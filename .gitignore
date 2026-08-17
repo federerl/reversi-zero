@@ -216,3 +216,41 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---------------------------------------------------------------------------
+# reversi-zero project artifacts
+#
+# Rule: nothing large, generated, or run-specific enters git history. Experiment
+# artifacts live in runs/ (local) or $RZ_RUN_ROOT (cluster); exported inference
+# checkpoints are distributed as GitHub Release assets, not committed.
+# ---------------------------------------------------------------------------
+
+# Experiment artifacts: checkpoints, replay shards, logs, metrics, arena reports
+runs/
+!runs/.gitkeep
+
+# Exported inference checkpoints (fetched via scripts/download_model.py)
+models/
+
+# Model / data payloads, wherever they land
+*.pt
+*.pth
+*.ckpt
+*.npz
+*.safetensors
+
+# TensorBoard event files
+events.out.tfevents.*
+
+# Node / frontend build output
+node_modules/
+web/dist/
+web/.vite/
+*.tsbuildinfo
+
+# Benchmark scratch output (bench/results/*.json IS committed as a baseline)
+bench/results/*.tmp.json
+
+# SLURM job logs
+slurm-*.out
+slurm/logs/

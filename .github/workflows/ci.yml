@@ -1,0 +1,85 @@
+name: CI
+
+# CPU-only. No CUDA is available on GitHub runners and none is required: every
+# core module must be importable and testable without a GPU (see
+# docs/architecture.md, "dependency rules"). The `gpu` pytest marker is excluded
+# unconditionally here.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Never let a stray CUDA probe or a downloaded wheel index change behaviour.
+  UV_FROZEN: "0"
+  PYTHONHASHSEED: "0"
+
+jobs:
+  quality:
+    name: lint + types
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      # If this action version ever disappears, replace with:
+      #   curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Sync (CPU torch)
+        run: uv sync --extra cpu --extra dev --extra api
+
+      - name: ruff check
+        run: uv run ruff check .
+
+      - name: ruff format --check
+        run: uv run ruff format --check .
+
+      - name: pyright
+        run: uv run pyright
+
+  tests:
+    name: tests (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Sync (CPU torch)
+        run: uv sync --extra cpu --extra dev --extra api --python ${{ matrix.python-version }}
+
+      # Target: under 90 seconds. `slow` covers the 50k-playout differential
+      # test, the resume integration test, and the 4x4 smoke train -- all of
+      # which run in nightly.yml instead.
+      - name: pytest (fast selection)
+        run: >
+          uv run pytest -m "not slow and not gpu"
+          --cov --cov-report=term-missing --cov-report=xml
+
+      - name: Upload coverage
+        if: matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: coverage.xml
+          if-no-files-found: ignore

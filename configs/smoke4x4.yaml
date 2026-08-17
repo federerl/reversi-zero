@@ -1,0 +1,45 @@
+# 4x4 pipeline-validation profile.
+#
+# This is NOT a result. 4x4 exists solely to prove the full loop -- self-play,
+# replay, training, checkpointing, arena -- can take randomly initialised weights
+# and produce measurable strength. It must finish in <=10 minutes on the dev
+# laptop (14 cores, CPU-only torch) and <=20 minutes on a 2-core CI runner.
+#
+# Gate (tests/integration/test_smoke4x4.py):
+#   >= 90% vs Random and >= 65% vs Greedy over 200 colour-balanced games.
+#
+# If this profile stops learning, nothing downstream is trustworthy.
+
+name: smoke4x4
+
+game:
+  board_size: 4
+
+net:
+  n_blocks: 2
+  channels: 16
+  value_hidden: 32
+
+mcts:
+  n_simulations: 25
+  dirichlet_alpha: 2.0        # branching is much smaller on 4x4
+  temp_moves: 4               # max_plies is only 12 here
+
+selfplay:
+  games_per_generation: 200
+  n_workers: 2
+  games_in_flight: 8
+  max_generations: 12
+
+replay:
+  window: 20000
+  retain_shards: 12
+
+train:
+  steps_per_generation: 100
+  batch_size: 256
+
+arena:
+  every_n_generations: 2
+  games: 100
+  opening_plies: 2
