@@ -108,7 +108,7 @@ def test_temp_moves_must_be_less_than_max_plies() -> None:
 
 
 def test_replay_window_must_hold_a_batch() -> None:
-    with pytest.raises(ValueError, match="replay.window"):
+    with pytest.raises(ValueError, match=r"replay\.window"):
         Config.model_validate({"replay": {"window": 64}, "train": {"batch_size": 512}})
 
 
@@ -170,7 +170,7 @@ def test_sha256_is_stable_and_sensitive() -> None:
 
 def test_config_is_frozen() -> None:
     config = load_config()
-    with pytest.raises(ValueError, match="frozen|immutable"):
+    with pytest.raises(ValueError, match=r"frozen|immutable"):
         config.seed = 5  # type: ignore[misc]
 
 

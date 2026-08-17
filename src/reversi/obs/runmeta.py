@@ -197,9 +197,13 @@ def _cpu_affinity() -> int | None:
 
 
 def _total_ram_bytes() -> int | None:
+    # os.sysconf is POSIX-only; it does not exist on the Windows dev box.
+    sysconf = getattr(os, "sysconf", None)
+    if sysconf is None:  # pragma: no cover - Windows
+        return None
     try:
-        return os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")
-    except (AttributeError, ValueError, OSError):  # pragma: no cover - Windows
+        return int(sysconf("SC_PAGE_SIZE")) * int(sysconf("SC_PHYS_PAGES"))
+    except (ValueError, OSError):  # pragma: no cover - unsupported names
         return None
 
 
@@ -279,7 +283,8 @@ def _repo_root() -> Path:
 
 def _git(args: list[str], cwd: Path) -> str | None:
     try:
-        result = subprocess.run(  # noqa: S603 - fixed argv, no shell
+        # Fixed argv, no shell: `args` is never attacker-controlled.
+        result = subprocess.run(
             ["git", *args],
             cwd=cwd,
             capture_output=True,

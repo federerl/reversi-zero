@@ -51,8 +51,11 @@ dev = [
     "pytest-cov>=5.0",
     "pytest-timeout>=2.3",
     "hypothesis>=6.100",
-    "ruff>=0.6",
-    "pyright>=1.1.380",
+    # Pinned to a minor range: ruff's formatter output changes between minors,
+    # so a loose bound means "formats clean locally, fails in CI". Once uv.lock
+    # is committed the lockfile pins this anyway; the range guards the gap.
+    "ruff>=0.16,<0.17",
+    "pyright>=1.1.400,<2",
 ]
 
 [project.scripts]
@@ -140,23 +143,16 @@ docstring-code-format = true
 # torch/numpy internals without catching bugs we care about.
 # ===========================================================================
 [tool.pyright]
-include = ["src", "tests", "scripts", "bench"]
+# `standard` everywhere, including tests: per-directory `typeCheckingMode` in
+# executionEnvironments is not honoured in the pyproject form, and a split mode
+# that silently does nothing is worse than one honest setting.
+# `bench/` is added to `include` when it first has files (backlog T24).
+include = ["src", "tests", "scripts"]
 exclude = ["**/__pycache__", "web", "runs", "models"]
 pythonVersion = "3.11"
 typeCheckingMode = "standard"
 reportMissingTypeStubs = false
 reportPrivateImportUsage = false
-
-[[tool.pyright.executionEnvironments]]
-root = "tests"
-typeCheckingMode = "basic"
-
-[[tool.pyright.executionEnvironments]]
-root = "bench"
-typeCheckingMode = "basic"
-
-[[tool.pyright.executionEnvironments]]
-root = "src"
 
 # ===========================================================================
 # pytest

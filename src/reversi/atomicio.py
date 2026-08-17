@@ -36,8 +36,11 @@ def atomic_write_json(path: Path, payload: Any, *, indent: int = 2) -> None:
     atomic_write_text(path, text)
 
 
-def atomic_write_with(path: Path, writer: Callable[[Path], None]) -> None:
+def atomic_write_with(path: Path, writer: Callable[[Path], object]) -> None:
     """Run ``writer(tmp_path)`` then move the result onto ``path`` atomically.
+
+    ``writer`` may return anything (``Path.write_bytes`` returns an ``int``); the
+    return value is ignored.
 
     Use this for binary formats with their own serialiser (``torch.save``,
     ``numpy.savez_compressed``) that need a path rather than a buffer.
@@ -45,14 +48,15 @@ def atomic_write_with(path: Path, writer: Callable[[Path], None]) -> None:
     _atomic(path, writer)
 
 
-def _atomic(path: Path, writer: Callable[[Path], None]) -> None:
+def _atomic(path: Path, writer: Callable[[Path], object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp_name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
     os.close(fd)
     tmp = Path(tmp_name)
     try:
         writer(tmp)
-        os.replace(tmp, path)
+        # Same-directory rename: atomic on POSIX and on Windows.
+        tmp.replace(path)
     except BaseException:
         tmp.unlink(missing_ok=True)
         raise

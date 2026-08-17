@@ -72,7 +72,9 @@ def seed_everything(seed: int, *, deterministic_torch: bool = False) -> None:
     """
     os.environ["PYTHONHASHSEED"] = str(seed)
     random.seed(seed)
-    np.random.seed(seed % _MAX_SEED)  # noqa: NPY002 - legacy global state, for third-party code
+    # Legacy global state: seeded only so third-party code that reaches for it
+    # is reproducible. Our own code uses explicit Generators via `rng()`.
+    np.random.seed(seed % _MAX_SEED)
 
     try:
         import torch

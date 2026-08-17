@@ -49,10 +49,7 @@ def test_matchup_seeds_are_distinct() -> None:
 
 def test_derivation_is_stable_across_processes() -> None:
     """Rules out hash() randomisation: a spawned worker must agree with its parent."""
-    code = (
-        "from reversi.seeding import derive_seed;"
-        "print(derive_seed(1337, 'worker', 3, 0))"
-    )
+    code = "from reversi.seeding import derive_seed;print(derive_seed(1337, 'worker', 3, 0))"
     env = {**os.environ, "PYTHONHASHSEED": "random"}
     result = subprocess.run(
         [sys.executable, "-c", code],
