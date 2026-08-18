@@ -68,7 +68,7 @@ def test_failed_write_leaves_no_temp_files(tmp_path: Path) -> None:
         tmp.write_bytes(b"junk")
         raise OSError
 
-    with pytest.raises(OSError, match=""):
+    with pytest.raises(OSError):
         atomic_write_with(path, exploding_writer)
 
     leftovers = [p.name for p in tmp_path.iterdir() if p.name.endswith(".tmp")]
