@@ -7,7 +7,7 @@ we literally walk outward in each of the eight directions and look.
 Nothing here is clever and nothing here is fast. That is the point. The real
 engine (``rules.py``, using two 64-bit integers) is far quicker but its
 correctness is not obvious from reading it. So we keep this version forever and
-make the two play 50,000 random games against each other, checking they agree on
+make the two play 20,000 random games against each other, checking they agree on
 **every single move**. If they ever disagree, one of them is wrong, and we find
 out in seconds instead of a week later.
 

@@ -10,7 +10,7 @@ So the rules are implemented twice:
 * ``rules.py`` + ``bitboard.py`` — fast, using two 64-bit integers per board.
 
 Both are written from the rules of Othello rather than from each other, and a
-test plays 50,000 random games through both, comparing every move.
+test plays 20,000 random games through both, comparing every move.
 """
 
 from __future__ import annotations

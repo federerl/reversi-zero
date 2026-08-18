@@ -25,7 +25,7 @@ from reversi.types import Player, pass_action
 
 # The reference engine is slow by design, so the fast selection keeps these
 # small. Day 3's bitboard engine is far quicker; these counts get raised then,
-# and the 50,000-game cross-check becomes the main workout.
+# and the cross-check against it becomes the main workout.
 FAST_GAMES = 60
 FULL_GAMES = 5000
 
@@ -116,6 +116,7 @@ def test_invariants_hold_across_random_games(size: int) -> None:
 
 @pytest.mark.property
 @pytest.mark.slow
+@pytest.mark.timeout(1200)  # ~4 min expected against the deliberately slow engine
 def test_invariants_hold_across_many_random_games() -> None:
     for seed in range(FULL_GAMES):
         play_random_game(seed, 8)
@@ -180,6 +181,7 @@ def test_illegal_actions_are_always_rejected() -> None:
 
 @pytest.mark.property
 @pytest.mark.slow
+@pytest.mark.timeout(900)
 def test_first_player_advantage_is_not_extreme() -> None:
     """A sanity check on the whole engine rather than on one rule.
 
