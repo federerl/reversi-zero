@@ -1,0 +1,72 @@
+# Base configuration: the 8x8 development baseline.
+#
+# Every profile in this directory is a DELTA on top of this file. Values are
+# stated explicitly rather than relying on code defaults, because an experiment
+# record that depends on code defaults is not reproducible.
+#
+# Load order: base.yaml -> <profile>.yaml -> --set overrides.
+
+name: dev8x8
+seed: 1337
+run_root: runs
+
+game:
+  board_size: 8
+
+net:
+  # 4 blocks x 48 channels ~= 180k parameters. Capacity is deliberately small:
+  # inference latency, not FLOPs, bounds self-play throughput.
+  n_blocks: 4
+  channels: 48
+  value_hidden: 64
+
+mcts:
+  n_simulations: 100          # dominant strength/cost knob; scales time linearly
+  c_puct: 1.5
+  fpu_reduction: 0.25         # unvisited children start pessimistic, not at Q=0
+  dirichlet_alpha: 1.0        # ~ 10 / mean branching factor (Reversi is ~8-10)
+  dirichlet_eps: 0.25         # MUST be 0.0 for arena / calibration / serving
+  temp_moves: 12              # plies played at temp_init before argmax
+  temp_init: 1.0
+
+selfplay:
+  games_per_generation: 800
+  n_workers: 4                # independent processes, no IPC between them
+  games_in_flight: 32         # games batched into one forward pass, per worker
+  max_generations: 15
+
+replay:
+  window: 100000              # positions available for sampling
+  per_gen_cap_factor: 2.0
+  retain_shards: 30
+
+train:
+  steps_per_generation: 400
+  batch_size: 512
+  optimizer: adamw            # full8x8 switches to sgd
+  lr: 0.001
+  momentum: 0.9               # sgd only
+  weight_decay: 0.0001
+  warmup_steps: 200
+  lr_floor_divisor: 20.0
+  grad_clip: 5.0
+  value_loss_weight: 1.0
+  symmetry_aug: true          # random dihedral op per sample, at sampling time
+  checkpoint_every_steps: 200
+
+arena:
+  every_n_generations: 5
+  games: 200                  # must be even: colours split exactly 50/50
+  opening_plies: 4            # seeded random opening book; played twice, swapped
+  min_legal_after_opening: 2
+  baselines: [random, greedy, minimax4]
+  bootstrap_resamples: 1000
+
+obs:
+  tensorboard: true
+  resource_sample_seconds: 1.0
+  diagnostic_positions: 512
+  wandb:
+    enabled: false            # no core workflow may depend on a hosted service
+    project: reversi-zero
+    entity: null

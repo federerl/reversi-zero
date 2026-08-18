@@ -1,0 +1,48 @@
+# 8x8 overnight training profile. This produces the headline result.
+#
+# Sizing rationale
+# ----------------
+# * n_workers=6 assumes >=8 CPU cores, leaving 2 for the parent process and the
+#   GPU feed. Self-play, not backpropagation, is the bottleneck: one generation
+#   is ~4.4e7 node expansions in Python versus ~8e5 sample-forwards on a 400k
+#   parameter net.
+# * games_per_generation is tuned to WALL CLOCK, not to a round number. With an
+#   8 hour job ceiling and requeue-on-preemption, a generation of <=20 minutes
+#   bounds the worst-case loss from a kill to <=20 minutes.
+# * max_generations is set high on purpose; the run stops on the SLURM time
+#   limit and resumes on the next job via `--resume auto`.
+#
+# All wall-clock figures here are TARGETS to be replaced with measured values
+# after the Day 8 benchmark. They are not predictions.
+
+name: full8x8
+
+net:
+  n_blocks: 6
+  channels: 64                # ~400k parameters
+
+mcts:
+  n_simulations: 300
+  temp_moves: 15
+
+selfplay:
+  games_per_generation: 2500  # target ~15-20 min/generation
+  n_workers: 6
+  games_in_flight: 48
+  max_generations: 400        # bounded in practice by the job time limit
+
+replay:
+  window: 400000
+  retain_shards: 30
+
+train:
+  steps_per_generation: 800
+  batch_size: 1024
+  optimizer: sgd              # better generalisation than AdamW at this scale
+  lr: 0.02
+  momentum: 0.9
+  weight_decay: 0.0001
+
+arena:
+  every_n_generations: 5
+  games: 400                  # ~+/-5% Wilson half-width

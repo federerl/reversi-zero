@@ -1,0 +1,34 @@
+# Normalise line endings.
+#
+# Development happens on Windows; training runs on a Linux GPU cluster and CI
+# runs on ubuntu-latest. Shell scripts and SLURM job files checked out with CRLF
+# fail on Linux with `bash: $'\r': command not found`, and GNU make chokes on
+# recipe lines with a trailing carriage return. Force LF in the repository for
+# everything text-shaped.
+
+* text=auto eol=lf
+
+# Files that must be LF no matter what the platform says.
+*.sh        text eol=lf
+*.sbatch    text eol=lf
+Makefile    text eol=lf
+*.py        text eol=lf
+*.yaml      text eol=lf
+*.yml       text eol=lf
+*.toml      text eol=lf
+*.md        text eol=lf
+*.json      text eol=lf
+*.ts        text eol=lf
+*.tsx       text eol=lf
+
+# PowerShell is Windows-facing; CRLF is the native convention there.
+*.ps1       text eol=crlf
+
+# Never touch binary payloads.
+*.pt        binary
+*.pth       binary
+*.npz       binary
+*.png       binary
+*.jpg       binary
+*.gif       binary
+*.ico       binary

@@ -1,0 +1,64 @@
+name: Nightly
+
+# The slow half of the test pyramid, plus the 4x4 end-to-end learning gate.
+#
+# The smoke train is NOT a "does it crash" check: it asserts that a randomly
+# initialised network reaches >=90% vs Random and >=65% vs Greedy on 4x4 within
+# the time budget. If this job goes red, the training pipeline is broken even if
+# every unit test passes.
+
+on:
+  schedule:
+    - cron: "0 5 * * *"   # 05:00 UTC daily
+  workflow_dispatch:
+
+jobs:
+  slow-tests:
+    name: slow suite (CPU)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Sync (CPU torch)
+        run: uv sync --extra cpu --extra dev --extra api
+
+      - name: Differential engine test (50k playouts)
+        run: uv run pytest -m differential -q
+
+      - name: Slow suite (resume, API game loop)
+        run: uv run pytest -m "slow and not gpu" -q
+
+  smoke-train:
+    name: 4x4 end-to-end learning gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Sync (CPU torch)
+        run: uv sync --extra cpu --extra dev --extra api
+
+      - name: Train 4x4 from random init and assert strength thresholds
+        run: uv run pytest -m slow tests/integration/test_smoke4x4.py -q
+
+      - name: Upload run artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke4x4-run
+          path: runs/
+          if-no-files-found: ignore
+          retention-days: 7

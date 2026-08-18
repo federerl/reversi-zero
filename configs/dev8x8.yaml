@@ -1,0 +1,7 @@
+# 8x8 development profile: a ~60-90 minute GPU run used to shake out the
+# pipeline at full board size before committing a night to it.
+#
+# Identical to base.yaml -- it exists as a named profile so that run_id and the
+# experiment log record "dev8x8" explicitly rather than "whatever base was".
+
+name: dev8x8
