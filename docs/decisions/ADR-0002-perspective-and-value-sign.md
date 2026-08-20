@@ -69,7 +69,7 @@ sign flipped exactly once**:
 ```python
 value = leaf_value
 for node, action in reversed(path):
-    value = -value          # into the parent's point of view
+    value = -value  # into the parent's point of view
     node.visits[action] += 1
     node.value_sum[action] += value
 ```
