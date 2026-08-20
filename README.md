@@ -8,10 +8,10 @@ games, no opening books, no hand-written evaluation. The point of the project is
 learns, but that the claim is *measured*: playing strength is established by tournaments with
 confidence intervals and Bradley–Terry ratings, never by pointing at a training-loss curve.
 
-> **Status: day 1 of 14.** Configuration, run provenance, metrics, and the CLI skeleton are in place
-> and tested. The engine, network, MCTS, training loop, evaluation, and web app are not yet
-> implemented — see the roadmap. Commands marked *(planned)* below exit with code 2 and name the
-> task that will deliver them.
+> **Status: day 3 of 14.** The rules engine is finished and frozen — implemented twice and
+> cross-checked over 20,000 games. Configuration, run provenance, metrics, and the CLI skeleton are
+> in place. The network, search, training loop, evaluation, and web app are not yet implemented.
+> Commands marked *(planned)* below exit with code 2 and name the task that will deliver them.
 
 ## Quickstart
 
@@ -63,12 +63,31 @@ runs/<run_id>/
 
 `run_id` is `{timestamp}-{profile}-{git_short}-s{seed}`. A run that cannot write these does not start.
 
+## The rules engine
+
+Implemented twice on purpose:
+
+* `game/reference.py` — a grid of squares, walking outward in eight directions. Slow, and correct by
+  inspection. This is the specification.
+* `game/rules.py` + `game/bitboard.py` — two 64-bit integers per board, one bit per square. About ten
+  times faster, and *not* correct by inspection.
+
+Neither was written from the other; both were written from the rules of Othello. A test plays 20,000
+random games through both and compares them at **every move** — legal moves, which discs each move
+would flip, the resulting position bit for bit, and the final score. That agreement is the entire
+correctness argument, and it exists because a rules bug does not crash: the AI would simply learn a
+slightly different game and every measurement afterwards would be meaningless.
+
+See `docs/how-the-engine-works.md`.
+
 ## Documentation
 
-* `docs/architecture.md` — layering, dependency rules, and the seven correctness contracts
-* `docs/training.md` — local and SLURM runbook, resume, troubleshooting
-* `docs/experiments.md` — one entry per run: hypothesis, config delta, outcome, decision
-* `docs/model_card.md` — training compute, data provenance, measured strength, limitations
+* `docs/configuration.md` — every setting, what it does, and what breaks if you change it
+* `docs/how-the-engine-works.md` — bitboards, passing, perspective, and the eight board rotations
+* `docs/architecture.md` — layering, dependency rules, and the seven correctness contracts *(planned)*
+* `docs/training.md` — local and SLURM runbook, resume, troubleshooting *(planned)*
+* `docs/experiments.md` — one entry per run: hypothesis, config delta, outcome, decision *(planned)*
+* `docs/model_card.md` — training compute, data provenance, measured strength, limitations *(planned)*
 
 ## License
 

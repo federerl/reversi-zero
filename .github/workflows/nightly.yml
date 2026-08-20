@@ -16,7 +16,9 @@ jobs:
   slow-tests:
     name: slow suite (CPU)
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # The 20,000-game engine cross-check takes ~15 min on a dev laptop and CI
+    # runners are slower, so this needs real headroom.
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
 
@@ -29,11 +31,11 @@ jobs:
       - name: Sync (CPU torch)
         run: uv sync --extra cpu --extra dev --extra api
 
-      - name: Differential engine test (50k playouts)
-        run: uv run pytest -m differential -q
-
-      - name: Slow suite (resume, API game loop)
-        run: uv run pytest -m "slow and not gpu" -q
+      # Everything marked `slow`: the 20,000-game engine cross-check, the
+      # 5,000-game invariant sweep, and (from day 5) resume and API tests.
+      # The quick versions of all of these already run on every push.
+      - name: Slow suite
+        run: uv run pytest -m "slow and not gpu" -q --durations=10
 
   smoke-train:
     name: 4x4 end-to-end learning gate
