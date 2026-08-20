@@ -48,5 +48,15 @@ class WorkerError(ReversiError):
     """
 
 
+class SearchError(ReversiError):
+    """The tree search was asked for something it cannot answer.
+
+    Searching a finished game, or asking for exploration noise without giving the
+    search a random number generator to draw it from. Both are caller bugs, and
+    both are worth failing on rather than papering over -- silently skipping the
+    noise would cost self-play its variety with no visible symptom.
+    """
+
+
 class ArenaError(ReversiError):
     """An evaluation match or tournament was configured unfairly or failed."""
