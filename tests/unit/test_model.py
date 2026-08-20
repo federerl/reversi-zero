@@ -220,3 +220,24 @@ def test_torch_evaluator_refuses_to_run_a_model_left_in_training_mode() -> None:
 def test_torch_evaluator_rejects_an_empty_batch() -> None:
     with pytest.raises(ValueError, match="at least one state"):
         TorchEvaluator(tiny(8)).evaluate([])
+
+
+def test_the_search_runs_against_the_real_network() -> None:
+    """The two halves of day 4, actually connected.
+
+    Everything else here tests the network alone and the search against a stub.
+    This is the only test that puts a real torch model behind the search, which
+    is the arrangement self-play will use -- so a shape or dtype mismatch between
+    them shows up now rather than on day 5.
+    """
+    from reversi.search.config import SearchConfig
+    from reversi.search.mcts import MCTS
+
+    state = rules.initial_state(8)
+    result = MCTS(TorchEvaluator(tiny(8)), SearchConfig(n_simulations=24)).run(state)
+
+    assert set(result.actions) == set(rules.legal_actions(state))
+    assert result.total_visits == 24
+    assert result.best_action() in rules.legal_actions(state)
+    assert -1.0 <= result.value() <= 1.0
+    assert result.policy_target().sum() == pytest.approx(1.0, abs=1e-6)
