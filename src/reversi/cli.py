@@ -133,11 +133,55 @@ def train(
     set_: SetOpt = None,
     run_id: RunIdOpt = None,
     resume: ResumeOpt = "auto",
+    generations: Annotated[
+        int | None,
+        typer.Option("--generations", help="Override selfplay.max_generations for this run."),
+    ] = None,
 ) -> None:
-    """Run the generational self-play + training loop."""
-    _load(config, set_)
-    _ = (run_id, resume)
-    _not_yet("T18", "training loop")
+    """Run the generational self-play + training loop.
+
+    Writes everything under ``runs/<run_id>/``: the resolved config, the
+    provenance files, one replay shard and one checkpoint per generation, and the
+    JSONL metric streams that every figure in the final report is built from.
+    """
+    from reversi.obs.metrics import MetricsHub
+    from reversi.train.loop import run_training
+
+    resolved = _load(config, set_)
+    paths = init_run(resolved, run_id=run_id)
+    setup_logging(log_dir=paths.logs, run_id=paths.run_id, component="train")
+
+    if resume != "off":
+        # Restarting from a checkpoint arrives with the checkpoint manager on day
+        # 7. Say so rather than appearing to resume and silently starting over.
+        typer.secho(
+            f"note: --resume {resume!r} is not implemented yet (backlog T18/T20); "
+            "this run starts from freshly initialised weights. Replay shards "
+            "already in the run directory ARE picked up.",
+            fg=typer.colors.YELLOW,
+            err=True,
+        )
+
+    typer.echo(f"run: {paths.root}")
+    with MetricsHub(
+        paths.metrics,
+        run_id=paths.run_id,
+        tb_dir=paths.tb if resolved.obs.tensorboard else None,
+    ) as metrics:
+        reports = run_training(resolved, paths, metrics=metrics, generations=generations)
+
+    if not reports:
+        typer.secho("no generations completed", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=1)
+
+    last = reports[-1]
+    typer.echo(
+        f"finished {len(reports)} generation(s): "
+        f"{sum(r.positions for r in reports)} positions, "
+        f"final loss {last.training['total_loss']:.4f} "
+        f"(policy {last.training['policy_loss']:.4f}, value {last.training['value_loss']:.4f})"
+    )
+    typer.echo(f"checkpoint: {last.checkpoint}")
 
 
 @app.command()

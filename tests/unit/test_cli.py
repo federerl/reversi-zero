@@ -72,9 +72,53 @@ def test_init_run_creates_a_run_directory(run_root: Path) -> None:
     assert (created / "meta.json").is_file()
 
 
-@pytest.mark.parametrize("command", ["train", "bench", "arena", "calibrate", "serve", "play"])
+@pytest.mark.parametrize("command", ["bench", "arena", "calibrate", "serve", "play"])
 def test_unimplemented_commands_fail_loudly_and_name_their_task(command: str) -> None:
     """A stub must never look like a successful no-op."""
     result = runner.invoke(app, [command])
     assert result.exit_code == 2
     assert "not implemented" in result.output
+
+
+def test_train_runs_a_generation(run_root: Path) -> None:
+    """``train`` is real as of day 5, so it must not be in the stub list above.
+
+    Overridden down to a few games and a couple of steps: this checks the command
+    wires up -- config, run directory, metrics, loop, summary -- not that anything
+    learns. Learning is measured by the integration tests and by day 6's gate.
+    """
+    result = runner.invoke(
+        app,
+        [
+            "train",
+            "-c",
+            "configs/smoke4x4.yaml",
+            "--generations",
+            "1",
+            "--resume",
+            "off",
+            "-s",
+            "selfplay.games_per_generation=2",
+            "-s",
+            "train.steps_per_generation=2",
+            "-s",
+            "train.batch_size=8",
+            "-s",
+            "mcts.n_simulations=4",
+            "-s",
+            "net.n_blocks=1",
+            "-s",
+            "net.channels=8",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "finished 1 generation" in result.output
+
+    run_dirs = list(run_root.iterdir())
+    assert len(run_dirs) == 1
+    run = run_dirs[0]
+    assert (run / "config.yaml").is_file()
+    assert (run / "checkpoints" / "latest.pt").is_file()
+    assert list((run / "replay").glob("*.npz"))
+    assert (run / "metrics" / "train.jsonl").is_file()
