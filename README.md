@@ -8,10 +8,12 @@ games, no opening books, no hand-written evaluation. The point of the project is
 learns, but that the claim is *measured*: playing strength is established by tournaments with
 confidence intervals and Bradley–Terry ratings, never by pointing at a training-loss curve.
 
-> **Status: day 3 of 14.** The rules engine is finished and frozen — implemented twice and
-> cross-checked over 20,000 games. Configuration, run provenance, metrics, and the CLI skeleton are
-> in place. The network, search, training loop, evaluation, and web app are not yet implemented.
-> Commands marked *(planned)* below exit with code 2 and name the task that will deliver them.
+> **Status: day 4 of 14.** The rules engine is finished and frozen — implemented twice and
+> cross-checked over 20,000 games. The policy-value network and the PUCT tree search are in, with
+> the value-sign and noise-gating contracts asserted in code and tested. Configuration, run
+> provenance, metrics, and the CLI skeleton are in place. The training loop, evaluation, and web app
+> are not yet implemented. Commands marked *(planned)* below exit with code 2 and name the task that
+> will deliver them.
 
 ## Quickstart
 
@@ -84,6 +86,7 @@ See `docs/how-the-engine-works.md`.
 
 * `docs/configuration.md` — every setting, what it does, and what breaks if you change it
 * `docs/how-the-engine-works.md` — bitboards, passing, perspective, and the eight board rotations
+* `docs/decisions/` — one file per decision that would be expensive to revisit
 * `docs/architecture.md` — layering, dependency rules, and the seven correctness contracts *(planned)*
 * `docs/training.md` — local and SLURM runbook, resume, troubleshooting *(planned)*
 * `docs/experiments.md` — one entry per run: hypothesis, config delta, outcome, decision *(planned)*
