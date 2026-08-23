@@ -8,13 +8,15 @@ games, no opening books, no hand-written evaluation. The point of the project is
 learns, but that the claim is *measured*: playing strength is established by tournaments with
 confidence intervals and Bradley–Terry ratings, never by pointing at a training-loss curve.
 
-> **Status: day 5 of 14.** The loop closes: `reversi train` plays self-play games, stores them in
-> checksummed shards, samples them back with eightfold symmetry augmentation, and trains on them,
-> generation after generation. The rules engine is frozen (implemented twice, cross-checked over
-> 20,000 games) and the search contracts are asserted in code. **Not yet measured against an
-> opponent** — that is day 6's gate, and until it passes no strength claim here would mean anything.
-> Resume, evaluation, and the web app are not implemented. Commands marked *(planned)* below exit
-> with code 2 and name the task that will deliver them.
+> **Status: day 6 of 14. The pipeline gate passes.** A 4×4 agent trained from randomly initialised
+> weights reaches **97.2%** against a random opponent and **93.2%** against a greedy one, over 200
+> colour-balanced games, after 7.2 minutes of self-play training on a laptop CPU.
+>
+> **That is a pipeline check, not a result.** 4×4 exists only to prove the machinery works before an
+> overnight GPU run is spent on it; no 4×4 number belongs in a strength claim. The headline is 8×8,
+> which has not been run yet. Still to come: resume and SLURM (day 7), throughput (day 8), the real
+> baselines and rating machinery (days 9–10), the web app (days 13–14). Commands marked *(planned)*
+> below exit with code 2 and name the task that will deliver them.
 
 ## Quickstart
 
@@ -65,6 +67,21 @@ runs/<run_id>/
 ```
 
 `run_id` is `{timestamp}-{profile}-{git_short}-s{seed}`. A run that cannot write these does not start.
+
+## Does it learn?
+
+Yes, on the validation board — measured by playing, never by pointing at a loss curve:
+
+| | score over 200 colour-balanced games |
+|---|---|
+| 4×4 agent vs Random | **97.2%** |
+| 4×4 agent vs Greedy | **93.2%** |
+
+The agent scores near 100% as white and lower as black. That is not a lopsided agent: **white wins
+4×4 Reversi with perfect play**, which `tests/unit/test_solved_4x4.py` proves by solving the game
+exactly (3,306 positions). As black it is defending a theoretically lost position. That test doubles
+as an independent check on the rules engine — it never inspects a flip or a legal-move list, it just
+plays every possible game to the end and asks who wins.
 
 ## The training loop
 
