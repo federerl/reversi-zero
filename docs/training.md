@@ -129,12 +129,26 @@ preserve shapes would not be caught at all.
 
 ## On a job scheduler
 
-There is no SLURM support, because the machine this project targets does not have
-a scheduler — you log in and run. If that changes, what a batch script needs is
-already in place: `--signal=B:USR1@300` to get a warning before the wall clock,
-`--requeue` so the job comes back, and the same `reversi train --run-id ...`
-command, which resumes on its own. The plan's criterion S9 (verify a real
-requeue) is recorded as not applicable rather than met.
+There is no SLURM support **yet**, and that is a timing accident rather than a
+decision.
+
+The GPU servers this project targets are offline for maintenance and are due back
+*as a Slurm cluster* before the start of term. Until they return there is nothing
+to write a batch script against and nothing to test it on, so the plan's
+criterion S9 — verify that a real job hits its wall clock, requeues, and resumes —
+is recorded as **deferred**, not as met and not as inapplicable.
+
+What a batch script will need already exists:
+
+* `--signal=B:USR1@300` to get a warning five minutes before the wall clock.
+  `obs/signals.py` already treats `SIGUSR1` as "finish this generation and stop".
+* `--requeue` so the job comes back.
+* the same `reversi train -c ... --run-id ...` command, unchanged. It resumes on
+  its own, which is the part that actually took the work.
+
+In other words the hard half is done and the sbatch file is a dozen lines of
+directives. Writing it before there is a cluster to run it on would produce
+something untested, which for this particular file is worth nothing.
 
 ## Troubleshooting
 
