@@ -14,9 +14,16 @@ confidence intervals and Bradley–Terry ratings, never by pointing at a trainin
 >
 > **That is a pipeline check, not a result.** 4×4 exists only to prove the machinery works before an
 > overnight GPU run is spent on it; no 4×4 number belongs in a strength claim. The headline is 8×8,
-> which has not been run yet. Still to come: resume and SLURM (day 7), throughput (day 8), the real
-> baselines and rating machinery (days 9–10), the web app (days 13–14). Commands marked *(planned)*
-> below exit with code 2 and name the task that will deliver them.
+> which has not been run yet.
+>
+> **Day 7 done:** a run now survives being killed. Checkpoints carry optimiser and RNG state, every
+> file is checksummed, and `reversi train --run-id <id>` picks up from the newest checkpoint that
+> still verifies — losing at most one generation. Proved by killing a real training process
+> mid-write and resuming it, not by simulating one.
+>
+> Still to come: throughput (day 8), the real baselines and rating machinery (days 9–10), the web
+> app (days 13–14). Commands marked *(planned)* below exit with code 2 and name the task that will
+> deliver them.
 
 ## Quickstart
 
@@ -67,6 +74,12 @@ runs/<run_id>/
 ```
 
 `run_id` is `{timestamp}-{profile}-{git_short}-s{seed}`. A run that cannot write these does not start.
+
+Each generation also writes `checkpoints/gen_NNNNN.pt` (weights, optimiser state, RNG state) beside
+`gen_NNNNN.json` — the same metadata as plain text, plus the checkpoint's SHA-256. Resume walks
+backwards from the newest generation until it finds one whose checksum still matches, so a process
+killed partway through a write falls back one generation rather than loading a torn file. See
+`docs/training.md`.
 
 ## Does it learn?
 
@@ -122,7 +135,7 @@ See `docs/how-the-engine-works.md`.
 * `docs/how-the-engine-works.md` — bitboards, passing, perspective, and the eight board rotations
 * `docs/decisions/` — one file per decision that would be expensive to revisit
 * `docs/architecture.md` — layering, dependency rules, and the seven correctness contracts *(planned)*
-* `docs/training.md` — local and SLURM runbook, resume, troubleshooting *(planned)*
+* `docs/training.md` — running a job, stopping one, resuming, and what a run leaves behind
 * `docs/experiments.md` — one entry per run: hypothesis, config delta, outcome, decision *(planned)*
 * `docs/model_card.md` — training compute, data provenance, measured strength, limitations *(planned)*
 

@@ -145,34 +145,61 @@ def train(
     JSONL metric streams that every figure in the final report is built from.
     """
     from reversi.obs.metrics import MetricsHub
+    from reversi.obs.signals import cooperative_stop
     from reversi.train.loop import run_training
+
+    if resume not in {"auto", "off"}:
+        typer.secho(
+            f"--resume must be 'auto' or 'off', got {resume!r}. Resuming from an "
+            "explicit checkpoint path is not supported: a run resumes from its own "
+            "directory, which is what keeps the replay shards and the weights in step.",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=2)
 
     resolved = _load(config, set_)
     paths = init_run(resolved, run_id=run_id)
     setup_logging(log_dir=paths.logs, run_id=paths.run_id, component="train")
 
-    if resume != "off":
-        # Restarting from a checkpoint arrives with the checkpoint manager on day
-        # 7. Say so rather than appearing to resume and silently starting over.
+    typer.echo(f"run: {paths.root}")
+    if resume == "off":
         typer.secho(
-            f"note: --resume {resume!r} is not implemented yet (backlog T18/T20); "
-            "this run starts from freshly initialised weights. Replay shards "
-            "already in the run directory ARE picked up.",
+            "--resume off: starting from freshly initialised weights even if this "
+            "directory already holds checkpoints.",
             fg=typer.colors.YELLOW,
             err=True,
         )
 
-    typer.echo(f"run: {paths.root}")
-    with MetricsHub(
-        paths.metrics,
-        run_id=paths.run_id,
-        tb_dir=paths.tb if resolved.obs.tensorboard else None,
-    ) as metrics:
-        reports = run_training(resolved, paths, metrics=metrics, generations=generations)
+    # A signal now means "finish this generation, then stop" rather than dying
+    # partway through writing a shard. Send it twice to stop immediately.
+    with (
+        cooperative_stop() as stop,
+        MetricsHub(
+            paths.metrics,
+            run_id=paths.run_id,
+            tb_dir=paths.tb if resolved.obs.tensorboard else None,
+        ) as metrics,
+    ):
+        reports = run_training(
+            resolved,
+            paths,
+            metrics=metrics,
+            generations=generations,
+            should_stop=stop,
+            resume=resume == "auto",
+        )
 
     if not reports:
-        typer.secho("no generations completed", fg=typer.colors.RED, err=True)
-        raise typer.Exit(code=1)
+        typer.echo("nothing to do: this run has already reached its generation target")
+        return
+
+    if stop.requested:
+        typer.secho(
+            f"stopped after generation {reports[-1].generation} on {stop.reason}. "
+            "Re-run the same command to carry on.",
+            fg=typer.colors.YELLOW,
+        )
 
     last = reports[-1]
     typer.echo(
