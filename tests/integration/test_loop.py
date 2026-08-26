@@ -161,21 +161,35 @@ def test_metrics_are_written_for_every_generation(smoke_config: Config, paths: R
     assert 0.0 < replay[0]["unique_positions_fraction"] <= 1.0
 
 
-def test_a_run_can_be_extended_by_replaying_the_shards(
-    smoke_config: Config, paths: RunPaths
-) -> None:
-    """Starting a fresh loop over an existing run directory picks the games back up.
+def test_running_again_continues_where_it_left_off(smoke_config: Config, paths: RunPaths) -> None:
+    """``generations`` is a total, not "this many more".
 
-    Not full resume -- the weights and optimiser state still restart, and that is
-    day 7's job. What this proves is that the shards and manifest written by one
-    process are readable by the next one, which is the half of resume that lives
-    in this package.
+    A run resumed at generation 3 with ``generations=4`` does two more, not four.
+    That is what lets the same command be issued every night without editing it,
+    and it is what makes the learning-rate schedule land where it was aimed.
     """
+    first = run_training(smoke_config, paths, generations=2)
+    assert [r.generation for r in first] == [1, 2]
+
+    second = run_training(smoke_config, paths, generations=4)
+
+    assert [r.generation for r in second] == [3, 4], "should continue, not restart"
+    assert second[0].buffer_size > second[0].positions, "the earlier games are still in the window"
+
+
+def test_a_finished_run_does_nothing_when_run_again(smoke_config: Config, paths: RunPaths) -> None:
+    """Re-running a completed run must not quietly train it a second time."""
     run_training(smoke_config, paths, generations=2)
-    before = Manifest.load(paths.replay).total_positions
 
-    reports = run_training(smoke_config, paths, generations=1)
+    again = run_training(smoke_config, paths, generations=2)
 
-    # The new run saw the earlier generations' positions in its window from the start.
-    assert reports[0].buffer_size > reports[0].positions
-    assert Manifest.load(paths.replay).total_positions >= before
+    assert again == []
+
+
+def test_resume_can_be_turned_off(smoke_config: Config, paths: RunPaths) -> None:
+    """Starting over in a directory that already has checkpoints has to be possible."""
+    run_training(smoke_config, paths, generations=2)
+
+    fresh = run_training(smoke_config, paths, generations=1, resume=False)
+
+    assert [r.generation for r in fresh] == [1]

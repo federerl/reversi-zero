@@ -35,12 +35,14 @@ from typing import Any
 
 import torch
 
-from reversi.atomicio import atomic_write_with
+from reversi.atomicio import sha256_file
+from reversi.ckpt.manager import CheckpointManager, RestoredRun, restore_rng
+from reversi.ckpt.meta import checkpoint_name
 from reversi.config import Config
 from reversi.data.replay import ReplayBuffer
 from reversi.data.schema import samples_to_arrays
 from reversi.data.shards import Manifest, shard_filename, write_shard
-from reversi.errors import WorkerError
+from reversi.errors import CheckpointError, WorkerError
 from reversi.nn.evaluator import TorchEvaluator
 from reversi.nn.model import PolicyValueNet, build
 from reversi.obs.metrics import MetricsHub
@@ -78,19 +80,31 @@ def run_training(
     generations: int | None = None,
     should_stop: Callable[[], bool] | None = None,
     device: str | torch.device = "cpu",
+    resume: bool = True,
 ) -> list[GenerationReport]:
     """Run the loop. Returns one report per completed generation.
 
-    ``generations`` overrides the configured count, which is what the pipeline
-    test uses to run three generations instead of fifteen. ``should_stop`` is
-    checked between generations, so day 7 can wire a signal handler to it without
-    touching this function.
+    ``generations`` is the total the run is aiming for, counted from the
+    beginning -- not "this many more". A run resumed at generation 9 with
+    ``generations=12`` does three more. That is deliberate: it means the same
+    command can be issued every night without editing it, and it is what makes
+    the learning-rate schedule land where it was meant to.
+
+    ``resume`` picks up the newest valid checkpoint in the run directory. Set it
+    to False to start over in a directory that already has one.
+
+    ``should_stop`` is checked between generations -- see ``obs.signals``.
     """
     board_size = config.game.board_size
     paths.ensure()
 
     model = build(config.net, board_size, seed=config.seed)
     search_config = SearchConfig.for_selfplay(config.mcts)
+
+    checkpoints = CheckpointManager(
+        paths.checkpoints, run_id=paths.run_id, config_sha256=config.sha256
+    )
+    restored = checkpoints.newest_valid() if resume else None
 
     manifest = Manifest.load(paths.replay)
     dropped = manifest.verify()
@@ -119,8 +133,27 @@ def run_training(
         device=device,
     )
 
+    first_generation = 1
+    parent: str | None = None
+    if restored is not None:
+        _restore_into(model, trainer, restored, config)
+        first_generation = restored.next_generation
+        parent = checkpoint_name(restored.meta.generation)
+        log.info(
+            "resuming from %s -- continuing at generation %d",
+            restored.meta.describe(),
+            first_generation,
+        )
+        if first_generation > total_generations:
+            log.info(
+                "this run already reached generation %d of %d; nothing to do",
+                restored.meta.generation,
+                total_generations,
+            )
+            return []
+
     reports: list[GenerationReport] = []
-    for generation in range(1, total_generations + 1):
+    for generation in range(first_generation, total_generations + 1):
         if should_stop is not None and should_stop():
             log.info("stopping before generation %d as asked", generation)
             break
@@ -178,7 +211,22 @@ def run_training(
         training: dict[str, Any] = {key: value / steps for key, value in totals.items()}
 
         # ---- 4. save and tidy ----------------------------------------
-        checkpoint = _save_weights(paths, model, config, generation, trainer.global_step)
+        meta = checkpoints.save(
+            model=model,
+            generation=generation,
+            global_step=trainer.global_step,
+            optimizer_state=trainer.optimizer.state_dict(),
+            games_played=summary.games,
+            positions_seen=len(samples),
+            replay_manifest_sha256=sha256_file(manifest.path) if manifest.path.exists() else None,
+            parent=parent,
+        )
+        parent = checkpoint_name(generation)
+        checkpoint = paths.checkpoints / parent
+        pruned = checkpoints.prune()
+        if pruned:
+            log.debug("pruned %d old checkpoint(s): %s", len(pruned), pruned)
+        _ = meta
         removed = manifest.prune(config.replay.retain_shards)
         if removed:
             log.debug("pruned %d shard(s) older than the retention window", len(removed))
@@ -238,33 +286,50 @@ def run_training(
     return reports
 
 
-def _save_weights(
-    paths: RunPaths,
+def _restore_into(
     model: PolicyValueNet,
+    trainer: Trainer,
+    restored: RestoredRun,
     config: Config,
-    generation: int,
-    global_step: int,
-) -> Path:
-    """Write the weights for this generation, plus a ``latest`` copy.
+) -> None:
+    """Put a checkpoint's contents back into a fresh model and trainer.
 
-    Deliberately minimal. The real checkpoint -- optimiser state, RNG state,
-    lineage, environment, a checksummed sidecar, and the resume logic that reads
-    all of it -- is day 7's job. This exists so that a run today leaves a usable
-    network behind rather than only a log file.
-
-    ``latest.pt`` is a copy, not a symlink: symlinks need elevated privileges on
-    Windows, and this project has to run on a laptop as well as a cluster.
+    The architecture is checked before anything is copied, and a config that no
+    longer matches is a warning rather than an error: changing the learning rate
+    between nights is a legitimate thing to do, while changing the board size is
+    not -- and the architecture check already catches that one.
     """
-    payload = {
-        "format_version": 0,  # 0 = pre-checkpoint-manager; day 7 bumps this
-        "generation": generation,
-        "global_step": global_step,
-        "arch": model.arch(),
-        "model_state_dict": model.state_dict(),
-        "config_sha256": config.sha256,
-    }
+    payload = restored.payload
+    meta = restored.meta
 
-    path = paths.checkpoints / f"gen_{generation:05d}.pt"
-    atomic_write_with(path, lambda tmp: torch.save(payload, tmp))
-    atomic_write_with(paths.checkpoints / "latest.pt", lambda tmp: torch.save(payload, tmp))
-    return path
+    if meta.arch != model.arch():
+        msg = (
+            f"cannot resume: the checkpoint was built as {meta.arch} but this "
+            f"config builds {model.arch()}. Those are different networks."
+        )
+        raise CheckpointError(msg)
+
+    if meta.config_sha256 != config.sha256:
+        log.warning(
+            "resuming with a different configuration than the checkpoint was trained "
+            "with (was %s, now %s). Hyperparameters may have changed; the "
+            "architecture matches, so the weights still fit.",
+            meta.config_sha256[:12],
+            config.sha256[:12],
+        )
+
+    model.load_state_dict(payload["model_state_dict"])
+
+    optimizer_state = payload.get("optimizer_state_dict")
+    if optimizer_state:
+        trainer.optimizer.load_state_dict(optimizer_state)
+    else:
+        log.warning(
+            "this checkpoint carries no optimiser state, so the optimiser restarts "
+            "cold. The first few hundred steps will take badly-sized steps."
+        )
+
+    # The step counter is what the learning-rate schedule reads. Losing it would
+    # restart the warmup every night and the run would never reach its rate.
+    trainer.global_step = meta.global_step
+    restore_rng(payload.get("rng"))
