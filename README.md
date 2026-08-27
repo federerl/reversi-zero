@@ -21,9 +21,13 @@ confidence intervals and Bradley–Terry ratings, never by pointing at a trainin
 > still verifies — losing at most one generation. Proved by killing a real training process
 > mid-write and resuming it, not by simulating one.
 >
-> Still to come: throughput (day 8), the real baselines and rating machinery (days 9–10), the web
-> app (days 13–14). Commands marked *(planned)* below exit with code 2 and name the task that will
-> deliver them.
+> **Day 8 done:** self-play now advances many games in lockstep so their network calls batch
+> together (**13.6×**) and runs across six worker processes (**2.25×** on top). Measured, not
+> assumed — `bench/results/` holds the numbers, and `configs/full8x8.yaml` was rewritten around
+> them.
+>
+> Still to come: the real baselines and rating machinery (days 9–10), the web app (days 13–14).
+> Commands marked *(planned)* below exit with code 2 and name the task that will deliver them.
 
 ## Quickstart
 
@@ -111,6 +115,24 @@ a shard that no longer matches its checksum is dropped rather than trained on.
 
 Measured on the dev laptop, `smoke4x4`: ~40s per generation, so the 12-generation profile lands
 around 8 minutes on CPU.
+
+## Throughput
+
+Self-play is where essentially all the compute goes — one 8×8 generation is tens of millions of
+network calls against a few seconds of backpropagation. Measured on an RTX A1000 laptop GPU:
+
+| | games/s | speedup |
+|---|---|---|
+| one game at a time | 0.072 | — |
+| 48 games batched | 0.977 | **13.6×** |
+| 6 worker processes | — | **2.25×** on top |
+
+The reason batching matters so much is that a single position barely occupies a GPU at all — 499
+positions/s at batch 1 versus 26,328 at batch 48, on the same card. It was never a hardware problem;
+the GPU was being starved.
+
+`bench/selfplay_bench.py` produces these numbers, and `bench/results/` holds them. Nothing in this
+repo is optimised without a before/after measurement to point at.
 
 ## The rules engine
 

@@ -35,13 +35,13 @@ from typing import Any
 
 import torch
 
-from reversi.atomicio import sha256_file
+from reversi.atomicio import atomic_write_with, sha256_file
 from reversi.ckpt.manager import CheckpointManager, RestoredRun, restore_rng
-from reversi.ckpt.meta import checkpoint_name
+from reversi.ckpt.meta import FORMAT_VERSION, checkpoint_name
 from reversi.config import Config
 from reversi.data.replay import ReplayBuffer
-from reversi.data.schema import samples_to_arrays
-from reversi.data.shards import Manifest, shard_filename, write_shard
+from reversi.data.schema import Sample, samples_to_arrays
+from reversi.data.shards import Manifest, ShardInfo, read_shard, shard_filename, write_shard
 from reversi.errors import CheckpointError, WorkerError
 from reversi.nn.evaluator import TorchEvaluator
 from reversi.nn.model import PolicyValueNet, build
@@ -50,6 +50,8 @@ from reversi.obs.runmeta import RunPaths
 from reversi.search.config import SearchConfig
 from reversi.seeding import derive_seed
 from reversi.seeding import rng as make_rng
+from reversi.selfplay.game_batch import BatchedSelfPlay
+from reversi.selfplay.runner import merge_summaries, run_workers
 from reversi.selfplay.worker import SelfPlaySummary, play_games
 from reversi.train.trainer import Trainer
 
@@ -160,44 +162,53 @@ def run_training(
 
         started = time.perf_counter()
 
-        # ---- 1. play -------------------------------------------------
-        # eval() matters: batch norm must use its accumulated averages, not the
-        # statistics of whatever positions happen to share a batch. The evaluator
-        # refuses to run a model in training mode, so this is belt and braces.
-        model.eval()
-        evaluator = TorchEvaluator(model, device=device)
-        summary = SelfPlaySummary()
-        samples = []
-
-        for record, branching in play_games(
-            evaluator,
-            search_config,
-            board_size=board_size,
-            n_games=config.selfplay.games_per_generation,
-            root_seed=config.seed,
-            generation=generation,
-            max_plies=4 * board_size * board_size,
-        ):
-            summary.observe(record, branching)
-            samples.extend(record.samples)
-
-        if not samples:
-            msg = (
-                f"generation {generation} produced no training positions from "
-                f"{summary.games} games. Every position had a single legal move, "
-                "which should be impossible -- suspect the rules engine or the config."
-            )
-            raise WorkerError(msg)
-
-        # ---- 2. store ------------------------------------------------
-        arrays = samples_to_arrays(samples, generation=generation, board_size=board_size)
-        shard = write_shard(
-            paths.replay / shard_filename(generation),
-            arrays,
-            board_size=board_size,
+        # ---- 1. play, and 2. store ----------------------------------
+        # Three ways to produce a generation. Measured on the target hardware at
+        # 8x8: 0.072 games/s one at a time, 1.85 batched, 4.16 across six
+        # workers -- so workers are the default and the others exist for small
+        # configs and for comparison.
+        use_workers = (
+            config.selfplay.n_workers > 1
+            and config.selfplay.games_per_generation >= config.selfplay.n_workers
         )
-        manifest.add(shard)
-        buffer.add(arrays)
+
+        if use_workers:
+            shards, summary = _play_across_workers(
+                model=model,
+                config=config,
+                paths=paths,
+                generation=generation,
+                device=device,
+            )
+            for shard in shards:
+                manifest.add(shard)
+                buffer.add(
+                    read_shard(
+                        manifest.file(shard),
+                        board_size=board_size,
+                        expect_sha256=shard.sha256,
+                    )
+                )
+            positions = sum(shard.n_positions for shard in shards)
+            mean_batch = float(config.selfplay.games_in_flight)
+        else:
+            samples, summary, mean_batch = _play_in_process(
+                model=model,
+                config=config,
+                search_config=search_config,
+                generation=generation,
+                device=device,
+            )
+            arrays = samples_to_arrays(samples, generation=generation, board_size=board_size)
+            shard = write_shard(
+                paths.replay / shard_filename(generation),
+                arrays,
+                board_size=board_size,
+            )
+            manifest.add(shard)
+            buffer.add(arrays)
+            positions = len(samples)
+
         played_seconds = time.perf_counter() - started
 
         # ---- 3. train ------------------------------------------------
@@ -217,7 +228,7 @@ def run_training(
             global_step=trainer.global_step,
             optimizer_state=trainer.optimizer.state_dict(),
             games_played=summary.games,
-            positions_seen=len(samples),
+            positions_seen=positions,
             replay_manifest_sha256=sha256_file(manifest.path) if manifest.path.exists() else None,
             parent=parent,
         )
@@ -227,7 +238,10 @@ def run_training(
         if pruned:
             log.debug("pruned %d old checkpoint(s): %s", len(pruned), pruned)
         _ = meta
-        removed = manifest.prune(config.replay.retain_shards)
+        # retain_shards counts shard *files*, and every worker writes one per
+        # generation -- so with six workers a limit of 30 would keep only five
+        # generations of history, quietly starving a window sized for more.
+        removed = manifest.prune(config.replay.retain_shards * max(1, config.selfplay.n_workers))
         if removed:
             log.debug("pruned %d shard(s) older than the retention window", len(removed))
 
@@ -238,7 +252,7 @@ def run_training(
         report = GenerationReport(
             generation=generation,
             games=summary.games,
-            positions=len(samples),
+            positions=positions,
             buffer_size=len(buffer),
             seconds=elapsed,
             selfplay=selfplay_metrics,
@@ -252,7 +266,7 @@ def run_training(
             generation,
             total_generations,
             summary.games,
-            len(samples),
+            positions,
             training.get("total_loss", float("nan")),
             training.get("policy_loss", float("nan")),
             training.get("value_loss", float("nan")),
@@ -266,6 +280,10 @@ def run_training(
                 global_step=trainer.global_step,
                 seconds=played_seconds,
                 games_per_s=summary.games / max(played_seconds, 1e-9),
+                positions_per_s=positions / max(played_seconds, 1e-9),
+                # The achieved batch size. If this drifts far below
+                # games_in_flight the batching has stopped paying for itself.
+                mean_batch=mean_batch,
                 **selfplay_metrics,
             )
             metrics.log(
@@ -284,6 +302,121 @@ def run_training(
             )
 
     return reports
+
+
+def _play_in_process(
+    *,
+    model: PolicyValueNet,
+    config: Config,
+    search_config: SearchConfig,
+    generation: int,
+    device: str | torch.device,
+) -> tuple[list[Sample], SelfPlaySummary, float]:
+    """One generation in this process. Batched unless the config asks for one game.
+
+    ``games_in_flight = 1`` keeps day 5's one-game-at-a-time path reachable. It is
+    far slower and exists for two reasons: tiny configs where a batch cannot
+    fill, and having something to compare the batched path against.
+    """
+    evaluator = TorchEvaluator(model, device=device)
+    board_size = config.game.board_size
+    ceiling = 4 * board_size * board_size
+
+    batched: BatchedSelfPlay | None = None
+    if config.selfplay.games_in_flight > 1:
+        batched = BatchedSelfPlay(
+            evaluator,
+            search_config,
+            board_size=board_size,
+            games_in_flight=config.selfplay.games_in_flight,
+            root_seed=config.seed,
+            generation=generation,
+            max_plies=ceiling,
+        )
+        produced = batched.play(config.selfplay.games_per_generation)
+    else:
+        produced = play_games(
+            evaluator,
+            search_config,
+            board_size=board_size,
+            n_games=config.selfplay.games_per_generation,
+            root_seed=config.seed,
+            generation=generation,
+            max_plies=ceiling,
+        )
+
+    summary = SelfPlaySummary()
+    samples: list[Sample] = []
+    for record, branching in produced:
+        summary.observe(record, branching)
+        samples.extend(record.samples)
+
+    if not samples:
+        msg = (
+            f"generation {generation} produced no training positions from "
+            f"{summary.games} games. Every position had a single legal move, which "
+            "should be impossible -- suspect the rules engine or the config."
+        )
+        raise WorkerError(msg)
+
+    return samples, summary, batched.mean_batch if batched is not None else 1.0
+
+
+def _play_across_workers(
+    *,
+    model: PolicyValueNet,
+    config: Config,
+    paths: RunPaths,
+    generation: int,
+    device: str | torch.device,
+) -> tuple[list[ShardInfo], SelfPlaySummary]:
+    """Produce one generation across several processes.
+
+    The weights go to a file first, and every worker loads its own copy. That is
+    the whole interface between parent and children -- no queues, no shared
+    memory, nothing to deadlock. The file is written fresh each generation
+    because self-play must use *this* generation's network, not the checkpoint
+    saved at the end of the previous one.
+    """
+    weights = paths.checkpoints / "current.pt"
+    weights.parent.mkdir(parents=True, exist_ok=True)
+    atomic_write_with(
+        weights,
+        lambda tmp: torch.save(
+            {
+                "format_version": FORMAT_VERSION,
+                "generation": generation,
+                "global_step": 0,
+                "arch": model.arch(),
+                "model_state_dict": model.state_dict(),
+                "config_sha256": config.sha256,
+            },
+            tmp,
+        ),
+    )
+
+    results = run_workers(
+        weights_path=weights,
+        config=config,
+        replay_dir=paths.replay,
+        generation=generation,
+        n_workers=config.selfplay.n_workers,
+        device=str(device),
+    )
+
+    slowest = max(r.seconds for r in results)
+    fastest = min(r.seconds for r in results)
+    if slowest > 0:
+        # A generation ends with its slowest worker, so a large spread is wasted
+        # wall-clock. Worth watching rather than assuming.
+        log.info(
+            "worker skew: fastest %.1fs, slowest %.1fs (%.0f%% idle at the end)",
+            fastest,
+            slowest,
+            100 * (1 - fastest / slowest),
+        )
+
+    return [r.shard for r in results], merge_summaries(results)
 
 
 def _restore_into(

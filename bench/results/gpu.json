@@ -1,0 +1,78 @@
+{
+  "engine": {
+    "apply_per_s": 252167.378604257,
+    "legal_actions_per_s": 66195.79391974735
+  },
+  "inference": {
+    "1": {
+      "latency_ms": 1.8696850002015708,
+      "positions_per_s": 534.8494531924842
+    },
+    "128": {
+      "latency_ms": 2.9018724999332335,
+      "positions_per_s": 44109.450019925076
+    },
+    "256": {
+      "latency_ms": 4.605639999863342,
+      "positions_per_s": 55584.02306901885
+    },
+    "32": {
+      "latency_ms": 1.9516424999892479,
+      "positions_per_s": 16396.445558126703
+    },
+    "48": {
+      "latency_ms": 1.8231399997603148,
+      "positions_per_s": 26328.20299390638
+    },
+    "8": {
+      "latency_ms": 1.7270675001782365,
+      "positions_per_s": 4632.129316992176
+    }
+  },
+  "machine": {
+    "cuda_available": true,
+    "gpu": "NVIDIA RTX A1000 Laptop GPU",
+    "gpu_memory_free_gib": 3.23,
+    "gpu_memory_gib": 4.0,
+    "platform": "Windows-11-10.0.26100-SP0",
+    "processor": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+    "python": "3.12.3",
+    "torch": "2.6.0+cu124"
+  },
+  "selfplay": {
+    "stage1": {
+      "games": 3,
+      "games_per_s": 0.07198631108309295,
+      "mean_batch": 1.0,
+      "positions_per_s": 407.130580048946,
+      "seconds": 41.67458999999508
+    },
+    "stage2_b16": {
+      "games": 16,
+      "games_per_s": 0.6539769978223691,
+      "mean_batch": 15.831782265144865,
+      "positions_per_s": 3685.2421298537774,
+      "seconds": 24.465692300000228,
+      "speedup_over_stage1": 9.084741084558301
+    },
+    "stage2_b48": {
+      "games": 48,
+      "games_per_s": 0.9771136710717866,
+      "mean_batch": 47.38348237769595,
+      "positions_per_s": 5500.90568971639,
+      "seconds": 49.12427429998934,
+      "speedup_over_stage1": 13.573603875102252
+    }
+  },
+  "settings": {
+    "board_size": 8,
+    "channels": 64,
+    "device": "cuda",
+    "n_blocks": 6,
+    "quick": false,
+    "simulations": 100
+  },
+  "tree": {
+    "simulations_per_s": 13434.249174088593
+  }
+}

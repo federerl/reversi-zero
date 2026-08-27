@@ -105,6 +105,7 @@ def play_game(
     board_size: int,
     rng: np.random.Generator,
     max_plies: int | None = None,
+    game_index: int = -1,
 ) -> tuple[GameRecord, list[int]]:
     """Play one game against yourself. Returns the record and the branching seen.
 
@@ -112,7 +113,7 @@ def play_game(
     of which move to play, so one seed reproduces the whole game.
     """
     mcts = MCTS(evaluator, search_config)
-    record = GameRecord(samples=[], board_size=board_size)
+    record = GameRecord(samples=[], board_size=board_size, game_index=game_index)
     branching: list[int] = []
 
     state = rules.initial_state(board_size)
@@ -187,4 +188,5 @@ def play_games(
             board_size=board_size,
             rng=make_rng(seed),
             max_plies=max_plies,
+            game_index=index,
         )

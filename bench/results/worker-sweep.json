@@ -1,0 +1,103 @@
+{
+  "what": "Worker count x games-in-flight, and simulations vs generation size.",
+  "why": "The plan's full8x8 profile (2500 games, 300 simulations) assumed a data-centre GPU. These are the numbers that replaced that assumption on the hardware the project actually has.",
+  "machine": {
+    "gpu": "NVIDIA RTX A1000 Laptop GPU",
+    "gpu_memory_gib": 4.0,
+    "cpu_cores": 20,
+    "torch": "2.6.0+cu124"
+  },
+  "board_size": 8,
+  "net": {
+    "n_blocks": 6,
+    "channels": 64,
+    "parameters": 458696
+  },
+  "worker_sweep": {
+    "simulations": 50,
+    "games_per_point": 144,
+    "points": [
+      {
+        "workers": 1,
+        "games_in_flight": 48,
+        "games_per_s": 1.847
+      },
+      {
+        "workers": 2,
+        "games_in_flight": 48,
+        "games_per_s": 2.998
+      },
+      {
+        "workers": 3,
+        "games_in_flight": 32,
+        "games_per_s": 3.26
+      },
+      {
+        "workers": 4,
+        "games_in_flight": 24,
+        "games_per_s": 3.239
+      },
+      {
+        "workers": 6,
+        "games_in_flight": 24,
+        "games_per_s": 4.161
+      },
+      {
+        "workers": 6,
+        "games_in_flight": 48,
+        "games_per_s": 4.13
+      },
+      {
+        "workers": 8,
+        "games_in_flight": 16,
+        "games_per_s": 2.165
+      }
+    ],
+    "best": {
+      "workers": 6,
+      "games_in_flight": 24,
+      "games_per_s": 4.161
+    },
+    "note": "8 workers is slower than 6: they contend for one small GPU and for cores. More is not better past the knee."
+  },
+  "simulation_sweep": {
+    "workers": 6,
+    "games_in_flight": 24,
+    "points": [
+      {
+        "simulations": 300,
+        "games_per_s": 0.277,
+        "games_in_20_min": 332
+      },
+      {
+        "simulations": 200,
+        "games_per_s": 0.402,
+        "games_in_20_min": 482
+      },
+      {
+        "simulations": 150,
+        "games_per_s": 0.521,
+        "games_in_20_min": 624
+      },
+      {
+        "simulations": 100,
+        "games_per_s": 0.959,
+        "games_in_20_min": 1151
+      }
+    ],
+    "note": "Positions per game is ~58.5 throughout, so simulations trade almost linearly against games. 10 workers at 300 sims measured 0.181 games/s -- worse than 6."
+  },
+  "acceptance": {
+    "T22_batching_over_stage1": {
+      "required": ">=5x at B=48",
+      "measured": "13.6x",
+      "status": "met"
+    },
+    "T23_workers_over_stage2": {
+      "required": ">=3x at N=6",
+      "measured": "2.25x",
+      "status": "NOT met",
+      "why": "The criterion assumed 8 cores and a GPU with headroom. Six processes on one 4 GB laptop GPU contend for it. The practical target it existed to protect -- a generation inside 20 minutes -- is met by adjusting games_per_generation instead. A central inference server (plan P2) would combine the workers' small batches into large ones and is the thing that would close this."
+    }
+  }
+}
