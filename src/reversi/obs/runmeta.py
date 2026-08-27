@@ -233,7 +233,10 @@ def _torch_info() -> dict[str, Any]:
         "available": True,
         "version": torch.__version__,
         "cuda_available": torch.cuda.is_available(),
-        "cuda_version": torch.version.cuda,
+        # torch.version is a real submodule, but not every torch release's
+        # type stubs declare it. Asking for it defensively keeps this working
+        # across the cpu and cu124 builds, which resolve to different versions.
+        "cuda_version": getattr(getattr(torch, "version", None), "cuda", None),
         "cudnn_version": torch.backends.cudnn.version(),
     }
     if torch.cuda.is_available():  # pragma: no cover - no GPU in CI

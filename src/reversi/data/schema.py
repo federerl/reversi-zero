@@ -89,6 +89,14 @@ class GameRecord:
 
     samples: list[Sample]
     board_size: int
+    game_index: int = -1
+    """Which game of the generation this was.
+
+    Batched self-play finishes games in whatever order they end, not the order
+    they started, so without this a record cannot be matched back to the seed
+    that produced it -- which is what makes "batched and unbatched agree" a
+    checkable claim rather than a hope.
+    """
     plies: int = 0
     passes: int = 0
     result_for_black: Outcome = 0

@@ -217,10 +217,30 @@ class MCTS:
     # -----------------------------------------------------------------
 
     def _simulate(self, root: Node) -> None:
+        node, path = self.descend(root)
+        self._backup(path, self._leaf_value(node))
+
+    # -----------------------------------------------------------------
+    # The pieces of one simulation, exposed so that a batched scheduler can
+    # drive many trees with the *same* logic rather than a second copy of it.
+    #
+    # `run` above is one scheduler: descend, evaluate, back up, repeat, one
+    # position at a time. `selfplay.game_batch` is another: descend every tree,
+    # evaluate all their leaves in one call, back them all up. The rules of the
+    # search live here and are shared; only the scheduling differs. Two copies
+    # would drift, and a drift between them would be invisible -- both would
+    # still produce legal moves.
+    # -----------------------------------------------------------------
+
+    def descend(self, root: Node) -> tuple[Node, list[tuple[Node, int]]]:
+        """Walk from the root to a position the tree has not opened up yet.
+
+        Returns the leaf and the path taken, which is what backup needs. Creates
+        child nodes along the way as they are first reached.
+        """
         node = root
         path: list[tuple[Node, int]] = []
 
-        # Descend to a position the tree has not opened up yet.
         while node.expanded:
             index = self._select(node)
             path.append((node, index))
@@ -230,7 +250,44 @@ class MCTS:
                 node.children[index] = child
             node = child
 
-        self._backup(path, self._leaf_value(node))
+        return node, path
+
+    def terminal_value(self, node: Node) -> float | None:
+        """The exact value of a finished position, or None if the game goes on.
+
+        A batched scheduler calls this first so that finished positions never
+        take up a slot in the network batch -- we know their answer exactly, and
+        a guess could only be worse *and* slower.
+        """
+        if not rules.is_terminal(node.state):
+            return None
+        if node.terminal_value is None:
+            node.terminal_value = float(scoring.result(node.state))
+        return node.terminal_value
+
+    def open_node(
+        self,
+        node: Node,
+        logits: NDArray[np.float32],
+        value: float,
+    ) -> float:
+        """Attach the legal moves to a leaf, using an answer obtained elsewhere.
+
+        Split out from ``_expand`` so a batched scheduler can hand back one row
+        of a batch it already ran.
+        """
+        actions = rules.legal_actions(node.state)
+        node.open_with(actions, priors_from_logits(logits, actions), value)
+
+        if __debug__:
+            # Contract C5, layer 2: an edge for every legal move and no others,
+            # so the search cannot reach an illegal move even in principle.
+            assert set(node.actions) == set(actions), "expanded node has illegal edges"
+        return value
+
+    def backup(self, path: Sequence[tuple[Node, int]], leaf_value: float) -> None:
+        """Public name for the sign-flipping walk back up -- see ``_backup``."""
+        self._backup(path, leaf_value)
 
     def _select(self, node: Node) -> int:
         """Pick the child to descend into: highest Q + exploration bonus."""
@@ -265,29 +322,17 @@ class MCTS:
 
     def _leaf_value(self, node: Node) -> float:
         """The value of a freshly reached position, from *its* mover's point of view."""
-        if rules.is_terminal(node.state):
-            if node.terminal_value is None:
-                # Exact, so it is computed once and cached. A finished game is
-                # never sent to the network: we know the answer, and a guess
-                # could only be worse.
-                node.terminal_value = float(scoring.result(node.state))
-            return node.terminal_value
+        exact = self.terminal_value(node)
+        if exact is not None:
+            return exact
 
         self._expand(node)
         return node.net_value
 
     def _expand(self, node: Node) -> None:
-        """Attach the legal moves and ask the network what it thinks."""
-        actions = rules.legal_actions(node.state)
+        """Attach the legal moves and ask the network what it thinks. Batch of one."""
         logits, values = self.evaluator.evaluate([node.state])
-        node.open_with(actions, priors_from_logits(logits[0], actions), float(values[0]))
-
-        if __debug__:
-            # Contract C5, layer 2: there is an edge for every legal move and no
-            # others, so the search cannot reach an illegal move even in
-            # principle.
-            legal = set(rules.legal_actions(node.state))
-            assert set(node.actions) == legal, "expanded node has edges that are not legal moves"
+        self.open_node(node, logits[0], float(values[0]))
 
     @staticmethod
     def _backup(path: Sequence[tuple[Node, int]], leaf_value: float) -> None:

@@ -1,39 +1,56 @@
 # 8x8 overnight training profile. This produces the headline result.
 #
-# Sizing rationale
-# ----------------
-# * n_workers=6 assumes >=8 CPU cores, leaving 2 for the parent process and the
-#   GPU feed. Self-play, not backpropagation, is the bottleneck: one generation
-#   is ~4.4e7 node expansions in Python versus ~8e5 sample-forwards on a 400k
-#   parameter net.
-# * games_per_generation is tuned to WALL CLOCK, not to a round number. With an
-#   8 hour job ceiling and requeue-on-preemption, a generation of <=20 minutes
-#   bounds the worst-case loss from a kill to <=20 minutes.
-# * max_generations is set high on purpose; the run stops on the SLURM time
-#   limit and resumes on the next job via `--resume auto`.
+# Sizing rationale -- MEASURED on day 8, not assumed
+# --------------------------------------------------
+# Hardware: RTX A1000 laptop GPU (4 GB), 20 CPU cores.
+# Full numbers in bench/results/gpu.json; the sweep behind these choices:
 #
-# All wall-clock figures here are TARGETS to be replaced with measured values
-# after the Day 8 benchmark. They are not predictions.
+#   workers x games-in-flight, 8x8, 50 sims:
+#     1 x 48 -> 1.85 games/s        6 x 24 -> 4.16 games/s   <- best
+#     2 x 48 -> 3.00                6 x 48 -> 4.13
+#     3 x 32 -> 3.26                8 x 16 -> 2.17  (contention)
+#
+#   at 6 workers x 24, how simulations trade against games in a 20-minute
+#   generation:
+#     300 sims -> 0.277 games/s ->  332 games
+#     200 sims -> 0.402          ->  482 games
+#     150 sims -> 0.521          ->  624 games
+#     100 sims -> 0.959          -> 1151 games
+#
+# The plan's original 2500 games at 300 simulations would take **2.5 hours per
+# generation** on this hardware -- about three generations per overnight session,
+# which is not enough to show a rating curve. That figure was written for a
+# data-centre GPU; this is a laptop.
+#
+# So the trade is made explicitly: 200 simulations and 600 games, giving a
+# ~25 minute generation and ~19 generations per 8-hour session. Simulations are
+# the dominant strength knob, so this is a real reduction in per-move strength
+# in exchange for enough generations to measure improvement at all. It is
+# recorded in the model card rather than glossed.
+#
+# If a proper GPU becomes available (the school's cluster returns as SLURM
+# before term), raise n_simulations back to 300 and games_per_generation to
+# 2500, and re-run bench/selfplay_bench.py to re-derive n_workers.
 
 name: full8x8
 
 net:
   n_blocks: 6
-  channels: 64                # ~400k parameters
+  channels: 64                # ~458k parameters (measured)
 
 mcts:
-  n_simulations: 300
+  n_simulations: 200          # 300 on better hardware; see above
   temp_moves: 15
 
 selfplay:
-  games_per_generation: 2500  # target ~15-20 min/generation
-  n_workers: 6
-  games_in_flight: 48
-  max_generations: 400        # bounded in practice by the job time limit
+  games_per_generation: 600   # measured ~25 min/generation at 200 sims
+  n_workers: 6                # measured best; 8+ loses to contention
+  games_in_flight: 24         # measured best; 48 is no better and uses more RAM
+  max_generations: 400        # bounded in practice by how long you let it run
 
 replay:
   window: 400000
-  retain_shards: 30
+  retain_shards: 30           # per worker: the loop multiplies by n_workers
 
 train:
   steps_per_generation: 800
