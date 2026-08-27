@@ -9,14 +9,26 @@ agent would be training on its own test set, and every number afterwards would b
 inflated by an unknowable amount. The layering rule is what makes that leak
 impossible rather than merely unlikely.
 
-Day 6 ships only the match runner -- enough to answer "does the 4x4 agent beat
-Random and Greedy?". The opening book, confidence intervals, Bradley-Terry
-ratings and the report schema arrive on days 9 and 10, and those are what turn a
-win rate into a defensible claim.
+As of day 9 this holds the match runner, the seeded opening book, the frozen
+Minimax-d4 baseline, and the report schema -- enough to run a fair matchup and
+write down why it should be believed. Confidence intervals and Bradley-Terry
+ratings arrive on day 10, and those are what turn a win rate into a claim with an
+error bar on it.
 """
 
 from __future__ import annotations
 
 from reversi.arena.match import MatchResult, play_match
+from reversi.arena.openings import Opening, apply_opening, random_openings
+from reversi.arena.report import MatchReport, check_fairness, write_report
 
-__all__ = ["MatchResult", "play_match"]
+__all__ = [
+    "MatchReport",
+    "MatchResult",
+    "Opening",
+    "apply_opening",
+    "check_fairness",
+    "play_match",
+    "random_openings",
+    "write_report",
+]

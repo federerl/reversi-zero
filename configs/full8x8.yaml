@@ -10,23 +10,32 @@
 #     2 x 48 -> 3.00                6 x 48 -> 4.13
 #     3 x 32 -> 3.26                8 x 16 -> 2.17  (contention)
 #
-#   at 6 workers x 24, how simulations trade against games in a 20-minute
-#   generation:
+#   simulations against games in a 20-minute generation. NOTE: these were
+#   measured with too few games per worker, so games_in_flight collapsed to ~6
+#   and every rate is about 2.4x too low. Kept for the shape of the trade, not
+#   the magnitudes -- see the CORRECTION block in bench/results/worker-sweep.json:
 #     300 sims -> 0.277 games/s ->  332 games
 #     200 sims -> 0.402          ->  482 games
 #     150 sims -> 0.521          ->  624 games
 #     100 sims -> 0.959          -> 1151 games
+#
+#   MEASURED on the first real run, 6 workers x 24 in flight, 200 sims:
+#     600 games in 632 s of self-play = 0.95 games/s, 12.2 min per generation
+#     including training. 34,848 positions, 944 KB of replay, 1% worker skew.
 #
 # The plan's original 2500 games at 300 simulations would take **2.5 hours per
 # generation** on this hardware -- about three generations per overnight session,
 # which is not enough to show a rating curve. That figure was written for a
 # data-centre GPU; this is a laptop.
 #
-# So the trade is made explicitly: 200 simulations and 600 games, giving a
-# ~25 minute generation and ~19 generations per 8-hour session. Simulations are
-# the dominant strength knob, so this is a real reduction in per-move strength
-# in exchange for enough generations to measure improvement at all. It is
-# recorded in the model card rather than glossed.
+# So the trade is made explicitly: 200 simulations and 600 games. Measured on the
+# first real run that is a **12.2 minute** generation, not the 25 estimated here
+# before the correction above -- so about 39 generations per 8-hour session.
+#
+# That also means 300 simulations (~17.5 min/generation) would fit inside the
+# 20-minute target after all. The reduction to 200 was made on numbers that were
+# too pessimistic. It stays for the current run because switching mid-run would
+# make the generations incomparable; revisit for the next one.
 #
 # If a proper GPU becomes available (the school's cluster returns as SLURM
 # before term), raise n_simulations back to 300 and games_per_generation to

@@ -10,14 +10,16 @@ Results are reported split by colour too. That split is a diagnostic worth
 looking at: an agent that wins 90% as black and 40% as white has not learned
 Reversi, it has learned an opening.
 
-**What is deliberately missing until day 9.** Strong agents are near
-deterministic, so without varied starting positions every game between the same
-two agents would be identical -- a 200-game match would be one game counted 200
-times. Day 9 adds the seeded random opening book (each opening played twice with
-colours swapped), and day 10 adds Wilson intervals and Bradley-Terry ratings, so
-a win rate becomes a claim with an error bar on it. Until then these numbers are
-honest but coarse, and the agents involved are random enough that repetition is
-not yet the problem it will be.
+**Varied openings, because strong agents are deterministic.** With no
+exploration noise and no temperature, two trained agents play the identical game
+every time from the standard start -- a 200-game match would be one game counted
+200 times. So each pair of games starts from a different seeded random position,
+and each of those positions is played **twice with the colours swapped** so that
+an opening favouring the first player cannot flatter whoever drew it. See
+``openings.py``.
+
+**Still missing until day 10:** Wilson intervals and Bradley-Terry ratings, which
+are what turn a win rate into a claim with an error bar on it.
 """
 
 from __future__ import annotations
@@ -25,6 +27,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from reversi.agents.base import Agent
+from reversi.arena.openings import apply_opening, random_openings
 from reversi.errors import ArenaError
 from reversi.game import rules, scoring
 from reversi.seeding import derive_seed
@@ -50,6 +53,8 @@ class MatchResult:
     draws_as_white: int
     mean_plies: float
     seed: int
+    opening_plies: int = 0
+    openings_used: int = 0
 
     @property
     def score(self) -> float:
@@ -87,13 +92,19 @@ def play_match(
     games: int,
     board_size: int,
     seed: int,
+    opening_plies: int = 0,
     max_plies: int | None = None,
 ) -> MatchResult:
     """Play ``games`` games, half with each agent as black.
 
+    With ``opening_plies > 0``, ``games // 2`` random opening positions are drawn
+    from ``seed`` and each is played twice with the colours swapped. That is the
+    arrangement contract S13 asks for, and it is what makes a match between two
+    deterministic agents measure more than a single line of play.
+
     Every game gets its own derived seed, so the whole match replays exactly from
-    ``seed`` -- and so two agents that are both deterministic still produce a
-    reproducible result rather than depending on call order.
+    ``seed`` -- two deterministic agents produce a reproducible result rather than
+    one that depends on call order.
     """
     if games < 2 or games % 2 != 0:
         msg = (
@@ -103,6 +114,16 @@ def play_match(
         raise ArenaError(msg)
 
     ceiling = max_plies if max_plies is not None else 4 * board_size * board_size
+
+    book: tuple[tuple[int, ...], ...] = ()
+    if opening_plies > 0:
+        book = random_openings(
+            count=games // 2,
+            board_size=board_size,
+            seed=seed,
+            plies=opening_plies,
+            label=f"{agent_a.name}-vs-{agent_b.name}",
+        )
 
     wins = losses = draws = 0
     wins_as_black = wins_as_white = 0
@@ -114,7 +135,10 @@ def play_match(
         black_agent, white_agent = (agent_a, agent_b) if a_is_black else (agent_b, agent_a)
         rng = make_rng(derive_seed(seed, "match", agent_a.name, agent_b.name, index))
 
-        state = rules.initial_state(board_size)
+        # Pair 2k and 2k+1 share opening k and differ only in who plays black.
+        state = (
+            apply_opening(board_size, book[index // 2]) if book else rules.initial_state(board_size)
+        )
         plies = 0
         while not rules.is_terminal(state):
             if plies > ceiling:
@@ -159,4 +183,6 @@ def play_match(
         draws_as_white=draws_as_white,
         mean_plies=total_plies / games,
         seed=seed,
+        opening_plies=opening_plies,
+        openings_used=len(book),
     )

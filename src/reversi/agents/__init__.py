@@ -15,6 +15,7 @@ from __future__ import annotations
 
 from reversi.agents.base import Agent
 from reversi.agents.greedy import GreedyAgent
+from reversi.agents.minimax import MinimaxAgent
 from reversi.agents.random_agent import RandomAgent
 
-__all__ = ["Agent", "GreedyAgent", "RandomAgent"]
+__all__ = ["Agent", "GreedyAgent", "MinimaxAgent", "RandomAgent"]

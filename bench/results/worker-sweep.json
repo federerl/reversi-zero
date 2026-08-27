@@ -99,5 +99,23 @@
       "status": "NOT met",
       "why": "The criterion assumed 8 cores and a GPU with headroom. Six processes on one 4 GB laptop GPU contend for it. The practical target it existed to protect -- a generation inside 20 minutes -- is met by adjusting games_per_generation instead. A central inference server (plan P2) would combine the workers' small batches into large ones and is the thing that would close this."
     }
+  },
+  "CORRECTION": {
+    "what_was_wrong": "The simulation_sweep below used 36-48 games spread over 6 workers, so each worker got 6-8 games and its games_in_flight collapsed to that -- a worker cannot hold more games in flight than it was given. The sweep therefore measured batches of ~6 while reporting a setting of 24, and every rate in it is roughly 2.4x too low.",
+    "measured_for_real": {
+      "source": "the first full8x8 run, generation 1, 20260827-030939-full8x8-60cfdda-s1337",
+      "simulations": 200,
+      "workers": 6,
+      "games_in_flight": 24,
+      "games": 600,
+      "selfplay_seconds": 632,
+      "generation_seconds": 732,
+      "games_per_s": 0.95,
+      "positions": 34848,
+      "worker_skew_percent": 1,
+      "replay_bytes_per_generation": 966656
+    },
+    "what_it_changes": "A generation is 12.2 minutes, not the 25 the config comment claims -- comfortably inside the 20-minute target. 300 simulations would be roughly 17.5 minutes and is therefore also affordable, which reverses the trade made in configs/full8x8.yaml. Left at 200 for the current run; worth revisiting for the next one.",
+    "lesson": "Benchmark at the batch size you intend to run, not a smaller one. The harness silently shrinks games_in_flight to the number of games available, which is correct behaviour and made the measurement mean something other than what it said."
   }
 }
