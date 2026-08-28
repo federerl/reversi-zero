@@ -254,3 +254,6 @@ bench/results/*.tmp.json
 # SLURM job logs
 slurm-*.out
 slurm/logs/
+
+# Personal working notes -- never committed. See notes/README.md.
+notes/
