@@ -37,7 +37,10 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: Sync (CPU torch)
-        run: uv sync --extra cpu --extra dev --extra api
+        # --extra obs brings matplotlib, which scripts/make_plots.py imports.
+        # pyright checks scripts/, so without it the type job fails on an
+        # import the code legitimately needs.
+        run: uv sync --extra cpu --extra dev --extra api --extra obs
 
       - name: ruff check
         run: uv run ruff check .
