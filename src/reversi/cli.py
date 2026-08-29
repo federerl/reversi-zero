@@ -12,6 +12,7 @@ task that will deliver them, rather than failing obscurely.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Annotated
 
@@ -291,14 +292,70 @@ def calibrate(
     _not_yet("T33", "difficulty calibration")
 
 
+@app.command("export")
+def export_cmd(
+    checkpoint: Annotated[Path, typer.Argument(help="A training checkpoint, e.g. .../latest.pt")],
+    destination: Annotated[Path, typer.Argument(help="Where to write the play-only model")],
+    notes: Annotated[str, typer.Option("--notes", help="Recorded in the sidecar.")] = "",
+) -> None:
+    """Write a play-only copy of a checkpoint, for serving or releasing.
+
+    A training checkpoint carries optimiser and RNG state that only mean anything
+    inside the run that made them. An export carries the weights and the
+    architecture, and nothing else -- about half the size, and no run directory
+    required to use it.
+    """
+    from reversi.nn.export import export_checkpoint
+
+    try:
+        meta = export_checkpoint(checkpoint, destination, notes=notes)
+    except ReversiError as error:
+        typer.secho(str(error), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2) from error
+
+    size = destination.stat().st_size / 1e6
+    typer.echo(f"{destination}  ({size:.1f} MB)")
+    typer.echo(f"  run {meta['run_id']}, generation {meta['generation']}")
+    typer.echo(f"  sha256 {meta['sha256']}")
+
+
 @app.command()
 def serve(
     host: Annotated[str, typer.Option("--host")] = "127.0.0.1",
     port: Annotated[int, typer.Option("--port")] = 8000,
+    model: Annotated[
+        Path | None,
+        typer.Option("--model", help="Exported model. Defaults to $RZ_MODEL_PATH."),
+    ] = None,
+    device: Annotated[str, typer.Option("--device", help="'auto', 'cpu' or 'cuda'.")] = "cpu",
 ) -> None:
-    """Serve the web app and inference API."""
-    _ = (host, port)
-    _not_yet("T35", "web backend")
+    """Serve the web app and inference API.
+
+    Defaults to the CPU rather than the GPU: a served game is one position at a
+    time, which a GPU barely notices, and leaving the card free means the server
+    can run alongside a training job on the same machine.
+    """
+    import uvicorn
+
+    from reversi.api.app import build_app
+
+    chosen = _pick_device(device)
+    path = model or Path(os.environ.get("RZ_MODEL_PATH", "models/reversi-8x8-gen60.pt"))
+    if not path.exists():
+        typer.secho(
+            f"no model at {path}. Export one from a training run first:",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        typer.secho(
+            "  uv run reversi export runs/<run_id>/checkpoints/latest.pt models/model.pt",
+            fg=typer.colors.YELLOW,
+            err=True,
+        )
+        raise typer.Exit(code=2)
+
+    typer.echo(f"serving {path} on {chosen} at http://{host}:{port}")
+    uvicorn.run(build_app(path, device=chosen), host=host, port=port, log_level="info")
 
 
 @app.command()
