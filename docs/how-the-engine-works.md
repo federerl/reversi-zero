@@ -244,7 +244,7 @@ Both are needed. Neither alone is enough.
 
 ---
 
-## Questions you might get asked
+## Common questions
 
 **"Why write the same thing twice? Isn't that wasted work?"**
 About an hour of work, and it never runs during training. What it buys is a

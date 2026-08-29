@@ -102,7 +102,7 @@ about 400,000.
    squares across the board between input and output — already enough to see the
    whole board. Adding depth past that buys much less than it costs.
 
-> **Interview question: "Why not use a bigger network?"**
+> **Why not a bigger network?**
 > Because self-play data generation, not network capacity, is the bottleneck —
 > it's about 20× the compute of training. A bigger network directly reduces how
 > many games we produce per GPU-hour. The plan is to benchmark first and only
@@ -163,7 +163,7 @@ Instead, an unvisited move starts at *the parent's current value, minus a small
 penalty*: slightly pessimistic relative to what we already know. The search then
 goes deeper on promising lines instead of spreading out.
 
-> **Interview question: "What's a subtle bug you avoided?"**
+> **Why this detail gets its own setting**
 > FPU is a good answer — it's a one-line detail that measurably changes search
 > quality, and the naive `Q = 0` version still runs perfectly happily, just weaker.
 
@@ -190,7 +190,7 @@ difficulty calibration, and the web app. Otherwise we'd be measuring a
 deliberately handicapped agent and every Elo number would be wrong. The
 evaluation code *asserts* it is zero rather than trusting the config.
 
-> **Interview question: "Why does self-play need noise?"**
+> **Why self-play needs noise**
 > Without it, self-play collapses into repeating the same game and the AI stops
 > exploring. With it, roughly a quarter of the root's move preference is randomised
 > each move, so the training data keeps covering alternatives. And it's switched
@@ -213,7 +213,7 @@ The schedule: play the **first 12 moves** at temperature 1.0, then switch to
 Why 12 out of ~58? Enough to diversify openings, not so much that the AI plays
 badly through the middlegame and learns from garbage.
 
-> **The subtle part worth saying out loud in an interview:** temperature affects
+> **The subtle part:** temperature affects
 > only *which move gets played*. The training target we store is **always** the
 > raw visit distribution, unaffected by temperature. Mixing those two up is one of
 > the most common bugs in AlphaZero reimplementations — and it doesn't crash, it
@@ -269,7 +269,7 @@ the overhead of launching the work dwarfs the work itself. Feeding it 32
 positions at once costs barely more time than 1 and does 32× the work. This
 typically buys a 10–20× speedup with no change to the algorithm.
 
-> **Interview question: "How did you make self-play fast enough?"**
+> **What makes self-play fast enough**
 > Three things: bitboards for the game rules, batching 32 concurrent games into
 > single GPU calls, and 6 parallel worker processes. And critically — we benchmark
 > first and let the measurements decide what to optimise next, rather than guessing.
@@ -406,7 +406,7 @@ pick one at random *each time a position is sampled* rather than storing all 8
 copies — that saves disk space and means the network sees the same position from
 a different angle each epoch.
 
-> **Interview question: "How did you get more out of limited data?"**
+> **Getting more out of limited data**
 > Board symmetry. It costs a permutation of 64 indices and multiplies effective
 > data by 8. The one detail to get right is that the "pass" action must stay put
 > while the 64 square-actions are permuted — it isn't a square, so no rotation
@@ -472,7 +472,7 @@ Random openings make the games genuinely independent. Fixing the seed keeps the
 whole thing reproducible. Playing each opening twice with swapped colours cancels
 out any first-player advantage.
 
-> **Interview question: "How do you know your evaluation is fair?"**
+> **What makes the evaluation fair**
 > Equal colours, a seeded random opening book so games are independent, each
 > opening played from both sides, exploration noise disabled and asserted to be
 > off, and results reported with confidence intervals rather than as a bare

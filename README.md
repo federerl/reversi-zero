@@ -87,7 +87,33 @@ killed partway through a write falls back one generation rather than loading a t
 
 ## Does it learn?
 
-Yes, on the validation board — measured by playing, never by pointing at a loss curve:
+Yes — and the claim is measured by playing, never by pointing at a loss curve.
+
+**8×8, after 60 generations of self-play from random weights** (36,000 games, 9.1 hours on a laptop
+GPU). Bradley–Terry ratings fitted across a 28-pairing round robin, anchored at Random = 0:
+
+| agent | Elo | 95% bootstrap interval |
+|---|---|---|
+| **generation 60** | **+877** | [+774, +1028] |
+| generation 20 | +758 | [+659, +898] |
+| generation 5 | +547 | [+467, +686] |
+| Minimax-d4 (hand-written, depth-4 alpha-beta) | +523 | [+434, +653] |
+| Greedy | +313 | [+220, +468] |
+| Random | 0 | — |
+
+Generation 60 beat the depth-4 searcher **30 games to nothing**, and its rating interval lies
+entirely above generation 20's — the strict form of "later is stronger", rather than two point
+estimates that happen to be in the right order.
+
+The baseline matters here: Minimax-d4 was *given* corner theory, mobility and frontier evaluation.
+The agent was given none of it and had to find those ideas from its own games.
+
+**Known limitations, stated rather than buried.** The agent plateaued — generations 40 and 60 are
+statistically indistinguishable — and it scores only 63% against Greedy despite beating Minimax-d4
+outright, because self-play narrows its training distribution away from the strange positions bad
+play produces. Both are written up in `docs/experiments.md`.
+
+<details><summary>4×4 pipeline validation (a fixture, not a result)</summary>
 
 | | score over 200 colour-balanced games |
 |---|---|
@@ -99,6 +125,8 @@ The agent scores near 100% as white and lower as black. That is not a lopsided a
 exactly (3,306 positions). As black it is defending a theoretically lost position. That test doubles
 as an independent check on the rules engine — it never inspects a flip or a legal-move list, it just
 plays every possible game to the end and asks who wins.
+
+</details>
 
 ## The training loop
 

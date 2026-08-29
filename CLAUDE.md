@@ -27,7 +27,7 @@ descriptions alike.
 - Prefer "the GPU sits idle waiting for one position at a time" over "inference
   latency bounds throughput."
 - Keep the real reasoning. Simpler language, not less substance — I need to be
-  able to defend these decisions in an interview.
+  able to defend every decision in this repo from first principles.
 
 If I have to re-read a sentence to parse it, it's too dense.
 

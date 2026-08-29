@@ -67,6 +67,37 @@ def _load(config: Path | None, overrides: list[str] | None) -> Config:
         raise typer.Exit(code=2) from exc
 
 
+def _pick_device(requested: str) -> str:
+    """Resolve --device, preferring the GPU when one is there.
+
+    Defaulting to the CPU would be the safe-looking choice and the wrong one: it
+    fails silently. An 8x8 run on the CPU is roughly ten times slower, so the
+    first sign of the mistake would be a night that produced three generations
+    instead of nineteen.
+    """
+    import torch
+
+    if requested == "cpu":
+        return "cpu"
+    if requested == "cuda":
+        if not torch.cuda.is_available():
+            typer.secho(
+                "--device cuda was asked for but no GPU is visible.",
+                fg=typer.colors.RED,
+                err=True,
+            )
+            raise typer.Exit(code=2)
+        return "cuda"
+    if requested != "auto":
+        typer.secho(
+            f"--device must be 'auto', 'cpu', or 'cuda'; got {requested!r}",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=2)
+    return "cuda" if torch.cuda.is_available() else "cpu"
+
+
 def _not_yet(task: str, what: str) -> None:
     message = f"{what} is not implemented yet (backlog {task})."
     typer.secho(message, fg=typer.colors.YELLOW, err=True)
@@ -137,6 +168,10 @@ def train(
         int | None,
         typer.Option("--generations", help="Override selfplay.max_generations for this run."),
     ] = None,
+    device: Annotated[
+        str,
+        typer.Option("--device", help="'auto', 'cpu', or 'cuda'. Auto prefers the GPU."),
+    ] = "auto",
 ) -> None:
     """Run the generational self-play + training loop.
 
@@ -159,10 +194,20 @@ def train(
         raise typer.Exit(code=2)
 
     resolved = _load(config, set_)
+    chosen = _pick_device(device)
     paths = init_run(resolved, run_id=run_id)
     setup_logging(log_dir=paths.logs, run_id=paths.run_id, component="train")
 
     typer.echo(f"run: {paths.root}")
+    typer.echo(f"device: {chosen}")
+    if chosen == "cpu" and device == "auto":
+        typer.secho(
+            "no GPU visible, so this will train on the CPU. Measured on 8x8 that is "
+            'roughly ten times slower -- check `python -c "import torch; '
+            'print(torch.cuda.is_available())"` if you expected otherwise.',
+            fg=typer.colors.YELLOW,
+            err=True,
+        )
     if resume == "off":
         typer.secho(
             "--resume off: starting from freshly initialised weights even if this "
@@ -188,6 +233,7 @@ def train(
             generations=generations,
             should_stop=stop,
             resume=resume == "auto",
+            device=chosen,
         )
 
     if not reports:
