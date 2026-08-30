@@ -188,6 +188,18 @@ The interface reports the number it actually reached, and the level is labelled
 will not get there and saying otherwise would be the interface overstating how
 hard the agent thought.
 
+### There is also a floor
+
+At the quicker levels a search finishes in under 300 ms, which is faster than a
+person can follow. You click, your discs begin turning over, and before that
+finishes the agent has moved and turned some of them back -- so the move you just
+made is never actually visible and the board appears to change on its own.
+
+So the agent will not answer sooner than 650 ms after your move, and a disc takes
+300 ms to turn. The wait costs nothing: the search has already produced its
+answer and this only delays showing it. Levels that genuinely take longer are
+unaffected, so the pause exists where it is needed and nowhere else.
+
 ---
 
 ## What is in `web/`

@@ -79,7 +79,7 @@ export function Board({ state, interactive, lastMove, visits, onPlay }: BoardPro
         ref={gridRef}
         role="grid"
         aria-label={`Reversi board, ${size} by ${size}`}
-        className="grid aspect-square w-full gap-px border border-board-line bg-board-line"
+        className="grid aspect-square w-full gap-[2px] border-2 border-board-line bg-board-line"
         style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))` }}
       >
         {Array.from({ length: size * size }, (_, square) => {
@@ -121,7 +121,7 @@ export function Board({ state, interactive, lastMove, visits, onPlay }: BoardPro
                   aria-hidden="true"
                   data-disc={hasBlack ? "black" : "white"}
                   className={[
-                    "relative aspect-square w-4/5 rounded-full transition-colors duration-200",
+                    "relative aspect-square w-4/5 rounded-full transition-colors duration-300",
                     "shadow-[0_1px_2px_rgba(0,0,0,.45)]",
                     hasBlack ? "bg-disc-black" : "bg-disc-white",
                   ].join(" ")}

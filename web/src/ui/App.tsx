@@ -42,6 +42,22 @@ import { BLACK } from "../engine/rules";
 const MODELS = modelsManifest.models as unknown as ModelDescriptor[];
 const DEFAULT_MODEL = MODELS[0]!.id;
 
+/**
+ * The soonest the agent is allowed to answer, in milliseconds.
+ *
+ * At the quicker levels a search finishes in under 300 ms, which is faster than
+ * a person can follow. You click, your discs start turning over, and before that
+ * finishes the agent has moved and turned some of them back -- so the move you
+ * just made is never actually visible, and the board appears to change by
+ * itself.
+ *
+ * Waiting out the difference costs nothing: the search has already produced its
+ * answer, and this only delays showing it. Levels that genuinely take longer
+ * than this are unaffected, so the pause exists exactly where it is needed and
+ * nowhere else.
+ */
+const MIN_REPLY_MS = 650;
+
 export function App() {
   const [game, dispatch] = useReducer(reduce, newGame(BLACK, "club", DEFAULT_MODEL));
   const [loading, setLoading] = useState(true);
@@ -111,9 +127,16 @@ export function App() {
     searchRef.current = controller;
     dispatch({ type: "thinking", value: true });
 
+    const askedAt = performance.now();
+
     engine
       .think(state, game.levelId, controller.signal)
-      .then((thought) => {
+      .then(async (thought) => {
+        // Let the player's own move finish landing before answering it.
+        const remaining = MIN_REPLY_MS - (performance.now() - askedAt);
+        if (remaining > 0) {
+          await new Promise((resolve) => setTimeout(resolve, remaining));
+        }
         if (controller.signal.aborted) return;
         dispatch({ type: "agentPlayed", action: thought.action, thought });
         dispatch({ type: "thinking", value: false });
@@ -155,7 +178,7 @@ export function App() {
   const yourChances = turn.thought ? 1 - turn.thought.winProbability : null;
 
   return (
-    <div className="mx-auto max-w-4xl px-4 pb-16 pt-8">
+    <div className="mx-auto max-w-6xl px-4 pb-12 pt-8">
       <header className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight">reversi-zero</h1>
         <p className="mt-1 max-w-prose text-sm text-muted">
@@ -164,14 +187,26 @@ export function App() {
         </p>
       </header>
 
-      <div className="grid items-start gap-7 md:grid-cols-[minmax(0,1fr)_17rem]">
-        <Board
-          state={state}
-          interactive={humanTurn && !game.thinking && !loading}
-          lastMove={turn.move}
-          visits={heatmap}
-          onPlay={play}
-        />
+      <div className="grid items-start gap-7 md:grid-cols-[minmax(0,1fr)_18rem]">
+        {/*
+          The board is square, so its size is bounded by whichever of width and
+          height runs out first. Capping the width by the remaining viewport
+          height is what stops a wide window producing a board taller than the
+          screen -- and, more usually, what lets the board actually use the room
+          a wide window gives it instead of staying the size it was on a laptop.
+        */}
+        <div
+          className="mx-auto w-full"
+          style={{ maxWidth: "min(100%, calc(100dvh - 12rem))" }}
+        >
+          <Board
+            state={state}
+            interactive={humanTurn && !game.thinking && !loading}
+            lastMove={turn.move}
+            visits={heatmap}
+            onPlay={play}
+          />
+        </div>
 
         <aside className="flex flex-col gap-4 rounded-md border border-line bg-surface p-4">
           <Score black={black} white={white} toMove={state.toMove} humanColor={game.humanColor} />
