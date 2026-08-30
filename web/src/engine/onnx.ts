@@ -61,6 +61,16 @@ export class ModelError extends Error {}
  */
 const LOAD_TIMEOUT_MS = 60_000;
 
+/**
+ * How long to let the threaded attempt run before falling back to one thread.
+ *
+ * Short on purpose. When threads work they are ready in about a second; when
+ * they do not, they hang indefinitely. Waiting the full load timeout on the
+ * broken path before trying the one that works would make a page that is about
+ * to work fine feel broken for a minute first.
+ */
+const THREADED_ATTEMPT_MS = 12_000;
+
 function withDeadline<T>(work: Promise<T>, ms: number, message: string): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const timer = setTimeout(() => reject(new ModelError(message)), ms);
@@ -90,39 +100,61 @@ export async function loadModel(descriptor: ModelDescriptor): Promise<OnnxEvalua
   // bundler that has content-hashed and moved that file leaves the worker
   // unable to find it -- which hangs at load with no error at all.
   ort.env.wasm.wasmPaths = "/ort/";
-
-  // Threads, when the page is allowed to have them.
-  //
-  // Measured on this network: throughput is flat across batch sizes, which
-  // means the cost is arithmetic rather than the overhead of calling into
-  // WebAssembly -- so batching search leaves buys nothing and more cores is the
-  // only lever. `crossOriginIsolated` is false unless the site sends the two
-  // cross-origin headers, and asking for threads without it fails rather than
-  // degrading, so the count is chosen from what the page actually has.
-  //
-  // Four rather than all of them: a search should leave the machine usable, and
-  // the returns past four on a network this small are small.
-  ort.env.wasm.numThreads = globalThis.crossOriginIsolated
-    ? Math.max(1, Math.min(4, navigator.hardwareConcurrency ?? 1))
-    : 1;
   ort.env.logLevel = "error";
 
-  let session: ort.InferenceSession;
-  try {
-    session = await withDeadline(
+  // Threads roughly halve a search, so they are worth asking for -- but they are
+  // not worth depending on.
+  //
+  // `crossOriginIsolated` says the page is *allowed* threads; it does not say
+  // they will work. A restricted container can refuse to start the worker
+  // threads, or start them and never get them running, and the failure is
+  // silent: `InferenceSession.create` simply never settles. That is how this
+  // broke in CI while working on every machine it was developed on.
+  //
+  // So threads are an attempt, not a requirement. If the attempt does not
+  // succeed quickly, fall back to one thread and load again. A search that takes
+  // twice as long is a far better outcome than a board that never loads, and the
+  // measurements say what "twice" means: 221 ms against 450 ms at Club.
+  const wanted = globalThis.crossOriginIsolated
+    ? Math.max(1, Math.min(4, navigator.hardwareConcurrency ?? 1))
+    : 1;
+
+  const open = async (threads: number, budgetMs: number): Promise<ort.InferenceSession> => {
+    ort.env.wasm.numThreads = threads;
+    return withDeadline(
       ort.InferenceSession.create(descriptor.url, {
         executionProviders: ["wasm"],
         graphOptimizationLevel: "all",
       }),
-      LOAD_TIMEOUT_MS,
-      `loading ${descriptor.label} took longer than ${LOAD_TIMEOUT_MS / 1000}s`,
+      budgetMs,
+      `loading ${descriptor.label} with ${threads} thread(s) took longer than ` +
+        `${Math.round(budgetMs / 1000)}s`,
     );
-  } catch (cause) {
-    throw new ModelError(
-      `could not load the network for ${descriptor.label} from ${descriptor.url}. ` +
-        `The file may be missing from the build, or the browser may not support ` +
-        `WebAssembly. (${String(cause)})`,
-    );
+  };
+
+  let session: ort.InferenceSession | null = null;
+
+  if (wanted > 1) {
+    try {
+      // A shorter budget for the attempt than for the fallback: this is the path
+      // that hangs, and waiting the full timeout on it before trying the one
+      // that works would make a working page feel broken.
+      session = await open(wanted, THREADED_ATTEMPT_MS);
+    } catch {
+      session = null;
+    }
+  }
+
+  if (session === null) {
+    try {
+      session = await open(1, LOAD_TIMEOUT_MS);
+    } catch (cause) {
+      throw new ModelError(
+        `could not load the network for ${descriptor.label} from ${descriptor.url}. ` +
+          `The file may be missing, the download may have failed, or this browser ` +
+          `may not support WebAssembly. (${String(cause)})`,
+      );
+    }
   }
 
   return new OnnxEvaluator(session, descriptor);

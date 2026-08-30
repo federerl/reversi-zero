@@ -83,6 +83,11 @@ test("a network opponent searches, and says how much", async ({ page }) => {
   await page.getByLabel("Opponent").selectOption("gen05");
   await expect(page.getByRole("status")).toContainText("Your move.", { timeout: 90_000 });
 
+  // If the network failed to load, the app says so in a toast. Checking here
+  // turns that into an immediate, readable failure instead of a later assertion
+  // timing out for ninety seconds with no clue why.
+  await expect(page.getByRole("alert")).toBeHidden();
+
   await expect(page.getByLabel("Thinking time")).toBeVisible();
   await page.locator('[data-square="19"]').click();
   await expect(page.getByRole("status")).toContainText("Your move.", { timeout: 90_000 });
@@ -136,11 +141,21 @@ test("a whole game can be played to the end", async ({ page }) => {
       continue;
     }
 
-    if (status.includes("must pass")) {
-      await page.getByRole("button", { name: "Pass" }).click();
+    // Decide from the controls, not from the prose.
+    //
+    // Two different states contain the words "must pass" -- "You have no legal
+    // move. You must pass." and "The agent has no legal move and must pass." --
+    // and only the first offers a button. Matching the phrase meant the test
+    // occasionally tried to click a Pass button that was not there, and waited
+    // out the whole test timeout when it did. Which of the two occurs depends on
+    // the game, which is why it only failed sometimes.
+    const pass = page.getByRole("button", { name: "Pass" });
+    if (await pass.isVisible()) {
+      await pass.click();
     } else {
       const squares = await playableSquares(page);
       if (squares.length === 0) {
+        // Not our turn: the agent is moving, or passing on its own.
         await page.waitForTimeout(100);
         continue;
       }
