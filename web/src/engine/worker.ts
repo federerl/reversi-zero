@@ -17,6 +17,7 @@
 
 import modelsManifest from "./models.json";
 
+import { baselineById } from "./baselines";
 import { levelById, chooseMove } from "./levels";
 import { MCTS, searchValue, visitCounts, type SearchResult } from "./mcts";
 import { loadModel, type ModelDescriptor, type OnnxEvaluator } from "./onnx";
@@ -45,7 +46,18 @@ function descriptorFor(modelId: string): ModelDescriptor {
   return found;
 }
 
-async function ensureModel(modelId: string): Promise<OnnxEvaluator> {
+async function ensureModel(modelId: string): Promise<OnnxEvaluator | null> {
+  // A baseline is not a network. Nothing to fetch, nothing to compile, and no
+  // reason to keep a previously loaded model alive while one is selected.
+  if (baselineById(modelId) !== undefined) {
+    if (evaluator !== null) {
+      await evaluator.release();
+      evaluator = null;
+      loadedId = null;
+    }
+    return null;
+  }
+
   if (evaluator !== null && loadedId === modelId) return evaluator;
 
   // Release the previous one first. Each session holds its own copy of the
@@ -62,12 +74,33 @@ async function ensureModel(modelId: string): Promise<OnnxEvaluator> {
   return evaluator;
 }
 
-async function think(state: State, levelId: string, signal: AbortSignal): Promise<Thought> {
-  if (evaluator === null || loadedId === null) {
-    throw new Error("no opponent has been loaded yet");
-  }
+async function think(
+  state: State,
+  levelId: string,
+  opponentId: string,
+  signal: AbortSignal,
+): Promise<Thought> {
   if (isTerminal(state)) {
     throw new Error("the game is over; there is no move to make");
+  }
+
+  // A baseline answers from the rules alone. No search, so no visit counts and
+  // no value -- and the difficulty setting does not apply to it, because there
+  // is nothing to spend a simulation budget on.
+  const baseline = baselineById(opponentId);
+  if (baseline !== undefined) {
+    const started = performance.now();
+    return {
+      action: baseline.select(state),
+      visits: [],
+      simulations: 0,
+      elapsedMs: performance.now() - started,
+      modelId: opponentId,
+    };
+  }
+
+  if (evaluator === null || loadedId === null) {
+    throw new Error("no opponent has been loaded yet");
   }
 
   const level = levelById(levelId);
@@ -121,7 +154,12 @@ self.onmessage = async (event: MessageEvent<WorkerRequest>) => {
     const controller = new AbortController();
     running.set(request.id, controller);
     try {
-      const thought = await think(request.state, request.levelId, controller.signal);
+      const thought = await think(
+        request.state,
+        request.levelId,
+        request.opponentId,
+        controller.signal,
+      );
       if (controller.signal.aborted) post({ type: "cancelled", id: request.id });
       else post({ type: "thought", id: request.id, thought });
     } finally {

@@ -12,6 +12,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 
 import modelsManifest from "../engine/models.json";
+import { BASELINES, isBaseline } from "../engine/baselines";
 import { LocalEngine } from "../engine/local";
 import type { ModelDescriptor } from "../engine/onnx";
 import { isTerminal, legalActions, mustPass, passAction, type Action } from "../engine/rules";
@@ -39,8 +40,55 @@ import {
 } from "./Panel";
 import { BLACK } from "../engine/rules";
 
-const MODELS = modelsManifest.models as unknown as ModelDescriptor[];
-const DEFAULT_MODEL = MODELS[0]!.id;
+interface RatedBaseline {
+  readonly name: string;
+  readonly elo: number;
+  readonly interval: [number, number];
+}
+
+const NETWORKS = modelsManifest.models as unknown as ModelDescriptor[];
+const RATED = modelsManifest.baselines as unknown as RatedBaseline[];
+
+/**
+ * Every opponent, weakest first.
+ *
+ * The baselines come first deliberately. The network is strong even at its
+ * earliest checkpoint -- generation 5 rates above the depth-4 search it was
+ * measured against -- so before these were offered there was nothing on the
+ * ladder a new player could actually beat, and no simulation budget makes a
+ * +547 network into a beginner's opponent.
+ *
+ * The order is by measured rating, not by what feels like it should be easier.
+ */
+const OPPONENTS: readonly ModelDescriptor[] = [
+  ...BASELINES.map((baseline) => {
+    const rated = RATED.find((entry) => entry.name === baseline.ratingName);
+    return {
+      id: baseline.id,
+      label: baseline.label,
+      generation: -1,
+      url: "",
+      boardSize: 8,
+      ...(rated ? { elo: rated.elo, eloInterval: rated.interval } : {}),
+      note: baseline.note,
+    } satisfies ModelDescriptor;
+  }),
+  ...[...NETWORKS].sort((a, b) => a.generation - b.generation),
+];
+
+/**
+ * Start on Greedy.
+ *
+ * A first game you lose is a bad demonstration, and every network on this ladder
+ * beats a casual player comfortably -- the weakest of them rates above the
+ * depth-4 search it was measured against. Greedy is beatable, it is a measured
+ * baseline rather than a hobbled agent, and the ladder above it is visible in
+ * the picker from the first second.
+ *
+ * It also means the page is playable immediately: no network is fetched until
+ * somebody chooses one.
+ */
+const DEFAULT_MODEL = "greedy";
 
 /**
  * The soonest the agent is allowed to answer, in milliseconds.
@@ -174,8 +222,10 @@ export function App() {
     [game.showAnalysis, turn.thought],
   );
 
-  // The agent's estimate, read from the player's side of the board.
-  const yourChances = turn.thought ? 1 - turn.thought.winProbability : null;
+  // The agent's estimate, read from the player's side of the board. Random and
+  // Greedy hold no opinion about who is winning, so there is nothing to show.
+  const agentChances = turn.thought?.winProbability;
+  const yourChances = agentChances === undefined ? null : 1 - agentChances;
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-12 pt-8">
@@ -227,17 +277,19 @@ export function App() {
           {yourChances !== null && !terminal && <WinProbability probability={yourChances} />}
 
           <OpponentPicker
-            models={MODELS}
+            models={OPPONENTS}
             value={game.modelId}
             onChange={(id) => dispatch({ type: "setModel", modelId: id })}
             disabled={game.thinking}
           />
 
-          <LevelPicker
-            value={game.levelId}
-            onChange={(id) => dispatch({ type: "setLevel", levelId: id })}
-            disabled={game.thinking}
-          />
+          {!isBaseline(game.modelId) && (
+            <LevelPicker
+              value={game.levelId}
+              onChange={(id) => dispatch({ type: "setLevel", levelId: id })}
+              disabled={game.thinking}
+            />
+          )}
 
           <SidePicker
             value={game.humanColor}
@@ -270,8 +322,9 @@ export function App() {
 
           {turn.thought && (
             <p className="font-mono text-[0.7rem] leading-relaxed text-muted tabular-nums">
-              played {squareName(turn.thought.action, state.size)} &middot;{" "}
-              {turn.thought.simulations} sims &middot; {Math.round(turn.thought.elapsedMs)} ms
+              played {squareName(turn.thought.action, state.size)}
+              {turn.thought.simulations > 0 && <> &middot; {turn.thought.simulations} sims</>}{" "}
+              &middot; {Math.round(turn.thought.elapsedMs)} ms
             </p>
           )}
         </aside>

@@ -62,7 +62,7 @@ export class LocalEngine implements Engine {
           if (signal?.aborted) return abort();
           signal?.addEventListener("abort", abort, { once: true });
 
-          this.send({ type: "think", id, state, levelId });
+          this.send({ type: "think", id, state, levelId, opponentId: this.modelId });
         }),
     );
   }

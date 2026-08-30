@@ -52,7 +52,37 @@ test("the agent answers a move, and the game moves on", async ({ page }) => {
   expect(await discCount(page)).toBeGreaterThan(4);
 
   // And it reports what it did, rather than only that it did something.
+  await expect(page.getByText(/played \w+\d · \d+ ms/)).toBeVisible();
+});
+
+test("a network opponent searches, and says how much", async ({ page }) => {
+  // The default opponent is a baseline, which runs no search. Picking a
+  // generation is what exercises the network path -- and the simulation count in
+  // the move report is the visible evidence that it ran.
+  await page.getByLabel("Opponent").selectOption("gen05");
+  await expect(page.getByRole("status")).toContainText("Your move.", { timeout: 60_000 });
+
+  await expect(page.getByLabel("Thinking time")).toBeVisible();
+  await page.locator('[data-square="19"]').click();
+  await expect(page.getByRole("status")).toContainText("Your move.", { timeout: 30_000 });
+
   await expect(page.getByText(/played \w+\d · \d+ sims · \d+ ms/)).toBeVisible();
+  // A network has an opinion about who is winning; the bar shows it.
+  await expect(page.getByRole("meter")).toBeVisible();
+});
+
+test("a baseline opponent offers no search controls and claims no opinion", async ({ page }) => {
+  // Random and Greedy pick from the rules alone. There is no simulation budget
+  // to spend and no value to report, so the interface shows neither rather than
+  // inventing them.
+  await expect(page.getByLabel("Opponent")).toHaveValue("greedy");
+  await expect(page.getByLabel("Thinking time")).toBeHidden();
+
+  await page.locator('[data-square="19"]').click();
+  await expect(page.getByRole("status")).toContainText("Your move.", { timeout: 30_000 });
+
+  await expect(page.getByRole("meter")).toBeHidden();
+  await expect(page.getByText(/sims/)).toBeHidden();
 });
 
 test("the board is never clickable while the agent is thinking", async ({ page }) => {
@@ -64,10 +94,11 @@ test("the board is never clickable while the agent is thinking", async ({ page }
 });
 
 test("a whole game can be played to the end", async ({ page }) => {
-  // Casual, so this finishes in a reasonable time. What is being checked is
-  // that the game terminates properly -- including any forced passes along the
-  // way, which is where a rules port most often goes wrong.
-  await page.getByLabel("Thinking time").selectOption("casual");
+  // Against the default opponent, which is a baseline: it answers instantly and
+  // needs no network downloaded, so this stays about the rules rather than about
+  // the search. What is being checked is that a game terminates properly --
+  // including any forced passes along the way, which is where a rules port most
+  // often goes wrong.
 
   // The bound counts loop turns, not moves, and a turn spent waiting for the
   // agent makes no move at all. It is generous for that reason: the agent will

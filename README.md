@@ -72,8 +72,14 @@ uv run reversi export runs/<run-id>/checkpoints/gen_00060.pt models/gen60.pt
 uv run reversi export-onnx models/gen60.pt web/public/models/reversi-8x8-gen60.onnx
 ```
 
-**What you can choose.** Which generation to play — 5, 20, 40 or 60, each labelled with its measured
-rating — and how long it thinks. Those are separate knobs on purpose: the generation sets how good
+**What you can choose.** Who to play — Random (0 Elo), Greedy (+313), or the agent at generation 5
+(+547), 20, 40 or 60 (+877), each labelled with its measured rating — and, for the networks, how long
+it thinks.
+
+The two weakest are not the network. Generation 5 already rates above the depth-4 search it was
+measured against, so there was no rung a new player could beat; Random and Greedy are the baselines
+the whole project was measured against, and they fill it in. The page starts on Greedy, which is
+beatable and needs no model downloaded at all. Those are separate knobs on purpose: the generation sets how good
 the agent's intuition is, and the search budget sets how much it improves on that intuition before
 moving. The difference between those two is the whole idea behind the method.
 

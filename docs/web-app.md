@@ -341,14 +341,36 @@ of 210 games per entrant, anchored so random play is 0.
 **How long it thinks** sets how much the search improves on that intuition
 before it moves.
 
-| Opponent | Elo | 95% interval |
-|---|---:|---|
-| Generation 60 | 877 | 774 – 1028 |
-| Generation 40 | 855 | 747 – 1018 |
-| Generation 20 | 758 | 659 – 898 |
-| Generation 5 | 547 | 467 – 686 |
-| Minimax, depth 4 | 523 | 434 – 653 |
-| Random | 0 | — |
+| Opponent | Elo | 95% interval | Runs |
+|---|---:|---|---|
+| Generation 60 | 877 | 774 – 1028 | the network |
+| Generation 40 | 855 | 747 – 1018 | the network |
+| Generation 20 | 758 | 659 – 898 | the network |
+| Generation 5 | 547 | 467 – 686 | the network |
+| *Minimax, depth 4* | *523* | *434 – 653* | *not offered in the app* |
+| **Greedy** | **313** | **220 – 468** | **the rules alone** |
+| **Random** | **0** | — | **the rules alone** |
+
+### Why the two weakest are not the network
+
+The network is strong even at its earliest checkpoint. Generation 5 rates +547,
+which is *above* the depth-4 alpha-beta search it was measured against, and no
+simulation budget changes that: the strength is in the network's own opinion and
+the search only sharpens it. Turning `Casual` down further makes the agent slower
+to decide, not weaker.
+
+So the bottom of the ladder is Random and Greedy — the same baselines every
+rating in this project is measured against, rated in the same round robin as
+every generation. Without them the easiest opponent on offer was already stronger
+than a classical engine, and a new player had nothing to beat.
+
+They also cost nothing. Neither needs the 1.8 MB network, so picking one is
+instant and a visitor who only plays Greedy downloads no model at all — which is
+why Greedy is the opponent the page starts on.
+
+Neither reports a win probability or a simulation count, and the interface hides
+both rather than inventing them: one picks uniformly at random and the other
+counts discs. Neither holds an opinion about who is winning.
 
 Keeping these separate is deliberate. A beginner can play the final agent
 thinking briefly, or an early agent thinking hard, and the difference between

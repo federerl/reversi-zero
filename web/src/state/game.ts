@@ -93,11 +93,13 @@ export function score(game: Game): { black: number; white: number } {
 export function winProbabilityHistory(game: Game): Array<{ ply: number; probability: number }> {
   const points: Array<{ ply: number; probability: number }> = [];
   game.history.forEach((turn, ply) => {
-    if (turn.thought === null) return;
+    // A baseline reports no win probability, so it contributes no point rather
+    // than a made-up one.
+    const forAgent = turn.thought?.winProbability;
+    if (forAgent === undefined) return;
     // The agent's value is from its own point of view. Flip it so the whole
     // series is read from the player's side of the board, which is the only way
     // a line going up can mean "you are doing better".
-    const forAgent = turn.thought.winProbability;
     points.push({ ply, probability: 1 - forAgent });
   });
   return points;

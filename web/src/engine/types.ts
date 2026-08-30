@@ -25,10 +25,16 @@ import type { Action, State } from "./rules";
 export interface Thought {
   /** The move to play. */
   readonly action: Action;
-  /** How the agent rates the position it just moved from, for the mover. */
-  readonly value: number;
-  /** Chance the mover wins, which is just the value rescaled to 0..1. */
-  readonly winProbability: number;
+  /**
+   * How the agent rates the position it just moved from, for the mover.
+   *
+   * Absent for the baseline opponents. Random and Greedy hold no opinion about
+   * who is winning -- one picks uniformly and the other counts discs -- so the
+   * interface hides the estimate rather than inventing one.
+   */
+  readonly value?: number;
+  /** Chance the mover wins, the value rescaled to 0..1. Absent for baselines. */
+  readonly winProbability?: number;
   /** Visits per action, full width, zero on every illegal one. For the heat map. */
   readonly visits: readonly number[];
   /** Simulations actually run, which a time budget may cut short. */
@@ -63,6 +69,8 @@ export type WorkerRequest =
       readonly id: number;
       readonly state: State;
       readonly levelId: string;
+      /** Which opponent to answer as -- a generation, or a baseline. */
+      readonly opponentId: string;
     }
   | { readonly type: "cancel"; readonly id: number };
 
