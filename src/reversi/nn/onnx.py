@@ -48,10 +48,20 @@ __all__ = [
     "run_onnx",
 ]
 
-# Opset 17 covers every operation this network uses (convolution, batch norm,
-# ReLU, matmul, tanh) and is what ONNX Runtime Web supports without a shim.
-# Nothing here needs a newer one.
-ONNX_OPSET = 17
+# The operator set version to export against.
+#
+# Every operation this network uses -- convolution, batch norm, ReLU, matmul,
+# tanh -- has existed since long before this, so the number is not about
+# features. It is about avoiding a *conversion*.
+#
+# torch's current exporter implements opset 18 and, when asked for something
+# older, down-converts and warns that the conversion "may not be successful".
+# Asking for 17 therefore produced a working file on one torch version and a
+# file the browser refused to load on another, because the `cpu` and `cu124`
+# extras resolve different torch versions and only the newer one takes that
+# path. Asking for what the exporter actually produces removes the step that
+# could go wrong.
+ONNX_OPSET = 18
 
 # Float32 arithmetic reordered by a different runtime drifts in the last few
 # digits. Anything beyond this is a real behaviour change, not rounding.

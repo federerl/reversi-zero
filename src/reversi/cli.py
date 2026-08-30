@@ -282,14 +282,94 @@ def arena(
 
 @app.command()
 def calibrate(
-    config: ConfigOpt = None,
-    set_: SetOpt = None,
-    validate: ValidateOpt = False,
+    model: Annotated[Path, typer.Argument(help="An exported model, from `reversi export`")],
+    out: Annotated[Path, typer.Option("--out", help="Where to write the report.")] = Path(
+        "runs/calibration/difficulty_report.json"
+    ),
+    games: Annotated[
+        int, typer.Option("--games", help="Games per pairing. 300 is the plan's figure.")
+    ] = 300,
+    board_size: Annotated[int, typer.Option("--board-size")] = 8,
+    guard_samples: Annotated[
+        int, typer.Option("--guard-samples", help="Moves to inspect for the guardrail check.")
+    ] = 500,
+    seed: Annotated[int, typer.Option("--seed")] = 20260830,
+    device: Annotated[
+        str,
+        typer.Option("--device", help="'cpu' or 'cuda'. CPU is usually faster here."),
+    ] = "cpu",
+    workers: Annotated[
+        int,
+        typer.Option("--workers", help="Pairings to play at once. 1 runs in this process."),
+    ] = 1,
+    no_baselines: Annotated[
+        bool,
+        typer.Option("--no-baselines", help="Rate the levels against each other only."),
+    ] = False,
+    write_config: Annotated[
+        Path | None,
+        typer.Option("--write-config", help="Also write the settings, with their ratings."),
+    ] = None,
 ) -> None:
-    """Search for and validate the four difficulty levels."""
-    _load(config, set_)
-    _ = validate
-    _not_yet("T33", "difficulty calibration")
+    """Measure the difficulty ladder and check it against criterion S15.
+
+    The four levels are *designed* to differ -- each searches more than the one
+    below it and tolerates less of a drop in value before refusing a move -- but
+    designed is not measured. A ladder whose rungs are not actually separated is
+    four names for one opponent, and a player who moves up a level and notices
+    nothing has been told something untrue.
+
+    This plays every level against every other and against the frozen baselines,
+    fits the whole result matrix at once, and reports whether the ratings rise,
+    whether adjacent rungs are at least 80 Elo apart with intervals that do not
+    overlap, whether the easiest still beats random play, and whether its
+    guardrail held over 500 of its own moves.
+
+    Exits non-zero when the ladder does not hold up, because a difficulty setting
+    that is not separated is a claim the interface should not be making.
+    """
+    from reversi.difficulty.calibrate import calibrate as run_calibration
+    from reversi.difficulty.calibrate import write_difficulty_config, write_report
+    from reversi.difficulty.levels import LEVELS
+
+    setup_logging()
+    try:
+        report = run_calibration(
+            model,
+            board_size=board_size,
+            games_per_pair=games,
+            seed=seed,
+            device=device,
+            guard_samples=guard_samples,
+            include_baselines=not no_baselines,
+            workers=workers,
+        )
+    except ReversiError as error:
+        typer.secho(str(error), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2) from error
+
+    typer.echo("")
+    typer.echo(report.tournament.ratings.describe())
+    typer.echo("")
+    typer.echo(report.summary())
+
+    write_report(out, report, model)
+    typer.echo("")
+    typer.echo(f"report: {out}")
+
+    if write_config is not None:
+        write_difficulty_config(write_config, report, list(LEVELS), model)
+        typer.echo(f"config: {write_config}")
+
+    if not report.passed:
+        typer.secho(
+            "S15 is not met. The plan's documented options, in order: widen the "
+            "simulation ratio, or ship fewer levels and say so -- never four tiers "
+            "that are not actually different.",
+            fg=typer.colors.YELLOW,
+            err=True,
+        )
+        raise typer.Exit(code=1)
 
 
 @app.command("export")

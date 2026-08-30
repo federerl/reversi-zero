@@ -82,12 +82,25 @@ def test_init_run_creates_a_run_directory(run_root: Path) -> None:
     assert (created / "meta.json").is_file()
 
 
-@pytest.mark.parametrize("command", ["bench", "arena", "calibrate", "play"])
+@pytest.mark.parametrize("command", ["bench", "arena", "play"])
 def test_unimplemented_commands_fail_loudly_and_name_their_task(command: str) -> None:
     """A stub must never look like a successful no-op."""
     result = runner.invoke(app, [command])
     assert result.exit_code == 2
     assert "not implemented" in result.output
+
+
+def test_calibrate_is_real_and_asks_for_a_model() -> None:
+    """``calibrate`` measures the difficulty ladder as of S15, so it must not be
+    in the stub list above.
+
+    Invoked with no arguments it should fail on the *missing model*, not with a
+    "not implemented" notice -- the difference between a command that needs
+    something and one that does nothing.
+    """
+    result = runner.invoke(app, ["calibrate"])
+    assert result.exit_code != 0
+    assert "not implemented" not in result.output
 
 
 def test_train_runs_a_generation(run_root: Path) -> None:
