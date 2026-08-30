@@ -319,6 +319,90 @@ def export_cmd(
     typer.echo(f"  sha256 {meta['sha256']}")
 
 
+@app.command("export-onnx")
+def export_onnx_cmd(
+    model: Annotated[Path, typer.Argument(help="An exported model, from `reversi export`")],
+    destination: Annotated[Path, typer.Argument(help="Where to write the .onnx file")],
+    positions: Annotated[
+        int, typer.Option("--check-positions", help="How many random inputs to compare on.")
+    ] = 64,
+) -> None:
+    """Convert an exported model to ONNX, for running it in a browser.
+
+    The web app runs the network on the visitor's own machine, which needs the
+    weights in a form that does not involve PyTorch. This writes that form, and
+    then checks it: both versions are run on random inputs and the file is
+    deleted rather than kept if their answers differ by more than float32
+    rounding. An export that computes something slightly different would not
+    fail anywhere -- the browser would just play a different agent than the one
+    every measurement in this repository was taken against.
+    """
+    from reversi.nn.onnx import export_onnx
+
+    try:
+        meta = export_onnx(model, destination, check_positions=positions)
+    except ReversiError as error:
+        typer.secho(str(error), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2) from error
+
+    agreement = meta["agreement"]
+    typer.echo(f"{destination}  ({meta['bytes'] / 1e6:.2f} MB)")
+    typer.echo(f"  {meta['label']}, opset {meta['onnx_opset']}")
+    if agreement:
+        typer.echo(
+            f"  agrees with PyTorch over {agreement['positions']} positions: "
+            f"policy within {agreement['max_policy_diff']:.1e}, "
+            f"value within {agreement['max_value_diff']:.1e}"
+        )
+    typer.echo(f"  sha256 {meta['sha256']}")
+
+
+@app.command("export-fixtures")
+def export_fixtures_cmd(
+    destination: Annotated[Path, typer.Argument(help="Directory to write the fixture JSON into")],
+    onnx: Annotated[
+        Path | None,
+        typer.Option("--onnx", help="An .onnx file, to also generate the network fixture."),
+    ] = None,
+    board_size: Annotated[int, typer.Option("--board-size")] = 8,
+    rules_count: Annotated[
+        int, typer.Option("--rules", help="Positions in the rules fixture.")
+    ] = 1000,
+    seed: Annotated[int, typer.Option("--seed")] = 20260830,
+) -> None:
+    """Write the data a TypeScript port of this engine has to reproduce.
+
+    The rules of Reversi are implemented twice in this repository and checked
+    against each other over 50,000 games. Running the agent in a browser means
+    writing them a third time, and a wrong port would not crash -- it would just
+    play a slightly different game and make the agent look weak.
+
+    So the expectations are generated from the frozen engine rather than written
+    by hand: legal moves and flip masks, the input encoding, the network's own
+    answers, search visit counts, and whole games. Regenerating them and finding
+    a difference means something changed that should not have.
+    """
+    from reversi.web.fixtures import write_fixtures
+
+    try:
+        sizes = write_fixtures(
+            destination,
+            board_size=board_size,
+            seed=seed,
+            rules_count=rules_count,
+            onnx_path=onnx,
+        )
+    except ReversiError as error:
+        typer.secho(str(error), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2) from error
+
+    for name in sorted(sizes):
+        typer.echo(f"  {name + '.json':16s} {sizes[name] / 1024:7.1f} KiB")
+    typer.echo(f"  {'total':16s} {sum(sizes.values()) / 1024:7.1f} KiB")
+    if onnx is None:
+        typer.echo("  (no --onnx given, so the network fixture was skipped)")
+
+
 @app.command()
 def serve(
     host: Annotated[str, typer.Option("--host")] = "127.0.0.1",

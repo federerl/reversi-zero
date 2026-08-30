@@ -45,6 +45,16 @@ api = [
     "uvicorn[standard]>=0.30",
 ]
 
+# --- building the web app's artifacts ---------------------------------------
+# Only needed to *produce* the browser's copy of the network, never to train,
+# evaluate or serve. `onnxruntime` is here rather than in `api` because it is
+# what checks that the exported file still computes what the checkpoint does --
+# a check that belongs to the build, not to the server.
+web = [
+    "onnx>=1.16",
+    "onnxruntime>=1.18",
+]
+
 # --- development ------------------------------------------------------------
 dev = [
     "pytest>=8.0",
