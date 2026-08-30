@@ -20,7 +20,8 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from reversi.api import service
 from reversi.api.schemas import (
@@ -169,6 +170,18 @@ def build_app(model_path: Path | None = None, *, device: str = "cpu") -> FastAPI
             difficulty=outcome.level.name,
             analysis=analysis,
         )
+
+    # ---- the page itself --------------------------------------------
+    # One self-contained file, served by the same process as the API. No build
+    # step and no second server to run, so `reversi serve` is the whole demo --
+    # which is what makes it something you can hand to somebody.
+    static = Path(__file__).parent / "static"
+    if static.is_dir():
+        app.mount("/static", StaticFiles(directory=static), name="static")
+
+        @app.get("/", include_in_schema=False)
+        async def index() -> FileResponse:
+            return FileResponse(static / "index.html")
 
     return app
 

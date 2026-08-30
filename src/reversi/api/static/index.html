@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>reversi-zero</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%275%27%20fill%3D%27rgb%2846%2C89%2C67%29%27%2F%3E%3Ccircle%20cx%3D%2711%27%20cy%3D%2716%27%20r%3D%276.5%27%20fill%3D%27rgb%2822%2C25%2C26%29%27%2F%3E%3Ccircle%20cx%3D%2721%27%20cy%3D%2716%27%20r%3D%276.5%27%20fill%3D%27rgb%28242%2C240%2C234%29%27%2F%3E%3C%2Fsvg%3E">
+<style>
+  :root {
+    --ground:      #f6f7f4;
+    --surface:     #ffffff;
+    --surface-2:   #eceee8;
+    --line:        #dcdfd6;
+    --ink:         #191d18;
+    --ink-2:       #4a5348;
+    --muted:       #6d7a6b;
+    --accent:      #b46a15;
+    --good:        #2e6b46;
+    --bad:         #a33a2a;
+
+    --board:       #2e5943;
+    --board-line:  #244635;
+    --board-edge:  #1c3628;
+    --disc-black:  #16191a;
+    --disc-white:  #f2f0ea;
+
+    --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground:    #101310;
+      --surface:   #191d19;
+      --surface-2: #222722;
+      --line:      #2f362f;
+      --ink:       #e8ebe5;
+      --ink-2:     #b9c2b6;
+      --muted:     #8a9788;
+      --accent:    #e0973f;
+      --good:      #6fbb8f;
+      --bad:       #e07a68;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 1.5rem 1rem 3rem;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font);
+    line-height: 1.5;
+  }
+
+  .wrap { max-width: 54rem; margin: 0 auto; }
+
+  header { margin-bottom: 1.5rem; }
+  h1 { font-size: 1.5rem; margin: 0 0 .25rem; letter-spacing: -.01em; }
+  .sub { color: var(--muted); font-size: .9rem; margin: 0; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 16rem;
+    gap: 1.75rem;
+    align-items: start;
+  }
+  @media (max-width: 44rem) { .layout { grid-template-columns: 1fr; } }
+
+  /* ---- board ---- */
+  .board-frame {
+    background: var(--board-edge);
+    padding: .5rem;
+    border-radius: 5px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.12), 0 10px 26px rgba(0,0,0,.10);
+  }
+  .board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 1px;
+    background: var(--board-line);
+    border: 1px solid var(--board-line);
+    aspect-ratio: 1;
+    width: 100%;
+  }
+  .cell {
+    background: var(--board);
+    display: grid;
+    place-items: center;
+    position: relative;
+    border: 0;
+    padding: 0;
+    cursor: default;
+  }
+  .cell.playable { cursor: pointer; }
+  .cell.playable:hover::after { background: rgba(255,255,255,.55); }
+  .cell:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; z-index: 2; }
+
+  .disc {
+    width: 80%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(0,0,0,.45);
+    transition: background .18s ease;
+  }
+  .disc.b { background: var(--disc-black); }
+  .disc.w { background: var(--disc-white); }
+  @media (prefers-reduced-motion: reduce) { .disc { transition: none; } }
+
+  .cell.playable::after {
+    content: "";
+    position: absolute;
+    width: 22%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: rgba(255,255,255,.32);
+  }
+  .cell.last { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  /* ---- panel ---- */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 1rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .score { display: flex; justify-content: space-between; align-items: center; }
+  .side { display: flex; align-items: center; gap: .5rem; font-variant-numeric: tabular-nums; }
+  .side .n { font-size: 1.5rem; font-weight: 600; }
+  .pip { width: 1.05rem; height: 1.05rem; border-radius: 50%; border: 1px solid var(--line); }
+  .pip.b { background: var(--disc-black); }
+  .pip.w { background: var(--disc-white); }
+  .side.active { color: var(--ink); }
+  .side:not(.active) { color: var(--muted); }
+
+  .status {
+    background: var(--surface-2);
+    border-left: 2px solid var(--accent);
+    padding: .55rem .75rem;
+    font-size: .9rem;
+    min-height: 3.4rem;
+    display: flex;
+    align-items: center;
+  }
+  .status.win { border-color: var(--good); }
+  .status.lose { border-color: var(--bad); }
+
+  label { font-size: .78rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); display: block; margin-bottom: .3rem; }
+
+  select, button {
+    font: inherit;
+    font-size: .9rem;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: .45rem .7rem;
+    width: 100%;
+    cursor: pointer;
+  }
+  button:hover:not(:disabled), select:hover { background: var(--surface-2); }
+  button:disabled { opacity: .45; cursor: default; }
+  button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button.primary { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+  button.primary:hover:not(:disabled) { opacity: .88; background: var(--ink); }
+
+  .row { display: flex; gap: .5rem; }
+  .hint { font-size: .78rem; color: var(--muted); margin: 0; }
+
+  .spinner {
+    display: inline-block; width: .8rem; height: .8rem; margin-right: .45rem;
+    border: 2px solid var(--muted); border-top-color: transparent; border-radius: 50%;
+    animation: spin .7s linear infinite; vertical-align: -1px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 1.5rem; transform: translateX(-50%);
+    background: var(--bad); color: #fff; padding: .6rem 1rem; border-radius: 4px;
+    font-size: .88rem; box-shadow: 0 4px 14px rgba(0,0,0,.2); max-width: 90vw;
+  }
+  .toast[hidden] { display: none; }
+
+  footer { margin-top: 2rem; font-size: .78rem; color: var(--muted); }
+  footer a { color: var(--accent); }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>reversi-zero</h1>
+    <p class="sub">An agent that learned Reversi from scratch, by playing itself. <span id="model"></span></p>
+  </header>
+
+  <div class="layout">
+    <div>
+      <div class="board-frame">
+        <div class="board" id="board" role="grid" aria-label="Reversi board"></div>
+      </div>
+      <p class="hint" style="margin-top:.6rem">
+        Arrow keys move between squares, Enter plays. Dots mark your legal moves.
+      </p>
+    </div>
+
+    <div class="panel">
+      <div class="score">
+        <span class="side" id="side-black"><span class="pip b"></span><span class="n" id="n-black">2</span></span>
+        <span class="side" id="side-white"><span class="n" id="n-white">2</span><span class="pip w"></span></span>
+      </div>
+
+      <div class="status" id="status" role="status" aria-live="polite">Your move.</div>
+
+      <div>
+        <label for="difficulty">Opponent</label>
+        <select id="difficulty"></select>
+        <p class="hint" id="difficulty-note" style="margin-top:.35rem"></p>
+      </div>
+
+      <div>
+        <label for="side">You play</label>
+        <select id="side">
+          <option value="black">Black (first)</option>
+          <option value="white">White (second)</option>
+        </select>
+      </div>
+
+      <button id="pass" hidden>Pass — you have no legal move</button>
+
+      <div class="row">
+        <button id="new" class="primary">New game</button>
+        <button id="rematch">Swap sides</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Every move is checked by the server, which owns the rules. The board you see is only a view.
+    <span id="provenance"></span>
+  </footer>
+</div>
+
+<div class="toast" id="toast" role="alert" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+
+  const SIZE = 8;
+  const PASS = SIZE * SIZE;
+
+  const el = {
+    board: document.getElementById("board"),
+    status: document.getElementById("status"),
+    nBlack: document.getElementById("n-black"),
+    nWhite: document.getElementById("n-white"),
+    sideBlack: document.getElementById("side-black"),
+    sideWhite: document.getElementById("side-white"),
+    difficulty: document.getElementById("difficulty"),
+    difficultyNote: document.getElementById("difficulty-note"),
+    side: document.getElementById("side"),
+    pass: document.getElementById("pass"),
+    newGame: document.getElementById("new"),
+    rematch: document.getElementById("rematch"),
+    toast: document.getElementById("toast"),
+    model: document.getElementById("model"),
+    provenance: document.getElementById("provenance"),
+  };
+
+  let game = null;        // the last state the SERVER confirmed
+  let human = "black";
+  let busy = false;
+  let lastMove = null;
+  let cells = [];
+  let difficulties = [];
+
+  // ---- board -------------------------------------------------------
+
+  function buildBoard() {
+    el.board.replaceChildren();
+    cells = [];
+    for (let i = 0; i < SIZE * SIZE; i++) {
+      const cell = document.createElement("button");
+      cell.className = "cell";
+      cell.type = "button";
+      cell.dataset.index = String(i);
+      cell.setAttribute("role", "gridcell");
+      cell.tabIndex = -1;
+      const disc = document.createElement("span");
+      cell.appendChild(disc);
+      cell.addEventListener("click", () => play(i));
+      el.board.appendChild(cell);
+      cells.push({ cell, disc });
+    }
+    cells[0].cell.tabIndex = 0;
+  }
+
+  function squareName(i) {
+    return "abcdefgh"[i % SIZE] + (Math.floor(i / SIZE) + 1);
+  }
+
+  function bit(hex, i) {
+    // A 64-bit board as hex; read one bit without ever making it a Number.
+    const nibble = parseInt(hex[15 - Math.floor(i / 4)], 16);
+    return (nibble >> (i % 4)) & 1;
+  }
+
+  function render() {
+    if (!game) return;
+    const { black, white } = game.position;
+    const legal = new Set(game.legal);
+    const myTurn = game.position.to_move === human && !game.is_terminal;
+
+    for (let i = 0; i < SIZE * SIZE; i++) {
+      const { cell, disc } = cells[i];
+      const isBlack = bit(black, i);
+      const isWhite = bit(white, i);
+      disc.className = isBlack ? "disc b" : isWhite ? "disc w" : "";
+
+      const playable = myTurn && legal.has(i);
+      cell.classList.toggle("playable", playable);
+      cell.classList.toggle("last", lastMove === i);
+      cell.disabled = !playable;
+      cell.setAttribute(
+        "aria-label",
+        squareName(i) + ": " + (isBlack ? "black" : isWhite ? "white" : playable ? "empty, you can play here" : "empty")
+      );
+    }
+
+    el.nBlack.textContent = game.score.black;
+    el.nWhite.textContent = game.score.white;
+    el.sideBlack.classList.toggle("active", game.position.to_move === "black" && !game.is_terminal);
+    el.sideWhite.classList.toggle("active", game.position.to_move === "white" && !game.is_terminal);
+
+    el.pass.hidden = !(myTurn && game.must_pass);
+    el.pass.disabled = busy;
+  }
+
+  function setStatus(text, kind) {
+    el.status.className = "status" + (kind ? " " + kind : "");
+    el.status.innerHTML = text;
+  }
+
+  function describe() {
+    if (!game) return;
+    if (game.is_terminal) {
+      const mine = human === "black" ? game.score.black : game.score.white;
+      const theirs = human === "black" ? game.score.white : game.score.black;
+      if (game.result === "draw") return setStatus(`A draw, ${mine}–${theirs}.`);
+      const won = game.result === human;
+      return setStatus(
+        `<strong>${won ? "You win" : "You lose"}, ${mine}–${theirs}.</strong>`,
+        won ? "win" : "lose"
+      );
+    }
+    if (busy) return setStatus('<span class="spinner"></span>Thinking…');
+    if (game.position.to_move === human) {
+      return setStatus(game.must_pass ? "You have no legal move — you must pass." : "Your move.");
+    }
+    setStatus("Opponent to move.");
+  }
+
+  // ---- talking to the server ---------------------------------------
+
+  async function api(path, body) {
+    const response = await fetch("/api" + path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+      let message = "Something went wrong (" + response.status + ").";
+      if (response.status === 429) message = "The engine is busy — try again in a moment.";
+      try {
+        const detail = (await response.json()).detail;
+        if (detail && detail.error) message = detail.error;
+      } catch (ignored) { /* keep the generic message */ }
+      const error = new Error(message);
+      error.status = response.status;
+      throw error;
+    }
+    return response.json();
+  }
+
+  function toast(message) {
+    el.toast.textContent = message;
+    el.toast.hidden = false;
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => { el.toast.hidden = true; }, 4000);
+  }
+
+  function lock(on) {
+    busy = on;
+    el.newGame.disabled = on;
+    el.rematch.disabled = on;
+    el.difficulty.disabled = on;
+    el.side.disabled = on;
+    render();
+    describe();
+  }
+
+  // ---- playing -----------------------------------------------------
+
+  async function play(action) {
+    if (busy || !game || game.is_terminal) return;
+    if (game.position.to_move !== human) return;
+
+    lock(true);
+    try {
+      // The server is the authority. Whatever it returns replaces our view --
+      // we never advance the board ourselves and hope the two agree.
+      game = await api("/move", { position: game.position, action });
+      lastMove = action === PASS ? null : action;
+      render();
+      await opponentTurns();
+    } catch (error) {
+      toast(error.message);
+    } finally {
+      lock(false);
+    }
+  }
+
+  async function opponentTurns() {
+    // Loop, because the opponent may have to pass and move again.
+    while (game && !game.is_terminal && game.position.to_move !== human) {
+      describe();
+      if (game.must_pass) {
+        game = await api("/move", { position: game.position, action: PASS });
+        lastMove = null;
+        toast("Opponent had no legal move and passed.");
+        render();
+        continue;
+      }
+      const reply = await api("/ai-move", {
+        position: game.position,
+        difficulty: el.difficulty.value,
+      });
+      game = reply.state;
+      lastMove = reply.action;
+      render();
+    }
+  }
+
+  async function newGame(swap) {
+    lock(true);
+    try {
+      if (swap) human = human === "black" ? "white" : "black";
+      el.side.value = human;
+      lastMove = null;
+      game = await api("/new-game", { board_size: SIZE });
+      render();
+      await opponentTurns();
+    } catch (error) {
+      toast(error.message);
+    } finally {
+      lock(false);
+    }
+  }
+
+  // ---- keyboard ----------------------------------------------------
+
+  el.board.addEventListener("keydown", (event) => {
+    const focused = document.activeElement;
+    if (!focused || !focused.dataset || focused.dataset.index === undefined) return;
+    const index = Number(focused.dataset.index);
+    const row = Math.floor(index / SIZE);
+    const col = index % SIZE;
+    const moves = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] };
+    const delta = moves[event.key];
+    if (!delta) return;
+
+    event.preventDefault();
+    const r = Math.min(SIZE - 1, Math.max(0, row + delta[0]));
+    const c = Math.min(SIZE - 1, Math.max(0, col + delta[1]));
+    const next = cells[r * SIZE + c].cell;
+    focused.tabIndex = -1;
+    next.tabIndex = 0;
+    next.focus();
+  });
+
+  // ---- start -------------------------------------------------------
+
+  el.newGame.addEventListener("click", () => newGame(false));
+  el.rematch.addEventListener("click", () => newGame(true));
+  el.pass.addEventListener("click", () => play(PASS));
+  el.side.addEventListener("change", () => {
+    human = el.side.value;
+    newGame(false);
+  });
+  el.difficulty.addEventListener("change", () => {
+    const chosen = difficulties.find((d) => d.name === el.difficulty.value);
+    el.difficultyNote.textContent = chosen ? chosen.description : "";
+  });
+
+  (async function start() {
+    buildBoard();
+    try {
+      const health = await (await fetch("/api/health")).json();
+      difficulties = health.difficulties;
+      el.difficulty.replaceChildren(
+        ...difficulties.map((d) => {
+          const option = document.createElement("option");
+          option.value = d.name;
+          option.textContent = `${d.label} — ${d.simulations} sims`;
+          return option;
+        })
+      );
+      el.difficulty.value = "club";
+      el.difficulty.dispatchEvent(new Event("change"));
+      el.model.textContent = `Generation ${health.generation}.`;
+      el.provenance.textContent = health.git_commit ? ` Built at ${health.git_commit}.` : "";
+    } catch (error) {
+      toast("Could not reach the server.");
+    }
+    await newGame(false);
+  })();
+})();
+</script>
+</body>
+</html>
