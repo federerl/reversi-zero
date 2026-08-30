@@ -80,7 +80,19 @@ export function Board({ state, interactive, lastMove, visits, onPlay }: BoardPro
         role="grid"
         aria-label={`Reversi board, ${size} by ${size}`}
         className="grid aspect-square w-full gap-[2px] border-2 border-board-line bg-board-line"
-        style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))` }}
+        // Both axes, explicitly. Naming only the columns leaves the rows as
+        // implicit tracks, and an implicit track is sized by its content -- so a
+        // row holding a disc grew taller than an empty one and the squares
+        // stopped being square.
+        //
+        // `minmax(0, 1fr)` rather than `1fr`: a bare `1fr` is `minmax(auto, 1fr)`,
+        // whose floor is the content's minimum size, which would let a disc push
+        // its row open again on a small board. The zero floor is what keeps the
+        // grid in charge of the track sizes rather than what is sitting in them.
+        style={{
+          gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
+          gridTemplateRows: `repeat(${size}, minmax(0, 1fr))`,
+        }}
       >
         {Array.from({ length: size * size }, (_, square) => {
           const row = Math.floor(square / size);

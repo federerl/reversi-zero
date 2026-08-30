@@ -69,16 +69,27 @@ test("a whole game can be played to the end", async ({ page }) => {
   // way, which is where a rules port most often goes wrong.
   await page.getByLabel("Thinking time").selectOption("casual");
 
-  for (let move = 0; move < 70; move++) {
-    const status = await page.getByRole("status").textContent();
-    if (status?.includes("win") || status?.includes("draw")) break;
+  // The bound counts loop turns, not moves, and a turn spent waiting for the
+  // agent makes no move at all. It is generous for that reason: the agent will
+  // not answer sooner than MIN_REPLY_MS, so a tighter bound runs out of turns
+  // partway through a game and fails for a reason that has nothing to do with
+  // the rules. The loop ends when the game does.
+  for (let turn = 0; turn < 250; turn++) {
+    const status = (await page.getByRole("status").textContent()) ?? "";
+    if (/win|draw/.test(status)) break;
 
-    if (status?.includes("must pass")) {
+    // Not our move yet. Wait for it rather than burning the turn on a poll.
+    if (status.includes("Thinking")) {
+      await expect(page.getByRole("status")).not.toContainText("Thinking", { timeout: 30_000 });
+      continue;
+    }
+
+    if (status.includes("must pass")) {
       await page.getByRole("button", { name: "Pass" }).click();
     } else {
       const squares = await playableSquares(page);
       if (squares.length === 0) {
-        await page.waitForTimeout(200);
+        await page.waitForTimeout(100);
         continue;
       }
       await page.locator(`[data-square="${squares[0]}"]`).click();
