@@ -230,12 +230,15 @@ See `docs/how-the-engine-works.md`.
 
 ## Documentation
 
+* `docs/web-app.md` — **running the site, deploying it, and what "there is no server" means**
 * `docs/configuration.md` — every setting, what it does, and what breaks if you change it
 * `docs/how-the-engine-works.md` — bitboards, passing, perspective, and the eight board rotations
-* `docs/decisions/` — one file per decision that would be expensive to revisit
-* `docs/architecture.md` — layering, dependency rules, and the seven correctness contracts *(planned)*
 * `docs/training.md` — running a job, stopping one, resuming, and what a run leaves behind
-* `docs/experiments.md` — one entry per run: hypothesis, config delta, outcome, decision *(planned)*
+* `docs/experiments.md` — one entry per run: hypothesis, config delta, outcome, decision
+* `docs/decisions/` — one file per decision that would be expensive to revisit
+  * `ADR-0002` — whose point of view a number is from (the value sign)
+  * `ADR-0005` — the agent runs in the browser, not on a server
+* `docs/architecture.md` — layering, dependency rules, and the seven correctness contracts *(planned)*
 * `docs/model_card.md` — training compute, data provenance, measured strength, limitations *(planned)*
 
 ## License
