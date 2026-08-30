@@ -100,6 +100,18 @@ export default defineConfig({
   worker: { format: "es" },
 
   build: {
+    // Vite would normally clear dist/ before each build. That fights the
+    // development loop, which runs `vite build --watch` and `vite preview`
+    // together: preview serves files out of dist/ while the watch build wants to
+    // delete them, and on Windows an open handle makes the delete fail outright
+    // rather than wait. The result was a build that died with EPERM on every
+    // save.
+    //
+    // Clearing is an explicit step in the `build` script instead, so the
+    // production build stays deterministic and the watch loop stops fighting the
+    // server sitting on its output.
+    emptyOutDir: false,
+
     rollupOptions: {
       input: {
         // The app, and a benchmark page. The benchmark is a real part of the

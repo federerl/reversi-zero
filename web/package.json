@@ -5,8 +5,8 @@
   "type": "module",
   "description": "Play an agent that learned Reversi from self-play. The agent runs in your browser.",
   "scripts": {
-    "dev": "node scripts/stage-runtime.mjs && concurrently -k -n build,serve -c blue,green \"vite build --watch\" \"vite preview\"",
-    "build": "node scripts/stage-runtime.mjs && tsc --noEmit && vite build",
+    "dev": "npm run build && concurrently -k -n build,serve -c blue,green \"vite build --watch\" \"vite preview\"",
+    "build": "node scripts/stage-runtime.mjs && node scripts/clean-dist.mjs && tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
