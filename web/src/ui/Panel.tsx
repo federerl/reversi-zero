@@ -12,7 +12,11 @@
  * more interesting to read.
  */
 
+import { useId } from "react";
+
 import { LEVELS, type Level } from "../engine/levels";
+import type { ModelDescriptor } from "../engine/onnx";
+import { BLACK, WHITE, type Player } from "../engine/rules";
 
 /**
  * What to promise a player about a level.
@@ -27,8 +31,6 @@ function describeBudget(level: Level): string {
   if (level.maxMillis === undefined) return `${level.simulations} simulations`;
   return `up to ${(level.maxMillis / 1000).toFixed(1)} s per move`;
 }
-import type { ModelDescriptor } from "../engine/onnx";
-import { BLACK, WHITE, type Player } from "../engine/rules";
 
 // ---------------------------------------------------------------------------
 
@@ -90,10 +92,12 @@ export function OpponentPicker({
   disabled: boolean;
 }) {
   const selected = models.find((model) => model.id === value);
+  const id = useId();
 
   return (
-    <Field label="Opponent" hint={selected?.note}>
+    <Field label="Opponent" htmlFor={id} hint={selected?.note}>
       <select
+        id={id}
         value={value}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
@@ -127,10 +131,12 @@ export function LevelPicker({
   disabled: boolean;
 }) {
   const selected = LEVELS.find((level) => level.id === value);
+  const id = useId();
 
   return (
-    <Field label="Thinking time" hint={selected?.description}>
+    <Field label="Thinking time" htmlFor={id} hint={selected?.description}>
       <select
+        id={id}
         value={value}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
@@ -155,9 +161,12 @@ export function SidePicker({
   onChange: (player: Player) => void;
   disabled: boolean;
 }) {
+  const id = useId();
+
   return (
-    <Field label="You play">
+    <Field label="You play" htmlFor={id}>
       <select
+        id={id}
         value={value === BLACK ? "black" : "white"}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value === "black" ? BLACK : WHITE)}
@@ -170,18 +179,32 @@ export function SidePicker({
   );
 }
 
+/**
+ * A labelled control.
+ *
+ * The label is tied to its control by id rather than merely sitting above it.
+ * Without that the two are unrelated as far as assistive technology is
+ * concerned: a screen reader announces an unlabelled combo box, and clicking
+ * the word "Opponent" does nothing. The child is cloned to receive the id
+ * because that keeps every caller from having to invent one.
+ */
 function Field({
   label,
+  htmlFor,
   hint,
   children,
 }: {
   label: string;
+  htmlFor: string;
   hint?: string | undefined;
   children: React.ReactNode;
 }) {
   return (
     <div>
-      <label className="mb-1 block text-[0.7rem] font-semibold uppercase tracking-wider text-muted">
+      <label
+        htmlFor={htmlFor}
+        className="mb-1 block text-[0.7rem] font-semibold uppercase tracking-wider text-muted"
+      >
         {label}
       </label>
       {children}

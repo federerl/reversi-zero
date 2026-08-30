@@ -119,6 +119,7 @@ export function Board({ state, interactive, lastMove, visits, onPlay }: BoardPro
               {(hasBlack || hasWhite) && (
                 <span
                   aria-hidden="true"
+                  data-disc={hasBlack ? "black" : "white"}
                   className={[
                     "relative aspect-square w-4/5 rounded-full transition-colors duration-200",
                     "shadow-[0_1px_2px_rgba(0,0,0,.45)]",
