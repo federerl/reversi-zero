@@ -82,9 +82,14 @@ def test_asking_for_impossible_openings_says_so() -> None:
 
     Failing loudly beats looping forever, and beats silently returning fewer
     openings than were asked for.
+
+    Only 12 usable two-ply openings exist on 4x4, so 60 is already impossible.
+    Asking for more does not make the test stronger, only slower: the generator
+    tries `count * 100` times before giving up, so a large `count` spends
+    hundreds of thousands of attempts re-proving what 6,000 already showed.
     """
     with pytest.raises(ArenaError, match="only found"):
-        random_openings(count=5000, board_size=4, seed=1, plies=2)
+        random_openings(count=60, board_size=4, seed=1, plies=2)
 
 
 def test_nonsense_requests_are_refused() -> None:
