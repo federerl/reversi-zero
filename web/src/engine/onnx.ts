@@ -20,7 +20,13 @@
  * side checks that the bytes arrived intact.
  */
 
-import * as ort from "onnxruntime-web";
+// The `wasm` entry point rather than the default one. The default pulls in the
+// WebGPU-capable build, whose binary is 27.8 MB (6.7 MB compressed) against
+// 14 MB (3.6 MB) for this one -- and the site does not use WebGPU. For a network
+// this small, dispatching each operation to the GPU generally costs more than
+// the arithmetic it saves, so paying twice the download for it would be
+// backwards.
+import * as ort from "onnxruntime-web/wasm";
 
 import { encodeBatch, IN_PLANES } from "./features";
 import type { Evaluator } from "./mcts";
@@ -44,18 +50,31 @@ export class ModelError extends Error {}
 /**
  * Load a network and return something the search can ask questions of.
  *
- * `wasmPaths` points the runtime at its own `.wasm` files. Without it the
- * runtime guesses a CDN URL, which fails under the cross-origin isolation the
- * site sets -- and fails at the first search rather than at load, which is a
- * much worse place to find out.
+ * Loading is where a browser without WebAssembly finds out, which is why the
+ * failure here names the cause rather than letting an opaque error surface at
+ * the first move.
  */
 export async function loadModel(descriptor: ModelDescriptor): Promise<OnnxEvaluator> {
+  // Point the runtime at its own files rather than letting the bundler place
+  // them. With threads the runtime starts workers from a sibling `.mjs`, and a
+  // bundler that has content-hashed and moved that file leaves the worker
+  // unable to find it -- which hangs at load with no error at all.
   ort.env.wasm.wasmPaths = "/ort/";
 
-  // One thread. The network is small enough that the cost of coordinating
-  // several would outweigh the work being shared, and single-threaded needs no
-  // cross-origin isolation to run at all.
-  ort.env.wasm.numThreads = 1;
+  // Threads, when the page is allowed to have them.
+  //
+  // Measured on this network: throughput is flat across batch sizes, which
+  // means the cost is arithmetic rather than the overhead of calling into
+  // WebAssembly -- so batching search leaves buys nothing and more cores is the
+  // only lever. `crossOriginIsolated` is false unless the site sends the two
+  // cross-origin headers, and asking for threads without it fails rather than
+  // degrading, so the count is chosen from what the page actually has.
+  //
+  // Four rather than all of them: a search should leave the machine usable, and
+  // the returns past four on a network this small are small.
+  ort.env.wasm.numThreads = globalThis.crossOriginIsolated
+    ? Math.max(1, Math.min(4, navigator.hardwareConcurrency ?? 1))
+    : 1;
   ort.env.logLevel = "error";
 
   let session: ort.InferenceSession;

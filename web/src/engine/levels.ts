@@ -35,6 +35,19 @@ export interface Level {
   readonly topK?: number;
   /** Discard candidates whose value is worse than the best by more than this. */
   readonly guard: number;
+  /**
+   * Stop searching after this long, whatever the simulation count says.
+   *
+   * Measured in a browser on a 20-core laptop at four threads: 16 simulations
+   * takes 55 ms, 64 takes 221 ms, 256 takes 898 ms and 800 takes 2.8 seconds.
+   * The last of those is past the point where a move reads as thinking rather
+   * than as a hang, and a phone would be several times slower again.
+   *
+   * So the deep levels are capped by time. The count becomes a ceiling and the
+   * clock decides, which means the same level feels the same everywhere and
+   * gets stronger on better hardware instead of slower on worse.
+   */
+  readonly maxMillis?: number;
   readonly description: string;
 }
 
@@ -63,7 +76,8 @@ export const LEVELS: readonly Level[] = [
     simulations: 256,
     temperature: 0,
     guard: 0.05,
-    description: "Plays its best move every time.",
+    maxMillis: 1200,
+    description: "Plays its best move every time. About a second per move.",
   },
   {
     id: "max",
@@ -71,7 +85,9 @@ export const LEVELS: readonly Level[] = [
     simulations: 800,
     temperature: 0,
     guard: 0,
-    description: "The full search budget. Takes about a second per move.",
+    maxMillis: 2000,
+    description:
+      "Thinks for up to two seconds, and searches as far as your device allows in that time.",
   },
 ];
 

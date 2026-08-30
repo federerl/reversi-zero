@@ -36,6 +36,22 @@ export interface SearchConfig {
   readonly cPuct: number;
   /** How pessimistic to be about a move nobody has tried yet. */
   readonly fpuReduction: number;
+  /**
+   * Stop after this many milliseconds even if the simulation budget is unspent.
+   *
+   * A fixed simulation count is a fixed amount of *work*, not a fixed amount of
+   * *waiting*, and the two differ by more than an order of magnitude across the
+   * devices this runs on. Measured on a 20-core laptop, 800 simulations takes
+   * 2.8 seconds; on a phone it would be far worse, and a move that takes ten
+   * seconds reads as a crash rather than as thinking.
+   *
+   * Capping by time makes the top difficulty mean "think hard for about this
+   * long", which is what a player actually cares about, and it degrades on slow
+   * hardware by searching less rather than by hanging. How many simulations it
+   * actually managed comes back in the result, so the interface can say so
+   * rather than claiming a number it did not reach.
+   */
+  readonly maxMillis?: number;
 }
 
 export const DEFAULT_CONFIG: SearchConfig = {
@@ -65,6 +81,10 @@ export interface SearchResult {
   /** The network's own opinion of the root, before any searching. */
   readonly rootValue: number;
   readonly boardSize: number;
+  /** Simulations actually run, which a time budget may cut short. */
+  readonly simulations: number;
+  /** True when the time budget stopped the search before its count was spent. */
+  readonly cutShort: boolean;
 }
 
 /**
@@ -191,10 +211,19 @@ export class MCTS {
     const root = new Node(state);
     await this.expand(root);
 
+    const deadline =
+      this.config.maxMillis === undefined ? Infinity : performance.now() + this.config.maxMillis;
+
+    let ran = 0;
     for (let i = 0; i < this.config.nSimulations; i++) {
       if (signal?.aborted) break;
+      // Checked before the simulation rather than after, so the budget is a
+      // ceiling on how long a player waits rather than a ceiling plus one more
+      // simulation. At the top level one simulation is several milliseconds.
+      if (performance.now() >= deadline) break;
       const { leaf, path } = this.descend(root);
       backup(path, await this.leafValue(leaf));
+      ran++;
     }
 
     return {
@@ -203,6 +232,8 @@ export class MCTS {
       qValues: root.actions.map((_, index) => root.q(index)),
       rootValue: root.netValue,
       boardSize: state.size,
+      simulations: ran,
+      cutShort: ran < this.config.nSimulations && !signal?.aborted,
     };
   }
 
