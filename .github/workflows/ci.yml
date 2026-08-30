@@ -38,9 +38,10 @@ jobs:
 
       - name: Sync (CPU torch)
         # --extra obs brings matplotlib, which scripts/make_plots.py imports.
-        # pyright checks scripts/, so without it the type job fails on an
-        # import the code legitimately needs.
-        run: uv sync --extra cpu --extra dev --extra api --extra obs
+        # --extra web brings onnxruntime, which nn/onnx.py and web/fixtures.py
+        # import. pyright checks both, so without them the type job fails on
+        # imports the code legitimately needs rather than on a real problem.
+        run: uv sync --extra cpu --extra dev --extra api --extra obs --extra web
 
       - name: ruff check
         run: uv run ruff check .

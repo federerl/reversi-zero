@@ -53,6 +53,11 @@ api = [
 web = [
     "onnx>=1.16",
     "onnxruntime>=1.18",
+    # torch's current `onnx.export` goes through its dynamo path, which imports
+    # onnxscript. Whether it is needed depends on the torch version, and the
+    # `cpu` and `cu124` extras resolve different ones -- so it is missing exactly
+    # where the newer torch is, which is CI rather than this laptop.
+    "onnxscript>=0.1",
 ]
 
 # --- development ------------------------------------------------------------
