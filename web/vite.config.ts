@@ -1,6 +1,8 @@
+import { createReadStream, existsSync } from "node:fs";
+import { basename } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
@@ -44,12 +46,55 @@ function dropUnusedRuntimeBinary() {
   };
 }
 
-export default defineConfig({
-  plugins: [react(), tailwindcss(), dropUnusedRuntimeBinary()],
+/**
+ * Serve the ONNX runtime's own files byte for byte in development.
+ *
+ * The runtime loads its worker module with a dynamic `import()`. Vite's dev
+ * server rewrites dynamic imports and appends `?import`, then tries to run the
+ * result through its transform pipeline -- but these are prebuilt files in
+ * `public/`, not source, and the transform fails:
+ *
+ *     Failed to fetch dynamically imported module:
+ *     /ort/ort-wasm-simd-threaded.mjs?import
+ *
+ * On the page that surfaces as "no available backend found". Inside the search
+ * worker it does not surface at all: the page sits at "Loading the agent…"
+ * forever with nothing in the console.
+ *
+ * None of this happens in a production build, because a static file server has
+ * no transform pipeline -- which is exactly why it went unnoticed. `preview`
+ * and the Playwright suite were fine the whole time.
+ */
+function serveRuntimeVerbatim(): Plugin {
+  return {
+    name: "serve-ort-verbatim",
+    configureServer(server) {
+      server.middlewares.use((request, response, next) => {
+        const url = request.url ?? "";
+        if (!url.startsWith("/ort/")) return next();
 
-  // onnxruntime-web ships .wasm files that must be served, not bundled into a
-  // JavaScript chunk. Excluding it from dependency pre-bundling is what keeps
-  // the bundler treating them as assets.
+        // basename only: this reads from a directory decided here, never from
+        // a path a request can steer.
+        const name = basename(url.split("?")[0] ?? "");
+        const file = fileURLToPath(new URL(`./public/ort/${name}`, import.meta.url));
+        if (!existsSync(file)) return next();
+
+        response.setHeader(
+          "Content-Type",
+          name.endsWith(".wasm") ? "application/wasm" : "text/javascript",
+        );
+        createReadStream(file).pipe(response);
+      });
+    },
+  };
+}
+
+export default defineConfig({
+  plugins: [react(), tailwindcss(), serveRuntimeVerbatim(), dropUnusedRuntimeBinary()],
+
+  // The runtime is excluded from dependency pre-bundling: its .wasm and worker
+  // module are fetched by URL from /ort/ (see serveRuntimeVerbatim above), not
+  // imported as source, and pre-bundling them only gets in the way.
   optimizeDeps: { exclude: ["onnxruntime-web"] },
 
   worker: { format: "es" },

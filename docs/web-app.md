@@ -69,21 +69,31 @@ play an agent that none of the measurements in this repository describe.
 ```bash
 cd web
 npm ci          # once, after cloning
-npm run dev     # http://localhost:5173 — reloads as you edit
+npm run dev     # http://localhost:4173 — rebuilds when you save
 ```
 
-To run the thing that actually gets deployed rather than the development
-version:
+`npm run dev` runs `vite build --watch` alongside `vite preview`, rather than the
+Vite dev server. Save a file and it rebuilds in about half a second; refresh to
+see it. There is no hot module replacement.
 
-```bash
-npm run build
-npm run preview # http://localhost:4173
-```
+**Why not the normal dev server.** `vite` in dev transforms every module it
+serves, and `onnxruntime-web` loads its own worker module with a dynamic
+`import()`. Vite rewrites that import, appends `?import`, and then tries to
+transform a prebuilt runtime file as if it were application source. The result
+is that `InferenceSession.create` never settles: the page sits at "Loading the
+agent…" forever with an empty console and no error to catch.
 
-Prefer `preview` when you are checking whether something works, and `dev` when
-you are changing code. The distinction is not pedantry here: the bundler moves
-and renames the ONNX runtime's files, and "works in development, hangs at load
-in production" has already happened once in this project.
+A build served statically has no transform pipeline, so none of it happens.
+That is why `dev` is wired this way, and it has a useful side effect — what you
+develop against is byte-for-byte what gets deployed.
+
+`npm run dev:vite` still starts the real dev server if you want hot reloading
+for pure layout or styling work. **The board will not work under it.** The
+engine cannot load, so expect "Loading the agent…" and nothing else.
+
+This is a known limitation rather than a solved problem. Fixing it properly
+means either getting Vite to leave `/ort/` alone in dev entirely, or having the
+runtime load its worker some other way.
 
 ### The tests
 
@@ -355,11 +365,17 @@ disk. Serve it over HTTP: `npm run dev` or `npm run preview`.
 `web/public/models/` against the URLs in `web/src/engine/models.json`. If it is
 present, open the network tab: a 404 there is the answer.
 
-**It hangs at load with an empty console.** This is the threading failure. The
-runtime starts its worker threads from a sibling `.mjs`, and if the bundler has
-renamed or moved that file the worker cannot find it and nothing reports the
-problem. `src/engine/onnx.ts` sets `wasmPaths` to a fixed directory and
-`scripts/stage-runtime.mjs` fills it; if you change either, change both.
+**It hangs at "Loading the agent…" with an empty console.** Two causes, and they
+look identical.
+
+*You are on `npm run dev:vite`.* The Vite dev server cannot serve the ONNX
+runtime — see "Every time" above. Use `npm run dev`.
+
+*Otherwise, it is the threading path.* The runtime starts its worker threads from
+a sibling `.mjs`, and if the bundler has renamed or moved that file the worker
+cannot find it and nothing reports the problem. `src/engine/onnx.ts` sets
+`wasmPaths` to a fixed directory and `scripts/stage-runtime.mjs` fills it; if you
+change either, change both.
 
 **Every move takes twice as long as the table above.** Cross-origin isolation is
 off, so the runtime fell back to one thread. Check `crossOriginIsolated` in the
