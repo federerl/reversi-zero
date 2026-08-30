@@ -48,6 +48,36 @@ export interface ModelDescriptor {
 export class ModelError extends Error {}
 
 /**
+ * How long to wait for the runtime to come up before calling it a failure.
+ *
+ * Generous, because it covers a cold download of the network over a slow
+ * connection as well as compiling it. The point is not to be strict; it is that
+ * this path has failed *silently* more than once -- a promise that never settles
+ * leaves the page saying "Loading the agent…" forever, with nothing in the
+ * console and nothing to catch.
+ *
+ * A visitor whose connection drops mid-download deserves to be told, and so does
+ * a test.
+ */
+const LOAD_TIMEOUT_MS = 60_000;
+
+function withDeadline<T>(work: Promise<T>, ms: number, message: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new ModelError(message)), ms);
+    work.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error: unknown) => {
+        clearTimeout(timer);
+        reject(error instanceof Error ? error : new ModelError(String(error)));
+      },
+    );
+  });
+}
+
+/**
  * Load a network and return something the search can ask questions of.
  *
  * Loading is where a browser without WebAssembly finds out, which is why the
@@ -79,10 +109,14 @@ export async function loadModel(descriptor: ModelDescriptor): Promise<OnnxEvalua
 
   let session: ort.InferenceSession;
   try {
-    session = await ort.InferenceSession.create(descriptor.url, {
-      executionProviders: ["wasm"],
-      graphOptimizationLevel: "all",
-    });
+    session = await withDeadline(
+      ort.InferenceSession.create(descriptor.url, {
+        executionProviders: ["wasm"],
+        graphOptimizationLevel: "all",
+      }),
+      LOAD_TIMEOUT_MS,
+      `loading ${descriptor.label} took longer than ${LOAD_TIMEOUT_MS / 1000}s`,
+    );
   } catch (cause) {
     throw new ModelError(
       `could not load the network for ${descriptor.label} from ${descriptor.url}. ` +

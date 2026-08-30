@@ -28,7 +28,21 @@ async function discCount(page: Page): Promise<number> {
   return page.locator("[data-square] span[data-disc]").count();
 }
 
+const consoleLog: string[] = [];
+
 test.beforeEach(async ({ page }) => {
+  // A failure in the engine surfaces as a toast, a console error, or -- the
+  // worst case, and one this project has hit repeatedly -- as nothing at all.
+  // Collecting these means a failure in CI reports a cause rather than just a
+  // timeout on some unrelated assertion.
+  consoleLog.length = 0;
+  page.on("console", (message) => {
+    if (message.type() === "error" || message.type() === "warning") {
+      consoleLog.push(`[${message.type()}] ${message.text()}`);
+    }
+  });
+  page.on("pageerror", (error) => consoleLog.push(`[pageerror] ${error.message}`));
+
   await page.goto("/");
   // Loading a network is a download plus a compile; the status line says so
   // until it is ready, and clicking before then would be testing nothing.
@@ -59,12 +73,19 @@ test("a network opponent searches, and says how much", async ({ page }) => {
   // The default opponent is a baseline, which runs no search. Picking a
   // generation is what exercises the network path -- and the simulation count in
   // the move report is the visible evidence that it ran.
+  //
+  // This is the only test that downloads and runs the network, so it is the only
+  // one that can catch a broken ONNX path. On a slow shared runner that means a
+  // download, a compile and a search, none of which are quick -- hence the
+  // long waits and test.slow().
+  test.slow();
+
   await page.getByLabel("Opponent").selectOption("gen05");
-  await expect(page.getByRole("status")).toContainText("Your move.", { timeout: 60_000 });
+  await expect(page.getByRole("status")).toContainText("Your move.", { timeout: 90_000 });
 
   await expect(page.getByLabel("Thinking time")).toBeVisible();
   await page.locator('[data-square="19"]').click();
-  await expect(page.getByRole("status")).toContainText("Your move.", { timeout: 30_000 });
+  await expect(page.getByRole("status")).toContainText("Your move.", { timeout: 90_000 });
 
   await expect(page.getByText(/played \w+\d · \d+ sims · \d+ ms/)).toBeVisible();
   // A network has an opinion about who is winning; the bar shows it.
