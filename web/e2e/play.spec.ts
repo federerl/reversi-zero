@@ -129,8 +129,26 @@ test("a whole game can be played to the end", async ({ page }) => {
   }
 
   // A finished game says who won and by how much.
-  await expect(page.getByRole("status")).toContainText(/win|draw/, { timeout: 30_000 });
-  expect(await discCount(page)).toBeGreaterThan(50);
+  const final = (await page.getByRole("status").textContent()) ?? "";
+  expect(final).toMatch(/win|draw/);
+
+  // The score it reports has to be the position on the board.
+  //
+  // Not "the board is nearly full", which is what this asserted first and is
+  // simply not true of Reversi: a game ends as soon as *neither* side has a
+  // legal move, which can happen with plenty of squares still empty. It failed
+  // here on a perfectly valid 38-disc game.
+  //
+  // Agreement between the reported score and the discs actually on the board is
+  // both true of every game and a much better check -- it ties the status line,
+  // the reducer and the rules engine together at the end of a real sequence of
+  // moves.
+  const counts = [...final.matchAll(/(\d+)/g)].map((m) => Number(m[1]));
+  expect(counts.length).toBeGreaterThanOrEqual(2);
+  expect(counts[0]! + counts[1]!).toBe(await discCount(page));
+
+  // And it was a real game rather than a two-move accident.
+  expect(await discCount(page)).toBeGreaterThan(20);
 });
 
 test("taking a move back returns the board to the player", async ({ page }) => {
