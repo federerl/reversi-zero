@@ -10,3 +10,4 @@ public/models/
 
 # Copied from node_modules at build time by scripts/stage-assets.mjs.
 public/ort/
+node_modules/.cache/

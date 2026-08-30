@@ -73,8 +73,14 @@ npm run dev     # http://localhost:4173 — rebuilds when you save
 ```
 
 `npm run dev` runs `vite build --watch` alongside `vite preview`, rather than the
-Vite dev server. Save a file and it rebuilds in about half a second; refresh to
-see it. There is no hot module replacement.
+Vite dev server. **It builds first** -- about two seconds -- then watches. Save a
+file and it rebuilds in roughly half a second; refresh to see it. There is no hot
+module replacement.
+
+It does not type check on the way, deliberately: your editor already reports type
+errors as you type, and a check standing between you and a running page is not a
+trade worth making. `npm run build` does check, and so does CI, so nothing
+untyped reaches a deploy. Run `npm run typecheck` yourself any time.
 
 **Why not the normal dev server.** `vite` in dev transforms every module it
 serves, and `onnxruntime-web` loads its own worker module with a dynamic

@@ -5,15 +5,16 @@
   "type": "module",
   "description": "Play an agent that learned Reversi from self-play. The agent runs in your browser.",
   "scripts": {
-    "dev": "npm run build && concurrently -k -n build,serve -c blue,green \"vite build --watch\" \"vite preview\"",
-    "build": "node scripts/stage-runtime.mjs && node scripts/clean-dist.mjs && tsc --noEmit && vite build",
+    "dev": "npm run build:app && concurrently -k -n build,serve -c blue,green \"vite build --watch\" \"vite preview\"",
+    "build": "tsc --noEmit && npm run build:app",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
     "stage-runtime": "node scripts/stage-runtime.mjs",
-    "dev:vite": "node scripts/stage-runtime.mjs && vite"
+    "dev:vite": "node scripts/stage-runtime.mjs && vite",
+    "build:app": "node scripts/stage-runtime.mjs && node scripts/clean-dist.mjs && vite build"
   },
   "dependencies": {
     "onnxruntime-web": "^1.20.0",
