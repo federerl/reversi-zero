@@ -1,0 +1,236 @@
+{
+  "kind": "difficulty_calibration",
+  "report_version": 1,
+  "created_utc": "2026-08-31T12:45:32+00:00",
+  "model": "reversi-8x8-gen60.pt",
+  "levels": [
+    "casual",
+    "club",
+    "strong",
+    "max"
+  ],
+  "passed": true,
+  "checks": {
+    "monotonic": {
+      "passed": true,
+      "detail": "casual 431 < club 623 < strong 891 < max 1053"
+    },
+    "adjacent_gap": {
+      "passed": true,
+      "detail": "casual->club +192, club->strong +267, strong->max +163  (need >= 80)",
+      "gaps": [
+        192.3,
+        267.3,
+        162.7
+      ]
+    },
+    "intervals_disjoint": {
+      "passed": true,
+      "detail": "every adjacent pair is separated"
+    },
+    "easiest_beats_random": {
+      "passed": true,
+      "detail": "casual scored 293.4/300 vs random = 97.8% (95% lower bound 95.4%, need > 60%)"
+    },
+    "guardrail": {
+      "passed": true,
+      "detail": "casual: 500 moves, worst drop 0.326 against a guardrail of 0.35, 0 violation(s)"
+    }
+  },
+  "guardrail": {
+    "level": "casual",
+    "guard": 0.35,
+    "samples": 500,
+    "worst_drop": 0.3258,
+    "violations": 0
+  },
+  "ratings": [
+    {
+      "name": "max",
+      "elo": 1053.3,
+      "ci_low": 1000.9,
+      "ci_high": 1114.5,
+      "games": 1800
+    },
+    {
+      "name": "strong",
+      "elo": 890.6,
+      "ci_low": 844.6,
+      "ci_high": 942.9,
+      "games": 1800
+    },
+    {
+      "name": "club",
+      "elo": 623.3,
+      "ci_low": 587.9,
+      "ci_high": 663.8,
+      "games": 1800
+    },
+    {
+      "name": "casual",
+      "elo": 431.0,
+      "ci_low": 400.1,
+      "ci_high": 464.7,
+      "games": 1800
+    },
+    {
+      "name": "minimax-d4",
+      "elo": 358.3,
+      "ci_low": 331.0,
+      "ci_high": 389.0,
+      "games": 1800
+    },
+    {
+      "name": "greedy",
+      "elo": 262.4,
+      "ci_low": 227.4,
+      "ci_high": 299.1,
+      "games": 1800
+    },
+    {
+      "name": "random",
+      "elo": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "games": 1800
+    }
+  ],
+  "pairings": [
+    {
+      "a": "casual",
+      "b": "club",
+      "score_a": 27.0,
+      "games": 300
+    },
+    {
+      "a": "casual",
+      "b": "strong",
+      "score_a": 2.4,
+      "games": 300
+    },
+    {
+      "a": "casual",
+      "b": "max",
+      "score_a": 3.6,
+      "games": 300
+    },
+    {
+      "a": "casual",
+      "b": "random",
+      "score_a": 293.4,
+      "games": 300
+    },
+    {
+      "a": "casual",
+      "b": "greedy",
+      "score_a": 194.1,
+      "games": 300
+    },
+    {
+      "a": "casual",
+      "b": "minimax-d4",
+      "score_a": 257.4,
+      "games": 300
+    },
+    {
+      "a": "club",
+      "b": "strong",
+      "score_a": 25.5,
+      "games": 300
+    },
+    {
+      "a": "club",
+      "b": "max",
+      "score_a": 5.1,
+      "games": 300
+    },
+    {
+      "a": "club",
+      "b": "random",
+      "score_a": 300.0,
+      "games": 300
+    },
+    {
+      "a": "club",
+      "b": "greedy",
+      "score_a": 218.1,
+      "games": 300
+    },
+    {
+      "a": "club",
+      "b": "minimax-d4",
+      "score_a": 285.0,
+      "games": 300
+    },
+    {
+      "a": "strong",
+      "b": "max",
+      "score_a": 67.5,
+      "games": 300
+    },
+    {
+      "a": "strong",
+      "b": "random",
+      "score_a": 297.9,
+      "games": 300
+    },
+    {
+      "a": "strong",
+      "b": "greedy",
+      "score_a": 255.0,
+      "games": 300
+    },
+    {
+      "a": "strong",
+      "b": "minimax-d4",
+      "score_a": 296.1,
+      "games": 300
+    },
+    {
+      "a": "max",
+      "b": "random",
+      "score_a": 299.1,
+      "games": 300
+    },
+    {
+      "a": "max",
+      "b": "greedy",
+      "score_a": 254.1,
+      "games": 300
+    },
+    {
+      "a": "max",
+      "b": "minimax-d4",
+      "score_a": 297.9,
+      "games": 300
+    },
+    {
+      "a": "random",
+      "b": "greedy",
+      "score_a": 108.6,
+      "games": 300
+    },
+    {
+      "a": "random",
+      "b": "minimax-d4",
+      "score_a": 3.6,
+      "games": 300
+    },
+    {
+      "a": "greedy",
+      "b": "minimax-d4",
+      "score_a": 12.0,
+      "games": 300
+    }
+  ],
+  "protocol": {
+    "board_size": 8,
+    "games_per_pair": 300,
+    "opening_plies": 4,
+    "seed": 20260830,
+    "anchor": "random",
+    "dirichlet_eps": 0.0,
+    "note": "ratings refitted from the run's logged pairing scores; the run played all 21 pairings then failed while building its report"
+  },
+  "elapsed_s": 21195.0
+}

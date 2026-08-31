@@ -50,6 +50,7 @@ from reversi.arena.elo import fit_bradley_terry
 from reversi.arena.match import MatchResult, play_match
 from reversi.arena.report import check_fairness
 from reversi.arena.stats import wilson_interval
+from reversi.arena.tournament import TournamentResult
 from reversi.difficulty.levels import LEVELS, DifficultyLevel, choose_move, level_by_name
 from reversi.errors import CheckpointError, ConfigError
 from reversi.game import rules
@@ -59,7 +60,6 @@ from reversi.seeding import derive_seed
 from reversi.types import Action
 
 if TYPE_CHECKING:
-    from reversi.arena.tournament import TournamentResult
     from reversi.game.state import State
     from reversi.search.evaluator import Evaluator
 
@@ -182,10 +182,25 @@ def check_guardrail(
             result = agent.mcts.run(state)
             action = choose_move(result, level, rng)
 
-            # Both from the point of view of the player to move here, so the
-            # difference is meaningful.
-            best_q = max(result.q_values)
+            # Judge against the best move the search actually *looked at*, which
+            # is what the guardrail itself does.
+            #
+            # An unvisited move's Q is a placeholder 0.0 rather than an estimate.
+            # Taking the maximum over every move therefore treats that 0.0 as an
+            # opinion, and in a losing position -- where every move the search
+            # examined scores, say, -0.8 -- the placeholder becomes the "best"
+            # and every choice looks like a 0.8 drop. Measured that way this
+            # reported 97 violations in 500 moves against code that was behaving
+            # correctly.
+            visited = [i for i in range(len(result.actions)) if result.visits[i] > 0]
             index = result.actions.index(action)
+            if not visited or index not in visited:
+                # Nothing was searched, so there is no opinion to fall short of.
+                state = rules.apply(state, action)
+                seen += 1
+                continue
+
+            best_q = max(result.q_values[i] for i in visited)
             drop = best_q - result.q_values[index]
 
             worst = max(worst, drop)

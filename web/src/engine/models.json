@@ -1,5 +1,39 @@
 {
   "manifest_version": 1,
+  "levels": [
+    {
+      "id": "casual",
+      "elo": 431.0,
+      "eloInterval": [
+        400.1,
+        464.7
+      ]
+    },
+    {
+      "id": "club",
+      "elo": 623.3,
+      "eloInterval": [
+        587.9,
+        663.8
+      ]
+    },
+    {
+      "id": "strong",
+      "elo": 890.6,
+      "eloInterval": [
+        844.6,
+        942.9
+      ]
+    },
+    {
+      "id": "max",
+      "elo": 1053.3,
+      "eloInterval": [
+        1000.9,
+        1114.5
+      ]
+    }
+  ],
   "board_size": 8,
   "run_id": null,
   "rating_anchor": "random = 0",

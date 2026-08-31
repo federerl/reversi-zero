@@ -20,11 +20,14 @@ confidence intervals and Bradley–Terry ratings, never by pointing at a trainin
 > machine to run it, the site hands a copy to each visitor. It is a static site: nothing to keep
 > awake, nothing to overwhelm, no request that carries your game anywhere. See *Play it* below.
 >
-> **Two things are honestly not done.** The four difficulty levels have never been measured against
-> each other, so their separation is designed rather than demonstrated (criterion S15). And the
-> agent's weakness against the *greedy* baseline — it beats depth-4 minimax 100% of the time but
-> greedy only 63% — is a real non-transitivity that `docs/experiments.md` records and explains but
-> does not yet fix.
+> **The difficulty ladder is measured too.** Casual, Club, Strong and Max rate **+431, +623,
+> +891 and +1053** over 21 pairings of 300 games — gaps of +192, +267 and +163 against a
+> requirement of 80, with no adjacent intervals overlapping. All from one checkpoint, so the
+> separation is a property of the method rather than of four different networks (criterion S15).
+>
+> **One thing is honestly not fixed.** The agent beats depth-4 minimax 100% of the time but greedy
+> only 63% — a real non-transitivity that `docs/experiments.md` records and explains but does not
+> resolve.
 
 ## Quickstart
 

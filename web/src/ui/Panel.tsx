@@ -15,8 +15,11 @@
 import { useId } from "react";
 
 import { LEVELS, type Level } from "../engine/levels";
+import modelsManifest from "../engine/models.json";
 import type { ModelDescriptor } from "../engine/onnx";
 import { BLACK, WHITE, type Player } from "../engine/rules";
+
+const LEVEL_RATINGS = modelsManifest.levels ?? [];
 
 /**
  * What to promise a player about a level.
@@ -30,6 +33,20 @@ import { BLACK, WHITE, type Player } from "../engine/rules";
 function describeBudget(level: Level): string {
   if (level.maxMillis === undefined) return `${level.simulations} simulations`;
   return `up to ${(level.maxMillis / 1000).toFixed(1)} s per move`;
+}
+
+/**
+ * A level's measured rating, if it has one.
+ *
+ * From the calibration report, never typed here. Before that report existed
+ * these four labels asserted that moving up gets you a harder game -- which was
+ * reasonable and was not evidence. Reading the numbers from the file that
+ * measured them means the interface cannot claim a separation nobody checked.
+ */
+function ratingFor(id: string): { elo: number; interval: [number, number] } | undefined {
+  const found = (LEVEL_RATINGS as Array<{ id: string; elo: number; eloInterval: [number, number] }>)
+    .find((entry) => entry.id === id);
+  return found ? { elo: found.elo, interval: found.eloInterval } : undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -131,6 +148,7 @@ export function LevelPicker({
   disabled: boolean;
 }) {
   const selected = LEVELS.find((level) => level.id === value);
+  const selectedRating = ratingFor(value);
   const id = useId();
 
   return (
@@ -142,12 +160,23 @@ export function LevelPicker({
         onChange={(event) => onChange(event.target.value)}
         className="w-full rounded border border-line bg-surface px-2 py-1.5 text-sm text-ink disabled:opacity-50"
       >
-        {LEVELS.map((level) => (
-          <option key={level.id} value={level.id}>
-            {level.label} — {describeBudget(level)}
-          </option>
-        ))}
+        {LEVELS.map((level) => {
+          const rated = ratingFor(level.id);
+          return (
+            <option key={level.id} value={level.id}>
+              {level.label}
+              {rated ? ` — ${Math.round(rated.elo)} Elo` : ""} · {describeBudget(level)}
+            </option>
+          );
+        })}
       </select>
+
+      {selectedRating && (
+        <p className="mt-1 font-mono text-[0.7rem] text-muted tabular-nums">
+          95% interval {Math.round(selectedRating.interval[0])}–
+          {Math.round(selectedRating.interval[1])}, random play = 0
+        </p>
+      )}
     </Field>
   );
 }

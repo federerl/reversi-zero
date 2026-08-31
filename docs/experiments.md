@@ -156,3 +156,83 @@ same seed, so the comparison is clean.
 run 2 beats generation 60 of run 1 with non-overlapping intervals, the weight was
 the constraint. If the value loss stays at 0.64, it is either capacity or
 irreducible noise, and the next test is a wider value head.
+
+
+---
+
+## Calibration: are the four difficulty levels actually different opponents?
+
+**Run:** 2026-08-31, `models/reversi-8x8-gen60.pt`, 21 pairings × 300 games,
+8 CPU workers, 5.9 hours. Evidence: `docs/difficulty_calibration.json`.
+
+**Question.** The interface offers Casual, Club, Strong and Max. Those labels
+promise that moving up a rung gets you a harder game. The promise rested on an
+argument — more search should play better — rather than on a measurement, which
+is the one user-facing claim in this project still doing that.
+
+**Setup.** One checkpoint, four levels, differing only in how much they search
+and how they choose. Rated against each other and against the three frozen
+baselines, all in a single Bradley–Terry fit anchored at random play = 0.
+Colour-balanced with a seeded 4-ply opening book, no exploration noise.
+
+Using **one** network is the point. If the rungs separate, the separation comes
+from the method rather than from four different models.
+
+### Result: S15 met, with room to spare
+
+| Level | Simulations | Elo | 95% interval | Gap to the rung below |
+|---|---:|---:|---|---:|
+| Casual | 16 | 431 | 400 – 465 | — |
+| Club | 64 | 623 | 588 – 664 | **+192** |
+| Strong | 256 | 891 | 845 – 943 | **+267** |
+| Max | 800 | 1053 | 1001 – 1115 | **+163** |
+
+For scale, on the same run: Minimax depth-4 rates +358, Greedy +262, Random 0.
+
+All five conditions hold. Ratings rise strictly; every adjacent gap clears the
+80-Elo bar by at least double; no adjacent pair of intervals overlaps; Casual
+beats Random 97.8% with a Wilson lower bound of 95.4%; and the guardrail held
+over 500 of Casual's own moves, worst drop 0.326 against a limit of 0.35.
+
+That last number is the interesting one — 0.326 against a limit of 0.35 says the
+guardrail is *binding*, not decorative. Casual really does walk up to the edge of
+what it is allowed to play.
+
+### What the measurement caught
+
+The calibration failed on its first run, at 97 guardrail violations in 500 moves.
+Two separate causes, and only the second was in the shipped code.
+
+**The check was wrong.** It took the best value over *every* move, including
+moves the search never visited — whose value is a placeholder `0.0` rather than
+an estimate. In a losing position where every searched move scores −0.8, that
+placeholder becomes the "best" and every choice looks like a 0.8 shortfall. 97
+violations became 1.
+
+**The remaining one was real.** `_acceptable` truncated to the top three moves by
+visit count *before* applying the guardrail, so the guard compared against the
+best of those three rather than the best move available. A strong move that
+happened to be searched less went invisible, and a weaker one passed a guard it
+should have failed. Rare — one move in 500 — and a genuine deviation from the
+criterion, which is worded against the best move available.
+
+The telling detail: the TypeScript port used in the browser already applied the
+two filters in the correct order. The two implementations had silently diverged,
+and nothing except measuring this would have shown it. Both now apply the
+guardrail first and narrow by visit count second.
+
+### Honest limits
+
+* **The report was reassembled.** The run played all 21 pairings and then crashed
+  building its result object — `TournamentResult` was imported for type checking
+  only and did not exist at runtime. The ratings here are refitted from the
+  pairing scores the run logged, which is the whole input the fit needs, so
+  nothing was replayed. Per-colour splits and game lengths were lost with the
+  process.
+* **One checkpoint.** These ratings describe generation 60. A weaker network
+  would likely show narrower gaps, since a bad move costs less when every move is
+  bad.
+* **Not comparable to the cross-generation table.** That run anchored at Random
+  through a different set of pairings, so the two scales agree on the anchor and
+  on nothing else. Max at +1053 here and generation 60 at +877 there are not
+  the same measurement.
