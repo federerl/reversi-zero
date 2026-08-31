@@ -607,6 +607,16 @@ def _needs_network(name: str) -> bool:
 
 def _play_pairing(job: _PairJob) -> MatchResult:
     """Play one pairing. Runs in its own process; loads its own network."""
+    import torch
+
+    # One thread per worker, for the same reason the self-play workers do it: a
+    # tree search asks the network about one position at a time, so there is
+    # nothing for intra-op threads to divide up. Left at the default, eight
+    # worker processes each try to use every core and spend their time
+    # contending rather than searching -- measured here as a calibration that
+    # managed three pairings in two hours.
+    torch.set_num_threads(1)
+
     evaluator = None
     if _needs_network(job.a) or _needs_network(job.b):
         evaluator = _evaluator_for(Path(job.model_path), job.device)
