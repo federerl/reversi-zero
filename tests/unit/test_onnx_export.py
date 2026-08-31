@@ -145,3 +145,56 @@ def test_agreement_is_measured_on_the_whole_graph(model_path: Path, tmp_path: Pa
     assert report.ok
     assert report.positions == 16
     assert "16 positions" in report.describe()
+
+
+def test_the_export_is_one_self_contained_file(model_path: Path, tmp_path: Path) -> None:
+    """The browser fetches one URL, so the weights have to be inside the file.
+
+    torch's newer exporter writes tensors to a sibling `.onnx.data` when it
+    judges them large enough, and the `.onnx` then refers to it by name. The
+    browser cannot follow that reference -- it fails with "Module.MountedFiles is
+    not available" -- and because the behaviour depends on the torch version, it
+    embedded on the machine this was written on and split on CI.
+    """
+    from reversi.nn.onnx import _has_external_data
+
+    destination = tmp_path / "model.onnx"
+    meta = export_onnx(model_path, destination)
+
+    assert not _has_external_data(destination)
+    assert meta["self_contained"] is True
+    strays = list(tmp_path.glob("*.data"))
+    assert strays == [], f"weights were left outside the model: {strays}"
+
+
+def test_a_model_split_across_files_is_repaired_rather_than_shipped(
+    model_path: Path, tmp_path: Path
+) -> None:
+    """Deliberately split a model, then export over it and check it comes back whole.
+
+    This is the failure mode reproduced rather than described: without the
+    embedding step the .onnx would still load in Python -- which is why it went
+    unnoticed -- and fail only in a browser.
+    """
+    import onnx
+
+    from reversi.nn.onnx import _embed_weights, _has_external_data
+
+    destination = tmp_path / "split.onnx"
+    export_onnx(model_path, destination)
+
+    # Push the weights out to a sidecar, the way the newer exporter does.
+    model = onnx.load(str(destination))
+    onnx.save_model(
+        model,
+        str(destination),
+        save_as_external_data=True,
+        location="split.onnx.data",
+        size_threshold=0,
+    )
+    assert _has_external_data(destination), "the split did not take effect"
+
+    _embed_weights(destination)
+
+    assert not _has_external_data(destination)
+    assert not (tmp_path / "split.onnx.data").exists()

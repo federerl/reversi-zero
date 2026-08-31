@@ -115,6 +115,39 @@ def run_onnx(
     return policy, value
 
 
+def _embed_weights(path: Path) -> None:
+    """Make sure the weights are inside the .onnx file, not beside it.
+
+    torch's newer exporter writes tensors to a sibling ``.onnx.data`` when it
+    judges them large enough, and the ``.onnx`` then refers to that file by
+    name. That is reasonable for a server and useless here: the browser fetches
+    one URL, and a model whose weights live in a second file fails at load with
+
+        Failed to load external data file "...onnx.data",
+        error: Module.MountedFiles is not available.
+
+    Worse, it is version-dependent -- the same code embeds on one torch and
+    externalises on another -- so it worked everywhere it was developed and
+    broke in CI.
+
+    Reading the model back (which follows the reference) and writing it once
+    more with the tensors inline removes the split whatever the exporter chose to
+    do. Cheap at this size, and it makes the artifact self-contained by
+    construction rather than by luck.
+    """
+    import onnx
+
+    model = onnx.load(str(path))  # follows an external reference if there is one
+    onnx.save_model(model, str(path), save_as_external_data=False)
+
+    # The sidecar is now dead weight, and leaving it invites someone to publish
+    # it alongside and conclude the split still works.
+    for stray in path.parent.glob(f"{path.name}.data"):
+        stray.unlink()
+    for stray in path.parent.glob(f"{path.stem}.data"):
+        stray.unlink()
+
+
 def check_agreement(
     model: PolicyValueNet,
     onnx_path: Path,
@@ -148,6 +181,17 @@ def check_agreement(
         max_policy_diff=float(np.abs(torch_policy.numpy() - onnx_policy).max()),
         max_value_diff=float(np.abs(torch_value.numpy() - onnx_value).max()),
         tolerance=tolerance,
+    )
+
+
+def _has_external_data(path: Path) -> bool:
+    """True when the file's weights live somewhere other than inside it."""
+    import onnx
+
+    model = onnx.load(str(path), load_external_data=False)
+    return any(
+        tensor.HasField("data_location") and tensor.data_location == onnx.TensorProto.EXTERNAL
+        for tensor in model.graph.initializer
     )
 
 
@@ -187,6 +231,8 @@ def export_onnx(
         opset_version=ONNX_OPSET,
     )
 
+    _embed_weights(destination)
+
     report: AgreementReport | None = None
     if verify:
         report = check_agreement(model, destination, positions=check_positions)
@@ -210,6 +256,7 @@ def export_onnx(
         "label": loaded.label,
         "arch": loaded.meta.get("arch"),
         "bytes": destination.stat().st_size,
+        "self_contained": not _has_external_data(destination),
         "sha256": sha256_file(destination),
         "agreement": None
         if report is None

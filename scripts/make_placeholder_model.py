@@ -67,6 +67,17 @@ def main() -> None:
         meta = export_onnx(staged, first)
         print(f"  {names[0]}  {meta['bytes'] / 1e6:.2f} MB  (untrained placeholder)")
 
+        # `export_onnx` guarantees the weights are inside the file, so copying
+        # the .onnx copies the whole model. Asserting it here rather than
+        # trusting it: a model whose weights lived in a sidecar would copy as a
+        # file that still referred to the original by name, and would fail only
+        # once a browser tried to load it.
+        from reversi.nn.onnx import _has_external_data
+
+        if _has_external_data(first):
+            msg = f"{first.name} keeps its weights outside the file; it cannot be copied"
+            raise SystemExit(msg)
+
         # Every opponent in the manifest points at the same file. A test that
         # switches generations is checking that switching works, not that the
         # generations differ.
