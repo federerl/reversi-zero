@@ -182,6 +182,17 @@ one opponent.
 uv run reversi calibrate models/reversi-8x8-gen60.pt   --games 300 --workers 8 --device cpu --guard-samples 500   --out runs/calibration/difficulty_report.json   --write-config configs/difficulty.yaml
 ```
 
+On Windows, PowerShell continues a line with a backtick rather than a backslash.
+A backslash there fails with `Missing expression after unary operator '--'`,
+which is PowerShell reading the next line as a fresh command:
+
+```powershell
+uv run reversi calibrate models/reversi-8x8-gen60.pt `
+  --games 300 --workers 8 --device cpu --guard-samples 500 `
+  --out runs/calibration/difficulty_report.json `
+  --write-config configs/difficulty.yaml
+```
+
 **Budget about four hours.** Run it in a terminal you can leave alone -- `tmux`,
 or just a window you do not close. It is an overnight job in the same sense the
 training runs are.
