@@ -238,6 +238,9 @@ models/
 *.ckpt
 *.npz
 *.safetensors
+# The browser's copy of the network is still the network. It is attached to a
+# GitHub Release and fetched at build time, exactly like the .pt it came from.
+*.onnx
 
 # TensorBoard event files
 events.out.tfevents.*

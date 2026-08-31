@@ -16,7 +16,17 @@ from reversi.cli import app
 runner = CliRunner()
 
 CONFIG_DIR = Path(__file__).resolve().parents[2] / "configs"
-EXPECTED_COMMANDS = ("train", "bench", "arena", "calibrate", "serve", "play", "config", "init-run")
+EXPECTED_COMMANDS = (
+    "train",
+    "export",
+    "serve",
+    "bench",
+    "arena",
+    "calibrate",
+    "play",
+    "config",
+    "init-run",
+)
 
 
 def test_help_lists_every_workflow() -> None:
@@ -72,12 +82,25 @@ def test_init_run_creates_a_run_directory(run_root: Path) -> None:
     assert (created / "meta.json").is_file()
 
 
-@pytest.mark.parametrize("command", ["bench", "arena", "calibrate", "serve", "play"])
+@pytest.mark.parametrize("command", ["bench", "arena", "play"])
 def test_unimplemented_commands_fail_loudly_and_name_their_task(command: str) -> None:
     """A stub must never look like a successful no-op."""
     result = runner.invoke(app, [command])
     assert result.exit_code == 2
     assert "not implemented" in result.output
+
+
+def test_calibrate_is_real_and_asks_for_a_model() -> None:
+    """``calibrate`` measures the difficulty ladder as of S15, so it must not be
+    in the stub list above.
+
+    Invoked with no arguments it should fail on the *missing model*, not with a
+    "not implemented" notice -- the difference between a command that needs
+    something and one that does nothing.
+    """
+    result = runner.invoke(app, ["calibrate"])
+    assert result.exit_code != 0
+    assert "not implemented" not in result.output
 
 
 def test_train_runs_a_generation(run_root: Path) -> None:
@@ -122,3 +145,50 @@ def test_train_runs_a_generation(run_root: Path) -> None:
     assert (run / "checkpoints" / "latest.pt").is_file()
     assert list((run / "replay").glob("*.npz"))
     assert (run / "metrics" / "train.jsonl").is_file()
+
+
+def test_serve_says_what_to_do_when_there_is_no_model(tmp_path: Path) -> None:
+    """A missing model is the most likely first-run failure, so the message names
+    the command that fixes it."""
+    result = runner.invoke(app, ["serve", "--model", str(tmp_path / "absent.pt")])
+
+    assert result.exit_code == 2
+    assert "no model at" in result.output
+    assert "reversi export" in result.output
+
+
+def test_export_writes_a_play_only_model(tmp_path: Path) -> None:
+    from reversi.ckpt import CheckpointManager
+    from reversi.config import NetConfig
+    from reversi.nn.model import build
+
+    net = build(NetConfig(n_blocks=1, channels=8, value_hidden=16), 8, seed=1)
+    CheckpointManager(tmp_path / "ckpt", run_id="cli-test", config_sha256="x").save(
+        model=net, generation=7, global_step=99
+    )
+
+    destination = tmp_path / "model.pt"
+    result = runner.invoke(
+        app, ["export", str(tmp_path / "ckpt" / "gen_00007.pt"), str(destination)]
+    )
+
+    assert result.exit_code == 0, result.output
+    assert destination.exists()
+    assert destination.with_suffix(".json").exists()
+    assert "generation 7" in result.output
+
+    # What the export must NOT contain. Size is the usual way to check this and
+    # a bad one: a checkpoint saved without optimiser state has nothing to strip,
+    # so the comparison would pass for the wrong reason.
+    import torch
+
+    payload = torch.load(destination, map_location="cpu", weights_only=False)
+    assert set(payload) == {"meta", "model_state_dict"}
+    assert "optimizer_state_dict" not in payload
+    assert "rng" not in payload
+    assert payload["meta"]["generation"] == 7
+
+
+def test_export_refuses_a_checkpoint_that_is_not_there(tmp_path: Path) -> None:
+    result = runner.invoke(app, ["export", str(tmp_path / "nope.pt"), str(tmp_path / "out.pt")])
+    assert result.exit_code == 2

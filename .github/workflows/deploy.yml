@@ -1,0 +1,99 @@
+name: Deploy the web app
+
+# Publishes the playable site to Cloudflare Pages.
+#
+# There is no server. The agent runs in the visitor's browser, so what gets
+# deployed is a directory of static files -- which is why this costs nothing to
+# host, never sleeps, and cannot be overwhelmed by however many people open the
+# link at once.
+#
+# The one thing the build has to fetch is the networks themselves. Model weights
+# are not in git (a repository rule that a different file extension does not
+# excuse), so they are attached to a GitHub Release and downloaded here.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      - "src/reversi/web/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag holding the .onnx models"
+        required: false
+        default: "models-v1"
+
+concurrency:
+  group: deploy-pages
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: build and publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      # ---- the networks -------------------------------------------------
+      # Downloaded from the release, then checked. An .onnx that arrived
+      # damaged would still load; the browser would just play something that is
+      # not the agent any of the published numbers describe.
+      - name: Fetch the models
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.release_tag || 'models-v1' }}
+        run: |
+          mkdir -p web/public/models
+          gh release download "$TAG" \
+            --repo "${{ github.repository }}" \
+            --pattern '*.onnx' \
+            --pattern '*.json' \
+            --dir web/public/models
+          ls -la web/public/models
+
+      - name: Verify each model against its recorded checksum
+        run: |
+          cd web/public/models
+          failed=0
+          for model in *.onnx; do
+            sidecar="${model%.onnx}.json"
+            [ -f "$sidecar" ] || { echo "::error::$model has no sidecar"; failed=1; continue; }
+            expected=$(python3 -c "import json,sys; print(json.load(open('$sidecar'))['sha256'])")
+            actual=$(sha256sum "$model" | cut -d' ' -f1)
+            if [ "$expected" != "$actual" ]; then
+              echo "::error::$model does not match its checksum"
+              failed=1
+            else
+              echo "ok  $model  ${actual:0:12}…"
+            fi
+          done
+          exit $failed
+
+      # ---- the site -----------------------------------------------------
+      - name: npm ci
+        working-directory: web
+        run: npm ci
+
+      - name: Build
+        working-directory: web
+        run: npm run build
+
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy web/dist --project-name=reversi-zero

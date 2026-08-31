@@ -1,0 +1,18 @@
+# Cloudflare Pages reads this file and sets these headers on the deployed site.
+# GitHub Pages cannot do this at all, which is why it was not chosen.
+#
+# The two cross-origin headers enable SharedArrayBuffer, and with it
+# multi-threaded WebAssembly. The search does not currently need threads: the
+# network is 458k parameters and one position takes well under a millisecond.
+# They are set now because turning them on later can break unrelated things on
+# the page (any cross-origin resource without CORP stops loading), and it is
+# better to find that out on day one than on the day the search gets slow.
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# The models are content-addressed by the build, so they can be cached hard.
+/models/*
+  Cache-Control: public, max-age=31536000, immutable

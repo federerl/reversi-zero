@@ -45,12 +45,31 @@ api = [
     "uvicorn[standard]>=0.30",
 ]
 
+# --- building the web app's artifacts ---------------------------------------
+# Only needed to *produce* the browser's copy of the network, never to train,
+# evaluate or serve. `onnxruntime` is here rather than in `api` because it is
+# what checks that the exported file still computes what the checkpoint does --
+# a check that belongs to the build, not to the server.
+web = [
+    "onnx>=1.16",
+    "onnxruntime>=1.18",
+    # torch's current `onnx.export` goes through its dynamo path, which imports
+    # onnxscript. Whether it is needed depends on the torch version, and the
+    # `cpu` and `cu124` extras resolve different ones -- so it is missing exactly
+    # where the newer torch is, which is CI rather than this laptop.
+    "onnxscript>=0.1",
+]
+
 # --- development ------------------------------------------------------------
 dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
     "pytest-timeout>=2.3",
     "hypothesis>=6.100",
+    # fastapi's TestClient is starlette's, which needs an HTTP client to drive
+    # the app in-process. Only the tests need it, so it lives here rather than
+    # in the `api` extra that ships with the server.
+    "httpx2>=0.1",
     # Pinned to a minor range: ruff's formatter output changes between minors,
     # so a loose bound means "formats clean locally, fails in CI". Once uv.lock
     # is committed the lockfile pins this anyway; the range guards the gap.
@@ -63,6 +82,10 @@ reversi = "reversi.cli:app"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/reversi"]
+
+# The web page ships inside the package, so `reversi serve` works from an
+# installed wheel and not only from a source checkout.
+artifacts = ["src/reversi/api/static/*"]
 
 # ===========================================================================
 # uv: dependency resolution and torch index selection

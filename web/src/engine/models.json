@@ -1,0 +1,101 @@
+{
+  "manifest_version": 1,
+  "board_size": 8,
+  "run_id": null,
+  "rating_anchor": "random = 0",
+  "rating_method": "Bradley-Terry, 95% bootstrap interval",
+  "games_per_entrant": 210,
+  "source": "crossgen.json",
+  "models": [
+    {
+      "id": "gen60",
+      "generation": 60,
+      "label": "Generation 60",
+      "url": "/models/reversi-8x8-gen60.onnx",
+      "boardSize": 8,
+      "elo": 877.3,
+      "eloInterval": [
+        774.2,
+        1028.2
+      ],
+      "games": 210,
+      "note": "The final agent. Beat the depth-4 search 30 games to nil."
+    },
+    {
+      "id": "gen40",
+      "generation": 40,
+      "label": "Generation 40",
+      "url": "/models/reversi-8x8-gen40.onnx",
+      "boardSize": 8,
+      "elo": 855.0,
+      "eloInterval": [
+        747.2,
+        1017.6
+      ],
+      "games": 210,
+      "note": "Two thirds through -- already close to its final strength."
+    },
+    {
+      "id": "gen20",
+      "generation": 20,
+      "label": "Generation 20",
+      "url": "/models/reversi-8x8-gen20.onnx",
+      "boardSize": 8,
+      "elo": 758.0,
+      "eloInterval": [
+        659.1,
+        898.3
+      ],
+      "games": 210,
+      "note": "A third of the way through training."
+    },
+    {
+      "id": "gen05",
+      "generation": 5,
+      "label": "Generation 5",
+      "url": "/models/reversi-8x8-gen5.onnx",
+      "boardSize": 8,
+      "elo": 547.3,
+      "eloInterval": [
+        466.7,
+        685.8
+      ],
+      "games": 210,
+      "note": "About six hours into training. Already beats a classical search."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "minimax-d4",
+      "elo": 522.6,
+      "interval": [
+        433.7,
+        653.4
+      ]
+    },
+    {
+      "name": "minimax-d2",
+      "elo": 333.8,
+      "interval": [
+        249.9,
+        458.8
+      ]
+    },
+    {
+      "name": "greedy",
+      "elo": 313.1,
+      "interval": [
+        220.1,
+        467.6
+      ]
+    },
+    {
+      "name": "random",
+      "elo": 0.0,
+      "interval": [
+        0.0,
+        0.0
+      ]
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+/*
+ * The palette is the board. Deep felt green, the two disc colours, and amber
+ * for anything the interface wants you to look at -- which on a board this
+ * colour is the one hue that reads clearly without competing with the discs.
+ *
+ * The neutrals are biased slightly green rather than being pure greys, so the
+ * page around the board looks like it belongs to it.
+ */
+@theme {
+  --color-ground: #f7f8f4;
+  --color-surface: #ffffff;
+  --color-surface-2: #edf0e9;
+  --color-surface-3: #e3e8dd;
+  --color-line: #dbe0d5;
+  --color-line-strong: #c2cab9;
+  --color-ink: #171b16;
+  --color-ink-2: #414a3f;
+  --color-muted: #6b7869;
+  --color-accent: #9c5c0f;
+  --color-accent-2: #b46a15;
+  --color-accent-soft: #f7ebd9;
+  --color-board: #2e5943;
+  --color-board-line: #244635;
+  --color-board-edge: #1c3628;
+  --color-disc-black: #16191a;
+  --color-disc-white: #f2f0ea;
+  --color-good: #2c6a45;
+  --color-bad: #9c3626;
+
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+
+/*
+ * The dark palette.
+ *
+ * Only `prefers-color-scheme` is consulted, because nothing on this site sets a
+ * theme by hand -- there is no toggle. Every colour on the page is read from
+ * these tokens rather than written as a literal, so a token redefined here
+ * changes the whole page consistently instead of leaving one theme's text on
+ * the other theme's background.
+ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-ground: #0f120f;
+    --color-surface: #171b17;
+    --color-surface-2: #1e241e;
+    --color-surface-3: #262d25;
+    --color-line: #2d342c;
+    --color-line-strong: #3d463c;
+    --color-ink: #e9ece6;
+    --color-ink-2: #b7c1b4;
+    --color-muted: #869382;
+    --color-accent: #e0973f;
+    --color-accent-2: #c98330;
+    --color-accent-soft: #2b2214;
+    --color-board: #35634c;
+    --color-board-line: #274c39;
+    --color-board-edge: #16281e;
+    --color-good: #6fbb8f;
+    --color-bad: #e07a68;
+  }
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ground);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Focus has to be visible on the board as well as in the panel: the board is
+   keyboard-navigable, and an outline that only shows on light surfaces would
+   disappear the moment focus moved onto a square. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

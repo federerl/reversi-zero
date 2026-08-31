@@ -1,0 +1,13 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+.vite/
+
+# Filled by CI from the GitHub Release. Model weights never enter git --
+# see the repository's working agreements.
+public/models/
+
+# Copied from node_modules at build time by scripts/stage-assets.mjs.
+public/ort/
+node_modules/.cache/
