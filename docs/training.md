@@ -168,3 +168,86 @@ You changed the network shape. Either put the config back, or start a new run.
 Check for `train.warmup_steps is N but this run is only M steps`. Warmup is capped
 at half the run so a short run still reaches its intended rate, but if you see
 this on a *long* run, `warmup_steps` is genuinely misconfigured.
+
+
+---
+
+## Calibrating the difficulty ladder (S15)
+
+The four difficulty levels are *designed* to differ. Until this is run, that is
+all they are: a ladder whose rungs are not measurably separated is four names for
+one opponent.
+
+```bash
+uv run reversi calibrate models/reversi-8x8-gen60.pt   --games 300 --workers 8 --device cpu --guard-samples 500   --out runs/calibration/difficulty_report.json   --write-config configs/difficulty.yaml
+```
+
+On Windows, PowerShell continues a line with a backtick rather than a backslash.
+A backslash there fails with `Missing expression after unary operator '--'`,
+which is PowerShell reading the next line as a fresh command:
+
+```powershell
+uv run reversi calibrate models/reversi-8x8-gen60.pt `
+  --games 300 --workers 8 --device cpu --guard-samples 500 `
+  --out runs/calibration/difficulty_report.json `
+  --write-config configs/difficulty.yaml
+```
+
+**Budget about four hours.** Run it in a terminal you can leave alone -- `tmux`,
+or just a window you do not close. It is an overnight job in the same sense the
+training runs are.
+
+### Why it costs that much
+
+`max` searches 800 simulations per move. On one CPU thread that is roughly 1.6
+seconds a move, so a game where `max` plays costs about 50 seconds, and the
+plan's 300 games across 21 pairings is some 32 hours of work. `--workers` spreads
+the pairings across processes, which brings the wall-clock down to about four.
+
+| games/pair | wall clock, 8 workers |
+|---|---|
+| 60 | ~1 hour |
+| 300 (the criterion) | ~4 hours |
+
+### Why the CPU, and not the GPU
+
+Counterintuitive, and it follows from the day-7 measurement: at batch size one
+the GPU is only 1.5x a CPU core. An arena plays one position at a time, so there
+is nothing to batch and nothing for the GPU to be good at. Eight CPU processes
+beat one GPU process by roughly four times, and leave the GPU free.
+
+Each worker sets `torch.set_num_threads(1)`. Without it, eight processes each
+try to use every core and spend their time contending -- measured, that turned a
+one-hour run into one that managed three pairings in two hours.
+
+### Reading the result
+
+The report is written whether or not the ladder holds up, and the command exits
+non-zero when it does not, because an unmeasured difficulty label is a claim the
+interface should not be making. Five checks:
+
+| check | what it means |
+|---|---|
+| `monotonic` | ratings rise from Casual to Max |
+| `adjacent_gap` | neighbouring rungs at least 80 Elo apart |
+| `intervals_disjoint` | neighbouring 95% intervals do not overlap |
+| `easiest_beats_random` | Casual beats Random, Wilson lower bound above 0.60 |
+| `guardrail` | Casual never played a move far below the best available |
+
+`intervals_disjoint` is the one that fails first, and usually for a reason that
+has nothing to do with the ladder: intervals narrow with the square root of the
+number of games, so a short run can show a genuinely ordered ladder as
+unseparated. If the ratings rise cleanly and only that check fails, the answer is
+more games rather than different levels.
+
+**If it genuinely does not separate**, the plan's documented options in order are
+to widen the simulation ratio (8 / 64 / 400 / 1500), and failing that to ship
+three levels and say so in the README. Never four tiers that are not different.
+
+### The obvious next optimisation, not yet done
+
+The arena plays one game at a time. Self-play got 13.6x by advancing many games
+in lockstep so their network calls batch together, and the same trick applies
+here -- a pairing is 300 independent games. That would take the four hours down
+to something like twenty minutes. It is a real piece of work, and it has not been
+done.

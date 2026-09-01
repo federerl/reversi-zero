@@ -100,7 +100,7 @@ LEVELS: tuple[DifficultyLevel, ...] = (
     ),
     DifficultyLevel(
         name="max",
-        label="Maximum",
+        label="Max",
         simulations=800,
         temperature=0.0,
         top_k=None,
@@ -169,9 +169,17 @@ def _acceptable(result: SearchResult, level: DifficultyLevel) -> list[int]:
     """
     order = sorted(range(len(result.actions)), key=lambda i: -result.visits[i])
 
-    if level.top_k is not None:
-        order = order[: level.top_k]
-
+    # The guardrail runs first, and top_k narrows what survives it.
+    #
+    # The other order looks equivalent and is not. Taking the three most-visited
+    # moves first makes the guard compare against the best of *those three*
+    # rather than the best move available, so a strong move that happened to be
+    # searched less becomes invisible and a weaker one passes a guard it should
+    # have failed. The criterion is worded against the best move available, and
+    # this is the order that delivers that.
+    #
+    # Found by the calibration: one violation in 500 moves, which is exactly the
+    # rate you would expect from a case this narrow.
     if level.guard > 0.0:
         # Only judge moves the search actually looked at -- an unvisited move has
         # no measured value, and treating its 0.0 as an opinion would let a level
@@ -180,5 +188,8 @@ def _acceptable(result: SearchResult, level: DifficultyLevel) -> list[int]:
         if visited:
             best_value = max(result.q_values[i] for i in visited)
             order = [i for i in visited if result.q_values[i] >= best_value - level.guard]
+
+    if level.top_k is not None:
+        order = order[: level.top_k]
 
     return order or [max(range(len(result.actions)), key=lambda i: result.visits[i])]

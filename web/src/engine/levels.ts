@@ -120,10 +120,19 @@ export function chooseMove(
   if (level.temperature <= 0) return actions[best]!;
 
   // Step 1: throw away anything clearly worse than the best move available.
-  const bestQ = Math.max(...qValues);
-  let candidates = actions
+  //
+  // Judged only against moves the search actually visited. An unvisited move's
+  // value is a placeholder zero rather than an estimate, so including it would
+  // make the "best available" a number nobody measured -- and in a losing
+  // position, where every real move scores below zero, that placeholder would
+  // become the baseline everything else is compared against.
+  const searched = actions
     .map((action, index) => ({ action, visits: visits[index]!, q: qValues[index]! }))
-    .filter((candidate) => bestQ - candidate.q <= level.guard);
+    .filter((candidate) => candidate.visits > 0);
+  if (searched.length === 0) return actions[best]!;
+
+  const bestQ = Math.max(...searched.map((candidate) => candidate.q));
+  let candidates = searched.filter((candidate) => bestQ - candidate.q <= level.guard);
 
   if (candidates.length === 0) return actions[best]!;
 

@@ -205,6 +205,19 @@ test("the opponent is labelled with a measured rating", async ({ page }) => {
   await expect(page.getByText(/95% interval \d+–\d+, random play = 0/)).toBeVisible();
 });
 
+test("the difficulty levels are labelled with their measured ratings too", async ({ page }) => {
+  // The levels were the last user-facing claim resting on an argument rather
+  // than a measurement. Now that the calibration has run, they carry numbers on
+  // the same scale as the opponents -- and this asserts the numbers reach the
+  // screen, not merely the JSON.
+  await page.getByLabel("Opponent").selectOption("gen05");
+  const levels = page.getByLabel("Thinking time");
+  await expect(levels).toBeVisible();
+
+  await expect(levels).toContainText(/Casual — \d+ Elo/);
+  await expect(levels).toContainText(/Max — \d+ Elo/);
+});
+
 test("the board can be played with the keyboard alone", async ({ page }) => {
   await page.locator('[data-square="19"]').focus();
   await page.keyboard.press("Enter");

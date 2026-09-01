@@ -10,6 +10,7 @@
 import { describe, expect, it } from "vitest";
 
 import { LEVELS, chooseMove, levelById } from "../src/engine/levels";
+import manifest from "../src/engine/models.json";
 
 describe("the ladder", () => {
   it("gets harder in one direction only", () => {
@@ -88,5 +89,39 @@ describe("choosing a move", () => {
 
   it("takes the only legal move without thinking about it", () => {
     expect(chooseMove({ actions: [64], visits: [0], qValues: [0] }, casual)).toBe(64);
+  });
+});
+
+describe("the measured ratings", () => {
+  it("gives every level a rating from the calibration report", () => {
+    // Same rule as the opponents: a label states a measured number or it does
+    // not appear. Before the calibration ran, these four names asserted that
+    // moving up gets you a harder game -- reasonable, and not evidence.
+    for (const level of LEVELS) {
+      const rated = manifest.levels.find((entry) => entry.id === level.id);
+      expect(rated, `${level.id} has no measured rating`).toBeDefined();
+      expect(rated!.eloInterval[0]!).toBeLessThan(rated!.elo);
+      expect(rated!.eloInterval[1]!).toBeGreaterThan(rated!.elo);
+    }
+  });
+
+  it("rates the ladder in the order it claims", () => {
+    // S15(a) and (c), asserted where a reader of the interface would see them.
+    // A ladder shown with ratings that do not rise would be worse than one shown
+    // without any.
+    const rated = LEVELS.map((level) => manifest.levels.find((e) => e.id === level.id)!);
+
+    for (let i = 1; i < rated.length; i++) {
+      expect(rated[i]!.elo).toBeGreaterThan(rated[i - 1]!.elo);
+      // Intervals disjoint: the higher one starts above where the lower one ends.
+      expect(rated[i]!.eloInterval[0]!).toBeGreaterThan(rated[i - 1]!.eloInterval[1]!);
+    }
+  });
+
+  it("separates the rungs by more than the 80 Elo the criterion asks for", () => {
+    const rated = LEVELS.map((level) => manifest.levels.find((e) => e.id === level.id)!);
+    for (let i = 1; i < rated.length; i++) {
+      expect(rated[i]!.elo - rated[i - 1]!.elo).toBeGreaterThanOrEqual(80);
+    }
   });
 });

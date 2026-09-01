@@ -49,6 +49,7 @@ def build_manifest(
     generations: list[int] | None = None,
     board_size: int = 8,
     url_prefix: str = "/models",
+    calibration: Path | None = None,
 ) -> dict[str, Any]:
     """Turn a cross-generation tournament report into the app's opponent list.
 
@@ -108,8 +109,13 @@ def build_manifest(
 
     models.sort(key=lambda entry: entry["generation"], reverse=True)
 
+    levels: list[dict[str, Any]] = []
+    if calibration is not None:
+        levels = _levels_from(calibration)
+
     return {
         "manifest_version": MANIFEST_VERSION,
+        "levels": levels,
         "board_size": board_size,
         "run_id": report.get("provenance", {}).get("run_id"),
         "rating_anchor": "random = 0",
@@ -119,6 +125,41 @@ def build_manifest(
         "models": models,
         "baselines": baselines,
     }
+
+
+def _levels_from(calibration: Path) -> list[dict[str, Any]]:
+    """The difficulty levels' ratings, from the report that measured them.
+
+    Same rule as the opponents: a label states a measured number or it does not
+    appear. Before this was run, "Casual" and "Club" were an assertion that
+    moving up gets you a harder game -- reasonable, and not evidence. Reading the
+    ratings from the report means the interface cannot claim a separation that
+    was not measured, and cannot go stale without the file it reads going stale
+    too.
+    """
+    report = json.loads(calibration.read_text(encoding="utf-8"))
+    if not report.get("passed"):
+        msg = (
+            f"{calibration.name} records a calibration that did not meet S15, so its "
+            "ratings should not be shown as if the ladder were separated"
+        )
+        raise ConfigError(msg)
+
+    rated = {entry["name"]: entry for entry in report["ratings"]}
+    out = []
+    for name in report["levels"]:
+        entry = rated.get(name)
+        if entry is None:
+            msg = f"{calibration.name} rates no level called {name!r}"
+            raise ConfigError(msg)
+        out.append(
+            {
+                "id": name,
+                "elo": round(entry["elo"], 1),
+                "eloInterval": [round(entry["ci_low"], 1), round(entry["ci_high"], 1)],
+            }
+        )
+    return out
 
 
 def write_manifest(destination: Path, manifest: dict[str, Any]) -> int:
