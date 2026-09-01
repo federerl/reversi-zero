@@ -499,10 +499,13 @@ def serve(
     time, which a GPU barely notices, and leaving the card free means the server
     can run alongside a training job on the same machine.
     """
-    import uvicorn
-
-    from reversi.api.app import build_app
-
+    # Check the model before importing the server.
+    #
+    # Both are things that can be missing on a first run, and this order reports
+    # the more likely and more actionable one. Importing first means somebody
+    # without the `api` extra installed is told about uvicorn when their real
+    # problem is that they have not exported a model yet -- and looking at a file
+    # path needs no dependencies at all.
     chosen = _pick_device(device)
     path = model or Path(os.environ.get("RZ_MODEL_PATH", "models/reversi-8x8-gen60.pt"))
     if not path.exists():
@@ -517,6 +520,23 @@ def serve(
             err=True,
         )
         raise typer.Exit(code=2)
+
+    try:
+        import uvicorn
+
+        from reversi.api.app import build_app
+    except ImportError as error:
+        typer.secho(
+            f"the web server needs the `api` extra, which is not installed ({error}).",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        typer.secho(
+            "  uv sync --extra cpu --extra api",
+            fg=typer.colors.YELLOW,
+            err=True,
+        )
+        raise typer.Exit(code=2) from error
 
     typer.echo(f"serving {path} on {chosen} at http://{host}:{port}")
     uvicorn.run(build_app(path, device=chosen), host=host, port=port, log_level="info")

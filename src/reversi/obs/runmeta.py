@@ -291,11 +291,23 @@ def _git(args: list[str], cwd: Path) -> str | None:
             ["git", *args],
             cwd=cwd,
             capture_output=True,
+            # Decode as UTF-8 and replace anything that is not, rather than
+            # letting the platform's default codec decide.
+            #
+            # `git diff` echoes the contents of changed files, and a working tree
+            # can easily hold something that is not text -- an untracked binary,
+            # a stray archive. On Windows the default is cp1252, which raises on
+            # the first byte it does not recognise, in a reader thread, leaving
+            # this function to return None and its caller to fail on `.strip()`.
+            # Recording provenance must not depend on every file in the tree
+            # being decodable.
+            encoding="utf-8",
+            errors="replace",
             text=True,
             timeout=_GIT_TIMEOUT_S,
             check=False,
         )
-    except (OSError, subprocess.SubprocessError):  # pragma: no cover
+    except (OSError, subprocess.SubprocessError, UnicodeError):  # pragma: no cover
         return None
     if result.returncode != 0:
         return None

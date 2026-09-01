@@ -17,6 +17,14 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+
+# The API is an optional extra, so its absence is a skip rather than a collection
+# error. Without this, `uv sync --extra cpu --extra dev` -- a reasonable thing to
+# run -- aborts the entire test session on an import, which reads as "the project
+# is broken" rather than "one optional component is not installed".
+pytest.importorskip("fastapi", reason="the `api` extra is not installed")
+pytest.importorskip("httpx2", reason="the `dev` extra's HTTP client is not installed")
+
 from fastapi.testclient import TestClient
 
 from reversi.api.app import build_app

@@ -280,7 +280,7 @@ never rated cannot appear in the list at all.
 
 Twice in Python — an obvious list-of-lists version written as the specification,
 and the fast bitboard version the agent was trained against — compared move by
-move over 50,000 random games and then frozen. The TypeScript engine is the
+move over 20,000 random games nightly and then frozen. The TypeScript engine is the
 third, and it is held to the same standard.
 
 **The expectations are generated, never hand-written.** A test written from

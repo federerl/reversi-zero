@@ -102,7 +102,7 @@ far it actually got, which on the machine above is about 560 of its 800 simulati
 
 Open `/bench/` on any device to measure it there.
 
-**The rules are written three times now.** Twice in Python, cross-checked over 50,000 games and
+**The rules are written three times now.** Twice in Python, cross-checked over 20,000 games a night and
 frozen; once in TypeScript for the browser. The third one is held to the same standard: every
 expectation it is tested against is *generated* from the frozen engine — 1,000 positions with the
 exact discs each move flips, the input encoding, search visit counts, and whole games replayed move
@@ -248,11 +248,14 @@ See `docs/how-the-engine-works.md`.
 * `docs/how-the-engine-works.md` — bitboards, passing, perspective, and the eight board rotations
 * `docs/training.md` — running a job, stopping one, resuming, and what a run leaves behind
 * `docs/experiments.md` — one entry per run: hypothesis, config delta, outcome, decision
+* `docs/architecture.md` — layering, dependency rules, and the seven correctness contracts
+* `docs/model_card.md` — training compute, data provenance, measured strength, limitations
 * `docs/decisions/` — one file per decision that would be expensive to revisit
+  * `ADR-0001` — a board is two integers, and what that costs
   * `ADR-0002` — whose point of view a number is from (the value sign)
+  * `ADR-0003` — symmetry, and the four rotations that cannot happen
+  * `ADR-0004` — independent workers that write their own shards
   * `ADR-0005` — the agent runs in the browser, not on a server
-* `docs/architecture.md` — layering, dependency rules, and the seven correctness contracts *(planned)*
-* `docs/model_card.md` — training compute, data provenance, measured strength, limitations *(planned)*
 
 ## License
 

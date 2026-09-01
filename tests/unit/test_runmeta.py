@@ -120,3 +120,36 @@ def test_default_run_root_is_used_without_env_override(
     config = load_config().model_copy(update={"run_root": tmp_path / "custom"})
     paths = init_run(config)
     assert paths.root.is_relative_to(tmp_path / "custom")
+
+
+def test_git_capture_survives_a_binary_file_in_the_tree(tmp_path: Path) -> None:
+    """Provenance must not depend on every file in the working tree being text.
+
+    `git diff` echoes the contents of changed files, and a tree can easily hold
+    something that is not text -- an untracked binary, a stray archive. Decoding
+    that with the platform default raises on Windows, in a reader thread, and the
+    failure surfaces as `'NoneType' object has no attribute 'strip'` a long way
+    from the cause. Found exactly that way.
+    """
+    import subprocess
+
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    subprocess.run(["git", "config", "user.email", "t@example.com"], cwd=tmp_path, check=True)
+    subprocess.run(["git", "config", "user.name", "t"], cwd=tmp_path, check=True)
+    (tmp_path / "readme.txt").write_text("hello\n", encoding="utf-8")
+    subprocess.run(["git", "add", "-A"], cwd=tmp_path, check=True)
+    subprocess.run(["git", "commit", "-qm", "first"], cwd=tmp_path, check=True)
+
+    # Bytes that decode as neither cp1252 nor UTF-8, staged, and deliberately
+    # containing no NUL.
+    #
+    # Both details matter. `git diff HEAD` covers staged changes, so an untracked
+    # file would never reach the decoder. And git decides a file is binary by
+    # looking for a NUL byte -- with one present it prints "Binary files differ"
+    # and the contents never appear either. It is the file that looks like text
+    # and is not that breaks this.
+    (tmp_path / "notes.log").write_bytes(bytes([0x90, 0x81, 0xFF, 0xFE, 0x8D]) * 900)
+    subprocess.run(["git", "add", "notes.log"], cwd=tmp_path, check=True)
+
+    info = git_info(repo=tmp_path)
+    assert info.get("commit"), "provenance was abandoned because of an undecodable file"
