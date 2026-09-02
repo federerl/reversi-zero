@@ -290,6 +290,7 @@ See `docs/how-the-engine-works.md`.
 * `docs/experiments.md` — one entry per run: hypothesis, config delta, outcome, decision
 * `docs/architecture.md` — layering, dependency rules, and the seven correctness contracts
 * `docs/model_card.md` — training compute, data provenance, measured strength, limitations
+* `docs/references.md` — which ideas came from papers, which from engine practice, and which from folklore
 * `docs/decisions/` — one file per decision that would be expensive to revisit
   * `ADR-0001` — a board is two integers, and what that costs
   * `ADR-0002` — whose point of view a number is from (the value sign)

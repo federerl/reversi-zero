@@ -147,8 +147,10 @@ alternatives.
 - **Too low** → the search just confirms whatever the network already thinks, and never discovers when the network is wrong.
 - **Too high** → visits spread thinly across many moves, the tree stays shallow, and move choices get worse.
 
-1.5 is the standard starting point; AlphaZero-family work generally lands
-between about 1.25 and 2.5.
+1.5 is a common starting point. It has **not** been tuned here, and it is not a
+number either AlphaZero paper states — AlphaZero's released pseudocode makes the
+constant grow with the visit count rather than holding it fixed. See
+`docs/references.md`.
 
 ### `fpu_reduction: 0.25`
 
@@ -183,7 +185,7 @@ adjusted_prior = 0.75 × network_prior  +  0.25 × random_noise
 ```
 
 - `dirichlet_eps: 0.25` is that 25% mixing weight.
-- `dirichlet_alpha: 1.0` controls the *shape* of the noise. Small alpha puts nearly all the noise on one randomly chosen move (spiky — "seriously consider this one odd move"). Large alpha spreads it evenly across all moves. The usual rule of thumb is `alpha ≈ 10 / average number of legal moves`. Reversi averages roughly 8–10 legal moves, giving alpha ≈ 1.0. (For comparison, AlphaZero used 0.3 for chess with ~35 moves and 0.03 for Go with ~250 — the same rule.)
+- `dirichlet_alpha: 1.0` controls the *shape* of the noise. Small alpha puts nearly all the noise on one randomly chosen move (spiky — "seriously consider this one odd move"). Large alpha spreads it evenly across all moves. A common rule of thumb is `alpha ≈ 10 / average number of legal moves`. Reversi averages roughly 8–10 legal moves, giving alpha ≈ 1.0. **That rule is folklore, not a published result** — the AlphaZero preprint says only that the noise "was scaled in inverse proportion to the approximate number of legal moves in a typical position", with no constant and no formula, and the published values imply constants of roughly 10.5 (chess, 0.3), 12 (shogi, 0.15) and 7.5 (Go, 0.03). Note also that 0.03 for Go is AlphaGo Zero's number, not AlphaZero's. See `docs/references.md`.
 
 **This must be 0 whenever we're measuring strength** — evaluation matches, the
 difficulty calibration, and the web app. Otherwise we'd be measuring a
