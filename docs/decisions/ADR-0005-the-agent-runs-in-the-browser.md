@@ -100,8 +100,8 @@ that from a footnote into the design.
 
 The strongest thing about this repository is that the rules were *proved* rather
 than assumed — two independent implementations, compared at every move over
-20,000 random games nightly, zero mismatches, then frozen. Every strength number since
-rests on that.
+20,000 random games nightly, zero mismatches, then frozen. Every strength
+number since rests on that.
 
 A TypeScript port is a third implementation, and a subtly wrong one fails in the
 worst available way: **it does not crash.** The browser plays a slightly
