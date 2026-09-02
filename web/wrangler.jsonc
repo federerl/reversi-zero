@@ -1,0 +1,22 @@
+{
+  // Cloudflare builds this repo itself, so it needs to be told what to deploy.
+  // Without this file the build stage succeeds -- it is just `vite build` -- and
+  // then the deploy stage has no idea which directory holds the site.
+  //
+  // `name` must match the Worker in the Cloudflare dashboard. A different name
+  // here does not fail; it quietly deploys to a *second* Worker, which looks
+  // exactly like "my changes never went live".
+  "name": "reversi-zero",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./dist",
+
+    // NOT "single-page-application". This site has two real entry points --
+    // index.html and bench/index.html -- and no client-side router, so every
+    // URL already maps to a file on disk. In SPA mode a request for a file that
+    // does not exist returns index.html with HTTP 200 instead of a 404, which
+    // would hand the model loader a page of HTML and fail somewhere far away
+    // from the actual cause.
+    "not_found_handling": "404-page"
+  }
+}
