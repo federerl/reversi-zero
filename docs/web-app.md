@@ -121,18 +121,51 @@ numbers to take on trust from one machine.
 
 ## Deploying it
 
-`.github/workflows/deploy.yml` publishes to **Cloudflare Pages** on merge to
-`main`. Three things have to exist first:
+**Cloudflare Pages builds this repository directly.** Connect the repo once in
+the Cloudflare dashboard and every push to `main` deploys; every pull request
+gets its own preview URL, which is genuinely useful for reviewing a change to the
+board before it is merged.
 
-1. A Cloudflare account with a Pages project named `reversi-zero`.
-2. Two repository secrets: `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
-3. A GitHub Release tagged `models-v1` with the four `.onnx` files and their
-   `.json` sidecars attached.
+### Build settings
 
-The workflow downloads the models from that release and verifies each one
-against the SHA-256 recorded in its sidecar before building. A model damaged in
-transit would still load; checking is what stops a corrupted download becoming a
-mysteriously weak agent.
+| Setting | Value |
+|---|---|
+| Framework preset | None |
+| Root directory | `web` |
+| Build command | `npm run build:deploy` |
+| Build output directory | `dist` |
+| Environment variable | `NODE_VERSION` = `22` |
+
+`build:deploy` is `build` with one step in front of it: fetching the trained
+networks. That step exists because **the `.onnx` files are not in git.** They are
+model weights, and the rule that keeps checkpoints out applies to them too — so a
+build that clones the repository has the entire site except the thing that plays.
+Without it the page renders a board and sits at "Loading the agent…" forever.
+
+`npm run build` is untouched, so a local build never reaches for the network and
+uses whatever you exported yourself.
+
+### The models come from a Release
+
+```bash
+gh release create models-v1   web/public/models/*.onnx web/public/models/*.json   --title "Trained networks v1"   --notes "Generations 5, 20, 40 and 60 as ONNX."
+```
+
+About 7 MB. `scripts/fetch-models.mjs` reads the filenames from
+`src/engine/models.json` rather than guessing them, downloads each one, and
+**checks it against the SHA-256 recorded when it was exported** — before writing
+it to disk, so a damaged download never lands where a later build would find it
+and assume it was fine. A truncated file would otherwise be a valid-looking
+`.onnx` that fails in the browser with no clue why.
+
+The repository is public, so the build needs no credentials to fetch them. Set
+`MODELS_TAG` to pin a build to an older set of weights, which is what you would
+want to roll a deploy back to match a particular checkpoint.
+
+### If the release does not exist yet
+
+The build fails with the command that creates it. That is deliberate: a deploy
+that quietly produced a site with no agent would be worse than one that stops.
 
 ### Why Cloudflare Pages and not GitHub Pages
 
