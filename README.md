@@ -25,6 +25,12 @@ confidence intervals and Bradley–Terry ratings, never by pointing at a trainin
 > requirement of 80, with no adjacent intervals overlapping. All from one checkpoint, so the
 > separation is a property of the method rather than of four different networks (criterion S15).
 >
+> **It holds its own against a real engine.** Measured against
+> [Edax 4.6](https://github.com/abulmo/edax-reversi), the reference Othello engine: generation 60 at
+> 256 simulations scores **53.1%** over 80 games against Edax at level 5 (95% interval 42.3–63.7%) —
+> statistically even. It beats levels 1–4 and loses to 6 and above. That is the first claim here
+> that does not depend on a baseline written in this repository.
+>
 > **One thing is honestly not fixed.** The agent beats depth-4 minimax 100% of the time but greedy
 > only 63% — a real non-transitivity that `docs/experiments.md` records and explains but does not
 > resolve.

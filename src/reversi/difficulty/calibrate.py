@@ -609,6 +609,10 @@ def agent_named(name: str, evaluator: Evaluator | None) -> Agent:
         return GreedyAgent()
     if name.startswith("minimax-d"):
         return MinimaxAgent(int(name.removeprefix("minimax-d")), name=name)
+    if name.startswith("edax-l"):
+        from reversi.agents.edax import EdaxAgent
+
+        return EdaxAgent(int(name.removeprefix("edax-l")), name=name)
 
     if evaluator is None:
         msg = f"{name} is a difficulty level and needs a network, but none was loaded"
@@ -617,7 +621,10 @@ def agent_named(name: str, evaluator: Evaluator | None) -> Agent:
 
 
 def _needs_network(name: str) -> bool:
-    return not (name == "random" or name == "greedy" or name.startswith("minimax-d"))
+    """Only the difficulty levels need the trained network loaded."""
+    return not (
+        name in {"random", "greedy"} or name.startswith("minimax-d") or name.startswith("edax-l")
+    )
 
 
 def _play_pairing(job: _PairJob) -> MatchResult:

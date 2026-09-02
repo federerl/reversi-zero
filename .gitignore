@@ -260,3 +260,4 @@ slurm/logs/
 
 # Personal working notes -- never committed. See notes/README.md.
 notes/
+tools/edax/

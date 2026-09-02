@@ -236,3 +236,84 @@ guardrail first and narrow by visit count second.
   through a different set of pairings, so the two scales agree on the anchor and
   on nothing else. Max at +1053 here and generation 60 at +877 there are not
   the same measurement.
+
+
+---
+
+## External check: how does the agent compare to Edax?
+
+**Run:** 2026-09-01, generation 60 at the `strong` setting (256 simulations),
+against [Edax 4.6](https://github.com/abulmo/edax-reversi) at a range of levels.
+Colour-balanced with the arena's 4-ply opening book, Edax's own book disabled.
+
+**Question.** Every number in this repository is the agent measured against
+baselines written in this repository. The scale is anchored at a random player we
+wrote and shaped by a minimax we wrote, which is internally consistent and says
+nothing about the agent's standing outside it. Edax is the reference Othello
+engine — open source, and downloadable by anyone who doubts the result.
+
+### Result
+
+| Opponent | Our score | Record |
+|---|---:|---|
+| Edax level 1 | 100.0% | 20–0 |
+| Edax level 2 | 95.0% | 19–1 |
+| Edax level 3 | 100.0% | 20–0 |
+| Edax level 4 | 90.0% | 18–2 |
+| **Edax level 5** | **53.1%** | **42–37–1** |
+| Edax level 6 | 35.0% | 7–13 |
+| Edax level 8 | 17.5% | 3–16–1 |
+| Edax level 10 | 12.5% | 2–17–1 |
+| Edax level 12 | 0.0% | 0–20 |
+
+Levels 1–4 and 6–12 are 20-game scouting runs, enough to locate the crossover and
+not enough to quote. **Level 5 was then measured over 80 games: 53.1%, 95%
+interval [42.3%, 63.7%].**
+
+**The claim that interval supports:** at 256 simulations a move, generation 60 is
+*indistinguishable from Edax at level 5*. Not "beats" — the interval spans even,
+and saying otherwise would be reading a point estimate as a result. That is the
+honest form of a crossover: the level at which neither side is measurably ahead.
+
+### What it does and does not say
+
+The agent learned Othello from nothing but self-play, with no human games, no
+opening book and no hand-written evaluation, in nine hours on a laptop GPU. It
+plays a recognised engine's five-ply search to a draw. That is the first
+statement about this agent that does not depend on anything else in this
+repository.
+
+It is also a modest level. Edax's default is 21, and at level 12 it wins every
+game. A 458k-parameter network trained for nine hours was never going to trouble
+that, and a comparison that only reported the loss would have been worth little —
+which is why the experiment searched for the crossover rather than playing one
+match at full strength.
+
+### Honest limits
+
+* **`strong`, not `max`.** 256 simulations rather than 800, because 800 costs 1.7
+  seconds a move and the scouting sweep would have taken a day. `max` would place
+  somewhat higher; how much is unmeasured.
+* **Edax levels are not an Elo scale.** Level 5 is a search depth, not a rating.
+  "Level with Edax 5" locates the agent against a reproducible reference; it does
+  not convert to a published Othello Elo.
+* **Not in the Bradley–Terry table.** These are head-to-head matches, not a round
+  robin, so Edax does not appear in `docs/crossgen.json`. Folding it in would put
+  every rating in this project on an externally anchored scale, and is the
+  obvious next step.
+* **The scouting rows are 20 games** — roughly ±20 points. They locate the
+  crossover and should not be quoted as measurements.
+
+### Getting Edax
+
+Not in this repository: it is a binary and a 14 MB evaluation table, and the rule
+that keeps checkpoints out of git applies to it too.
+
+```bash
+gh release download v4.6 --repo abulmo/edax-reversi   --pattern '*MS-windows*' --dir tools/edax
+# then unzip it there, so that tools/edax/data/eval.dat exists
+```
+
+`tools/edax/` is gitignored. The adapter finds it by convention and, when it is
+absent, says how to fetch it rather than failing obscurely; the tests that need
+it skip.
