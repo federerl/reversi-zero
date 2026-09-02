@@ -38,6 +38,31 @@ If I have to re-read a sentence to parse it, it's too dense.
 - **Never commit:** checkpoints, replay data, run folders (`runs/`, `models/`, `*.pt`, `*.npz`). `.gitignore` and `.gitattributes` already cover this — don't loosen them.
 - **The plan:** `.claude/plans/assume-one-rtx-6000-l40a-crispy-dusk.md` holds the 14-day roadmap, the task backlog, and the correctness contracts. Follow it; flag it if something in it turns out to be wrong.
 
+## The repo is public and read by strangers
+
+Recruiters read this repository. Nothing in it should read like a transcript of
+our conversation.
+
+Commit messages, PR titles and bodies, code comments, and docs are written **for
+someone who has never seen this chat**. That means:
+
+- No first-person narration of your own reasoning or mistakes ("four things I had
+  wrong", "as I mentioned earlier", "you asked me to").
+- No addressing me. No "your run", "as requested", "per your question".
+- Describe the change and why it is right, not the process that produced it or
+  the order things were discovered in.
+- Corrections are stated as facts about the code or the docs, not as an account
+  of who believed what.
+
+Anything that only makes sense with our conversation as context belongs in
+`notes/`, which is gitignored.
+
+**No AI attribution trailers.** Do not put `Co-Authored-By: Claude ...` on commits
+or "Generated with Claude Code" in PR bodies. The assistance is disclosed once, in
+the README's "How this was built" section, and that is the only place it belongs.
+Repeating it on every commit and every pull request turns a normal fact about how
+the work was done into the loudest thing in the repository.
+
 ## Reporting
 
 Say what actually happened. If a check didn't run, say it didn't run — don't
