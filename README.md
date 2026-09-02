@@ -298,6 +298,19 @@ See `docs/how-the-engine-works.md`.
   * `ADR-0004` — independent workers that write their own shards
   * `ADR-0005` — the agent runs in the browser, not on a server
 
+## How this was built
+
+Written with AI assistance, using Claude Code as a pair programmer for
+implementation and review.
+
+What that did not cover: the experimental standards this project is held to. The
+two independent rules engines and the differential test between them, the seven
+correctness contracts, refusing to cite a training loss as evidence of strength,
+writing predictions down before a run rather than after it, and reporting the
+plateau and the non-transitivity against Greedy instead of quietly omitting them
+— those are the argument the repository is making, and `docs/` records the
+reasoning behind each one.
+
 ## License
 
 MIT

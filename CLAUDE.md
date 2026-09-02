@@ -57,6 +57,12 @@ someone who has never seen this chat**. That means:
 Anything that only makes sense with our conversation as context belongs in
 `notes/`, which is gitignored.
 
+**No AI attribution trailers.** Do not put `Co-Authored-By: Claude ...` on commits
+or "Generated with Claude Code" in PR bodies. The assistance is disclosed once, in
+the README's "How this was built" section, and that is the only place it belongs.
+Repeating it on every commit and every pull request turns a normal fact about how
+the work was done into the loudest thing in the repository.
+
 ## Reporting
 
 Say what actually happened. If a check didn't run, say it didn't run — don't
