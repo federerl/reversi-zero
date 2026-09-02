@@ -169,6 +169,15 @@ GPU). Bradley–Terry ratings fitted across a 28-pairing round robin, anchored a
 | Greedy | +313 | [+220, +468] |
 | Random | 0 | — |
 
+![Bradley-Terry ratings for eight agents with 95% bootstrap intervals. Generation 60 leads at
+roughly +877, generation 40 is close behind and its interval overlaps heavily, minimax-d4 sits near
++523, and Random is the zero point.](docs/figures/ratings.png)
+
+*Everyone placed on one scale by fitting all 28 pairings at once, rather than chaining head-to-head
+results — so the ordering does not depend on which matches happened to be played first. The bars for
+generations 40 and 60 overlap almost entirely; that overlap **is** the plateau, and it is why the
+claim below is made about generation 20 rather than 40.*
+
 Generation 60 beat the depth-4 searcher **30 games to nothing**, and its rating interval lies
 entirely above generation 20's — the strict form of "later is stronger", rather than two point
 estimates that happen to be in the right order.
@@ -180,6 +189,14 @@ The agent was given none of it and had to find those ideas from its own games.
 statistically indistinguishable — and it scores only 63% against Greedy despite beating Minimax-d4
 outright, because self-play narrows its training distribution away from the strange positions bad
 play produces. Both are written up in `docs/experiments.md`.
+
+![Score against each baseline from generation 5 to 60. The line against minimax-d4 climbs from 0.57
+to 1.00 while the line against Greedy falls from 0.90 to 0.63; the two cross around generation 20.](docs/figures/strength.png)
+
+*The crossing lines are that second limitation, drawn. As the agent got better against the searcher
+that plays well, it got **worse** against the one that plays badly — self-play stops producing the
+strange positions Greedy walks into, so the agent stops practising them. Shaded bands are 95% Wilson
+intervals; they are wide because each point is 30 games.*
 
 <details><summary>4×4 pipeline validation (a fixture, not a result)</summary>
 
@@ -212,6 +229,16 @@ a shard that no longer matches its checksum is dropped rather than trained on.
 Measured on the dev laptop, `smoke4x4`: ~40s per generation, so the 12-generation profile lands
 around 8 minutes on CPU.
 
+![Two panels. Policy cross-entropy falls smoothly from 2.5 to 1.2 over 60 generations. Value mean
+squared error drops sharply to 0.63 by generation 10, then drifts slowly back up to
+0.66.](docs/figures/losses.png)
+
+*Included as a diagnostic, and labelled as one on the figure itself. A falling policy loss means the
+network is getting better at predicting what its own search will conclude — which is not the same
+thing as playing better, and the arena above is what answers that. The value loss falling and then
+drifting back up is expected rather than a bug: as play improves, games get closer, so guessing the
+winner from a position genuinely gets harder.*
+
 ## Throughput
 
 Self-play is where essentially all the compute goes — one 8×8 generation is tens of millions of
@@ -229,6 +256,13 @@ the GPU was being starved.
 
 `bench/selfplay_bench.py` produces these numbers, and `bench/results/` holds them. Nothing in this
 repo is optimised without a before/after measurement to point at.
+
+![Self-play time per generation over 60 generations, holding between roughly 8.7 and 10
+minutes.](docs/figures/throughput.png)
+
+*About nine minutes per generation, and held there on purpose. The run had an eight-hour job limit,
+so generations were sized so that being interrupted costs at most one of them — the alternative is
+losing a night's work to a scheduler.*
 
 ## The rules engine
 
