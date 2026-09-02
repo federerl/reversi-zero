@@ -14,9 +14,7 @@
     "e2e": "playwright test",
     "stage-runtime": "node scripts/stage-runtime.mjs",
     "dev:vite": "node scripts/stage-runtime.mjs && vite",
-    "build:app": "node scripts/stage-runtime.mjs && node scripts/clean-dist.mjs && vite build",
-    "fetch-models": "node scripts/fetch-models.mjs",
-    "build:deploy": "node scripts/fetch-models.mjs && npm run build"
+    "build:app": "node scripts/stage-runtime.mjs && node scripts/clean-dist.mjs && vite build"
   },
   "dependencies": {
     "onnxruntime-web": "^1.20.0",
