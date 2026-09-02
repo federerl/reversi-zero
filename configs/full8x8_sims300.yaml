@@ -1,0 +1,65 @@
+# Run 2. One change from full8x8.yaml: 300 simulations per move instead of 200.
+#
+# Why this specific change
+# ------------------------
+# A "simulation" is one pass down the search tree, ask the network about the
+# position it reaches, and carry the answer back up. More of them per move means
+# the search's answer is better -- and the search's answer is the target the
+# network trains on, so better search should mean better training data, not just
+# better play during self-play.
+#
+# The plan calls this the dominant strength knob. Run 1 used 200 rather than 300
+# because of a benchmark that was later shown to be wrong: it gave each worker
+# too few games, so the number of games in flight quietly collapsed from 24 to
+# about 6, and every throughput number it produced was roughly 2.4x too low.
+# See the CORRECTION block in bench/results/worker-sweep.json.
+#
+# The real number, from run 1 itself: a generation took about 9 minutes at 200
+# simulations. Cost is close to linear in simulations, so 300 should land near
+# 13.5 minutes -- comfortably inside the 20-minute target that the reduction was
+# made to protect. The reduction was not needed.
+#
+# What we are actually testing
+# ----------------------------
+# Run 1 plateaued: generations 40 and 60 are statistically indistinguishable.
+# The question is whether that plateau came from spending compute in the wrong
+# place -- many cheap, noisy searches instead of fewer good ones.
+#
+# Compare at equal COMPUTE, not equal generation number. Generation 35 here costs
+# about what generation 53 cost in run 1. Comparing generation 35 to generation
+# 35 would hand this run a 1.5x compute advantage and prove nothing.
+#
+# Everything else is deliberately identical to full8x8.yaml. One variable, or the
+# result cannot be attributed to anything.
+
+name: full8x8-sims300
+
+net:
+  n_blocks: 6
+  channels: 64                # ~458k parameters (measured)
+
+mcts:
+  n_simulations: 300          # THE CHANGE. Run 1 used 200.
+  temp_moves: 15
+
+selfplay:
+  games_per_generation: 600   # unchanged, so generations stay comparable in games
+  n_workers: 6                # measured best; 8+ loses to contention
+  games_in_flight: 24         # measured best; 48 is no better and uses more RAM
+  max_generations: 400        # bounded in practice by how long you let it run
+
+replay:
+  window: 400000
+  retain_shards: 30           # per worker: the loop multiplies by n_workers
+
+train:
+  steps_per_generation: 800
+  batch_size: 1024
+  optimizer: sgd              # better generalisation than AdamW at this scale
+  lr: 0.02
+  momentum: 0.9
+  weight_decay: 0.0001
+
+arena:
+  every_n_generations: 5
+  games: 400                  # ~+/-5% Wilson half-width

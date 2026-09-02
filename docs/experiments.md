@@ -145,18 +145,56 @@ that plays reasonable openings and misjudges endgames.
 
 ---
 
-## Planned: Run 2 — the value head
+## Planned: Run 2 — the value head — `configs/full8x8_value4.yaml`
 
-**Question.** Does the plateau lift if the value term is weighted more heavily?
+**Written before the run, so the prediction cannot be adjusted afterwards.**
 
-**Change.** `train.value_loss_weight` from 1.0 to 4.0. Everything else identical,
-same seed, so the comparison is clean.
+**Question.** Run 1's value head stopped improving at generation 5 and never
+moved again, while the policy kept learning for fifty-five more generations. Does
+the plateau lift if the value term is weighted more heavily?
 
-**What would settle it.** If the value loss falls below 0.60 and generation 60 of
-run 2 beats generation 60 of run 1 with non-overlapping intervals, the weight was
-the constraint. If the value loss stays at 0.64, it is either capacity or
-irreducible noise, and the next test is a wider value head.
+**Change.** `train.value_loss_weight` from 1.0 to 4.0. Nothing else. The two
+resolved configs were compared field by field: of 45 settings, exactly two
+differ — that one, and the profile's name.
 
+**Why this and not more simulations.** Raising `n_simulations` to 300 is also
+worth doing, and run 1's config records that the reduction to 200 rested on a
+confounded benchmark. But it aims at the wrong target for *this* plateau. More
+simulations improve the **policy** target — a better-searched move distribution.
+The value target is not produced by the search at all; it is the game's final
+result. More search does not make it easier to predict, and the value head is
+what stopped moving. `configs/full8x8_sims300.yaml` is prepared for run 3.
+
+**Same seed (1337) and same self-play cost**, so generation 60 here compares
+directly against generation 60 of run 1 — same games, same simulations, same
+wall clock, one different number.
+
+**Predictions, in advance:**
+
+| if | then |
+|---|---|
+| value loss < 0.60 **and** this run's gen 60 beats run 1's with non-overlapping intervals | the weight was the constraint |
+| value loss < 0.60 but no strength gain | the value head learned more and it did not matter — the plateau is elsewhere |
+| value loss stays near 0.64 | capacity or irreducible noise; next test is a wider value head |
+| policy loss rises materially | 4.0 is too aggressive and the trunk was starved of the policy signal |
+
+The third and fourth rows are the ones worth watching. A negative result here is
+still a result: it eliminates the cheapest explanation and points at the head's
+size, which is the more expensive thing to change.
+
+**To run it:**
+
+```bash
+python -m reversi.cli train --config configs/full8x8_value4.yaml --generations 60
+```
+
+About nine minutes per generation, so roughly nine hours. If it is stopped early,
+resume with the run id it printed — `--generations` is a total, not an increment,
+so the same 60 means "finish the 60", not "do 60 more".
+
+```bash
+python -m reversi.cli train --config configs/full8x8_value4.yaml --generations 60 --run-id <the id>
+```
 
 ---
 

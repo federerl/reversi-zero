@@ -1,0 +1,90 @@
+# Run 2. One change from full8x8.yaml: the value term counts four times as much
+# in the loss.
+#
+# What the network is being asked to learn
+# ----------------------------------------
+# Every training position carries two targets. The *policy* target is what the
+# search concluded -- how it spread its visits over the legal moves. The *value*
+# target is who actually won that game, seen from the point of view of whoever
+# was to move. One trunk of shared layers feeds both heads, so the two targets
+# compete for the same weights, and the loss weights decide who wins that
+# competition.
+#
+# Why this is the change worth making
+# -----------------------------------
+# Run 1 plateaued, and the training curve says where: the value head stopped
+# improving at generation 5 and never moved again.
+#
+#   generation    policy loss    value loss
+#            1          2.481         0.800
+#            5          1.945         0.644   <- and then nothing
+#           20          1.592         0.643
+#           40          1.308         0.647
+#           60          1.216         0.661
+#
+# The policy kept learning for fifty-five more generations. The value head did
+# not. An agent that predicts moves well but cannot say who is winning is exactly
+# the shape that plays reasonable openings and misjudges endgames.
+#
+# The policy loss is roughly twice the value loss in magnitude for most of
+# training, and both are weighted 1.0, so the shared trunk has been optimising
+# mostly for the policy. Weighting the value term by 4.0 makes it the larger of
+# the two and forces the trunk to carry information about who is ahead.
+#
+# Why not more simulations instead
+# --------------------------------
+# Raising n_simulations from 200 to 300 is also on the list, and run 1's config
+# says the reduction to 200 was made on a confounded benchmark. But it aims at
+# the wrong target for *this* plateau. More simulations improve the **policy**
+# target directly -- a better-searched move distribution. The value target is not
+# produced by the search at all; it is the game's final result. So more search
+# does not make the value target any easier to predict, and the value head is
+# what stopped moving.
+#
+# `configs/full8x8_sims300.yaml` is ready for when this question is answered.
+# Run it as run 3, not tonight -- two changes at once cannot be attributed.
+#
+# What would settle it
+# --------------------
+# If the value loss falls below 0.60 **and** this run's checkpoint beats run 1's
+# generation 60 with non-overlapping intervals, the weight was the constraint.
+# If the value loss stays near 0.64, it is either capacity -- the value head is
+# one 1x1 convolution to a single plane, then 64 hidden units, a narrow channel
+# for "who is winning" -- or irreducible noise, and the next test is a wider head.
+#
+# A generation costs the same as run 1, because nothing about self-play changed.
+# So generation 60 here compares directly against generation 60 there: same
+# games, same simulations, same wall-clock, one different number.
+
+name: full8x8-value4
+
+net:
+  n_blocks: 6
+  channels: 64                # ~458k parameters (measured)
+
+mcts:
+  n_simulations: 200          # unchanged, so self-play cost matches run 1 exactly
+  temp_moves: 15
+
+selfplay:
+  games_per_generation: 600
+  n_workers: 6                # measured best; 8+ loses to contention
+  games_in_flight: 24         # measured best; 48 is no better and uses more RAM
+  max_generations: 400        # bounded in practice by how long you let it run
+
+replay:
+  window: 400000
+  retain_shards: 30           # per worker: the loop multiplies by n_workers
+
+train:
+  steps_per_generation: 800
+  batch_size: 1024
+  optimizer: sgd
+  lr: 0.02
+  momentum: 0.9
+  weight_decay: 0.0001
+  value_loss_weight: 4.0      # THE CHANGE. Run 1 used 1.0.
+
+arena:
+  every_n_generations: 5
+  games: 400                  # ~+/-5% Wilson half-width
