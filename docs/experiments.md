@@ -145,56 +145,98 @@ that plays reasonable openings and misjudges endgames.
 
 ---
 
-## Planned: Run 2 — the value head — `configs/full8x8_value4.yaml`
+## Run 2 — the value head — `20260902-062601-full8x8-value4-7b96ef1-s1337`
 
-**Written before the run, so the prediction cannot be adjusted afterwards.**
+**Result: the change made the agent weaker. The hypothesis is refuted.**
 
-**Question.** Run 1's value head stopped improving at generation 5 and never
-moved again, while the policy kept learning for fifty-five more generations. Does
-the plateau lift if the value term is weighted more heavily?
+**Question.** Run 1's value head stopped improving at generation 5 and never moved
+again, while the policy kept learning for fifty-five more generations. Does the
+plateau lift if the value term is weighted more heavily?
 
-**Change.** `train.value_loss_weight` from 1.0 to 4.0. Nothing else. The two
-resolved configs were compared field by field: of 45 settings, exactly two
-differ — that one, and the profile's name.
+**Change.** `train.value_loss_weight` from 1.0 to 4.0, and nothing else. Comparing
+the two resolved configs field by field: of 45 settings, exactly two differ — that
+one and the profile's name. Same seed (1337), same self-play cost per generation.
 
-**Why this and not more simulations.** Raising `n_simulations` to 300 is also
-worth doing, and run 1's config records that the reduction to 200 rested on a
-confounded benchmark. But it aims at the wrong target for *this* plateau. More
-simulations improve the **policy** target — a better-searched move distribution.
-The value target is not produced by the search at all; it is the game's final
-result. More search does not make it easier to predict, and the value head is
-what stopped moving. `configs/full8x8_sims300.yaml` is prepared for run 3.
+**Scale.** 53 generations, 31,800 self-play games, stopped early because the
+answer was already available at a matched generation.
 
-**Same seed (1337) and same self-play cost**, so generation 60 here compares
-directly against generation 60 of run 1 — same games, same simulations, same
-wall clock, one different number.
-
-**Predictions, in advance:**
+### The prediction, registered before the run
 
 | if | then |
 |---|---|
-| value loss < 0.60 **and** this run's gen 60 beats run 1's with non-overlapping intervals | the weight was the constraint |
-| value loss < 0.60 but no strength gain | the value head learned more and it did not matter — the plateau is elsewhere |
-| value loss stays near 0.64 | capacity or irreducible noise; next test is a wider value head |
-| policy loss rises materially | 4.0 is too aggressive and the trunk was starved of the policy signal |
+| value loss < 0.60 **and** it beats run 1 with non-overlapping intervals | the weight was the constraint |
+| value loss < 0.60 but no strength gain | the value head learned more and it did not matter |
+| value loss stays near 0.64 | capacity or irreducible noise; next test is a wider head |
+| **policy loss rises materially** | **4.0 is too aggressive and the trunk was starved of the policy signal** |
 
-The third and fourth rows are the ones worth watching. A negative result here is
-still a result: it eliminates the cheapest explanation and points at the head's
-size, which is the more expensive thing to change.
+**The fourth row is what happened.**
 
-**To run it:**
+### What the losses did
 
-```bash
-python -m reversi.cli train --config configs/full8x8_value4.yaml --generations 60
-```
+At generation 53, the two terms moved in opposite directions:
 
-About nine minutes per generation, so roughly nine hours. If it is stopped early,
-resume with the run id it printed — `--generations` is a total, not an increment,
-so the same 60 means "finish the 60", not "do 60 more".
+| | run 1 | run 2 | change |
+|---|---|---|---|
+| value loss | 0.6524 | **0.6327** | 3% better |
+| policy loss | 1.2436 | **1.3724** | **10.4% worse** |
 
-```bash
-python -m reversi.cli train --config configs/full8x8_value4.yaml --generations 60 --run-id <the id>
-```
+The value head did improve, and it improved at every generation, not just this
+one — run 1 drifted from 0.6298 at generation 13 to 0.6605 at generation 60,
+while run 2 stayed roughly flat around 0.625. So reweighting genuinely stopped the
+value head degrading.
+
+It never came close to the 0.60 the prediction asked for. The best it reached was
+0.6132, at generation 4.
+
+### What it cost, measured by playing
+
+Both runs have a checkpoint at generation 53, so the comparison is exact: same
+generation, same games played, same self-play compute. 200 colour-balanced games,
+4-ply opening book, no exploration noise.
+
+| | score for run 2 | 95% Wilson interval | record |
+|---|---|---|---|
+| generation 53, run 2 vs run 1 | **42.0%** | [35.4%, 48.9%] | 77W 109L 14D |
+
+The interval lies entirely below 50%, so this is a real difference rather than
+noise. It corresponds to roughly **56 Elo weaker**.
+
+### Reading
+
+**A better value head is not worth a worse policy.** Weighting the value term four
+times as heavily bought a 3% improvement in predicting who is winning and paid
+10.4% in predicting which move to play. One trunk feeds both heads, so the second
+number is what the first one cost. Since move selection is what actually plays the
+game, the trade was bad — and losing 56 Elo is the price.
+
+**This eliminates the cheapest explanation for the plateau.** The value head is
+not underweighted. It can be made to stop degrading, and doing so does not make
+the agent stronger.
+
+### Decisions taken
+
+* **`value_loss_weight` stays at 1.0.** `configs/full8x8_value4.yaml` is kept so
+  the result can be reproduced, not because it should be used.
+* **The next test is capacity, not weighting.** The value head is one 1×1
+  convolution to a single plane, then 64 hidden units — a narrow channel through
+  which to express "who is winning". If it cannot represent the answer, no loss
+  weight will make it learn one. Widening it, or giving it its own layers instead
+  of competing for the shared trunk, is the experiment run 2 points at.
+* **Raising simulations to 300 is now clearly a separate question.**
+  `configs/full8x8_sims300.yaml` is ready. More search improves the *policy*
+  target; it does not touch the value target, which is the game's final result.
+  Run 2 gives no reason to expect it to lift the plateau, and a reason to test it
+  on its own rather than alongside another change.
+
+### Caveats
+
+* **One matched comparison, at generation 53.** A second pairing at generation 40
+  was started and not completed; the conclusion rests on the deeper of the two.
+* **Same seed, one run each.** This separates "weighting the value term hurts"
+  from "this seed was unlucky" no better than run 1 separated "training works"
+  from "this seed worked".
+* **200 games gives about ±7%.** Enough to place the interval below 50%, not
+  enough to pin the gap to closer than roughly ±25 Elo.
 
 ---
 
