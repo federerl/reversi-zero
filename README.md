@@ -35,6 +35,14 @@ confidence intervals and Bradley–Terry ratings, never by pointing at a trainin
 > only 63% — a real non-transitivity that `docs/experiments.md` records and explains but does not
 > resolve.
 
+![The board mid-game against generation 60. Legal moves show as dots, the panel names the
+opponent as "Generation 60 - 877 Elo" with its 95% interval, and reports the agent's own estimate
+of who is winning.](docs/figures/demo.gif)
+
+*Playing generation 60 in the browser. Every opponent and every thinking-time setting is labelled
+with a measured rating and its interval, not an adjective — and the whole search runs locally, so
+nothing about the game leaves the page.*
+
 ## Quickstart
 
 ```bash
