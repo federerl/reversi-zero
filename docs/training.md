@@ -129,26 +129,56 @@ preserve shapes would not be caught at all.
 
 ## On a job scheduler
 
-There is no SLURM support **yet**, and that is a timing accident rather than a
-decision.
+Training runs on the CSSE Slurm cluster. The scripts live in `slurm/`, and
+`slurm/README.md` is the operator's page: which partition, which flags, how to
+submit, how to read a log. This section is about *why* the arrangement is what it
+is, and what has been verified.
 
-The GPU servers this project targets are offline for maintenance and are due back
-*as a Slurm cluster* before the start of term. Until they return there is nothing
-to write a batch script against and nothing to test it on, so the plan's
-criterion S9 — verify that a real job hits its wall clock, requeues, and resumes —
-is recorded as **deferred**, not as met and not as inapplicable.
+**The constraint.** Every partition has a 24-hour wall-clock limit, and a full
+8×8 run takes longer than that. So a run is a chain of identical jobs, each one
+resuming where the last stopped. `slurm/submit_chain.sh` submits them with
+`--dependency=afterany`, so job *k*+1 starts when job *k* ends for any reason.
 
-What a batch script will need already exists:
+**Why no new code was needed.** Three things the training loop already did make
+the chain safe:
 
-* `--signal=B:USR1@300` to get a warning five minutes before the wall clock.
-  `obs/signals.py` already treats `SIGUSR1` as "finish this generation and stop".
-* `--requeue` so the job comes back.
-* the same `reversi train -c ... --run-id ...` command, unchanged. It resumes on
-  its own, which is the part that actually took the work.
+* `--generations N` means "stop once the run has *N* generations in total". A
+  job that starts after the run is finished exits in seconds, so asking for one
+  job too many costs nothing.
+* `--run-id` reuses the run directory, and resume loads the newest checkpoint
+  that verifies (see above).
+* `SIGUSR1` means "finish this generation, then stop". The sbatch header asks
+  Slurm for that signal fifteen minutes before the limit (`--signal=B:USR1@900`),
+  and `rz_run` in `slurm/env.sh` forwards it from the batch shell to the training
+  process. Without the forwarding, the signal stops at the shell and the process
+  is killed mid-checkpoint when the limit arrives.
 
-In other words the hard half is done and the sbatch file is a dozen lines of
-directives. Writing it before there is a cluster to run it on would produce
-something untested, which for this particular file is worth nothing.
+**What was verified, on 2026-09-04, on gus.** Criterion S9 from the original plan
+was: a real job hits its wall clock, stops cleanly, and a later job resumes.
+
+1. `sbatch slurm/smoke4x4.sbatch` (job 6843): twelve generations of the 4×4
+   profile on one L40S in 2 minutes 15 seconds, checkpoint written, exit status 0.
+2. The same profile with a two-minute limit and the warning at sixty seconds
+   (job 6844): the warning arrived after generation 3, the loop finished
+   generation 4, wrote its checkpoint, and exited with status 0 forty seconds
+   before the limit would have killed it.
+3. The same run id resubmitted without a limit (job 6845): resumed at generation
+   5 and finished at 12.
+
+The resumed run reproduced the uninterrupted run's losses digit for digit
+(generation 5: 1.7663; generation 12: 1.3038). Stopping and resuming changed
+nothing about the result, which is the strongest evidence the resume path can
+give.
+
+**Which GPU node, and why.** The cluster has two: gebru (eight Quadro RTX 6000,
+48 CPU threads) and gus (six L40S, 255 CPU threads). Training goes to gus.
+Self-play is CPU-bound tree search, with the GPU only scoring positions in
+batches; six CPU threads per GPU on gebru would leave the card waiting on the
+workers. The request `--gres=gpu:nvidia_l40s:1` selects gus without naming it.
+
+**Where evaluation goes.** Round robins between agents are many independent
+games, one per core. They run on the `cpu` partition (984 cores across four
+nodes) through `slurm/cpu.sbatch`, not on a GPU.
 
 ## Troubleshooting
 
