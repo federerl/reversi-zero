@@ -240,6 +240,81 @@ the agent stronger.
 
 ---
 
+## Run 3 — the control — `control` (CSSE Slurm cluster)
+
+**Result: pending.** Submitted 2026-09-04. This section was written before the
+first generation finished.
+
+**Question.** Run 1 is one run with one seed on one laptop. How much of its curve
+is the recipe, and how much is noise? And what does a generation cost on the
+cluster hardware that every later run will use?
+
+**Change.** None. The profile is `full8x8.yaml` exactly as run 1 used it. Two
+things differ and neither is a hyperparameter: the machine (one NVIDIA L40S and
+22 self-play worker processes, against a laptop RTX A1000 and 6), and the seed,
+which is the profile's default 1337 as in run 1, so the games differ only through
+the worker split and floating-point order on different hardware.
+
+**Scale.** 120 generations as a chain of 24-hour jobs (`slurm/submit_chain.sh`),
+72,000 self-play games. Run 1 stopped at 60; this one runs on so the plateau run 1
+showed between generations 40 and 60 is seen a second time, or not.
+
+### The prediction, registered before the run
+
+| if | then |
+|---|---|
+| generation 60 rates within run 1's 95% interval (774–1028) against the same baselines | run 1 was representative; a single seed is enough to compare recipes against |
+| generation 60 rates clearly above or below run 1 | seed and hardware noise is large, and every recipe comparison in this document needs a second seed before it is believed |
+| the value loss again stops improving near generation 5 and drifts upward | the plateau is the recipe's, not the laptop's |
+| generations 60 to 120 rate above generation 60 with non-overlapping intervals | run 1 stopped early; the plateau was an artefact of stopping |
+
+The wall-clock per generation is recorded as the cluster baseline that E1's cost
+is compared against.
+
+---
+
+## Run 4 — E1, capacity — `e1-10x128` (CSSE Slurm cluster)
+
+**Result: pending.** Submitted 2026-09-04, queued behind run 3 for a GPU. This
+section was written before the first generation finished.
+
+**Question.** Run 2 concluded that the next thing to test is capacity, not
+weighting. Does a network with about 6.5 times the parameters learn a stronger
+agent from the same self-play budget?
+
+**Change.** `net.n_blocks` from 6 to 10 and `net.channels` from 64 to 128, and
+nothing else. About 2.97 M parameters against run 1's 458,696, and roughly 6.7
+times the arithmetic per position. Self-play cost is left identical: 200
+simulations per move, 600 games per generation. So generation *N* here has seen
+exactly as much play as generation *N* of runs 1 and 3, and the comparison at a
+matched generation is exact. The bigger network costs more wall-clock per
+generation; that is reported alongside, not hidden.
+
+**Fallback.** If the cluster bench shows a generation would exceed twenty minutes
+(the wall-clock signal arrives fifteen minutes before the limit, and the current
+generation must finish inside that window), the run is cancelled before it has
+produced anything and resubmitted as `full8x8_e1_8x96.yaml`: 8 blocks of 96
+channels, about 1.34 M parameters. The prediction below applies unchanged.
+
+**Scale.** 120 generations, 72,000 games, as a chain of 24-hour jobs.
+
+### The prediction, registered before the run
+
+Compared against run 3, the control, which is the same recipe on the same
+hardware:
+
+| if | then |
+|---|---|
+| at generations 40 and 60, the Bradley–Terry interval lies entirely above the control's, **and** value loss falls below 0.60 by generation 30 | capacity was the constraint on both heads |
+| strength rises with non-overlapping intervals but value loss does not fall below 0.60 | capacity helped the policy only; the value head's problem is something else |
+| value loss falls below 0.60 but strength does not rise | the value head learned more and it did not matter — run 2's second row, reached by a different route |
+| neither moves | capacity is not the constraint at this self-play budget; the next test is more simulations or more games per generation (`full8x8_sims300.yaml`), not a bigger network |
+
+Run 1 never went below 0.64 on the value loss. Its policy loss was still falling
+at generation 60.
+
+---
+
 ## Calibration: are the four difficulty levels actually different opponents?
 
 **Run:** 2026-08-31, `models/reversi-8x8-gen60.pt`, 21 pairings × 300 games,
