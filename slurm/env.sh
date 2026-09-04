@@ -32,7 +32,7 @@ fi
 
 mkdir -p "$RZ_RUN_ROOT" slurm/logs
 
-echo "job ${SLURM_JOB_ID:-?} on ${SLURMD_NODENAME:-?}: ${SLURM_CPUS_PER_TASK:-?} cpus, gres ${SLURM_JOB_GRES:-none}, restart count ${SLURM_RESTART_COUNT:-0}"
+echo "job ${SLURM_JOB_ID:-?} on ${SLURMD_NODENAME:-?}: ${SLURM_CPUS_PER_TASK:-?} cpus, gpus ${SLURM_GPUS_ON_NODE:-0} (CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-unset}), restart count ${SLURM_RESTART_COUNT:-0}"
 echo "run root: $RZ_RUN_ROOT"
 
 # Run a command so that it receives the scheduler's signals.
