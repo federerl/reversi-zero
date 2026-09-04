@@ -1,0 +1,31 @@
+{
+  "what": "env.json written by the job that resumed the interrupted 4x4 smoke run on the CSSE Slurm cluster (criterion S9). Job 6844 was stopped by the wall-clock signal after generation 4; this job, 6845, resumed at generation 5 and finished at 12. See docs/training.md, 'On a job scheduler'.",
+  "cpu_affinity": 8,
+  "cpu_count_logical": 256,
+  "hostname": "gus",
+  "machine": "x86_64",
+  "platform": "Linux-6.1.0-52-amd64-x86_64-with-glibc2.36",
+  "processor": "",
+  "python": "3.11.2",
+  "python_executable": "/home/liul4/reversi-zero/.venv/bin/python",
+  "ram_bytes": 1081989505024,
+  "slurm": {
+    "SLURM_CPUS_ON_NODE": "8",
+    "SLURM_JOB_ID": "6845",
+    "SLURM_JOB_NAME": "rz-smoke",
+    "SLURM_JOB_NODELIST": "gus",
+    "SLURM_JOB_PARTITION": "gpu"
+  },
+  "torch": {
+    "available": true,
+    "cuda_available": true,
+    "cuda_version": "12.4",
+    "cudnn_version": 90100,
+    "gpu_count": 1,
+    "gpu_names": [
+      "NVIDIA L40S"
+    ],
+    "gpu_total_memory_bytes": 47695921152,
+    "version": "2.6.0+cu124"
+  }
+}

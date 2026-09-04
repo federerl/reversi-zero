@@ -168,7 +168,9 @@ was: a real job hits its wall clock, stops cleanly, and a later job resumes.
 The resumed run reproduced the uninterrupted run's losses digit for digit
 (generation 5: 1.7663; generation 12: 1.3038). Stopping and resuming changed
 nothing about the result, which is the strongest evidence the resume path can
-give.
+give. The `env.json` the resuming job wrote is kept as
+`docs/slurm_smoke_evidence.json`: node, partition, job id, torch and CUDA
+versions, and the GPU.
 
 **Which GPU node, and why.** The cluster has two: gebru (eight Quadro RTX 6000,
 48 CPU threads) and gus (six L40S, 255 CPU threads). Training goes to gus.
