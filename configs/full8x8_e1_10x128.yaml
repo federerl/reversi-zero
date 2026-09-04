@@ -1,0 +1,56 @@
+# Experiment E1: does a bigger network learn a stronger agent?
+#
+# Everything here is `full8x8.yaml`, the run 1 profile, except the network:
+# 10 residual blocks of 128 channels instead of 6 of 64. That is about 2.97 M
+# parameters against 459k, and roughly 6.7x the arithmetic per position.
+#
+# Why this is the first cluster experiment. Run 2 changed how the value head was
+# weighted and made the agent weaker; its write-up concluded that the next thing
+# to test is capacity, not weighting. A bigger network is also the cheapest
+# possible experiment: one config changes, no code does.
+#
+# What "matched" means. Self-play cost is left identical to run 1 (200
+# simulations, 600 games per generation), so generation 40 here saw the same
+# amount of play as generation 40 of run 1 and the two can be compared directly.
+# The bigger network costs more wall-clock per generation; that is reported, not
+# hidden.
+#
+# The prediction, written before the run: at generations 40 and 60, this run's
+# Bradley-Terry interval lies entirely above run 1's, and the value loss falls
+# below 0.60 by generation 30 (run 1 never went under 0.64). If strength rises
+# but value loss does not, capacity helped the policy only.
+#
+# Worker count is not set here. The sbatch script sets it from the cores the job
+# was given, because the right number depends on the node, not on the experiment.
+
+name: full8x8-e1-10x128
+
+net:
+  n_blocks: 10                # THE CHANGE. Run 1 used 6.
+  channels: 128               # THE CHANGE. Run 1 used 64.
+
+mcts:
+  n_simulations: 200          # unchanged, so self-play cost matches run 1
+  temp_moves: 15
+
+selfplay:
+  games_per_generation: 600
+  n_workers: 6                # overridden per job by slurm/train.sbatch
+  games_in_flight: 24
+  max_generations: 400
+
+replay:
+  window: 400000
+  retain_shards: 30
+
+train:
+  steps_per_generation: 800
+  batch_size: 1024
+  optimizer: sgd
+  lr: 0.02
+  momentum: 0.9
+  weight_decay: 0.0001
+
+arena:
+  every_n_generations: 5
+  games: 400
