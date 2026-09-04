@@ -36,7 +36,7 @@ If I have to re-read a sentence to parse it, it's too dense.
 - **Quality gates:** `ruff check`, `ruff format --check`, `pyright`, `pytest -m "not slow and not gpu"`. All must pass before you tell me something is done. `uv` is not installed yet; a throwaway venv in the scratchpad is the workaround, and it must not touch my conda base.
 - **CPU-only rule:** every test and the whole CI pipeline run without a GPU. `reversi.game` and `reversi.config` must not import torch.
 - **Never commit:** checkpoints, replay data, run folders (`runs/`, `models/`, `*.pt`, `*.npz`). `.gitignore` and `.gitattributes` already cover this — don't loosen them.
-- **The plan:** `.claude/plans/assume-one-rtx-6000-l40a-crispy-dusk.md` holds the 14-day roadmap, the task backlog, and the correctness contracts. Follow it; flag it if something in it turns out to be wrong.
+- **The plan:** `docs/roadmap-1.0.md` holds the 1.0 scope, the pre-registered experiments, the week-by-week schedule, and the cut order. Follow it; flag it if something in it turns out to be wrong. The correctness contracts live in `docs/architecture.md`.
 
 ## The repo is public and read by strangers
 

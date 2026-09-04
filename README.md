@@ -296,6 +296,7 @@ See `docs/how-the-engine-works.md`.
 * `docs/how-the-engine-works.md` — bitboards, passing, perspective, and the eight board rotations
 * `docs/training.md` — running a job, stopping one, resuming, and what a run leaves behind
 * `docs/experiments.md` — one entry per run: hypothesis, config delta, outcome, decision
+* `docs/roadmap-1.0.md` — what 1.0 adds, which experiments run and what they predict, and what gets cut first
 * `docs/architecture.md` — layering, dependency rules, and the seven correctness contracts
 * `docs/model_card.md` — training compute, data provenance, measured strength, limitations
 * `docs/references.md` — which ideas came from papers, which from engine practice, and which from folklore
