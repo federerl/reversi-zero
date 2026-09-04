@@ -158,7 +158,7 @@ slurm/env.sh           module loads; uv sync --extra cu124 --extra obs; export R
 slurm/smoke4x4.sbatch  day-1 test: 1 GPU, 30 min, reversi train -c configs/smoke4x4.yaml
 slurm/bench.sbatch     bench/selfplay_bench.py on a node -> bench/results/cluster-<gpu>.json
 slurm/train.sbatch     the real job
-slurm/arena.sbatch     CPU partition: reversi arena --suite crossgen
+slurm/cpu.sbatch       CPU partition: any CPU-only command, e.g. reversi arena --suite crossgen
 slurm/submit_chain.sh  submits K copies of train.sbatch with --dependency=afterany
 slurm/fetch_run.sh     rsync checkpoints/{latest,best}.*, metrics/, arena/, config.yaml, meta.json
 slurm/README.md        how to submit, read logs, and resume by hand
