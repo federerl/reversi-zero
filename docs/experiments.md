@@ -242,9 +242,10 @@ the agent stronger.
 
 ## Run 3 — the control — `control` (CSSE Slurm cluster)
 
-**Result: run 1 was representative, and the plateau is the recipe's.** The
-prediction table below was written before the first generation finished; the
-result sections after it were written on 2026-09-04 once the run had been rated.
+**Result: run 1 was representative to within about 25 Elo, and the plateau is the
+recipe's.** The prediction table below was written before the first generation
+finished; the result sections after it were written on 2026-09-04 once the run
+had been rated.
 
 **Question.** Run 1 is one run with one seed on one laptop. How much of its curve
 is the recipe, and how much is noise? And what does a generation cost on the
@@ -335,10 +336,32 @@ running on, is **not met**. The plateau run 1 showed between 40 and 60 is real; 
 sits nearer generation 100 on this longer run, and the recipe does not climb past
 it at this self-play budget.
 
+### The 1000-game matches
+
+A 100-game pairing cannot see a 55% effect. So the two questions above were
+replayed as single pairings of 1000 games each, split across 62 CPU processes
+(same protocol otherwise: colour-balanced, 4-ply seeded openings, 50 simulations,
+no exploration noise; `docs/ratings/head-to-head-1000.json`):
+
+| pairing | score | 95% Wilson | record |
+|---|---|---|---|
+| control gen 60 vs run 1 gen 60 | **53.4%** | [50.4%, 56.5%] | 526W 457L 17D |
+| control gen 120 vs control gen 60 | **55.1%** | [52.0%, 58.2%] | 521W 419L 60D |
+
+Both intervals exclude 50%, barely in the first case. The control's generation 60
+is a little stronger than run 1's, by about 24 Elo; the same recipe, on different
+hardware with a different worker split, does not land on the same agent. That is
+the size of the noise floor for a single-seed comparison on this project, and
+the number every later recipe comparison has to clear before it means anything.
+
+The second row says the sixty extra generations were worth about 36 Elo. Real,
+small, and finished by generation 100, where the cross-generation table goes flat.
+
 ### Decisions taken
 
-* Run 1 stands as a representative result. Recipe comparisons on this project
-  can be made against a single seed, with the interval doing the work.
+* Run 1 stands as a representative result, with one qualification: two instances
+  of the same recipe differ by about 25 Elo. A recipe change that shows less than
+  that against a single control has not shown anything.
 * 120 generations is the length for the capacity experiments, because that is
   where this recipe stops improving. Anything a change buys after that is the
   change's, not the extra generations'.
@@ -351,10 +374,11 @@ it at this self-play budget.
 
 ## Run 4 — E1, capacity — `e1-10x128` (CSSE Slurm cluster)
 
-**Result: the value head learned more, and the agent is a little stronger, but
-not decisively at 100 games per pairing.** The prediction table below was written
-before the first generation finished; the result sections after it on 2026-09-04
-once the run had been rated. Longer head-to-head matches follow below.
+**Result: the value head learned more, and the agent is stronger at a matched
+generation, by about 30 to 40 Elo. That is real at 1000 games, and it is about the
+size of the noise between two instances of the same recipe.** The prediction table
+below was written before the first generation finished; the result sections after
+it were written on 2026-09-04 once the run had been rated.
 
 **Question.** Run 2 concluded that the next thing to test is capacity, not
 weighting. Does a network with about 6.5 times the parameters learn a stronger
@@ -440,6 +464,49 @@ match that can.
 E1's own cross-generation table (`docs/ratings/run4-e1-10x128-crossgen.json`) shows
 the same shape as the control's: a rise to generation 100 and a plateau after it
 (generations 100, 114, 120 at 891, 892, 905).
+
+### The 1000-game matches
+
+The same two matched pairings, replayed as 1000 games each across 62 CPU
+processes (`docs/ratings/head-to-head-1000.json`):
+
+| pairing | score for E1 | 95% Wilson | record | about |
+|---|---|---|---|---|
+| E1 gen 60 vs control gen 60 | **55.6%** | [52.5%, 58.7%] | 533W 421L 46D | +39 Elo |
+| E1 gen 120 vs control gen 120 | **54.1%** | [51.1%, 57.2%] | 523W 440L 37D | +29 Elo |
+
+Both intervals exclude 50%. The bigger network is stronger at a matched
+generation, and the direction did not change between 60 and 120.
+
+### Reading
+
+Against the prediction table: the value-loss half of the first row is met, and
+the strength half is met on the 1000-game evidence but not in the form it was
+written, which asked for Bradley–Terry intervals that do not overlap at 100 games
+per pairing. Recorded as **row 1, weakly**: capacity was a constraint on both
+heads, and lifting it bought 30 to 40 Elo.
+
+Two things keep that from being a headline. First, run 3 measured the noise
+between two instances of the *same* recipe at about 24 Elo, so E1's gain is
+roughly one noise-width, established only because 1000 games were played.
+Second, E1 plateaus at the same generation the control does, around 100, so more
+capacity moved the ceiling up a little rather than removing it. At 6.7 times the
+arithmetic per position, that is an expensive 35 Elo.
+
+### Decisions taken
+
+* The 1.0 network is chosen on strength per browser-millisecond, not on this
+  table alone. E1's generation 120 is the current best checkpoint, and it costs a
+  WebGPU path to serve; that trade is measured in `docs/web-app.md` before it is
+  taken.
+* The value head's ceiling is not capacity alone: E1's value loss fell to 0.57
+  and the agent gained 35 Elo, not 150. The next experiment changes what the
+  value head is *asked to predict* (E2, the ownership head), not how big it is.
+* Every future recipe comparison plays at least 1000 games at a matched
+  generation, or reports that it cannot tell.
+* The late rise in E1's value loss (0.571 at generation 100 to 0.620 at 120) is
+  written down and unexplained. It did not cost strength that the arena can see.
+
 
 
 ---
