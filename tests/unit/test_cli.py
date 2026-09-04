@@ -6,6 +6,7 @@ pin the surface so the sbatch scripts cannot silently drift from it.
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -82,12 +83,91 @@ def test_init_run_creates_a_run_directory(run_root: Path) -> None:
     assert (created / "meta.json").is_file()
 
 
-@pytest.mark.parametrize("command", ["bench", "arena", "play"])
+@pytest.mark.parametrize("command", ["bench", "play"])
 def test_unimplemented_commands_fail_loudly_and_name_their_task(command: str) -> None:
     """A stub must never look like a successful no-op."""
     result = runner.invoke(app, [command])
     assert result.exit_code == 2
     assert "not implemented" in result.output
+
+
+def test_arena_says_what_it_needs_instead_of_pretending() -> None:
+    """``arena`` is real, so it must not be in the stub list above. With nothing to
+    rate it should fail on the missing checkpoint, not with a "not implemented"
+    notice."""
+    result = runner.invoke(app, ["arena", "-c", "configs/smoke4x4.yaml"])
+    assert result.exit_code == 2
+    assert "not implemented" not in result.output
+    assert "--checkpoint" in result.output
+
+
+def test_arena_rates_a_tiny_run_against_the_baselines(run_root: Path) -> None:
+    """One generation of training, then the baselines suite on what it produced.
+
+    Two games per pairing and two simulations per move: this checks the command
+    wires up -- run directory, checkpoint, entrants, tournament, report -- not
+    that the network is any good.
+    """
+    trained = runner.invoke(
+        app,
+        [
+            "train",
+            "-c",
+            "configs/smoke4x4.yaml",
+            "--generations",
+            "1",
+            "--resume",
+            "off",
+            "-s",
+            "selfplay.games_per_generation=2",
+            "-s",
+            "train.steps_per_generation=2",
+            "-s",
+            "train.batch_size=8",
+            "-s",
+            "mcts.n_simulations=4",
+            "-s",
+            "net.n_blocks=1",
+            "-s",
+            "net.channels=8",
+        ],
+    )
+    assert trained.exit_code == 0, trained.output
+    run = next(run_root.iterdir())
+
+    result = runner.invoke(
+        app,
+        [
+            "arena",
+            "-c",
+            "configs/smoke4x4.yaml",
+            "--suite",
+            "baselines",
+            "--run-id",
+            run.name,
+            "--games",
+            "2",
+            "--simulations",
+            "2",
+            "--opening-plies",
+            "0",
+            "--bootstrap",
+            "0",
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert "rating table (anchor: random = 0)" in result.output
+
+    report_path = run / "arena" / "baselines_gen01.json"
+    assert report_path.is_file()
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    rated = {row["name"] for row in report["ratings"]}
+    assert rated == {"random", "greedy", "minimax-d4", "gen01"}
+    assert len(report["matchups"]) == 6
+    assert report["agent_specs"]["gen01"]["kind"] == "alphazero"
+    assert report["agent_specs"]["gen01"]["simulations"] == 2
+    assert report["agent_specs"]["gen01"]["generation"] == 1
+    assert report["agent_specs"]["minimax-d4"]["depth"] == 4
 
 
 def test_calibrate_is_real_and_asks_for_a_model() -> None:

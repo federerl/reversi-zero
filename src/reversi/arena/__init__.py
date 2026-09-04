@@ -23,14 +23,22 @@ rather than an eyeball comparison of two win rates.
 from __future__ import annotations
 
 from reversi.arena.elo import Rating, RatingTable, fit_bradley_terry
+from reversi.arena.entrants import EntrantSpec, build_agent, describe_entrant, parse_entrant
 from reversi.arena.match import MatchResult, play_match
 from reversi.arena.openings import Opening, apply_opening, random_openings
 from reversi.arena.report import MatchReport, check_fairness, write_report
 from reversi.arena.stats import Interval, bootstrap_interval, wilson_interval
-from reversi.arena.tournament import Entrant, TournamentResult, round_robin, write_tournament
+from reversi.arena.tournament import (
+    Entrant,
+    TournamentResult,
+    round_robin,
+    round_robin_parallel,
+    write_tournament,
+)
 
 __all__ = [
     "Entrant",
+    "EntrantSpec",
     "Interval",
     "MatchReport",
     "MatchResult",
@@ -40,11 +48,15 @@ __all__ = [
     "TournamentResult",
     "apply_opening",
     "bootstrap_interval",
+    "build_agent",
     "check_fairness",
+    "describe_entrant",
     "fit_bradley_terry",
+    "parse_entrant",
     "play_match",
     "random_openings",
     "round_robin",
+    "round_robin_parallel",
     "wilson_interval",
     "write_report",
     "write_tournament",
