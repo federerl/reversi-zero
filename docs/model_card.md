@@ -135,7 +135,23 @@ continued to fall. More training at these settings would likely produce
 generation 60 again.
 
 **One run, one seed.** Nothing here separates "the method works" from "this seed
-worked". A second run at a different seed would.
+worked". A second run at a different seed would. A second run *was* made — see
+run 2 in `docs/experiments.md` — but it changed a hyperparameter rather than the
+seed, so it tests a different question.
+
+**The easy levels are inconsistent, and that is unmeasured.** Casual and Club
+sample among their top few moves rather than playing the best one, which is what
+makes them weak rather than stupid — but it also means they play a noticeably
+different game each time. Every difficulty rating here is a **mean over 300 games
+per pairing**; nothing measured the spread, so how consistent a level feels is a
+question this project has not asked. Reported by a player, recorded in
+`docs/experiments.md`, **not fixed**.
+
+**Only four of the twenty-four offered combinations were rated.** Calibration ran
+on generation 60. The web app lets the opponent generation and the thinking-time
+level be chosen independently, so a pairing like generation 5 at Club carries two
+ratings from two different round robins and no measurement of the combination
+itself.
 
 **The ratings are relative.** The scale is anchored at a random player written
 for this project and shaped by a minimax written for this project. It is not

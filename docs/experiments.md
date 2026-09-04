@@ -317,6 +317,60 @@ guardrail first and narrow by visit count second.
   on nothing else. Max at +1053 here and generation 60 at +877 there are not
   the same measurement.
 
+### Reported from play: the easy levels feel inconsistent
+
+A player using **generation 5 at Club** described the agent as sometimes
+unbeatable, sometimes ordinary, and sometimes losing badly — across games at a
+single setting. That is a real effect with three separate causes, none of them a
+bug, and none of them measured.
+
+**Casual and Club deliberately do not play their best move.** They sample:
+
+| level | simulations | temperature | top-k | guard | plays |
+|---|---|---|---|---|---|
+| Casual | 16 | 0.8 | 3 | 0.35 | samples among 3 |
+| Club | 64 | 0.35 | 2 | 0.20 | samples between 2 |
+| Strong | 256 | 0.0 | — | 0.05 | best move |
+| Max | 800 | 0.0 | — | 0.0 | best move |
+
+Sampling is what makes a weak level *weak* rather than *stupid* — the value
+guardrail keeps the alternatives reasonable, so it plays a second-best move rather
+than throwing away a corner. But a level that picks between two moves plays a
+different game every time, and at 64 simulations the second choice is sometimes
+nearly as good and sometimes clearly worse. **Strong and Max are deterministic and
+should not show this at all**, which is a prediction worth testing rather than an
+assumption.
+
+**The ratings describe a mean and say nothing about spread.** Club is +623 over
+300 games per pairing. That is an average. Nothing in the calibration measured
+how much one game differs from the next, so "how consistent is this level" is a
+question this project has never asked. Two levels with identical ratings and very
+different variances would be indistinguishable in the report and obviously
+different to play.
+
+**The combination that was played has never been rated.** Calibration ran on
+`reversi-8x8-gen60.pt` — one checkpoint, four levels. The interface lets the
+opponent generation and the thinking-time level be chosen independently, so
+generation 5 at Club is a combination no measurement covers. The two numbers on
+screen come from two different round robins: generation 5's +547 from the
+cross-generation table, Club's +623 from the calibration, and those scales agree
+on the anchor and on nothing else. Their combination is not +547, not +623, and
+not any number this repository has produced.
+
+**For 1.0.** Three things would close this, in order of how much they buy:
+
+1. Measure the *spread*, not just the mean — the same pairing repeated, reporting
+   the distribution of results rather than one rating. A level whose games vary
+   wildly is a different product from one that does not, and right now the report
+   cannot tell them apart.
+2. Rate the combinations that the interface actually offers, or stop offering the
+   ones that were never rated. Four levels times six opponents is 24 combinations
+   presented as if each were characterised; four were.
+3. Reconsider whether sampling is the right way to make a level weak. Fewer
+   simulations lowers strength without adding variance; temperature lowers it by
+   adding variance. The current levels change both at once, so their separate
+   contributions are unknown.
+
 
 ---
 
