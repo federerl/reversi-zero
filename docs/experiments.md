@@ -513,7 +513,12 @@ arithmetic per position, that is an expensive 35 Elo.
 
 ## Run 5 — E2, the ownership head — `e2-ownership` (CSSE Slurm cluster)
 
-**Result: pending.** This section was written before the run was submitted.
+**Result: the largest gain of any change so far, for 65 parameters and no extra
+self-play cost: +45 Elo at generation 60 and +74 at generation 120 over the
+control, both decisive at 1000 games. And it did not happen the way the
+prediction said it would.** The prediction table below was written before the run
+was submitted; the result sections after it were written on 2026-09-05 once the
+run had been rated.
 
 **Question.** Runs 1 and 3 showed the value head stops improving at generation 5
 and sits at a loss of 0.65 for the rest of the run. Run 2 showed that weighting
@@ -555,6 +560,106 @@ Compared against run 3, the control, at matched generations 60 and 120, in
 
 Value loss below 0.60 by generation 30 is expected in every row but the last; run
 1 and run 3 never went below 0.62.
+
+### What it cost
+
+Nothing measurable. 3.5 minutes of self-play per generation, the same as the
+control; 120 generations in 8 hours 20 minutes on one L40S. The head is 65
+weights.
+
+### The losses did not do what the prediction expected
+
+| generation | control value / policy | E2 value / policy | E2 ownership |
+|---|---|---|---|
+| 10 | 0.630 / 1.834 | 0.651 / 1.793 | 0.881 |
+| 30 | 0.644 / 1.365 | 0.640 / 1.347 | 0.865 |
+| 60 | 0.655 / 1.213 | 0.646 / 1.168 | 0.867 |
+| 100 | 0.643 / 1.097 | 0.640 / 1.111 | 0.868 |
+| 120 | 0.651 / 1.096 | 0.649 / 1.124 | 0.865 |
+
+The value loss tracks the control's at 0.65 from start to finish. It never came
+near the 0.60 that every winning row of the prediction table assumed. The
+ownership term fell from 1.08 to 0.87 in the first fifteen generations and then
+sat at 0.865 for the remaining hundred.
+
+### Why the ownership term sits at 0.87: the target is mostly unpredictable
+
+A diagnostic (`docs/ratings/ownership-diag-e2-g120.json`): the generation-120
+head scored on the 34,720 positions of its own last generation, grouped by how
+far into the game each position is, against two reference predictors. "All
+empty" says every square ends up unowned; on a finished board every square is
+occupied, so its error is 1.0 by construction. "Board as is" says every disc
+stays the colour it is now and every empty square stays empty.
+
+| moves into the game | head | all empty | board as is |
+|---|---|---|---|
+| 0–9 | 0.996 | 1.000 | 1.137 |
+| 10–19 | 0.988 | 1.000 | 1.293 |
+| 20–29 | 0.970 | 1.000 | 1.444 |
+| 30–39 | 0.923 | 1.000 | 1.564 |
+| 40–49 | 0.801 | 1.000 | 1.527 |
+| 50–59 | 0.452 | 1.000 | 1.018 |
+
+For the first thirty moves the head is no better than "all empty". And "board as
+is" is the *worst* predictor at every stage, worse than saying nothing: discs flip
+so much in Reversi that a square's current colour is anti-informative about its
+final colour. That is the difference from Go, where the idea comes from and where
+territory settles early. In Reversi, who owns a square is close to unknowable
+until the last ten moves, and the head learned exactly the part that is knowable.
+
+### Strength: decisively better anyway
+
+1000-game head-to-head matches against the control at matched generations
+(`docs/ratings/head-to-head-e2-1000.json`; colour-balanced, 4-ply seeded
+openings, 50 simulations, no exploration noise):
+
+| pairing | score for E2 | 95% Wilson | record | about |
+|---|---|---|---|---|
+| E2 gen 60 vs control gen 60 | **56.4%** | [53.3%, 59.4%] | 539W 412L 49D | +45 Elo |
+| E2 gen 120 vs control gen 120 | **60.5%** | [57.4%, 63.4%] | 578W 369L 53D | +74 Elo |
+
+Both intervals exclude 50% by a wide margin. At generation 120 the gap is three
+times the 24 Elo noise floor run 3 measured between two instances of the same
+recipe, and about double what run 4 bought with a network 6.7 times the size.
+E2's own cross-generation table (`docs/ratings/run5-e2-ownership-crossgen.json`)
+has the same shape as the others, a climb to generation 100 and a plateau after
+it, at generations 100, 114 and 120 rated 984, 956 and 968 against Random.
+
+### Reading
+
+The first prediction row is what happened on strength: E2 beats the control at
+both generations with intervals excluding 50%, and by more than run 4's 30 to 40
+Elo. The row's *mechanism* was wrong. It assumed the gain would come through a
+better value predictor, visible as a lower value loss. The value loss did not
+move, and the ownership target turned out to be mostly noise until the endgame.
+
+What the head did instead was shape the trunk. The trunk is the part of the
+network both heads read from, and every position now pushes it toward features
+that say something about the endgame, which the single win/loss number does not.
+The policy head, reading a better trunk, got better. The evidence for that
+reading is indirect: E2's policy loss is not lower than the control's either, so
+"better" here means the policy's *mistakes* changed in a way the search converts
+into wins, not that the network matches its own search more closely. That is a
+statement about play, and play is what was measured.
+
+Two cautions. This is one seed. Run 3 established that two instances of a recipe
+differ by about 24 Elo, and the +74 at generation 120 is comfortably past that,
+but the +45 at generation 60 is not far past it. And the gain is at 50
+simulations; the difficulty ladder plays at 16 to 800.
+
+### Decisions taken
+
+* The ownership head is part of the 1.0 recipe. It costs nothing measurable and
+  is the biggest single gain found.
+* The next run combines it with E1's capacity, E1+E2, 10×128 with the head, to
+  see whether the two gains add. Its prediction is registered before it starts.
+* The "value loss below 0.60" expectation is retired as a proxy for a better
+  agent on this project. Runs 4 and 5 together show it is neither necessary (E2)
+  nor sufficient (E1, which lowered it to 0.57 for 35 Elo).
+* The diagnostic's "board as is" row is worth remembering when anyone proposes a
+  feature plane or target built on current disc ownership: in Reversi, the board
+  as it stands is a bad guide to the board as it ends.
+
 
 ---
 

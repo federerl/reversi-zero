@@ -1,0 +1,36 @@
+[
+ {
+  "a": "e2-g60",
+  "b": "control-g60",
+  "wins": 539,
+  "losses": 412,
+  "draws": 49,
+  "games": 1000,
+  "wins_as_black": 255,
+  "wins_as_white": 284,
+  "score": 0.5635,
+  "ci_low": 0.5325760910863078,
+  "ci_high": 0.5939379105860267,
+  "simulations": 50,
+  "opening_plies": 4,
+  "chunks": 50,
+  "seed": 20260905
+ },
+ {
+  "a": "e2-g120",
+  "b": "control-g120",
+  "wins": 578,
+  "losses": 369,
+  "draws": 53,
+  "games": 1000,
+  "wins_as_black": 303,
+  "wins_as_white": 275,
+  "score": 0.6045,
+  "ci_low": 0.5738501387951881,
+  "ci_high": 0.6343500686813309,
+  "simulations": 50,
+  "opening_plies": 4,
+  "chunks": 50,
+  "seed": 20260905
+ }
+]

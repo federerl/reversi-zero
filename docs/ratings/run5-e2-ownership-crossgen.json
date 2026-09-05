@@ -1,0 +1,698 @@
+{
+ "agent_specs": {
+  "gen05": {
+   "checkpoint": "gen_00005.pt",
+   "generation": 5,
+   "kind": "alphazero",
+   "run_id": "e2-ownership",
+   "simulations": 50
+  },
+  "gen100": {
+   "checkpoint": "gen_00100.pt",
+   "generation": 100,
+   "kind": "alphazero",
+   "run_id": "e2-ownership",
+   "simulations": 50
+  },
+  "gen114": {
+   "checkpoint": "gen_00114.pt",
+   "generation": 114,
+   "kind": "alphazero",
+   "run_id": "e2-ownership",
+   "simulations": 50
+  },
+  "gen120": {
+   "checkpoint": "gen_00120.pt",
+   "generation": 120,
+   "kind": "alphazero",
+   "run_id": "e2-ownership",
+   "simulations": 50
+  },
+  "gen35": {
+   "checkpoint": "gen_00035.pt",
+   "generation": 35,
+   "kind": "alphazero",
+   "run_id": "e2-ownership",
+   "simulations": 50
+  },
+  "gen65": {
+   "checkpoint": "gen_00065.pt",
+   "generation": 65,
+   "kind": "alphazero",
+   "run_id": "e2-ownership",
+   "simulations": 50
+  },
+  "greedy": {
+   "kind": "greedy"
+  },
+  "minimax-d2": {
+   "depth": 2,
+   "kind": "minimax",
+   "weights": "3f542dbba6a9cc03"
+  },
+  "minimax-d4": {
+   "depth": 4,
+   "kind": "minimax",
+   "weights": "3f542dbba6a9cc03"
+  },
+  "random": {
+   "kind": "random"
+  }
+ },
+ "board_size": 8,
+ "kind": "round_robin",
+ "matchups": [
+  {
+   "a": "random",
+   "b": "greedy",
+   "ci_high": 0.34838413505460547,
+   "ci_low": 0.17974267906681746,
+   "decisive": true,
+   "games": 100,
+   "record": "24W 73L 3D",
+   "score_a": 0.255,
+   "score_as_black": 0.13,
+   "score_as_white": 0.38
+  },
+  {
+   "a": "random",
+   "b": "minimax-d2",
+   "ci_high": 0.1683346359884119,
+   "ci_low": 0.05163009755924652,
+   "decisive": true,
+   "games": 100,
+   "record": "9W 90L 1D",
+   "score_a": 0.095,
+   "score_as_black": 0.11,
+   "score_as_white": 0.08
+  },
+  {
+   "a": "random",
+   "b": "minimax-d4",
+   "ci_high": 0.07736398830050406,
+   "ci_low": 0.007779834996132329,
+   "decisive": true,
+   "games": 100,
+   "record": "2W 97L 1D",
+   "score_a": 0.025,
+   "score_as_black": 0.03,
+   "score_as_white": 0.02
+  },
+  {
+   "a": "random",
+   "b": "gen05",
+   "ci_high": 0.03699349820698568,
+   "ci_low": 3.469446951953614e-18,
+   "decisive": true,
+   "games": 100,
+   "record": "0W 100L 0D",
+   "score_a": 0.0,
+   "score_as_black": 0.0,
+   "score_as_white": 0.0
+  },
+  {
+   "a": "random",
+   "b": "gen35",
+   "ci_high": 0.03699349820698568,
+   "ci_low": 3.469446951953614e-18,
+   "decisive": true,
+   "games": 100,
+   "record": "0W 100L 0D",
+   "score_a": 0.0,
+   "score_as_black": 0.0,
+   "score_as_white": 0.0
+  },
+  {
+   "a": "random",
+   "b": "gen65",
+   "ci_high": 0.03699349820698568,
+   "ci_low": 3.469446951953614e-18,
+   "decisive": true,
+   "games": 100,
+   "record": "0W 100L 0D",
+   "score_a": 0.0,
+   "score_as_black": 0.0,
+   "score_as_white": 0.0
+  },
+  {
+   "a": "random",
+   "b": "gen100",
+   "ci_high": 0.03699349820698568,
+   "ci_low": 3.469446951953614e-18,
+   "decisive": true,
+   "games": 100,
+   "record": "0W 100L 0D",
+   "score_a": 0.0,
+   "score_as_black": 0.0,
+   "score_as_white": 0.0
+  },
+  {
+   "a": "random",
+   "b": "gen114",
+   "ci_high": 0.03699349820698568,
+   "ci_low": 3.469446951953614e-18,
+   "decisive": true,
+   "games": 100,
+   "record": "0W 100L 0D",
+   "score_a": 0.0,
+   "score_as_black": 0.0,
+   "score_as_white": 0.0
+  },
+  {
+   "a": "random",
+   "b": "gen120",
+   "ci_high": 0.03699349820698568,
+   "ci_low": 3.469446951953614e-18,
+   "decisive": true,
+   "games": 100,
+   "record": "0W 100L 0D",
+   "score_a": 0.0,
+   "score_as_black": 0.0,
+   "score_as_white": 0.0
+  },
+  {
+   "a": "greedy",
+   "b": "minimax-d2",
+   "ci_high": 0.23853076795190664,
+   "ci_low": 0.09699474581091344,
+   "decisive": true,
+   "games": 100,
+   "record": "15W 84L 1D",
+   "score_a": 0.155,
+   "score_as_black": 0.18,
+   "score_as_white": 0.13
+  },
+  {
+   "a": "greedy",
+   "b": "minimax-d4",
+   "ci_high": 0.0700117907285439,
+   "ci_low": 0.005501967550162343,
+   "decisive": true,
+   "games": 100,
+   "record": "2W 98L 0D",
+   "score_a": 0.02,
+   "score_as_black": 0.02,
+   "score_as_white": 0.02
+  },
+  {
+   "a": "greedy",
+   "b": "gen05",
+   "ci_high": 0.1247681544589592,
+   "ci_low": 0.027786123963188192,
+   "decisive": true,
+   "games": 100,
+   "record": "6W 94L 0D",
+   "score_a": 0.06,
+   "score_as_black": 0.04,
+   "score_as_white": 0.08
+  },
+  {
+   "a": "greedy",
+   "b": "gen35",
+   "ci_high": 0.3215438302287378,
+   "ci_low": 0.15843265880303448,
+   "decisive": true,
+   "games": 100,
+   "record": "23W 77L 0D",
+   "score_a": 0.23,
+   "score_as_black": 0.3,
+   "score_as_white": 0.16
+  },
+  {
+   "a": "greedy",
+   "b": "gen65",
+   "ci_high": 0.31070353514985793,
+   "ci_low": 0.15001282384605402,
+   "decisive": true,
+   "games": 100,
+   "record": "22W 78L 0D",
+   "score_a": 0.22,
+   "score_as_black": 0.14,
+   "score_as_white": 0.3
+  },
+  {
+   "a": "greedy",
+   "b": "gen100",
+   "ci_high": 0.2666735838630073,
+   "ci_low": 0.11700225498946351,
+   "decisive": true,
+   "games": 100,
+   "record": "18W 82L 0D",
+   "score_a": 0.18,
+   "score_as_black": 0.16,
+   "score_as_white": 0.2
+  },
+  {
+   "a": "greedy",
+   "b": "gen114",
+   "ci_high": 0.24420269389270244,
+   "ci_low": 0.10095288488804782,
+   "decisive": true,
+   "games": 100,
+   "record": "16W 84L 0D",
+   "score_a": 0.16,
+   "score_as_black": 0.12,
+   "score_as_white": 0.2
+  },
+  {
+   "a": "greedy",
+   "b": "gen120",
+   "ci_high": 0.28882916559315885,
+   "ci_low": 0.13336693333103253,
+   "decisive": true,
+   "games": 100,
+   "record": "20W 80L 0D",
+   "score_a": 0.2,
+   "score_as_black": 0.14,
+   "score_as_white": 0.26
+  },
+  {
+   "a": "minimax-d2",
+   "b": "minimax-d4",
+   "ci_high": 0.3215438302287378,
+   "ci_low": 0.15843265880303448,
+   "decisive": true,
+   "games": 100,
+   "record": "21W 75L 4D",
+   "score_a": 0.23,
+   "score_as_black": 0.2,
+   "score_as_white": 0.26
+  },
+  {
+   "a": "minimax-d2",
+   "b": "gen05",
+   "ci_high": 0.14376573460674041,
+   "ci_low": 0.037678738869197356,
+   "decisive": true,
+   "games": 100,
+   "record": "7W 92L 1D",
+   "score_a": 0.075,
+   "score_as_black": 0.08,
+   "score_as_white": 0.07
+  },
+  {
+   "a": "minimax-d2",
+   "b": "gen35",
+   "ci_high": 0.03699349820698568,
+   "ci_low": 3.469446951953614e-18,
+   "decisive": true,
+   "games": 100,
+   "record": "0W 100L 0D",
+   "score_a": 0.0,
+   "score_as_black": 0.0,
+   "score_as_white": 0.0
+  },
+  {
+   "a": "minimax-d2",
+   "b": "gen65",
+   "ci_high": 0.054486196178705315,
+   "ci_low": 0.0017674320641406505,
+   "decisive": true,
+   "games": 100,
+   "record": "1W 99L 0D",
+   "score_a": 0.01,
+   "score_as_black": 0.02,
+   "score_as_white": 0.0
+  },
+  {
+   "a": "minimax-d2",
+   "b": "gen100",
+   "ci_high": 0.03699349820698568,
+   "ci_low": 3.469446951953614e-18,
+   "decisive": true,
+   "games": 100,
+   "record": "0W 100L 0D",
+   "score_a": 0.0,
+   "score_as_black": 0.0,
+   "score_as_white": 0.0
+  },
+  {
+   "a": "minimax-d2",
+   "b": "gen114",
+   "ci_high": 0.03699349820698568,
+   "ci_low": 3.469446951953614e-18,
+   "decisive": true,
+   "games": 100,
+   "record": "0W 100L 0D",
+   "score_a": 0.0,
+   "score_as_black": 0.0,
+   "score_as_white": 0.0
+  },
+  {
+   "a": "minimax-d2",
+   "b": "gen120",
+   "ci_high": 0.054486196178705315,
+   "ci_low": 0.0017674320641406505,
+   "decisive": true,
+   "games": 100,
+   "record": "1W 99L 0D",
+   "score_a": 0.01,
+   "score_as_black": 0.02,
+   "score_as_white": 0.0
+  },
+  {
+   "a": "minimax-d4",
+   "b": "gen05",
+   "ci_high": 0.4217919642519971,
+   "ci_low": 0.24115576012044787,
+   "decisive": true,
+   "games": 100,
+   "record": "31W 66L 3D",
+   "score_a": 0.325,
+   "score_as_black": 0.3,
+   "score_as_white": 0.35
+  },
+  {
+   "a": "minimax-d4",
+   "b": "gen35",
+   "ci_high": 0.0845193642905276,
+   "ci_low": 0.010254524024038925,
+   "decisive": true,
+   "games": 100,
+   "record": "3W 97L 0D",
+   "score_a": 0.03,
+   "score_as_black": 0.02,
+   "score_as_white": 0.04
+  },
+  {
+   "a": "minimax-d4",
+   "b": "gen65",
+   "ci_high": 0.0845193642905276,
+   "ci_low": 0.010254524024038925,
+   "decisive": true,
+   "games": 100,
+   "record": "3W 97L 0D",
+   "score_a": 0.03,
+   "score_as_black": 0.02,
+   "score_as_white": 0.04
+  },
+  {
+   "a": "minimax-d4",
+   "b": "gen100",
+   "ci_high": 0.0845193642905276,
+   "ci_low": 0.010254524024038925,
+   "decisive": true,
+   "games": 100,
+   "record": "3W 97L 0D",
+   "score_a": 0.03,
+   "score_as_black": 0.02,
+   "score_as_white": 0.04
+  },
+  {
+   "a": "minimax-d4",
+   "b": "gen114",
+   "ci_high": 0.11175046923191913,
+   "ci_low": 0.02154367915436796,
+   "decisive": true,
+   "games": 100,
+   "record": "5W 95L 0D",
+   "score_a": 0.05,
+   "score_as_black": 0.06,
+   "score_as_white": 0.04
+  },
+  {
+   "a": "minimax-d4",
+   "b": "gen120",
+   "ci_high": 0.11175046923191913,
+   "ci_low": 0.02154367915436796,
+   "decisive": true,
+   "games": 100,
+   "record": "5W 95L 0D",
+   "score_a": 0.05,
+   "score_as_black": 0.08,
+   "score_as_white": 0.02
+  },
+  {
+   "a": "gen05",
+   "b": "gen35",
+   "ci_high": 0.0700117907285439,
+   "ci_low": 0.005501967550162343,
+   "decisive": true,
+   "games": 100,
+   "record": "2W 98L 0D",
+   "score_a": 0.02,
+   "score_as_black": 0.02,
+   "score_as_white": 0.02
+  },
+  {
+   "a": "gen05",
+   "b": "gen65",
+   "ci_high": 0.0700117907285439,
+   "ci_low": 0.005501967550162343,
+   "decisive": true,
+   "games": 100,
+   "record": "1W 97L 2D",
+   "score_a": 0.02,
+   "score_as_black": 0.02,
+   "score_as_white": 0.02
+  },
+  {
+   "a": "gen05",
+   "b": "gen100",
+   "ci_high": 0.03699349820698568,
+   "ci_low": 3.469446951953614e-18,
+   "decisive": true,
+   "games": 100,
+   "record": "0W 100L 0D",
+   "score_a": 0.0,
+   "score_as_black": 0.0,
+   "score_as_white": 0.0
+  },
+  {
+   "a": "gen05",
+   "b": "gen114",
+   "ci_high": 0.07736398830050406,
+   "ci_low": 0.007779834996132329,
+   "decisive": true,
+   "games": 100,
+   "record": "2W 97L 1D",
+   "score_a": 0.025,
+   "score_as_black": 0.02,
+   "score_as_white": 0.03
+  },
+  {
+   "a": "gen05",
+   "b": "gen120",
+   "ci_high": 0.0845193642905276,
+   "ci_low": 0.010254524024038925,
+   "decisive": true,
+   "games": 100,
+   "record": "3W 97L 0D",
+   "score_a": 0.03,
+   "score_as_black": 0.02,
+   "score_as_white": 0.04
+  },
+  {
+   "a": "gen35",
+   "b": "gen65",
+   "ci_high": 0.5278461045078768,
+   "ci_low": 0.33733298524110106,
+   "decisive": false,
+   "games": 100,
+   "record": "40W 54L 6D",
+   "score_a": 0.43,
+   "score_as_black": 0.43,
+   "score_as_white": 0.43
+  },
+  {
+   "a": "gen35",
+   "b": "gen100",
+   "ci_high": 0.31070353514985793,
+   "ci_low": 0.15001282384605402,
+   "decisive": true,
+   "games": 100,
+   "record": "19W 75L 6D",
+   "score_a": 0.22,
+   "score_as_black": 0.18,
+   "score_as_white": 0.26
+  },
+  {
+   "a": "gen35",
+   "b": "gen114",
+   "ci_high": 0.3853889117557111,
+   "ci_low": 0.2101483574912227,
+   "decisive": true,
+   "games": 100,
+   "record": "28W 70L 2D",
+   "score_a": 0.29,
+   "score_as_black": 0.24,
+   "score_as_white": 0.34
+  },
+  {
+   "a": "gen35",
+   "b": "gen120",
+   "ci_high": 0.41662618610452384,
+   "ci_low": 0.23669147324999093,
+   "decisive": true,
+   "games": 100,
+   "record": "29W 65L 6D",
+   "score_a": 0.32,
+   "score_as_black": 0.32,
+   "score_as_white": 0.32
+  },
+  {
+   "a": "gen65",
+   "b": "gen100",
+   "ci_high": 0.44234449611834176,
+   "ci_low": 0.2591234883258237,
+   "decisive": true,
+   "games": 100,
+   "record": "32W 63L 5D",
+   "score_a": 0.345,
+   "score_as_black": 0.34,
+   "score_as_white": 0.35
+  },
+  {
+   "a": "gen65",
+   "b": "gen114",
+   "ci_high": 0.6248918204065872,
+   "ci_low": 0.4328885697009936,
+   "decisive": false,
+   "games": 100,
+   "record": "49W 43L 8D",
+   "score_a": 0.53,
+   "score_as_black": 0.61,
+   "score_as_white": 0.45
+  },
+  {
+   "a": "gen65",
+   "b": "gen120",
+   "ci_high": 0.4269465620490947,
+   "ci_low": 0.24563122734128034,
+   "decisive": true,
+   "games": 100,
+   "record": "31W 65L 4D",
+   "score_a": 0.33,
+   "score_as_black": 0.3,
+   "score_as_white": 0.36
+  },
+  {
+   "a": "gen100",
+   "b": "gen114",
+   "ci_high": 0.5768342223477603,
+   "ci_low": 0.384645517580519,
+   "decisive": false,
+   "games": 100,
+   "record": "45W 49L 6D",
+   "score_a": 0.48,
+   "score_as_black": 0.43,
+   "score_as_white": 0.53
+  },
+  {
+   "a": "gen100",
+   "b": "gen120",
+   "ci_high": 0.5865198806597283,
+   "ci_low": 0.3942199893044113,
+   "decisive": false,
+   "games": 100,
+   "record": "47W 49L 4D",
+   "score_a": 0.49,
+   "score_as_black": 0.45,
+   "score_as_white": 0.53
+  },
+  {
+   "a": "gen114",
+   "b": "gen120",
+   "ci_high": 0.6009788714884068,
+   "ci_low": 0.40865119352952345,
+   "decisive": false,
+   "games": 100,
+   "record": "49W 48L 3D",
+   "score_a": 0.505,
+   "score_as_black": 0.48,
+   "score_as_white": 0.53
+  }
+ ],
+ "notes": "Run 5, E2 ownership head: cross-generation table",
+ "protocol": {
+  "anchor": "random",
+  "games_per_pair": 100,
+  "opening_plies": 4,
+  "seconds": 872.7018757909536,
+  "seed": 2344983883
+ },
+ "provenance": {
+  "git": {
+   "available": true,
+   "branch": "exp/e2-ownership",
+   "commit": "67411db683836f0f3a66794d26fde49bc061cfcc",
+   "commit_short": "67411db",
+   "diff": "(omitted)",
+   "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "dirty": false
+  }
+ },
+ "ratings": [
+  {
+   "ci_high": 1062.5826877362979,
+   "ci_low": 922.8780198711727,
+   "elo": 984.2594849105056,
+   "games": 900,
+   "name": "gen100"
+  },
+  {
+   "ci_high": 1045.5312273509328,
+   "ci_low": 908.7056977238707,
+   "elo": 967.9485954923783,
+   "games": 900,
+   "name": "gen120"
+  },
+  {
+   "ci_high": 1034.9699055079311,
+   "ci_low": 896.6854842611343,
+   "elo": 956.229444639591,
+   "games": 900,
+   "name": "gen114"
+  },
+  {
+   "ci_high": 970.3790722134512,
+   "ci_low": 842.2617086781306,
+   "elo": 899.3947660934377,
+   "games": 900,
+   "name": "gen65"
+  },
+  {
+   "ci_high": 912.8660207416187,
+   "ci_low": 782.4591050789762,
+   "elo": 839.401240763437,
+   "games": 900,
+   "name": "gen35"
+  },
+  {
+   "ci_high": 615.3903786928353,
+   "ci_low": 505.2840099561476,
+   "elo": 554.3797981524644,
+   "games": 900,
+   "name": "gen05"
+  },
+  {
+   "ci_high": 565.8877653717755,
+   "ci_low": 452.2327344718013,
+   "elo": 502.78900899905807,
+   "games": 900,
+   "name": "minimax-d4"
+  },
+  {
+   "ci_high": 401.56129384836294,
+   "ci_low": 287.17055462562365,
+   "elo": 339.6798660721524,
+   "games": 900,
+   "name": "minimax-d2"
+  },
+  {
+   "ci_high": 391.19503709566607,
+   "ci_low": 261.01172753289154,
+   "elo": 323.6322738468825,
+   "games": 900,
+   "name": "greedy"
+  },
+  {
+   "ci_high": 0.0,
+   "ci_low": 0.0,
+   "elo": 0.0,
+   "games": 900,
+   "name": "random"
+  }
+ ],
+ "report_version": 1
+}
