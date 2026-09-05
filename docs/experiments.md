@@ -511,6 +511,246 @@ arithmetic per position, that is an expensive 35 Elo.
 
 ---
 
+## Run 5 — E2, the ownership head — `e2-ownership` (CSSE Slurm cluster)
+
+**Result: the largest gain of any change so far, for 65 parameters and no extra
+self-play cost: +45 Elo at generation 60 and +74 at generation 120 over the
+control, both decisive at 1000 games. And it did not happen the way the
+prediction said it would.** The prediction table below was written before the run
+was submitted; the result sections after it were written on 2026-09-05 once the
+run had been rated.
+
+**Question.** Runs 1 and 3 showed the value head stops improving at generation 5
+and sits at a loss of 0.65 for the rest of the run. Run 2 showed that weighting
+its one target more heavily starves the policy. Run 4 showed that a bigger
+network lowers the value loss to 0.57 but buys only 30 to 40 Elo, so capacity is
+not the whole story. What if the problem is the *target*? Does giving the value
+side sixty-four answers per position instead of one make a stronger agent?
+
+**Change.** `net.ownership: true` and `train.ownership_loss_weight: 1.0`, and
+nothing else about the run 1 recipe (`configs/full8x8_e2_ownership.yaml`).
+The network grows a third head, a 1×1 convolution off the trunk that predicts
+for every square who owns it when the game ends: +1 the player to move, −1 the
+opponent, 0 empty. The final disc margin that decides `z` is the sum of those 64
+numbers, so the head is asked for the same answer as the value head plus where it
+comes from. The loss gains a mean-squared-error term on it, weighted like the
+value term. The idea is KataGo's (Wu, *Accelerating Self-Play Learning in Go*,
+arXiv:1902.10565), where auxiliary ownership and score targets were among the
+largest single gains in learning efficiency.
+
+The head is never consulted at play time. `forward` still returns a policy and a
+value; the search, the export and the browser see a network of exactly the shape
+run 3 produced. Only the trainer sees the third output.
+
+**Scale.** 120 generations, 72,000 games, one L40S, chained 24-hour jobs. 6×64
+network, 200 simulations, 600 games per generation: the same self-play budget as
+runs 1, 3 and 4, so generation *N* is comparable across all of them.
+
+### The prediction, registered before the run
+
+Compared against run 3, the control, at matched generations 60 and 120, in
+1000-game head-to-head matches (the protocol run 4 settled on):
+
+| if | then |
+|---|---|
+| E2 beats the control at both generations with intervals excluding 50%, **and** by more than run 4's 30 to 40 Elo | the target was the constraint, and it is a cheaper lever than capacity |
+| E2 beats the control decisively but by about what run 4 gained | the ownership head is worth about as much as a 6.7× bigger network at a fraction of the cost; E1 and E2 are then combined for the 1.0 network |
+| value loss falls below 0.60 but E2 does not beat the control | the head made a better predictor and not a better player; the value head is not what limits play at this search budget |
+| E2 is weaker than the control | the extra term competes with the policy after all, as run 2's weight did; halve the weight and try once more |
+
+Value loss below 0.60 by generation 30 is expected in every row but the last; run
+1 and run 3 never went below 0.62.
+
+### What it cost
+
+Nothing measurable. 3.5 minutes of self-play per generation, the same as the
+control; 120 generations in 8 hours 20 minutes on one L40S. The head is 65
+weights.
+
+### The losses did not do what the prediction expected
+
+| generation | control value / policy | E2 value / policy | E2 ownership |
+|---|---|---|---|
+| 10 | 0.630 / 1.834 | 0.651 / 1.793 | 0.881 |
+| 30 | 0.644 / 1.365 | 0.640 / 1.347 | 0.865 |
+| 60 | 0.655 / 1.213 | 0.646 / 1.168 | 0.867 |
+| 100 | 0.643 / 1.097 | 0.640 / 1.111 | 0.868 |
+| 120 | 0.651 / 1.096 | 0.649 / 1.124 | 0.865 |
+
+The value loss tracks the control's at 0.65 from start to finish. It never came
+near the 0.60 that every winning row of the prediction table assumed. The
+ownership term fell from 1.08 to 0.87 in the first fifteen generations and then
+sat at 0.865 for the remaining hundred.
+
+### Why the ownership term sits at 0.87: the target is mostly unpredictable
+
+A diagnostic (`docs/ratings/ownership-diag-e2-g120.json`): the generation-120
+head scored on the 34,720 positions of its own last generation, grouped by how
+far into the game each position is, against two reference predictors. "All
+empty" says every square ends up unowned; on a finished board every square is
+occupied, so its error is 1.0 by construction. "Board as is" says every disc
+stays the colour it is now and every empty square stays empty.
+
+| moves into the game | head | all empty | board as is |
+|---|---|---|---|
+| 0–9 | 0.996 | 1.000 | 1.137 |
+| 10–19 | 0.988 | 1.000 | 1.293 |
+| 20–29 | 0.970 | 1.000 | 1.444 |
+| 30–39 | 0.923 | 1.000 | 1.564 |
+| 40–49 | 0.801 | 1.000 | 1.527 |
+| 50–59 | 0.452 | 1.000 | 1.018 |
+
+For the first thirty moves the head is no better than "all empty". And "board as
+is" is the *worst* predictor at every stage, worse than saying nothing: discs flip
+so much in Reversi that a square's current colour is anti-informative about its
+final colour. That is the difference from Go, where the idea comes from and where
+territory settles early. In Reversi, who owns a square is close to unknowable
+until the last ten moves, and the head learned exactly the part that is knowable.
+
+### Strength: decisively better anyway
+
+1000-game head-to-head matches against the control at matched generations
+(`docs/ratings/head-to-head-e2-1000.json`; colour-balanced, 4-ply seeded
+openings, 50 simulations, no exploration noise):
+
+| pairing | score for E2 | 95% Wilson | record | about |
+|---|---|---|---|---|
+| E2 gen 60 vs control gen 60 | **56.4%** | [53.3%, 59.4%] | 539W 412L 49D | +45 Elo |
+| E2 gen 120 vs control gen 120 | **60.5%** | [57.4%, 63.4%] | 578W 369L 53D | +74 Elo |
+
+Both intervals exclude 50% by a wide margin. At generation 120 the gap is three
+times the 24 Elo noise floor run 3 measured between two instances of the same
+recipe, and about double what run 4 bought with a network 6.7 times the size.
+E2's own cross-generation table (`docs/ratings/run5-e2-ownership-crossgen.json`)
+has the same shape as the others, a climb to generation 100 and a plateau after
+it, at generations 100, 114 and 120 rated 984, 956 and 968 against Random.
+
+### Reading
+
+The first prediction row is what happened on strength: E2 beats the control at
+both generations with intervals excluding 50%, and by more than run 4's 30 to 40
+Elo. The row's *mechanism* was wrong. It assumed the gain would come through a
+better value predictor, visible as a lower value loss. The value loss did not
+move, and the ownership target turned out to be mostly noise until the endgame.
+
+What the head did instead was shape the trunk. The trunk is the part of the
+network both heads read from, and every position now pushes it toward features
+that say something about the endgame, which the single win/loss number does not.
+The policy head, reading a better trunk, got better. The evidence for that
+reading is indirect: E2's policy loss is not lower than the control's either, so
+"better" here means the policy's *mistakes* changed in a way the search converts
+into wins, not that the network matches its own search more closely. That is a
+statement about play, and play is what was measured.
+
+Two cautions. This is one seed. Run 3 established that two instances of a recipe
+differ by about 24 Elo, and the +74 at generation 120 is comfortably past that,
+but the +45 at generation 60 is not far past it. And the gain is at 50
+simulations; the difficulty ladder plays at 16 to 800.
+
+### Decisions taken
+
+* The ownership head is part of the 1.0 recipe. It costs nothing measurable and
+  is the biggest single gain found.
+* The next run combines it with E1's capacity, E1+E2, 10×128 with the head, to
+  see whether the two gains add. Its prediction is registered before it starts.
+* The "value loss below 0.60" expectation is retired as a proxy for a better
+  agent on this project. Runs 4 and 5 together show it is neither necessary (E2)
+  nor sufficient (E1, which lowered it to 0.57 for 35 Elo).
+* The diagnostic's "board as is" row is worth remembering when anyone proposes a
+  feature plane or target built on current disc ownership: in Reversi, the board
+  as it stands is a bad guide to the board as it ends.
+
+
+---
+
+## Play-time sweep: `c_puct`
+
+**Result: 1.5 stays. More exploration hurts at this search budget; less does not
+measurably help.**
+
+**Question.** `c_puct` is the constant that trades exploring untried moves against
+exploiting the best-looking one during search. This project has used 1.5 since day
+4 without measuring it, and `references.md` recorded that as a gap. The papers
+give no number for a board this size or a budget this small.
+
+**Setup.** No training. Run 4's generation-120 network entered one tournament four
+times, at `c_puct` 1.0, 1.5, 2.5 and 4.0, alongside Random, Greedy, Minimax-d2 and
+Minimax-d4: 8 entrants, 28 pairings, 200 colour-balanced games each, 4-ply
+openings, 50 simulations, one Bradley–Terry fit anchored at Random = 0
+(`docs/ratings/cpuct-sweep-e1-g120.json`; 93 minutes on 64 CPU cores).
+
+| `c_puct` | Elo | 95% interval |
+|---|---|---|
+| 1.0 | 762 | [723, 805] |
+| **1.5** | 750 | [712, 795] |
+| 2.5 | 695 | [655, 737] |
+| 4.0 | 620 | [583, 658] |
+| minimax-d4 | 384 | [350, 417] |
+
+Head to head, 1.0 scored 52.2% against 1.5 (99W 90L 11D, interval [45.4%,
+59.1%]): no difference the games can see. 1.5 beat 2.5 with 64.5% and 4.0 with
+70.5%, both decisive.
+
+### Reading
+
+At 50 simulations there is not much budget to spend on exploring, and the network
+at generation 120 has good enough first impressions that spending it on the
+second- and third-best moves costs more than it finds. That is the direction the
+pseudocode's own schedule points: its coefficient starts at 1.25 and only grows
+with visit count, so at small budgets it is near the bottom of the range tested
+here. Whether 1.0 is better than 1.5 at 800 simulations, where the Max difficulty
+level plays, was not tested and is a different question; the difficulty ladder is
+recalibrated on the 1.0 network anyway, and that is the place to ask it.
+
+### Decisions taken
+
+* `c_puct` stays at 1.5 for training, the arena, the difficulty levels and the
+  browser. Changing it to 1.0 would be a change without evidence.
+* The sweep protocol, one network entered several times with different search
+  settings via `reversi arena --entrant NAME=PATH@SIMS;c_puct=…`, is the way any
+  play-time constant is tuned on this project from here on.
+
+---
+
+## Run 6 — E1+E2, capacity and the ownership head together — `e12-10x128-ownership`
+
+**Result: pending.** This section was written before the run was submitted.
+
+**Question.** Run 4 gained 30 to 40 Elo from a 10×128 network. Run 5 gained 45 to
+74 Elo from an ownership head on the 6×64 network. Do the two gains add?
+
+**Change.** Both changes applied to the run 1 recipe, and nothing else
+(`configs/full8x8_e12_10x128_ownership.yaml`): `net.n_blocks: 10`,
+`net.channels: 128`, `net.ownership: true`, `train.ownership_loss_weight: 1.0`.
+Self-play cost is unchanged, so generation *N* is comparable to generation *N* of
+runs 1, 3, 4 and 5.
+
+**Why they might add.** The two changes act on different things: E1 gives the
+trunk more room, E2 gives it a richer training signal. Run 5's reading was that
+the ownership target shaped the trunk; a bigger trunk should be able to use the
+same signal at least as well.
+
+**Why they might not.** Run 4 lowered the value loss to 0.57 with the plain value
+target. If the bigger network was already extracting from the win/loss number
+what the ownership target adds, the head has nothing left to contribute.
+
+**Scale.** 120 generations, one L40S, chained 24-hour jobs; about 12.5 hours at
+run 4's pace.
+
+### The prediction, registered before the run
+
+Against run 5 (E2 alone) at matched generations 60 and 120, 1000-game head-to-head
+matches:
+
+| if | then |
+|---|---|
+| E1+E2 beats E2 at both generations with intervals excluding 50%, by 30 Elo or more | the gains add; the 1.0 network is 10×128 with the head, and the browser needs WebGPU to run it at full strength |
+| E1+E2 beats E2 decisively but by less than 20 Elo | the gains mostly overlap; the 1.0 network is 6×64 with the head, which the browser already runs at full speed, and the WebGPU path is for later networks rather than this one |
+| no decisive difference either way | same decision as the row above; capacity is not the lever at this self-play budget once the trunk is fed properly |
+| E1+E2 loses to E2 | the bigger trunk overfits the 64-square target; halve the ownership weight before growing the network again |
+
+---
+
 ## Calibration: are the four difficulty levels actually different opponents?
 
 **Run:** 2026-08-31, `models/reversi-8x8-gen60.pt`, 21 pairings × 300 games,

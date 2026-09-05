@@ -25,7 +25,7 @@ from typing import Any
 import numpy as np
 
 from reversi.atomicio import atomic_write_json, atomic_write_with, sha256_file
-from reversi.data.schema import FIELDS, Arrays, validate_arrays
+from reversi.data.schema import FIELDS, OPTIONAL_FIELDS, Arrays, validate_arrays
 from reversi.errors import ReplayError
 
 __all__ = ["Manifest", "ShardInfo", "read_shard", "shard_filename", "write_shard"]
@@ -112,7 +112,9 @@ def read_shard(
 
     try:
         with np.load(path) as loaded:
-            arrays = {field: loaded[field] for field in FIELDS if field in loaded}
+            arrays = {
+                field: loaded[field] for field in (*FIELDS, *OPTIONAL_FIELDS) if field in loaded
+            }
     except (OSError, ValueError, EOFError, zipfile.BadZipFile) as error:
         msg = f"shard {path.name} could not be read: {error}"
         raise ReplayError(msg) from error

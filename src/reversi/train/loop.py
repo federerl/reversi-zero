@@ -44,7 +44,7 @@ from reversi.data.schema import Sample, samples_to_arrays
 from reversi.data.shards import Manifest, ShardInfo, read_shard, shard_filename, write_shard
 from reversi.errors import CheckpointError, WorkerError
 from reversi.nn.evaluator import TorchEvaluator
-from reversi.nn.model import PolicyValueNet, build
+from reversi.nn.model import PolicyValueNet, build, normalise_arch
 from reversi.obs.metrics import MetricsHub
 from reversi.obs.runmeta import RunPaths
 from reversi.search.config import SearchConfig
@@ -435,7 +435,7 @@ def _restore_into(
     payload = restored.payload
     meta = restored.meta
 
-    if meta.arch != model.arch():
+    if normalise_arch(meta.arch) != normalise_arch(model.arch()):
         msg = (
             f"cannot resume: the checkpoint was built as {meta.arch} but this "
             f"config builds {model.arch()}. Those are different networks."

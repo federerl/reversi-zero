@@ -1,0 +1,57 @@
+{
+ "positions": 34720,
+ "head_mse": 0.8688415884971619,
+ "zeros_mse": 0.9996161460876465,
+ "board_as_is_mse": 1.3403023481369019,
+ "checkpoint": "/home/liul4/reversi-runs/e2-ownership/checkpoints/gen_00120.pt",
+ "by_move": [
+  {
+   "move_from": 0,
+   "move_to": 9,
+   "positions": 6000,
+   "head_mse": 0.9958494305610657,
+   "zeros_mse": 0.9996093511581421,
+   "board_as_is_mse": 1.1365677118301392
+  },
+  {
+   "move_from": 10,
+   "move_to": 19,
+   "positions": 6000,
+   "head_mse": 0.9880513548851013,
+   "zeros_mse": 0.9996093511581421,
+   "board_as_is_mse": 1.2932969331741333
+  },
+  {
+   "move_from": 20,
+   "move_to": 29,
+   "positions": 6000,
+   "head_mse": 0.969511091709137,
+   "zeros_mse": 0.9996093511581421,
+   "board_as_is_mse": 1.443765640258789
+  },
+  {
+   "move_from": 30,
+   "move_to": 39,
+   "positions": 5999,
+   "head_mse": 0.9232158660888672,
+   "zeros_mse": 0.9996092915534973,
+   "board_as_is_mse": 1.5635210275650024
+  },
+  {
+   "move_from": 40,
+   "move_to": 49,
+   "positions": 5967,
+   "head_mse": 0.8007364273071289,
+   "zeros_mse": 0.9996124505996704,
+   "board_as_is_mse": 1.5273771286010742
+  },
+  {
+   "move_from": 50,
+   "move_to": 59,
+   "positions": 4687,
+   "head_mse": 0.45166149735450745,
+   "zeros_mse": 0.9996699690818787,
+   "board_as_is_mse": 1.018131971359253
+  }
+ ]
+}

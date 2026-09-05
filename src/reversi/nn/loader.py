@@ -69,6 +69,7 @@ def load_model(path: Path, *, device: str | torch.device = "cpu") -> PolicyValue
         channels=arch["channels"],
         value_hidden=arch["value_hidden"],
         in_planes=arch["in_planes"],
+        ownership=bool(arch.get("ownership", False)),
     )
 
     try:
