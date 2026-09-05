@@ -175,9 +175,11 @@ community write-up, not a paper.
 
 ## Not established — do not cite on this project's authority
 
-**KataGo.** David J. Wu's "Accelerating Self-Play Learning in Go" is widely cited
-as documenting FPU, and its arXiv identifier is commonly given as 1902.10565.
-**Neither was verified here.** Check it yourself before citing it.
+**KataGo.** David J. Wu's "Accelerating Self-Play Learning in Go" is arXiv:1902.10565;
+the identifier and title were checked against arXiv on 2026-09-03. That it is the
+paper which documents FPU **was not verified here**; check before citing it for
+that. Its auxiliary ownership target is the basis of experiment E2 in
+`experiments.md`.
 
 **Whether the AlphaGo Zero paper states a numeric c_puct.** Its Methods describes
 c_puct qualitatively as "a constant determining the level of exploration" and says
@@ -194,8 +196,10 @@ to say there is no logarithm anywhere in AlphaZero: there is one, in the
 coefficient rather than in the visit-count term.
 
 **This project uses a fixed `c_puct = 1.5`**, which is neither a value the papers
-state nor the pseudocode's schedule. It has not been tuned. That is a real gap and
-an obvious thing to test.
+state nor the pseudocode's schedule. It was tested on 2026-09-04 by entering one
+network four times, at 1.0, 1.5, 2.5 and 4.0, in a single tournament: 1.0 and 1.5
+were indistinguishable, and 2.5 and 4.0 were clearly worse at 50 simulations
+(`experiments.md`, "Play-time sweep: c_puct"). 1.5 stays.
 
 ---
 

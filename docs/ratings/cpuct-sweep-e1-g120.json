@@ -1,0 +1,472 @@
+{
+ "agent_specs": {
+  "c1.0": {
+   "c_puct": 1.0,
+   "checkpoint": "gen_00120.pt",
+   "fpu_reduction": 0.25,
+   "generation": 120,
+   "kind": "alphazero",
+   "run_id": "e1-10x128",
+   "simulations": 50
+  },
+  "c1.5": {
+   "checkpoint": "gen_00120.pt",
+   "generation": 120,
+   "kind": "alphazero",
+   "run_id": "e1-10x128",
+   "simulations": 50
+  },
+  "c2.5": {
+   "c_puct": 2.5,
+   "checkpoint": "gen_00120.pt",
+   "fpu_reduction": 0.25,
+   "generation": 120,
+   "kind": "alphazero",
+   "run_id": "e1-10x128",
+   "simulations": 50
+  },
+  "c4.0": {
+   "c_puct": 4.0,
+   "checkpoint": "gen_00120.pt",
+   "fpu_reduction": 0.25,
+   "generation": 120,
+   "kind": "alphazero",
+   "run_id": "e1-10x128",
+   "simulations": 50
+  },
+  "greedy": {
+   "kind": "greedy"
+  },
+  "minimax-d2": {
+   "depth": 2,
+   "kind": "minimax",
+   "weights": "3f542dbba6a9cc03"
+  },
+  "minimax-d4": {
+   "depth": 4,
+   "kind": "minimax",
+   "weights": "3f542dbba6a9cc03"
+  },
+  "random": {
+   "kind": "random"
+  }
+ },
+ "board_size": 8,
+ "kind": "round_robin",
+ "matchups": [
+  {
+   "a": "random",
+   "b": "greedy",
+   "ci_high": 0.49429067352145145,
+   "ci_low": 0.3585361254351385,
+   "decisive": true,
+   "games": 200,
+   "record": "82W 112L 6D",
+   "score_a": 0.425,
+   "score_as_black": 0.405,
+   "score_as_white": 0.445
+  },
+  {
+   "a": "random",
+   "b": "minimax-d2",
+   "ci_high": 0.11405480885610647,
+   "ci_low": 0.042152171828342806,
+   "decisive": true,
+   "games": 200,
+   "record": "13W 185L 2D",
+   "score_a": 0.07,
+   "score_as_black": 0.095,
+   "score_as_white": 0.045
+  },
+  {
+   "a": "random",
+   "b": "minimax-d4",
+   "ci_high": 0.0537574613520185,
+   "ci_low": 0.009239825338271078,
+   "decisive": true,
+   "games": 200,
+   "record": "4W 195L 1D",
+   "score_a": 0.0225,
+   "score_as_black": 0.04,
+   "score_as_white": 0.005
+  },
+  {
+   "a": "random",
+   "b": "c1.0",
+   "ci_high": 0.02777370439789293,
+   "ci_low": 0.0008831687156009797,
+   "decisive": true,
+   "games": 200,
+   "record": "1W 199L 0D",
+   "score_a": 0.005,
+   "score_as_black": 0.0,
+   "score_as_white": 0.01
+  },
+  {
+   "a": "random",
+   "b": "c1.5",
+   "ci_high": 0.050287086905826436,
+   "ci_low": 0.0078044264163494685,
+   "decisive": true,
+   "games": 200,
+   "record": "4W 196L 0D",
+   "score_a": 0.02,
+   "score_as_black": 0.02,
+   "score_as_white": 0.02
+  },
+  {
+   "a": "random",
+   "b": "c2.5",
+   "ci_high": 0.018845326377266575,
+   "ci_low": 0.0,
+   "decisive": true,
+   "games": 200,
+   "record": "0W 200L 0D",
+   "score_a": 0.0,
+   "score_as_black": 0.0,
+   "score_as_white": 0.0
+  },
+  {
+   "a": "random",
+   "b": "c4.0",
+   "ci_high": 0.018845326377266575,
+   "ci_low": 0.0,
+   "decisive": true,
+   "games": 200,
+   "record": "0W 200L 0D",
+   "score_a": 0.0,
+   "score_as_black": 0.0,
+   "score_as_white": 0.0
+  },
+  {
+   "a": "greedy",
+   "b": "minimax-d2",
+   "ci_high": 0.23638137998425252,
+   "ci_low": 0.13077385552908438,
+   "decisive": true,
+   "games": 200,
+   "record": "33W 162L 5D",
+   "score_a": 0.1775,
+   "score_as_black": 0.17,
+   "score_as_white": 0.185
+  },
+  {
+   "a": "greedy",
+   "b": "minimax-d4",
+   "ci_high": 0.06055567618984434,
+   "ci_low": 0.012253157236672571,
+   "decisive": true,
+   "games": 200,
+   "record": "5W 194L 1D",
+   "score_a": 0.0275,
+   "score_as_black": 0.03,
+   "score_as_white": 0.025
+  },
+  {
+   "a": "greedy",
+   "b": "c1.0",
+   "ci_high": 0.3511534602960517,
+   "ci_low": 0.2269500300461729,
+   "decisive": true,
+   "games": 200,
+   "record": "57W 143L 0D",
+   "score_a": 0.285,
+   "score_as_black": 0.3,
+   "score_as_white": 0.27
+  },
+  {
+   "a": "greedy",
+   "b": "c1.5",
+   "ci_high": 0.3511534602960517,
+   "ci_low": 0.2269500300461729,
+   "decisive": true,
+   "games": 200,
+   "record": "57W 143L 0D",
+   "score_a": 0.285,
+   "score_as_black": 0.22,
+   "score_as_white": 0.35
+  },
+  {
+   "a": "greedy",
+   "b": "c2.5",
+   "ci_high": 0.2930830436530359,
+   "ci_low": 0.17709343259068805,
+   "decisive": true,
+   "games": 200,
+   "record": "46W 154L 0D",
+   "score_a": 0.23,
+   "score_as_black": 0.22,
+   "score_as_white": 0.24
+  },
+  {
+   "a": "greedy",
+   "b": "c4.0",
+   "ci_high": 0.29841368882762537,
+   "ci_low": 0.18157433415232588,
+   "decisive": true,
+   "games": 200,
+   "record": "47W 153L 0D",
+   "score_a": 0.235,
+   "score_as_black": 0.24,
+   "score_as_white": 0.23
+  },
+  {
+   "a": "minimax-d2",
+   "b": "minimax-d4",
+   "ci_high": 0.32490745602534116,
+   "ci_low": 0.20413830063574687,
+   "decisive": true,
+   "games": 200,
+   "record": "49W 145L 6D",
+   "score_a": 0.26,
+   "score_as_black": 0.28,
+   "score_as_white": 0.24
+  },
+  {
+   "a": "minimax-d2",
+   "b": "c1.0",
+   "ci_high": 0.0357217617161768,
+   "ci_low": 0.0027466581335444384,
+   "decisive": true,
+   "games": 200,
+   "record": "2W 198L 0D",
+   "score_a": 0.01,
+   "score_as_black": 0.01,
+   "score_as_white": 0.01
+  },
+  {
+   "a": "minimax-d2",
+   "b": "c1.5",
+   "ci_high": 0.02777370439789293,
+   "ci_low": 0.0008831687156009797,
+   "decisive": true,
+   "games": 200,
+   "record": "1W 199L 0D",
+   "score_a": 0.005,
+   "score_as_black": 0.01,
+   "score_as_white": 0.0
+  },
+  {
+   "a": "minimax-d2",
+   "b": "c2.5",
+   "ci_high": 0.0357217617161768,
+   "ci_low": 0.0027466581335444384,
+   "decisive": true,
+   "games": 200,
+   "record": "2W 198L 0D",
+   "score_a": 0.01,
+   "score_as_black": 0.01,
+   "score_as_white": 0.01
+  },
+  {
+   "a": "minimax-d2",
+   "b": "c4.0",
+   "ci_high": 0.02777370439789293,
+   "ci_low": 0.0008831687156009797,
+   "decisive": true,
+   "games": 200,
+   "record": "1W 199L 0D",
+   "score_a": 0.005,
+   "score_as_black": 0.01,
+   "score_as_white": 0.0
+  },
+  {
+   "a": "minimax-d4",
+   "b": "c1.0",
+   "ci_high": 0.04316572879269026,
+   "ci_low": 0.00511423779325831,
+   "decisive": true,
+   "games": 200,
+   "record": "3W 197L 0D",
+   "score_a": 0.015,
+   "score_as_black": 0.02,
+   "score_as_white": 0.01
+  },
+  {
+   "a": "minimax-d4",
+   "b": "c1.5",
+   "ci_high": 0.0357217617161768,
+   "ci_low": 0.0027466581335444384,
+   "decisive": true,
+   "games": 200,
+   "record": "2W 198L 0D",
+   "score_a": 0.01,
+   "score_as_black": 0.01,
+   "score_as_white": 0.01
+  },
+  {
+   "a": "minimax-d4",
+   "b": "c2.5",
+   "ci_high": 0.07693206820093293,
+   "ci_low": 0.020405632066152306,
+   "decisive": true,
+   "games": 200,
+   "record": "8W 192L 0D",
+   "score_a": 0.04,
+   "score_as_black": 0.05,
+   "score_as_white": 0.03
+  },
+  {
+   "a": "minimax-d4",
+   "b": "c4.0",
+   "ci_high": 0.09886690542445957,
+   "ci_low": 0.03281120841942135,
+   "decisive": true,
+   "games": 200,
+   "record": "11W 188L 1D",
+   "score_a": 0.0575,
+   "score_as_black": 0.08,
+   "score_as_white": 0.035
+  },
+  {
+   "a": "c1.0",
+   "b": "c1.5",
+   "ci_high": 0.5906468992160211,
+   "ci_low": 0.45350506109700184,
+   "decisive": false,
+   "games": 200,
+   "record": "99W 90L 11D",
+   "score_a": 0.5225,
+   "score_as_black": 0.49,
+   "score_as_white": 0.555
+  },
+  {
+   "a": "c1.0",
+   "b": "c2.5",
+   "ci_high": 0.6486614536619731,
+   "ci_low": 0.5132290674857779,
+   "decisive": true,
+   "games": 200,
+   "record": "115W 82L 3D",
+   "score_a": 0.5825,
+   "score_as_black": 0.54,
+   "score_as_white": 0.625
+  },
+  {
+   "a": "c1.0",
+   "b": "c4.0",
+   "ci_high": 0.8451382379616379,
+   "ci_low": 0.7337430194757748,
+   "decisive": true,
+   "games": 200,
+   "record": "154W 36L 10D",
+   "score_a": 0.795,
+   "score_as_black": 0.81,
+   "score_as_white": 0.78
+  },
+  {
+   "a": "c1.5",
+   "b": "c2.5",
+   "ci_high": 0.7080137245956883,
+   "ci_low": 0.5765211307549043,
+   "decisive": true,
+   "games": 200,
+   "record": "124W 66L 10D",
+   "score_a": 0.645,
+   "score_as_black": 0.62,
+   "score_as_white": 0.67
+  },
+  {
+   "a": "c1.5",
+   "b": "c4.0",
+   "ci_high": 0.7638605614315084,
+   "ci_low": 0.6384128547538122,
+   "decisive": true,
+   "games": 200,
+   "record": "137W 55L 8D",
+   "score_a": 0.705,
+   "score_as_black": 0.745,
+   "score_as_white": 0.665
+  },
+  {
+   "a": "c2.5",
+   "b": "c4.0",
+   "ci_high": 0.6962352626050865,
+   "ci_low": 0.5637707259049378,
+   "decisive": true,
+   "games": 200,
+   "record": "122W 69L 9D",
+   "score_a": 0.6325,
+   "score_as_black": 0.615,
+   "score_as_white": 0.65
+  }
+ ],
+ "notes": "c_puct sweep: E1 generation 120 at four exploration constants, plus baselines. 200 games per pairing, 50 simulations.",
+ "protocol": {
+  "anchor": "random",
+  "games_per_pair": 200,
+  "opening_plies": 4,
+  "seconds": 5601.108016015001,
+  "seed": 1025319116
+ },
+ "provenance": {
+  "git": {
+   "available": true,
+   "branch": "exp/e2-ownership",
+   "commit": "67411db683836f0f3a66794d26fde49bc061cfcc",
+   "commit_short": "67411db",
+   "diff": "(omitted)",
+   "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "dirty": false
+  }
+ },
+ "ratings": [
+  {
+   "ci_high": 805.2858527209318,
+   "ci_low": 723.3484677965121,
+   "elo": 761.5975512528731,
+   "games": 1400,
+   "name": "c1.0"
+  },
+  {
+   "ci_high": 794.6626514503179,
+   "ci_low": 711.995539917684,
+   "elo": 750.0535962042866,
+   "games": 1400,
+   "name": "c1.5"
+  },
+  {
+   "ci_high": 736.8037369618792,
+   "ci_low": 654.8567564701091,
+   "elo": 695.4220513178385,
+   "games": 1400,
+   "name": "c2.5"
+  },
+  {
+   "ci_high": 657.8535505761707,
+   "ci_low": 582.6914688430239,
+   "elo": 620.2471461483451,
+   "games": 1400,
+   "name": "c4.0"
+  },
+  {
+   "ci_high": 417.0457441183399,
+   "ci_low": 349.8819964638735,
+   "elo": 384.476400539686,
+   "games": 1400,
+   "name": "minimax-d4"
+  },
+  {
+   "ci_high": 306.4621434878559,
+   "ci_low": 242.90013200537277,
+   "elo": 273.7101234620264,
+   "games": 1400,
+   "name": "minimax-d2"
+  },
+  {
+   "ci_high": 282.4624442529604,
+   "ci_low": 197.93328090856633,
+   "elo": 238.9201284199041,
+   "games": 1400,
+   "name": "greedy"
+  },
+  {
+   "ci_high": 0.0,
+   "ci_low": 0.0,
+   "elo": 0.0,
+   "games": 1400,
+   "name": "random"
+  }
+ ],
+ "report_version": 1
+}

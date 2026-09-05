@@ -663,6 +663,55 @@ simulations; the difficulty ladder plays at 16 to 800.
 
 ---
 
+## Play-time sweep: `c_puct`
+
+**Result: 1.5 stays. More exploration hurts at this search budget; less does not
+measurably help.**
+
+**Question.** `c_puct` is the constant that trades exploring untried moves against
+exploiting the best-looking one during search. This project has used 1.5 since day
+4 without measuring it, and `references.md` recorded that as a gap. The papers
+give no number for a board this size or a budget this small.
+
+**Setup.** No training. Run 4's generation-120 network entered one tournament four
+times, at `c_puct` 1.0, 1.5, 2.5 and 4.0, alongside Random, Greedy, Minimax-d2 and
+Minimax-d4: 8 entrants, 28 pairings, 200 colour-balanced games each, 4-ply
+openings, 50 simulations, one Bradley–Terry fit anchored at Random = 0
+(`docs/ratings/cpuct-sweep-e1-g120.json`; 93 minutes on 64 CPU cores).
+
+| `c_puct` | Elo | 95% interval |
+|---|---|---|
+| 1.0 | 762 | [723, 805] |
+| **1.5** | 750 | [712, 795] |
+| 2.5 | 695 | [655, 737] |
+| 4.0 | 620 | [583, 658] |
+| minimax-d4 | 384 | [350, 417] |
+
+Head to head, 1.0 scored 52.2% against 1.5 (99W 90L 11D, interval [45.4%,
+59.1%]): no difference the games can see. 1.5 beat 2.5 with 64.5% and 4.0 with
+70.5%, both decisive.
+
+### Reading
+
+At 50 simulations there is not much budget to spend on exploring, and the network
+at generation 120 has good enough first impressions that spending it on the
+second- and third-best moves costs more than it finds. That is the direction the
+pseudocode's own schedule points: its coefficient starts at 1.25 and only grows
+with visit count, so at small budgets it is near the bottom of the range tested
+here. Whether 1.0 is better than 1.5 at 800 simulations, where the Max difficulty
+level plays, was not tested and is a different question; the difficulty ladder is
+recalibrated on the 1.0 network anyway, and that is the place to ask it.
+
+### Decisions taken
+
+* `c_puct` stays at 1.5 for training, the arena, the difficulty levels and the
+  browser. Changing it to 1.0 would be a change without evidence.
+* The sweep protocol, one network entered several times with different search
+  settings via `reversi arena --entrant NAME=PATH@SIMS;c_puct=…`, is the way any
+  play-time constant is tuned on this project from here on.
+
+---
+
 ## Run 6 — E1+E2, capacity and the ownership head together — `e12-10x128-ownership`
 
 **Result: pending.** This section was written before the run was submitted.
