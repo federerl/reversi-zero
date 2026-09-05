@@ -74,6 +74,7 @@ net:
   n_blocks: 4
   channels: 48
   value_hidden: 64
+  ownership: false
 ```
 
 The network looks at a board position and outputs two things:
@@ -89,6 +90,7 @@ architecture — a board is essentially an 8×8 image with a few channels).
 | `n_blocks: 4` | Depth: 4 residual blocks stacked up | More blocks = the network can combine information from further across the board, but every block slows down every one of those 4.6M calls |
 | `channels: 48` | Width: 48 feature maps per layer | More channels = more patterns recognisable per layer |
 | `value_hidden: 64` | Size of the hidden layer in the win-probability head | Minor; 64 is plenty for one number |
+| `ownership: false` | Add a third head that predicts who ends up owning each square | 65 extra parameters. Trained only when `train.ownership_loss_weight` is above 0; never consulted at play time, so a network with it is a drop-in for one without |
 
 Together: about **180,000 parameters**. `full8x8` uses 6 blocks × 64 channels,
 about 400,000.
@@ -333,6 +335,7 @@ train:
   lr_floor_divisor: 20.0
   grad_clip: 5.0
   value_loss_weight: 1.0
+  ownership_loss_weight: 0.0
   symmetry_aug: true
   checkpoint_every_steps: 200
 ```
@@ -393,7 +396,31 @@ loss = policy_loss  +  1.0 × value_loss
 
 1.0 weights them equally (AlphaZero's choice). Raise it if win predictions stay
 poor while move predictions are fine; lower it if the value head starts
-memorising specific game outcomes.
+memorising specific game outcomes. Run 2 tried 4.0 and the agent got weaker: the
+policy signal was starved (see `experiments.md`).
+
+### `ownership_loss_weight: 0.0`
+
+A third, optional term, only for a network built with `net.ownership: true`:
+
+```
+loss = policy_loss  +  value_loss_weight × value_loss  +  ownership_loss_weight × ownership_loss
+```
+
+- **ownership loss** — for each of the 64 squares, did the network's guess at who
+  owns it when the game ends (+1 me, −1 them, 0 empty) match what happened?
+
+The final disc margin is the sum of those 64 numbers, so this is the value target
+broken into its parts: the same answer as `z`, plus *where* it comes from.
+Sixty-four training signals per position instead of one, aimed at the shared
+trunk, without touching the policy term. It is measured as a mean squared error
+over the squares, so it has the same natural scale as the value term and 1.0
+means "as important as the result". Positions from shards written before the
+target existed carry no ownership and are left out of this term only.
+
+0.0 switches the term off, which is exactly the two-term loss above. Setting it
+above 0 without `net.ownership: true` is a configuration error, because there
+would be no head to train.
 
 ### `symmetry_aug: true`
 

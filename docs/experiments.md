@@ -511,6 +511,53 @@ arithmetic per position, that is an expensive 35 Elo.
 
 ---
 
+## Run 5 — E2, the ownership head — `e2-ownership` (CSSE Slurm cluster)
+
+**Result: pending.** This section was written before the run was submitted.
+
+**Question.** Runs 1 and 3 showed the value head stops improving at generation 5
+and sits at a loss of 0.65 for the rest of the run. Run 2 showed that weighting
+its one target more heavily starves the policy. Run 4 showed that a bigger
+network lowers the value loss to 0.57 but buys only 30 to 40 Elo, so capacity is
+not the whole story. What if the problem is the *target*? Does giving the value
+side sixty-four answers per position instead of one make a stronger agent?
+
+**Change.** `net.ownership: true` and `train.ownership_loss_weight: 1.0`, and
+nothing else about the run 1 recipe (`configs/full8x8_e2_ownership.yaml`).
+The network grows a third head, a 1×1 convolution off the trunk that predicts
+for every square who owns it when the game ends: +1 the player to move, −1 the
+opponent, 0 empty. The final disc margin that decides `z` is the sum of those 64
+numbers, so the head is asked for the same answer as the value head plus where it
+comes from. The loss gains a mean-squared-error term on it, weighted like the
+value term. The idea is KataGo's (Wu, *Accelerating Self-Play Learning in Go*,
+arXiv:1902.10565), where auxiliary ownership and score targets were among the
+largest single gains in learning efficiency.
+
+The head is never consulted at play time. `forward` still returns a policy and a
+value; the search, the export and the browser see a network of exactly the shape
+run 3 produced. Only the trainer sees the third output.
+
+**Scale.** 120 generations, 72,000 games, one L40S, chained 24-hour jobs. 6×64
+network, 200 simulations, 600 games per generation: the same self-play budget as
+runs 1, 3 and 4, so generation *N* is comparable across all of them.
+
+### The prediction, registered before the run
+
+Compared against run 3, the control, at matched generations 60 and 120, in
+1000-game head-to-head matches (the protocol run 4 settled on):
+
+| if | then |
+|---|---|
+| E2 beats the control at both generations with intervals excluding 50%, **and** by more than run 4's 30 to 40 Elo | the target was the constraint, and it is a cheaper lever than capacity |
+| E2 beats the control decisively but by about what run 4 gained | the ownership head is worth about as much as a 6.7× bigger network at a fraction of the cost; E1 and E2 are then combined for the 1.0 network |
+| value loss falls below 0.60 but E2 does not beat the control | the head made a better predictor and not a better player; the value head is not what limits play at this search budget |
+| E2 is weaker than the control | the extra term competes with the policy after all, as run 2's weight did; halve the weight and try once more |
+
+Value loss below 0.60 by generation 30 is expected in every row but the last; run
+1 and run 3 never went below 0.62.
+
+---
+
 ## Calibration: are the four difficulty levels actually different opponents?
 
 **Run:** 2026-08-31, `models/reversi-8x8-gen60.pt`, 21 pairings × 300 games,

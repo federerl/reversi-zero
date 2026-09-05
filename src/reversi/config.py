@@ -73,6 +73,11 @@ class NetConfig(_Base):
     n_blocks: int = Field(default=4, ge=1, le=20)
     channels: int = Field(default=48, ge=8, le=256)
     value_hidden: int = Field(default=64, ge=8, le=512)
+    ownership: bool = Field(
+        default=False,
+        description="Add a head that predicts who ends up owning each square. "
+        "Trained only if train.ownership_loss_weight > 0; never used at play time.",
+    )
 
 
 class MCTSConfig(_Base):
@@ -154,6 +159,12 @@ class TrainConfig(_Base):
     lr_floor_divisor: float = Field(default=20.0, ge=1.0, description="Cosine decays to lr/this")
     grad_clip: float = Field(default=5.0, gt=0.0, description="Global-norm clip")
     value_loss_weight: float = Field(default=1.0, ge=0.0)
+    ownership_loss_weight: float = Field(
+        default=0.0,
+        ge=0.0,
+        description="Weight on the ownership head's loss. 0 disables the term. "
+        "Needs net.ownership.",
+    )
     symmetry_aug: bool = Field(
         default=True,
         description="Apply a random one of the 8 dihedral symmetries per sample "
@@ -261,6 +272,14 @@ class Config(_Base):
                 f"selfplay.games_per_generation ({self.selfplay.games_per_generation}) "
                 f"must be >= selfplay.n_workers ({self.selfplay.n_workers}); "
                 "otherwise some workers would have no games to play."
+            )
+            raise ValueError(msg)
+
+        if self.train.ownership_loss_weight > 0.0 and not self.net.ownership:
+            msg = (
+                f"train.ownership_loss_weight is {self.train.ownership_loss_weight} but "
+                "net.ownership is false: there is no head to train. Set net.ownership: "
+                "true, or the weight to 0."
             )
             raise ValueError(msg)
 

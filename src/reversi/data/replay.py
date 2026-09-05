@@ -52,6 +52,14 @@ class Batch:
     """``(batch, size**2 + 1)`` -- what the policy head should say."""
     z: NDArray[np.float32]
     """``(batch,)`` -- what the value head should say."""
+    own: NDArray[np.float32] | None = None
+    """``(batch, size**2)`` -- who ends up owning each square, +1 / 0 / -1 from the
+    mover's view. Zeros where the position predates the ownership target. The
+    buffer always fills it; ``None`` only for batches built by hand."""
+    own_valid: NDArray[np.bool_] | None = None
+    """``(batch,)`` -- whether ``own`` is a real target for that row. Rows read
+    from shards written before the target existed are ``False`` and must not
+    contribute to an ownership loss."""
 
     def __len__(self) -> int:
         return len(self.z)
@@ -83,6 +91,9 @@ class ReplayBuffer:
             np.array([*list(sym.inverse), n_squares], dtype=np.int64)
             for sym in symmetry.symmetries(board_size)
         )
+        # The same reordering for anything indexed by square alone, such as the
+        # ownership target: the policy's permutation without its PASS entry.
+        self._square_gather = tuple(gather[:n_squares] for gather in self._policy_gather)
 
     # -----------------------------------------------------------------
     # Filling it
@@ -124,11 +135,24 @@ class ReplayBuffer:
         self._reindex()
 
     def _append(self, arrays: Arrays) -> None:
+        block = {field: np.asarray(arrays[field]) for field in FIELDS}
+        count = len(block["black"])
+        # Ownership is optional on disk but always present in memory, with a flag
+        # saying whether it is real. A window that mixes old shards (no target)
+        # and new ones (target) then concatenates without special cases, and the
+        # loss masks the rows it cannot learn from.
+        if "own" in arrays:
+            block["own"] = np.asarray(arrays["own"], dtype=np.int8)
+            block["own_valid"] = np.ones(count, dtype=np.bool_)
+        else:
+            block["own"] = np.zeros((count, self.board_size * self.board_size), dtype=np.int8)
+            block["own_valid"] = np.zeros(count, dtype=np.bool_)
+
         if not self._columns:
-            self._columns = {field: np.asarray(arrays[field]).copy() for field in FIELDS}
+            self._columns = {field: column.copy() for field, column in block.items()}
             return
-        for field in FIELDS:
-            self._columns[field] = np.concatenate((self._columns[field], np.asarray(arrays[field])))
+        for field, column in block.items():
+            self._columns[field] = np.concatenate((self._columns[field], column))
 
     def _trim(self) -> None:
         """Drop the oldest positions once the window is full."""
@@ -136,7 +160,7 @@ class ReplayBuffer:
         if size <= self.window:
             return
         keep = slice(size - self.window, size)
-        self._columns = {field: self._columns[field][keep] for field in FIELDS}
+        self._columns = {field: column[keep] for field, column in self._columns.items()}
 
     def _reindex(self) -> None:
         if not self._columns:
@@ -239,6 +263,8 @@ class ReplayBuffer:
         planes = np.empty((len(indices), features.IN_PLANES, size, size), dtype=np.float32)
         pi = np.empty((len(indices), width), dtype=np.float32)
         z = np.empty(len(indices), dtype=np.float32)
+        own = np.empty((len(indices), size * size), dtype=np.float32)
+        own_valid = np.asarray(self._columns["own_valid"][indices], dtype=np.bool_)
 
         which_turn = (
             rng.integers(0, len(turns), size=len(indices))
@@ -254,17 +280,20 @@ class ReplayBuffer:
                 size=size,
             )
             target = np.asarray(self._columns["pi"][index], dtype=np.float32)
+            owners = np.asarray(self._columns["own"][index], dtype=np.float32)
 
             turn = int(which_turn[row])
             if turn != 0:
                 state = symmetry.transform_state(state, turns[turn])
                 target = target[self._policy_gather[turn]]
+                owners = owners[self._square_gather[turn]]
 
             planes[row] = features.encode(state)
             pi[row] = target
             z[row] = self._columns["z"][index]
+            own[row] = owners
 
-        return Batch(planes=planes, pi=pi, z=z)
+        return Batch(planes=planes, pi=pi, z=z, own=own, own_valid=own_valid)
 
     # -----------------------------------------------------------------
 

@@ -80,6 +80,10 @@ class Trainer:
         planes = torch.from_numpy(np.ascontiguousarray(batch.planes)).to(self.device)
         pi_target = torch.from_numpy(np.ascontiguousarray(batch.pi)).to(self.device)
         z_target = torch.from_numpy(np.ascontiguousarray(batch.z)).to(self.device)
+        own_target = own_valid = None
+        if batch.own is not None and batch.own_valid is not None:
+            own_target = torch.from_numpy(np.ascontiguousarray(batch.own)).to(self.device)
+            own_valid = torch.from_numpy(np.ascontiguousarray(batch.own_valid)).to(self.device)
 
         lr = learning_rate(
             self.global_step,
@@ -91,13 +95,17 @@ class Trainer:
         for group in self.optimizer.param_groups:
             group["lr"] = lr
 
-        policy_logits, value_pred = self.model(planes)
+        policy_logits, value_pred, ownership_pred = self.model.forward_all(planes)
         parts = policy_value_loss(
             policy_logits,
             value_pred,
             pi_target,
             z_target,
             value_weight=self.config.value_loss_weight,
+            ownership_pred=ownership_pred,
+            own_target=own_target,
+            own_valid=own_valid,
+            ownership_weight=self.config.ownership_loss_weight,
         )
 
         self.optimizer.zero_grad(set_to_none=True)

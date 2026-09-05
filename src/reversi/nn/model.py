@@ -91,6 +91,7 @@ class PolicyValueNet(nn.Module):
         channels: int = 48,
         value_hidden: int = 64,
         in_planes: int = IN_PLANES,
+        ownership: bool = False,
     ) -> None:
         super().__init__()
         if board_size < 2:
@@ -102,6 +103,7 @@ class PolicyValueNet(nn.Module):
         self.n_blocks = n_blocks
         self.channels = channels
         self.value_hidden = value_hidden
+        self.ownership = ownership
 
         n_squares = board_size * board_size
         self.policy_size = policy_size(board_size)
@@ -135,6 +137,21 @@ class PolicyValueNet(nn.Module):
             nn.Tanh(),  # bounds the answer to [-1, +1]: a loss, a draw, or a win
         )
 
+        # The ownership head, when asked for: one number per square in [-1, +1],
+        # "who ends up owning this". A 1x1 convolution straight off the trunk,
+        # because the answer for a square is a local property of the trunk's
+        # features at that square, and a linear layer would only add parameters
+        # that let squares copy each other. Sixty-five extra weights for 64 extra
+        # training signals per position. Not part of ``forward``: the search, the
+        # export, and the browser never see it, only the loss does.
+        self.ownership_head: nn.Module | None = None
+        if ownership:
+            self.ownership_head = nn.Sequential(
+                nn.Conv2d(channels, 1, kernel_size=1),
+                nn.Flatten(),
+                nn.Tanh(),
+            )
+
     @classmethod
     def from_config(cls, net: NetConfig, board_size: int) -> PolicyValueNet:
         """Build the network described by a validated config block."""
@@ -143,14 +160,34 @@ class PolicyValueNet(nn.Module):
             n_blocks=net.n_blocks,
             channels=net.channels,
             value_hidden=net.value_hidden,
+            ownership=net.ownership,
         )
 
-    def forward(self, x: Tensor) -> tuple[Tensor, Tensor]:
+    def _trunk(self, x: Tensor) -> Tensor:
         if x.ndim != 4:
             msg = f"expected a (batch, planes, size, size) tensor, got shape {tuple(x.shape)}"
             raise ValueError(msg)
-        trunk = self.trunk_out(self.blocks(self.stem(x)))
+        return self.trunk_out(self.blocks(self.stem(x)))
+
+    def forward(self, x: Tensor) -> tuple[Tensor, Tensor]:
+        """What every consumer but the trainer calls: ``(policy_logits, value)``.
+
+        The ownership head is left out on purpose. Search, export and the browser
+        want exactly two outputs, and a network trained with the extra head must
+        be a drop-in for one trained without it.
+        """
+        trunk = self._trunk(x)
         return self.policy_head(trunk), self.value_head(trunk)
+
+    def forward_all(self, x: Tensor) -> tuple[Tensor, Tensor, Tensor | None]:
+        """Everything the network predicts, for the loss: policy, value, ownership.
+
+        Ownership is ``None`` when the network has no such head, so the trainer
+        can treat both kinds of network the same way.
+        """
+        trunk = self._trunk(x)
+        ownership = self.ownership_head(trunk) if self.ownership_head is not None else None
+        return self.policy_head(trunk), self.value_head(trunk), ownership
 
     def arch(self) -> dict[str, Any]:
         """The shape of this network, for the checkpoint sidecar.
@@ -167,10 +204,26 @@ class PolicyValueNet(nn.Module):
             "channels": self.channels,
             "value_hidden": self.value_hidden,
             "policy_size": self.policy_size,
+            "ownership": self.ownership,
         }
 
     def parameter_count(self) -> int:
         return sum(p.numel() for p in self.parameters())
+
+
+def normalise_arch(arch: dict[str, Any]) -> dict[str, Any]:
+    """An architecture record with every later-added field filled in.
+
+    Checkpoints written before the ownership head existed have no ``ownership``
+    key, and they describe a network without one. Comparing such a record to a
+    freshly built network's ``arch()`` must say "same network", not "different",
+    or every old run would refuse to resume and every old export would refuse to
+    load. New fields are added here with the value that reproduces the old
+    behaviour, and nowhere else.
+    """
+    filled = dict(arch)
+    filled.setdefault("ownership", False)
+    return filled
 
 
 def _init_weights(module: nn.Module) -> None:
