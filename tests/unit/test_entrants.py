@@ -58,6 +58,23 @@ def test_a_network_entrant_is_named_and_given_a_budget(tmp_path: Path) -> None:
     assert unnamed.simulations == 50
 
 
+def test_search_settings_ride_along_after_a_semicolon(tmp_path: Path) -> None:
+    """One network, several search constants: that is how c_puct gets tuned."""
+    weights = tmp_path / "gen_00120.pt"
+    weights.write_bytes(b"x")
+
+    spec = parse_entrant(f"e1-c25={weights}@50;c_puct=2.5;fpu=0.1", default_simulations=1)
+    assert spec.c_puct == 2.5
+    assert spec.fpu_reduction == 0.1
+    assert spec.simulations == 50
+    assert describe_entrant(spec)["c_puct"] == 2.5
+
+    with pytest.raises(ConfigError, match="unknown search option"):
+        parse_entrant(f"x={weights};temperature=1", default_simulations=1)
+    with pytest.raises(ConfigError, match="must be a number"):
+        parse_entrant(f"x={weights};c_puct=lots", default_simulations=1)
+
+
 def test_a_missing_network_file_is_refused_with_the_alternatives_named(tmp_path: Path) -> None:
     with pytest.raises(ConfigError, match="no network file"):
         parse_entrant(f"ghost={tmp_path / 'absent.pt'}", default_simulations=50)

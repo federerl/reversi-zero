@@ -74,9 +74,13 @@ def parse_entrant(text: str, *, default_simulations: int) -> EntrantSpec:
         NAME=PATH@200               the same, at 200 simulations
         PATH                        name taken from the file's stem
         level:casual=PATH           a difficulty rung on top of a network
+        NAME=PATH@50;c_puct=2.5     search settings after a semicolon: c_puct, fpu
 
     The equals sign separates the name from the file because file names on
-    Windows may contain colons and drive letters, and a name never does.
+    Windows may contain colons and drive letters, and a name never does. The
+    semicolon options exist so that one network can enter a tournament several
+    times with different search settings, which is how a search constant is tuned:
+    the same weights, rated against each other and the baselines.
     """
     text = text.strip()
     if not text:
@@ -101,6 +105,9 @@ def parse_entrant(text: str, *, default_simulations: int) -> EntrantSpec:
         level, path = body.split("=", 1)
         return EntrantSpec(name=level, kind="level", path=path, level=level)
 
+    text, *option_parts = text.split(";")
+    options = _search_options(option_parts, text)
+
     name, _, rest = text.rpartition("=") if "=" in text else ("", "", text)
     path, _, sims = rest.rpartition("@") if "@" in rest else (rest, "", "")
     if not name:
@@ -119,7 +126,34 @@ def parse_entrant(text: str, *, default_simulations: int) -> EntrantSpec:
             "random, greedy, minimax-dN and edax-lN; anything else is read as a file."
         )
         raise ConfigError(msg)
-    return EntrantSpec(name=name, kind="checkpoint", path=path, simulations=simulations)
+    return EntrantSpec(
+        name=name,
+        kind="checkpoint",
+        path=path,
+        simulations=simulations,
+        c_puct=options.get("c_puct", 1.5),
+        fpu_reduction=options.get("fpu_reduction", 0.25),
+    )
+
+
+def _search_options(parts: list[str], text: str) -> dict[str, float]:
+    """The ``;c_puct=2.5;fpu=0.1`` tail of an entrant, checked and named for the spec."""
+    names = {"c_puct": "c_puct", "fpu": "fpu_reduction", "fpu_reduction": "fpu_reduction"}
+    options: dict[str, float] = {}
+    for part in parts:
+        key, sep, value = part.partition("=")
+        if not sep or key not in names:
+            msg = (
+                f"unknown search option {part!r} in {text!r}; after the semicolon use "
+                "c_puct=<number> or fpu=<number>"
+            )
+            raise ConfigError(msg)
+        try:
+            options[names[key]] = float(value)
+        except ValueError as error:
+            msg = f"{key} must be a number, got {value!r} in {text!r}"
+            raise ConfigError(msg) from error
+    return options
 
 
 def _load_evaluator(path: Path, device: str) -> Evaluator:
