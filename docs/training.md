@@ -75,14 +75,25 @@ runs/<run_id>/
   checkpoints/
     gen_00007.pt         weights, optimiser state, RNG state
     gen_00007.json       the same metadata as plain JSON, plus the .pt's checksum
+                         and, on rated generations, elo_estimate
     latest.pt/.json      a copy of the newest (a copy, not a symlink -- Windows)
+    best.pt/.json        a copy of the highest-rated so far; export this one
   replay/
     gen_00007_w00.npz    one shard per generation
     manifest.json        every shard with its checksum
   metrics/
     train.jsonl  selfplay.jsonl  replay.jsonl
+    arena.jsonl          the in-loop quick rating, one row per rated generation
   logs/
 ```
+
+`latest` is the most recent checkpoint; `best` is the strongest one the run has
+measured. They are usually different files. Every `arena.every_n_generations`
+generations the loop plays the new checkpoint against Random, Greedy and a shallow
+Minimax, fits a rating, and promotes the checkpoint to `best` if the rating is the
+highest so far. A run's own curve is `elo_estimate` over `metrics/arena.jsonl`.
+The number is coarse on purpose (see `configuration.md`, `quick_games`); the
+rated table comes from `reversi arena` afterwards.
 
 The `.json` sidecars are there so you can inspect a run without loading torch:
 

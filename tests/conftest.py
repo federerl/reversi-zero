@@ -55,6 +55,16 @@ def smoke_config() -> Config:
             },
             "replay": {"window": 512, "retain_shards": 4},
             "train": {"steps_per_generation": 2, "batch_size": 8},
-            "arena": {"every_n_generations": 1, "games": 4, "opening_plies": 1},
+            "arena": {
+                "every_n_generations": 1,
+                "games": 4,
+                "opening_plies": 1,
+                # The quick evaluation runs every generation here so the loop
+                # tests exercise it, but at a cost of a few seconds, not minutes.
+                "quick_games": 4,
+                "quick_simulations": 4,
+                "quick_opponents": ("random", "greedy"),
+                "quick_workers": 1,
+            },
         }
     )

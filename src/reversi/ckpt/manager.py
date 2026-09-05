@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import logging
 import random
+from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -139,10 +140,47 @@ class CheckpointManager:
         return meta
 
     def mark_best(self, generation: int) -> None:
-        """Promote a generation to ``best`` -- used by the arena from day 9."""
+        """Promote a generation to ``best``.
+
+        Called by the training loop when the quick evaluation rates a generation
+        above every earlier one. ``best.pt`` is therefore the checkpoint to export
+        and to play against, and ``latest.pt`` is only the most recent.
+        """
         path = self.directory / checkpoint_name(generation)
         meta = self.read_meta(path)
         self._copy_as(path, meta, BEST)
+
+    def best_estimate(self) -> tuple[int, float] | None:
+        """The generation ``best`` points at and its rating, or ``None`` if there is none.
+
+        Read from ``best.json`` so that a resumed run keeps comparing against the
+        best it had found, rather than promoting the first generation after the
+        restart by default.
+        """
+        sidecar = self.directory / f"{BEST}.json"
+        if not sidecar.exists():
+            return None
+        meta = CheckpointMeta.read(sidecar)
+        if meta.elo_estimate is None:
+            return None
+        return meta.generation, meta.elo_estimate
+
+    def update_meta(self, generation: int, *, elo_estimate: float) -> CheckpointMeta:
+        """Write a rating into a saved generation's sidecar.
+
+        The rating is measured after the checkpoint is written, so it cannot be
+        in the sidecar from the start. The weights are untouched; only the
+        metadata changes, and ``latest.json`` is refreshed if it describes this
+        generation, so the two copies never disagree.
+        """
+        path = self.directory / checkpoint_name(generation)
+        meta = replace(self.read_meta(path), elo_estimate=elo_estimate)
+        atomic_write_json(sidecar_for(path), meta.to_json())
+
+        latest_sidecar = self.directory / f"{LATEST}.json"
+        if latest_sidecar.exists() and CheckpointMeta.read(latest_sidecar).generation == generation:
+            atomic_write_json(latest_sidecar, meta.to_json())
+        return meta
 
     def _copy_as(self, source: Path, meta: CheckpointMeta, label: str) -> None:
         target = self.directory / f"{label}.pt"
