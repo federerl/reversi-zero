@@ -48,7 +48,12 @@ ResumeOpt = Annotated[
 ]
 SuiteOpt = Annotated[
     str,
-    typer.Option("--suite", help="'baselines', 'crossgen', or 'final'."),
+    typer.Option(
+        "--suite",
+        help="'baselines' (one checkpoint vs the fixed opponents), 'crossgen' (several "
+        "generations of one run, on one scale), 'final' (crossgen plus Edax), or "
+        "'custom' (only what --entrant lists).",
+    ),
 ]
 ShaOnlyOpt = Annotated[
     bool,
@@ -273,11 +278,191 @@ def arena(
     config: ConfigOpt = None,
     set_: SetOpt = None,
     suite: SuiteOpt = "baselines",
+    run_id: RunIdOpt = None,
+    checkpoint: Annotated[
+        Path | None,
+        typer.Option(
+            "--checkpoint",
+            help="The network to rate in the baselines suite. Default: the run's latest.pt.",
+        ),
+    ] = None,
+    entrant: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--entrant",
+            "-e",
+            help="An extra entrant: random, greedy, minimax-d4, edax-l5, or NAME=PATH[@SIMS] "
+            "for a network file. Repeatable. With --suite custom these are the whole field.",
+        ),
+    ] = None,
+    games: Annotated[
+        int | None,
+        typer.Option("--games", help="Games per pairing, even. Default: arena.games."),
+    ] = None,
+    simulations: Annotated[
+        int | None,
+        typer.Option(
+            "--simulations",
+            help="Search budget per move for network entrants. Default: mcts.n_simulations.",
+        ),
+    ] = None,
+    workers: Annotated[
+        int,
+        typer.Option("--workers", help="Pairings to play at once. 1 runs in this process."),
+    ] = 1,
+    opening_plies: Annotated[
+        int | None,
+        typer.Option(
+            "--opening-plies",
+            help="Random moves before each game, so pairings do not replay one line. "
+            "Default: arena.opening_plies.",
+        ),
+    ] = None,
+    max_checkpoints: Annotated[
+        int,
+        typer.Option("--max-checkpoints", help="Generations to rate in crossgen and final."),
+    ] = 6,
+    seed: Annotated[
+        int | None,
+        typer.Option("--seed", help="Tournament seed. Default: derived from the config seed."),
+    ] = None,
+    bootstrap: Annotated[
+        int | None,
+        typer.Option(
+            "--bootstrap",
+            help="Resamples for the rating intervals. Default: arena.bootstrap_resamples.",
+        ),
+    ] = None,
+    out: Annotated[
+        Path | None,
+        typer.Option("--out", help="Where to write the report. Default: <run>/arena/<suite>.json."),
+    ] = None,
+    device: Annotated[
+        str,
+        typer.Option("--device", help="'cpu' or 'cuda'. CPU is usually faster here."),
+    ] = "cpu",
+    notes: Annotated[str, typer.Option("--notes", help="Recorded in the report.")] = "",
 ) -> None:
-    """Play evaluation matches and report Wilson intervals and Bradley-Terry Elo."""
-    _load(config, set_)
-    _ = suite
-    _not_yet("T27/T28", "arena")
+    """Play a tournament and report ratings with confidence intervals.
+
+    Every entrant plays every other, the same number of colour-balanced games
+    from the same seeded openings, and the whole result matrix is fitted at once
+    (Bradley-Terry, anchored at random play = 0). That is what turns "it won 60%
+    of its games" into a rating with an error bar, on a scale that Random, Greedy
+    and Minimax also sit on.
+
+    The report has the shape every consumer already reads: ``crossgen.json`` under
+    the run's ``arena/`` directory feeds the README figures and the web app's
+    opponent list, so a new run gets a rated table with one command.
+    """
+    from reversi.arena.entrants import describe_entrant, parse_entrant
+    from reversi.arena.suites import baseline_entrants, checkpoint_label, crossgen_entrants
+    from reversi.arena.tournament import round_robin_parallel, write_tournament
+    from reversi.errors import ConfigError
+    from reversi.obs.runmeta import run_root
+    from reversi.seeding import derive_seed
+
+    resolved = _load(config, set_)
+    setup_logging()
+
+    suites = {"baselines", "crossgen", "final", "custom"}
+    if suite not in suites:
+        typer.secho(
+            f"--suite must be one of {sorted(suites)}, got {suite!r}", fg=typer.colors.RED, err=True
+        )
+        raise typer.Exit(code=2)
+
+    run_dir = run_root(resolved) / run_id if run_id else None
+    checkpoints_dir = run_dir / "checkpoints" if run_dir else None
+    sims = simulations if simulations is not None else resolved.mcts.n_simulations
+    n_games = games if games is not None else resolved.arena.games
+    plies = opening_plies if opening_plies is not None else resolved.arena.opening_plies
+    resamples = bootstrap if bootstrap is not None else resolved.arena.bootstrap_resamples
+    tournament_seed = seed if seed is not None else derive_seed(resolved.seed, "arena", suite)
+
+    try:
+        entrants = []
+        label = suite
+        if suite == "baselines":
+            path = checkpoint
+            if path is None and checkpoints_dir is not None:
+                path = checkpoints_dir / "latest.pt"
+            if path is None:
+                msg = (
+                    "the baselines suite needs --checkpoint, or --run-id to use the run's latest.pt"
+                )
+                raise ConfigError(msg)
+            rated = parse_entrant(f"{checkpoint_label(path)}={path}", default_simulations=sims)
+            entrants = [*baseline_entrants(resolved.arena.baselines), rated]
+            label = f"baselines_{rated.name}"
+        elif suite in {"crossgen", "final"}:
+            if checkpoints_dir is None:
+                msg = f"the {suite} suite needs --run-id, so it knows which checkpoints to rate"
+                raise ConfigError(msg)
+            entrants = crossgen_entrants(
+                checkpoints_dir, simulations=sims, max_checkpoints=max_checkpoints
+            )
+            if suite == "final":
+                from reversi.agents.edax import find_edax
+
+                try:
+                    find_edax()
+                except ReversiError as missing:
+                    typer.secho(
+                        f"Edax is not installed, so the final suite is crossgen only. {missing}",
+                        fg=typer.colors.YELLOW,
+                        err=True,
+                    )
+                else:
+                    entrants.append(parse_entrant("edax-l5", default_simulations=sims))
+        for text in entrant or []:
+            entrants.append(parse_entrant(text, default_simulations=sims))
+        if suite == "custom" and len(entrants) < 2:
+            msg = "the custom suite needs at least two --entrant"
+            raise ConfigError(msg)
+
+        names = [e.name for e in entrants]
+        anchor = "random" if "random" in names else names[0]
+        if anchor != "random":
+            typer.secho(
+                f"random is not in this field, so ratings are anchored at {anchor} = 0 and are "
+                "not comparable to tables anchored at random.",
+                fg=typer.colors.YELLOW,
+                err=True,
+            )
+        typer.echo(f"{len(entrants)} entrants, {n_games} games per pairing, {sims} simulations")
+        result = round_robin_parallel(
+            entrants,
+            games_per_pair=n_games,
+            board_size=resolved.game.board_size,
+            seed=tournament_seed,
+            workers=workers,
+            opening_plies=plies,
+            anchor=anchor,
+            bootstrap=resamples,
+            device=device,
+        )
+    except ReversiError as error:
+        typer.secho(str(error), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2) from error
+
+    typer.echo("")
+    typer.echo(result.describe())
+
+    if out is not None:
+        destination = out
+    elif run_dir is not None:
+        destination = run_dir / "arena" / f"{label}.json"
+    else:
+        destination = Path(resolved.run_root) / "arena" / f"{label}.json"
+    write_tournament(
+        destination,
+        result,
+        specs={e.name: describe_entrant(e, board_size=resolved.game.board_size) for e in entrants},
+        notes=notes,
+    )
+    typer.echo("")
+    typer.echo(f"report: {destination}  ({result.seconds / 60:.1f} min)")
 
 
 @app.command()

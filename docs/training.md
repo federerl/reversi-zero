@@ -127,6 +127,36 @@ describe the network you just built. torch would reject an outright shape
 mismatch anyway, but the message is unhelpful, and a change that happened to
 preserve shapes would not be caught at all.
 
+## Rating what a run produced
+
+Training loss says nothing about strength. The number that does is a rating from
+games, and `reversi arena` produces it:
+
+```bash
+uv run reversi arena -c configs/full8x8.yaml --suite crossgen --run-id <id> --workers 8
+```
+
+`crossgen` takes up to six of the run's saved generations, spread from first to
+last, adds Random, Greedy and two Minimax depths, plays every pairing the same
+number of colour-balanced games from seeded openings, and fits one rating table
+to the whole matrix (Bradley–Terry, anchored at Random = 0, with bootstrap
+intervals). The report lands at `runs/<id>/arena/crossgen.json`, in the shape the
+README figures and the web app's opponent list read.
+
+Two other suites: `baselines` rates one checkpoint (the run's `latest.pt`, or
+`--checkpoint`) against the fixed opponents; `final` is `crossgen` plus the Edax
+engine when it is installed. `--entrant` adds anyone to any suite, which is how
+a checkpoint from a *different* run joins the table:
+
+```bash
+uv run reversi arena -c configs/full8x8.yaml --suite custom     -e random -e greedy -e minimax-d4     -e control-g60=runs/control/checkpoints/gen_00060.pt@50     -e run1-g60=runs/<run 1>/checkpoints/gen_00060.pt@50 --out runs/compare.json
+```
+
+Pairings run in separate CPU processes, one thread each. A tournament asks the
+network about one position at a time, so a GPU barely helps here and eight CPU
+processes beat one GPU process comfortably. On the cluster this is a
+`slurm/cpu.sbatch` job.
+
 ## On a job scheduler
 
 Training runs on the CSSE Slurm cluster. The scripts live in `slurm/`, and

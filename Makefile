@@ -51,8 +51,8 @@ train-full:  ## 8x8 overnight run; resumes across the 8h job ceiling
 bench:  ## Engine / MCTS / inference / self-play throughput -> bench/results/
 	$(RUN) reversi bench -c $(CONFIG)
 
-arena:  ## Evaluate a checkpoint against the frozen baselines
-	$(RUN) reversi arena -c $(CONFIG)
+arena:  ## Rate a run's checkpoints against the frozen baselines (RUN_ID=<run id>)
+	$(RUN) reversi arena -c $(CONFIG) --suite crossgen --run-id $(RUN_ID) --workers 8
 
 calibrate:  ## Search and validate the four difficulty levels
 	$(RUN) reversi calibrate -c $(CONFIG) --validate

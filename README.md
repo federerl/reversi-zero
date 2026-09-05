@@ -60,9 +60,9 @@ python scripts/validate_run.py runs/*      # assert every run is reproducible
 
 reversi train -c configs/smoke4x4.yaml     # 4x4 pipeline validation, ~8 min CPU
 reversi train -c configs/full8x8.yaml      # 8x8 run (needs a GPU to be worth starting)
-reversi arena                              # (planned) evaluate vs Random / Greedy / Minimax-d4
-reversi calibrate --validate               # (planned) verify the four difficulty levels
-reversi serve                              # (planned) play in the browser
+reversi arena --suite crossgen --run-id <id>  # rate a run's generations against Random / Greedy / Minimax
+reversi calibrate models/reversi-8x8-gen60.pt  # measure the four difficulty levels
+reversi serve                              # play against a checkpoint from a local server
 ```
 
 ## Play it

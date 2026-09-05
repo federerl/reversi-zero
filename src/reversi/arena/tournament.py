@@ -31,14 +31,22 @@ import numpy as np
 
 from reversi.agents.base import Agent
 from reversi.arena.elo import RatingTable, fit_bradley_terry
+from reversi.arena.entrants import EntrantSpec, build_agent
 from reversi.arena.match import MatchResult, play_match
 from reversi.arena.report import check_fairness
 from reversi.arena.stats import wilson_interval
 from reversi.atomicio import atomic_write_json
 from reversi.errors import ArenaError
 from reversi.obs.runmeta import git_info
+from reversi.seeding import derive_seed
 
-__all__ = ["Entrant", "TournamentResult", "round_robin", "write_tournament"]
+__all__ = [
+    "Entrant",
+    "TournamentResult",
+    "round_robin",
+    "round_robin_parallel",
+    "write_tournament",
+]
 
 log = logging.getLogger(__name__)
 
@@ -197,3 +205,147 @@ def write_tournament(
     }
     atomic_write_json(path, payload)
     return payload
+
+
+# ---------------------------------------------------------------------------
+# The same tournament, with the pairings spread across processes
+# ---------------------------------------------------------------------------
+#
+# The pairings of a round robin are independent, so they parallelise perfectly.
+# Each process builds its own agents from an ``EntrantSpec`` and loads its own
+# copy of any network, so there is no shared state and nothing to deadlock on.
+#
+# On the CPU rather than the GPU, which is counterintuitive until measured: a
+# tournament asks the network about one position at a time, and at batch size one
+# a GPU is barely faster than a CPU core. Several CPU processes beat one GPU
+# process by a wide margin and leave the GPU free for training.
+
+
+@dataclass(frozen=True, slots=True)
+class _PairJob:
+    """One pairing, in a form that survives being sent to another process."""
+
+    a: EntrantSpec
+    b: EntrantSpec
+    board_size: int
+    games: int
+    seed: int
+    opening_plies: int
+    device: str
+
+
+def _play_pairing(job: _PairJob) -> MatchResult:
+    """Play one pairing. Runs in its own process and loads its own networks."""
+    if job.a.needs_network or job.b.needs_network:
+        import torch
+
+        # One thread per process: a tree search asks about one position at a
+        # time, so there is nothing for intra-op threads to divide. Left at the
+        # default, eight processes each try to use every core and spend their
+        # time contending rather than searching.
+        torch.set_num_threads(1)
+
+    return play_match(
+        build_agent(job.a, device=job.device),
+        build_agent(job.b, device=job.device),
+        games=job.games,
+        board_size=job.board_size,
+        seed=job.seed,
+        opening_plies=job.opening_plies,
+    )
+
+
+def round_robin_parallel(
+    entrants: list[EntrantSpec],
+    *,
+    games_per_pair: int,
+    board_size: int,
+    seed: int,
+    workers: int = 1,
+    opening_plies: int = 4,
+    anchor: str = "random",
+    bootstrap: int = 500,
+    device: str = "cpu",
+    scope: str = "arena",
+) -> TournamentResult:
+    """``round_robin`` over specs instead of live agents, with the pairings spread out.
+
+    Identical protocol. Each pairing derives its seed from the tournament seed,
+    ``scope`` and the two names, so a result does not depend on how many processes
+    happened to run it, and adding an entrant does not renumber everyone else's
+    games. ``workers=1`` plays in this process, which is what tests use.
+    """
+    from concurrent.futures import ProcessPoolExecutor
+    from multiprocessing import get_context
+
+    if len(entrants) < 2:
+        msg = f"a tournament needs at least two entrants, got {len(entrants)}"
+        raise ArenaError(msg)
+    names = [e.name for e in entrants]
+    if len(set(names)) != len(names):
+        msg = f"entrant names must be unique: {names}"
+        raise ArenaError(msg)
+    if anchor not in names:
+        msg = f"the anchor {anchor!r} must be one of the entrants: {names}"
+        raise ArenaError(msg)
+
+    started = time.perf_counter()
+    jobs = [
+        _PairJob(
+            a=a,
+            b=b,
+            board_size=board_size,
+            games=games_per_pair,
+            seed=derive_seed(seed, scope, a.name, b.name),
+            opening_plies=opening_plies,
+            device=device,
+        )
+        for a, b in combinations(entrants, 2)
+    ]
+    log.info(
+        "playing %d pairings of %d games across %d process(es) on %s",
+        len(jobs),
+        games_per_pair,
+        max(1, workers),
+        device,
+    )
+
+    matches: list[MatchResult] = []
+    if workers <= 1:
+        for job in jobs:
+            matches.append(_play_pairing(job))
+            _log_match(matches[-1])
+    else:
+        # `spawn` everywhere: it is the only start method Windows has, and using
+        # it on every platform means the code is exercised the same way wherever
+        # it runs.
+        context = get_context("spawn")
+        with ProcessPoolExecutor(max_workers=workers, mp_context=context) as pool:
+            for match in pool.map(_play_pairing, jobs):
+                matches.append(match)
+                _log_match(match)
+
+    results: dict[tuple[str, str], tuple[float, int]] = {}
+    for match in matches:
+        check_fairness(match, require_openings=opening_plies > 0)
+        results[(match.agent_a, match.agent_b)] = (match.wins + 0.5 * match.draws, match.games)
+
+    return TournamentResult(
+        ratings=fit_bradley_terry(results, anchor=anchor, bootstrap=bootstrap),
+        matches=matches,
+        board_size=board_size,
+        games_per_pair=games_per_pair,
+        opening_plies=opening_plies,
+        seed=seed,
+        seconds=time.perf_counter() - started,
+    )
+
+
+def _log_match(match: MatchResult) -> None:
+    log.info(
+        "%s vs %s: %.1f%% over %d games",
+        match.agent_a,
+        match.agent_b,
+        100 * match.score,
+        match.games,
+    )
