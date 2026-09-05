@@ -1,0 +1,58 @@
+# Experiment E1+E2: do the two gains add?
+#
+# Run 4 (E1) grew the network from 6x64 to 10x128 and gained 30 to 40 Elo at a
+# matched generation. Run 5 (E2) added an ownership head to the 6x64 network and
+# gained 45 to 74 Elo. This profile applies both changes to the run 1 recipe and
+# nothing else. Self-play cost is unchanged (200 simulations, 600 games), so
+# generation N is comparable to generation N of runs 1, 3, 4 and 5.
+#
+# The two changes act on different things. E1 gives the trunk more room; E2 gives
+# it a richer training signal. If the ownership head's gain came from the trunk
+# being underfed rather than undersized, a bigger trunk should use the same signal
+# at least as well, and the gains should roughly add. If the bigger network was
+# already extracting from the value target what the ownership target adds, they
+# will not.
+#
+# The prediction, written before the run: in 1000-game matches at matched
+# generations 60 and 120, E1+E2 beats run 5 (E2 alone) with intervals excluding
+# 50%, by an amount comparable to E1's own gain over the control (30 to 40 Elo).
+# If it beats E2 by less than 20 Elo or not at all, the gains do not add and the
+# 1.0 network is the small one with the head, which the browser runs at full speed
+# without WebGPU. If it loses to E2, the bigger trunk overfits the 64-square target
+# and the head's weight should come down before the size goes up.
+#
+# Worker count is set per job by slurm/train.sbatch.
+
+name: full8x8-e12-10x128-ownership
+
+net:
+  n_blocks: 10                # E1
+  channels: 128               # E1
+  ownership: true             # E2
+
+mcts:
+  n_simulations: 200
+  temp_moves: 15
+
+selfplay:
+  games_per_generation: 600
+  n_workers: 6                # overridden per job by slurm/train.sbatch
+  games_in_flight: 24
+  max_generations: 400
+
+replay:
+  window: 400000
+  retain_shards: 30
+
+train:
+  steps_per_generation: 800
+  batch_size: 1024
+  optimizer: sgd
+  lr: 0.02
+  momentum: 0.9
+  weight_decay: 0.0001
+  ownership_loss_weight: 1.0  # E2
+
+arena:
+  every_n_generations: 5
+  games: 400

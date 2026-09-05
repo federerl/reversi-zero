@@ -663,6 +663,45 @@ simulations; the difficulty ladder plays at 16 to 800.
 
 ---
 
+## Run 6 — E1+E2, capacity and the ownership head together — `e12-10x128-ownership`
+
+**Result: pending.** This section was written before the run was submitted.
+
+**Question.** Run 4 gained 30 to 40 Elo from a 10×128 network. Run 5 gained 45 to
+74 Elo from an ownership head on the 6×64 network. Do the two gains add?
+
+**Change.** Both changes applied to the run 1 recipe, and nothing else
+(`configs/full8x8_e12_10x128_ownership.yaml`): `net.n_blocks: 10`,
+`net.channels: 128`, `net.ownership: true`, `train.ownership_loss_weight: 1.0`.
+Self-play cost is unchanged, so generation *N* is comparable to generation *N* of
+runs 1, 3, 4 and 5.
+
+**Why they might add.** The two changes act on different things: E1 gives the
+trunk more room, E2 gives it a richer training signal. Run 5's reading was that
+the ownership target shaped the trunk; a bigger trunk should be able to use the
+same signal at least as well.
+
+**Why they might not.** Run 4 lowered the value loss to 0.57 with the plain value
+target. If the bigger network was already extracting from the win/loss number
+what the ownership target adds, the head has nothing left to contribute.
+
+**Scale.** 120 generations, one L40S, chained 24-hour jobs; about 12.5 hours at
+run 4's pace.
+
+### The prediction, registered before the run
+
+Against run 5 (E2 alone) at matched generations 60 and 120, 1000-game head-to-head
+matches:
+
+| if | then |
+|---|---|
+| E1+E2 beats E2 at both generations with intervals excluding 50%, by 30 Elo or more | the gains add; the 1.0 network is 10×128 with the head, and the browser needs WebGPU to run it at full strength |
+| E1+E2 beats E2 decisively but by less than 20 Elo | the gains mostly overlap; the 1.0 network is 6×64 with the head, which the browser already runs at full speed, and the WebGPU path is for later networks rather than this one |
+| no decisive difference either way | same decision as the row above; capacity is not the lever at this self-play budget once the trunk is fed properly |
+| E1+E2 loses to E2 | the bigger trunk overfits the 64-square target; halve the ownership weight before growing the network again |
+
+---
+
 ## Calibration: are the four difficulty levels actually different opponents?
 
 **Run:** 2026-08-31, `models/reversi-8x8-gen60.pt`, 21 pairings × 300 games,
