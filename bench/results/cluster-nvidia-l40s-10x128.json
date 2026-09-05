@@ -1,0 +1,78 @@
+{
+  "engine": {
+    "apply_per_s": 305187.7818999305,
+    "legal_actions_per_s": 100804.39793057709
+  },
+  "inference": {
+    "1": {
+      "latency_ms": 2.300477724929806,
+      "positions_per_s": 434.6923202790468
+    },
+    "128": {
+      "latency_ms": 2.2874454502016306,
+      "positions_per_s": 55957.61856909734
+    },
+    "256": {
+      "latency_ms": 2.3031694494420663,
+      "positions_per_s": 111151.17911190381
+    },
+    "32": {
+      "latency_ms": 2.260296675376594,
+      "positions_per_s": 14157.433556667243
+    },
+    "48": {
+      "latency_ms": 2.2748514500563033,
+      "positions_per_s": 21100.278877028206
+    },
+    "8": {
+      "latency_ms": 2.298256949870847,
+      "positions_per_s": 3480.898861395619
+    }
+  },
+  "machine": {
+    "cuda_available": true,
+    "gpu": "NVIDIA L40S",
+    "gpu_memory_free_gib": 44.0,
+    "gpu_memory_gib": 44.42,
+    "platform": "Linux-6.1.0-52-amd64-x86_64-with-glibc2.36",
+    "processor": "",
+    "python": "3.11.2",
+    "torch": "2.6.0+cu124"
+  },
+  "selfplay": {
+    "stage1": {
+      "games": 3,
+      "games_per_s": 0.03462208830737849,
+      "mean_batch": 1.0,
+      "positions_per_s": 385.44770912604474,
+      "seconds": 86.64988585800165
+    },
+    "stage2_b16": {
+      "games": 16,
+      "games_per_s": 0.36433056856636625,
+      "mean_batch": 15.725486725663718,
+      "positions_per_s": 4046.3008358191346,
+      "seconds": 43.91616125695873,
+      "speedup_over_stage1": 10.523067393618827
+    },
+    "stage2_b48": {
+      "games": 48,
+      "games_per_s": 0.6465369255923976,
+      "mean_batch": 47.43611903064861,
+      "positions_per_s": 7171.481865305856,
+      "seconds": 74.2416992749786,
+      "speedup_over_stage1": 18.674116935188188
+    }
+  },
+  "settings": {
+    "board_size": 8,
+    "channels": 128,
+    "device": "cuda",
+    "n_blocks": 10,
+    "quick": false,
+    "simulations": 200
+  },
+  "tree": {
+    "simulations_per_s": 14412.621692341683
+  }
+}

@@ -240,6 +240,277 @@ the agent stronger.
 
 ---
 
+## Run 3 — the control — `control` (CSSE Slurm cluster)
+
+**Result: run 1 was representative to within about 25 Elo, and the plateau is the
+recipe's.** The prediction table below was written before the first generation
+finished; the result sections after it were written on 2026-09-04 once the run
+had been rated.
+
+**Question.** Run 1 is one run with one seed on one laptop. How much of its curve
+is the recipe, and how much is noise? And what does a generation cost on the
+cluster hardware that every later run will use?
+
+**Change.** None. The profile is `full8x8.yaml` exactly as run 1 used it. Two
+things differ and neither is a hyperparameter: the machine (one NVIDIA L40S and
+22 self-play worker processes, against a laptop RTX A1000 and 6), and the seed,
+which is the profile's default 1337 as in run 1, so the games differ only through
+the worker split and floating-point order on different hardware.
+
+**Scale.** 120 generations as a chain of 24-hour jobs (`slurm/submit_chain.sh`),
+72,000 self-play games. Run 1 stopped at 60; this one runs on so the plateau run 1
+showed between generations 40 and 60 is seen a second time, or not.
+
+### The prediction, registered before the run
+
+| if | then |
+|---|---|
+| generation 60 rates within run 1's 95% interval (774–1028) against the same baselines | run 1 was representative; a single seed is enough to compare recipes against |
+| generation 60 rates clearly above or below run 1 | seed and hardware noise is large, and every recipe comparison in this document needs a second seed before it is believed |
+| the value loss again stops improving near generation 5 and drifts upward | the plateau is the recipe's, not the laptop's |
+| generations 60 to 120 rate above generation 60 with non-overlapping intervals | run 1 stopped early; the plateau was an artefact of stopping |
+
+The wall-clock per generation is recorded as the cluster baseline that E1's cost
+is compared against.
+
+### What it cost
+
+120 generations in 8 hours 15 minutes on one L40S with 22 self-play workers:
+3.5 minutes of self-play and about 4.1 minutes in total per generation, against
+9 minutes on the laptop. Same games, same simulations; the hardware is the whole
+difference.
+
+### The losses reproduced run 1
+
+At every matched generation the two runs are within a few hundredths of each
+other. The value loss sits at 0.63 to 0.66 for both, from generation 5 to the
+end. Run 1's value plateau was not the laptop's doing.
+
+| generation | run 1 value / policy | control value / policy |
+|---|---|---|
+| 10 | 0.633 / 1.851 | 0.630 / 1.834 |
+| 30 | 0.655 / 1.411 | 0.644 / 1.365 |
+| 53 | 0.652 / 1.244 | 0.655 / 1.220 |
+| 60 | 0.661 / 1.216 | 0.655 / 1.213 |
+| 120 | — | 0.651 / 1.096 |
+
+### Strength: indistinguishable from run 1 at generation 60
+
+Both generation-60 checkpoints were entered in one tournament with the baselines
+and run 4's checkpoints (`docs/ratings/runs-1-3-4-matched-generations.json`: 11
+entrants, 100 colour-balanced games per pairing, 4-ply openings, 50 simulations,
+Bradley–Terry anchored at Random = 0, bootstrap intervals). Ratings are
+comparable **within** that table only; a different field gives a different scale,
+which is why these numbers are smaller than the +877 of run 1's original table.
+
+| entrant | Elo | 95% interval |
+|---|---|---|
+| run 1, generation 60 | 636 | [590, 687] |
+| control, generation 60 | 649 | [602, 697] |
+| control, generation 120 | 709 | [664, 760] |
+
+Head to head, run 1's generation 60 scored **49.0%** against the control's
+(47W 49L 4D, Wilson interval [39.4%, 58.7%]). The first row of the prediction
+table is what happened: one seed on one laptop was a fair sample of the recipe.
+
+### Generations 60 to 120: a little, then flat
+
+The control's own cross-generation table (`docs/ratings/run3-control-crossgen.json`,
+same protocol, 6 generations plus 4 baselines):
+
+| checkpoint | Elo | 95% interval |
+|---|---|---|
+| generation 120 | 836 | [779, 907] |
+| generation 100 | 835 | [780, 898] |
+| generation 114 | 827 | [771, 892] |
+| generation 65 | 792 | [737, 854] |
+| generation 35 | 754 | [700, 815] |
+| generation 5 | 485 | [438, 539] |
+| minimax-d4 | 452 | [406, 509] |
+
+Generation 120 scored 58% against generation 60 in the combined table and 57%
+against generation 65 here; generations 100, 114 and 120 are within 10 Elo of one
+another and split their games 49–51. So the second sixty generations bought
+perhaps 50 Elo and then nothing. The fourth prediction row, a decisive gain from
+running on, is **not met**. The plateau run 1 showed between 40 and 60 is real; it
+sits nearer generation 100 on this longer run, and the recipe does not climb past
+it at this self-play budget.
+
+### The 1000-game matches
+
+A 100-game pairing cannot see a 55% effect. So the two questions above were
+replayed as single pairings of 1000 games each, split across 62 CPU processes
+(same protocol otherwise: colour-balanced, 4-ply seeded openings, 50 simulations,
+no exploration noise; `docs/ratings/head-to-head-1000.json`):
+
+| pairing | score | 95% Wilson | record |
+|---|---|---|---|
+| control gen 60 vs run 1 gen 60 | **53.4%** | [50.4%, 56.5%] | 526W 457L 17D |
+| control gen 120 vs control gen 60 | **55.1%** | [52.0%, 58.2%] | 521W 419L 60D |
+
+Both intervals exclude 50%, barely in the first case. The control's generation 60
+is a little stronger than run 1's, by about 24 Elo; the same recipe, on different
+hardware with a different worker split, does not land on the same agent. That is
+the size of the noise floor for a single-seed comparison on this project, and
+the number every later recipe comparison has to clear before it means anything.
+
+The second row says the sixty extra generations were worth about 36 Elo. Real,
+small, and finished by generation 100, where the cross-generation table goes flat.
+
+### Decisions taken
+
+* Run 1 stands as a representative result, with one qualification: two instances
+  of the same recipe differ by about 25 Elo. A recipe change that shows less than
+  that against a single control has not shown anything.
+* 120 generations is the length for the capacity experiments, because that is
+  where this recipe stops improving. Anything a change buys after that is the
+  change's, not the extra generations'.
+* The value plateau is the recipe's own. The next thing to try on it is a change
+  to the value head's *input*, not its weight (run 2) or the network's size
+  (run 4): the ownership head of E2.
+
+
+---
+
+## Run 4 — E1, capacity — `e1-10x128` (CSSE Slurm cluster)
+
+**Result: the value head learned more, and the agent is stronger at a matched
+generation, by about 30 to 40 Elo. That is real at 1000 games, and it is about the
+size of the noise between two instances of the same recipe.** The prediction table
+below was written before the first generation finished; the result sections after
+it were written on 2026-09-04 once the run had been rated.
+
+**Question.** Run 2 concluded that the next thing to test is capacity, not
+weighting. Does a network with about 6.5 times the parameters learn a stronger
+agent from the same self-play budget?
+
+**Change.** `net.n_blocks` from 6 to 10 and `net.channels` from 64 to 128, and
+nothing else. About 2.97 M parameters against run 1's 458,696, and roughly 6.7
+times the arithmetic per position. Self-play cost is left identical: 200
+simulations per move, 600 games per generation. So generation *N* here has seen
+exactly as much play as generation *N* of runs 1 and 3, and the comparison at a
+matched generation is exact. The bigger network costs more wall-clock per
+generation; that is reported alongside, not hidden.
+
+**Fallback.** If the cluster bench shows a generation would exceed twenty minutes
+(the wall-clock signal arrives fifteen minutes before the limit, and the current
+generation must finish inside that window), the run is cancelled before it has
+produced anything and resubmitted as `full8x8_e1_8x96.yaml`: 8 blocks of 96
+channels, about 1.34 M parameters. The prediction below applies unchanged.
+
+**Scale.** 120 generations, 72,000 games, as a chain of 24-hour jobs.
+
+### The prediction, registered before the run
+
+Compared against run 3, the control, which is the same recipe on the same
+hardware:
+
+| if | then |
+|---|---|
+| at generations 40 and 60, the Bradley–Terry interval lies entirely above the control's, **and** value loss falls below 0.60 by generation 30 | capacity was the constraint on both heads |
+| strength rises with non-overlapping intervals but value loss does not fall below 0.60 | capacity helped the policy only; the value head's problem is something else |
+| value loss falls below 0.60 but strength does not rise | the value head learned more and it did not matter — run 2's second row, reached by a different route |
+| neither moves | capacity is not the constraint at this self-play budget; the next test is more simulations or more games per generation (`full8x8_sims300.yaml`), not a bigger network |
+
+Run 1 never went below 0.64 on the value loss. Its policy loss was still falling
+at generation 60.
+
+### What it cost
+
+The bench (`bench/results/cluster-nvidia-l40s-*.json`) said the network would not
+be where the time goes, and the run agreed: 5.4 minutes of self-play per
+generation against the control's 3.5, for 6.7 times the arithmetic per position.
+The tree search in Python is the bottleneck, and the GPU is mostly idle either
+way. 120 generations took 12 hours 30 minutes on one L40S.
+
+### The value head learned more
+
+E1's value loss fell below 0.60 at generation 10 and stayed there until the last
+twenty generations, where it drifted back up. The control never got below 0.62.
+The policy losses finished identical.
+
+| generation | control value / policy | E1 value / policy |
+|---|---|---|
+| 10 | 0.630 / 1.834 | 0.599 / 1.837 |
+| 30 | 0.644 / 1.365 | **0.584** / 1.368 |
+| 60 | 0.655 / 1.213 | 0.591 / 1.183 |
+| 100 | 0.643 / 1.097 | **0.571** / 1.111 |
+| 120 | 0.651 / 1.096 | 0.620 / 1.096 |
+
+So the loss half of the first prediction row is met: below 0.60 by generation 30,
+comfortably. The value plateau at 0.65 *was* partly a capacity limit. The late
+drift upward, from 0.571 at generation 100 to 0.620 at 120, is unexplained here
+and is the first thing to look at in the metrics before drawing on it.
+
+### Strength at matched generations: ahead, but the intervals overlap
+
+From the same combined tournament as run 3's section (100 games per pairing, 50
+simulations, one Bradley–Terry fit):
+
+| generation | control Elo [95%] | E1 Elo [95%] | E1 vs control, head to head |
+|---|---|---|---|
+| 40 | 633 [589, 683] | 630 [585, 679] | 53.0% [43.3%, 62.5%] |
+| 60 | 649 [602, 697] | 689 [644, 738] | 55.0% [45.2%, 64.4%] |
+| 120 | 709 [664, 760] | 759 [712, 809] | 58.5% [48.7%, 67.7%] |
+
+Nothing at generation 40. Forty to fifty Elo at 60 and at 120, in the same
+direction both times, with every head-to-head interval still spanning 50%. The
+first prediction row asked for intervals *entirely* above the control's; they
+overlap by about 35 Elo at both generations, so that row is **not met** on this
+evidence. A 100-game pairing has a margin of about ±10 percentage points and
+cannot resolve a 55% effect either way; the section after this one is the longer
+match that can.
+
+E1's own cross-generation table (`docs/ratings/run4-e1-10x128-crossgen.json`) shows
+the same shape as the control's: a rise to generation 100 and a plateau after it
+(generations 100, 114, 120 at 891, 892, 905).
+
+### The 1000-game matches
+
+The same two matched pairings, replayed as 1000 games each across 62 CPU
+processes (`docs/ratings/head-to-head-1000.json`):
+
+| pairing | score for E1 | 95% Wilson | record | about |
+|---|---|---|---|---|
+| E1 gen 60 vs control gen 60 | **55.6%** | [52.5%, 58.7%] | 533W 421L 46D | +39 Elo |
+| E1 gen 120 vs control gen 120 | **54.1%** | [51.1%, 57.2%] | 523W 440L 37D | +29 Elo |
+
+Both intervals exclude 50%. The bigger network is stronger at a matched
+generation, and the direction did not change between 60 and 120.
+
+### Reading
+
+Against the prediction table: the value-loss half of the first row is met, and
+the strength half is met on the 1000-game evidence but not in the form it was
+written, which asked for Bradley–Terry intervals that do not overlap at 100 games
+per pairing. Recorded as **row 1, weakly**: capacity was a constraint on both
+heads, and lifting it bought 30 to 40 Elo.
+
+Two things keep that from being a headline. First, run 3 measured the noise
+between two instances of the *same* recipe at about 24 Elo, so E1's gain is
+roughly one noise-width, established only because 1000 games were played.
+Second, E1 plateaus at the same generation the control does, around 100, so more
+capacity moved the ceiling up a little rather than removing it. At 6.7 times the
+arithmetic per position, that is an expensive 35 Elo.
+
+### Decisions taken
+
+* The 1.0 network is chosen on strength per browser-millisecond, not on this
+  table alone. E1's generation 120 is the current best checkpoint, and it costs a
+  WebGPU path to serve; that trade is measured in `docs/web-app.md` before it is
+  taken.
+* The value head's ceiling is not capacity alone: E1's value loss fell to 0.57
+  and the agent gained 35 Elo, not 150. The next experiment changes what the
+  value head is *asked to predict* (E2, the ownership head), not how big it is.
+* Every future recipe comparison plays at least 1000 games at a matched
+  generation, or reports that it cannot tell.
+* The late rise in E1's value loss (0.571 at generation 100 to 0.620 at 120) is
+  written down and unexplained. It did not cost strength that the arena can see.
+
+
+
+---
+
 ## Calibration: are the four difficulty levels actually different opponents?
 
 **Run:** 2026-08-31, `models/reversi-8x8-gen60.pt`, 21 pairings × 300 games,
