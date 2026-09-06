@@ -360,8 +360,9 @@ small, and finished by generation 100, where the cross-generation table goes fla
 ### Decisions taken
 
 * Run 1 stands as a representative result, with one qualification: two instances
-  of the same recipe differ by about 25 Elo. A recipe change that shows less than
-  that against a single control has not shown anything.
+  of the same recipe differ by about 25 Elo here, and by 48 Elo in the pair runs 5
+  and 7 form. A recipe change that shows less than about 50 Elo against a single
+  control has not shown anything; it has earned a second seed.
 * 120 generations is the length for the capacity experiments, because that is
   where this recipe stops improving. Anything a change buys after that is the
   change's, not the extra generations'.
@@ -868,7 +869,11 @@ longer required for 1.0; it stays on the list for a later network.
 
 ## Run 7 — E2, second seed — `e2-ownership-seed2` (CSSE Slurm cluster, gebru)
 
-**Result: pending.** This section was written before the first generation finished.
+**Result: the head helps, and run 5 was a lucky seed. The second seed beats the
+control decisively at both generations, by +25 and +33 Elo, against run 5's +45
+and +74. Two seeds of the same recipe differ by 48 Elo at generation 120, twice
+the noise floor run 3 measured.** The prediction table below was written before
+the first generation finished; the result sections after it on 2026-09-06.
 
 **Question.** Run 5's +74 Elo over the control at generation 120 is the largest
 gain in the project and rests on one seed. Run 3 measured about 24 Elo of noise
@@ -897,11 +902,71 @@ Also: run 5 against run 7 directly at generation 120. Two seeds of the same reci
 should split near 50%; a decisive result either way is the noise floor for this
 recipe, to set beside run 3's 24 Elo.
 
+### What it cost
+
+4.1 minutes of self-play per generation on an RTX 6000 with 14 workers, against
+3.5 on the L40S with 22. 120 generations in 10 hours 27 minutes.
+
+### The losses
+
+Indistinguishable from run 5's at every matched generation: value 0.64 to 0.66
+throughout, ownership 0.87, policy within 0.04. Nothing in the curves tells the
+two seeds apart.
+
+### Strength
+
+1000-game matches (`docs/ratings/head-to-head-e2s2-1000.json`):
+
+| pairing | score for run 7 | 95% Wilson | record | about |
+|---|---|---|---|---|
+| run 7 gen 60 vs control gen 60 | **53.6%** | [50.6%, 56.7%] | 521W 448L 31D | +25 Elo |
+| run 7 gen 120 vs control gen 120 | **54.8%** | [51.7%, 57.8%] | 527W 432L 41D | +33 Elo |
+| run 7 gen 120 vs run 5 gen 120 | **43.2%** | [40.2%, 46.3%] | 395W 530L 75D | −48 Elo |
+
+Both intervals against the control exclude 50%, so the head's gain is real on a
+second seed. It is less than half of run 5's. And the third row is the one to
+remember: two runs of the *same* recipe, differing only in the seed and the node
+they ran on, are 48 Elo apart at generation 120, decisively. Run 3 put that
+noise at about 24 Elo from one pair of runs; with a second pair the honest range
+is 25 to 50 Elo.
+
+### Reading
+
+The second prediction row is what happened: the head helps, and run 5 drew a good
+seed. Reported as the recipe's effect, the ownership head is worth about **+45 Elo
+at generation 120, the mean of two seeds (+74 and +33)**, with the two seeds far
+enough apart that a third would move the mean by 10 or 15 Elo either way.
+
+The noise floor matters beyond this run. Run 4's capacity gain of 30 to 40 Elo
+was a single-seed comparison and now sits inside the range two seeds of one recipe
+can span. Run 6's +73 at generation 60 is outside it; its +13 at 120 was never
+claimed. The README carries what both seeds support and nothing that one seed
+produced alone.
+
+### Decisions taken
+
+* The ownership head stays in the 1.0 recipe: three runs with it (5, 7 and 8) all
+  beat the control decisively at generation 120, and no run without it does that
+  at the same cost.
+* Run 5's generation 120 remains the 1.0 checkpoint candidate. It is the best of
+  three seeds, so its +74 over the control is a best-of-three number and is said
+  to be one; its strength against Edax is measured directly and does not depend
+  on how it was chosen.
+* A claim of less than about 50 Elo from a single pair of runs is not a claim on
+  this project. It is a hint that buys a second seed.
+
+---
+
+
 ---
 
 ## Run 8 — E2, ownership weight halved — `e2-ownership-w05` (CSSE Slurm cluster, gebru)
 
-**Result: pending.** This section was written before the first generation finished.
+**Result: no better and no worse than the second seed at full weight. Nothing at
+generation 60, +26 Elo over the control at 120. The weight does not matter over a
+factor of two, as far as one run can tell; 1.0 stays.** The prediction table
+below was written before the first generation finished; the result sections after
+it on 2026-09-06.
 
 **Question.** Run 5 used an ownership weight of 1.0, the first value tried. Does
 the weight matter?
@@ -918,6 +983,39 @@ Against run 3 (the control) at matched generations 60 and 120, 1000-game matches
 | within about 25 Elo of run 5 | the head's gain is robust to the weight over a factor of two; 1.0 stays because it is what was measured most |
 | clearly less than run 5 | the weight matters and 1.0 was on the low side; 2.0 is the next thing to try |
 | clearly more than run 5 | 1.0 was too much and the term was competing with the policy after all; 0.5 becomes the recipe's value |
+
+### Strength
+
+1000-game matches (`docs/ratings/head-to-head-e2w05-1000.json`):
+
+| pairing | score for run 8 | 95% Wilson | record | about |
+|---|---|---|---|---|
+| run 8 gen 60 vs control gen 60 | 50.0% | [46.9%, 53.1%] | 471W 471L 58D | 0 |
+| run 8 gen 120 vs control gen 120 | **53.7%** | [50.6%, 56.8%] | 504W 430L 66D | +26 Elo |
+
+The losses match runs 5 and 7 at every matched generation, with the ownership term
+a little higher (0.877 against 0.865), as a smaller weight would predict.
+
+### Reading
+
+Against run 5, which the table was written to compare with, this is the second
+row: clearly less. But run 7 has since shown that run 5 was the lucky seed of the
+recipe, and against run 7's +33 the halved weight's +26 is well inside the noise.
+Read against the two-seed mean, the first row holds: the head's gain is robust to
+the weight over a factor of two, and 1.0 stays because it is the value with the
+most games behind it. The third row's question, whether the term competes with the
+policy, is answered no: halving it did not help.
+
+### Decisions taken
+
+* `train.ownership_loss_weight` stays at 1.0.
+* Weight 2.0 is not worth a run on this evidence. Halving changed nothing that
+  1000 games could see, so doubling is unlikely to either, and the GPU time is
+  better spent on a longer run of the big network with the head (run 6's late
+  climb).
+
+---
+
 
 ---
 
