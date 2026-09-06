@@ -736,7 +736,12 @@ recalibrated on the 1.0 network anyway, and that is the place to ask it.
 
 ## Run 6 — E1+E2, capacity and the ownership head together — `e12-10x128-ownership`
 
-**Result: pending.** This section was written before the run was submitted.
+**Result: the gains do not add by generation 120. The big network with the head
+is far ahead at generation 60 (+73 Elo over E2 alone) and level with it at 120
+(+13 Elo, interval spanning 50%). The 1.0 network is the small one with the head,
+and the browser does not need WebGPU to run it.** The prediction table below was
+written before the run was submitted; the result sections after it were written
+on 2026-09-06 once the run had been rated.
 
 **Question.** Run 4 gained 30 to 40 Elo from a 10×128 network. Run 5 gained 45 to
 74 Elo from an ownership head on the 6×64 network. Do the two gains add?
@@ -770,6 +775,89 @@ matches:
 | E1+E2 beats E2 decisively but by less than 20 Elo | the gains mostly overlap; the 1.0 network is 6×64 with the head, which the browser already runs at full speed, and the WebGPU path is for later networks rather than this one |
 | no decisive difference either way | same decision as the row above; capacity is not the lever at this self-play budget once the trunk is fed properly |
 | E1+E2 loses to E2 | the bigger trunk overfits the 64-square target; halve the ownership weight before growing the network again |
+
+### What it cost
+
+5.3 minutes of self-play per generation against E2's 3.5, the same ratio run 4
+showed against the control. 120 generations in 12 hours 31 minutes on one L40S.
+
+### The losses
+
+| generation | E1 (10×128) value / policy | E2 (6×64 + head) value / policy | E1+E2 value / policy / ownership |
+|---|---|---|---|
+| 10 | 0.599 / 1.837 | 0.651 / 1.793 | 0.605 / 1.876 / 0.858 |
+| 30 | 0.584 / 1.368 | 0.640 / 1.347 | 0.605 / 1.348 / 0.859 |
+| 60 | 0.591 / 1.183 | 0.646 / 1.168 | 0.598 / 1.164 / 0.864 |
+| 100 | 0.571 / 1.111 | 0.640 / 1.111 | 0.580 / 1.069 / 0.864 |
+| 120 | 0.620 / 1.096 | 0.649 / 1.124 | 0.595 / 1.055 / 0.864 |
+
+The value loss sits where E1's did, the ownership term where E2's did, and the
+policy loss ends lowest of any run. None of that is evidence of strength; it is
+recorded because it is consistent with each change doing what it did alone.
+
+### Strength: ahead early, level by the end
+
+1000-game head-to-head matches against run 5 (E2 alone) at matched generations
+(`docs/ratings/head-to-head-e12-1000.json`; colour-balanced, 4-ply seeded openings,
+50 simulations, no exploration noise):
+
+| pairing | score for E1+E2 | 95% Wilson | record | about |
+|---|---|---|---|---|
+| E1+E2 gen 60 vs E2 gen 60 | **60.3%** | [57.2%, 63.3%] | 581W 375L 44D | +73 Elo |
+| E1+E2 gen 120 vs E2 gen 120 | 51.9% | [48.9%, 55.0%] | 484W 445L 71D | +13 Elo |
+
+At generation 60 the first prediction row holds, and by a wide margin: the big
+network with the head is 73 Elo ahead of the small one with the head, twice E1's
+own gain over the control. At generation 120 the third row holds: the interval
+spans 50%, and 13 Elo is well inside the 24 Elo noise floor. The small network
+caught up.
+
+Against Edax, same protocol as runs 1 and 5 (`docs/ratings/edax-e12-g120.json`):
+
+| Edax level | E1+E2 gen 120 | E2 gen 120 (run 5) |
+|---|---|---|
+| 5 | 74.4% [63.8%, 82.7%] | 71.2% |
+| 6 | 52.5% [41.7%, 63.1%] | 59.4% |
+| 7 | 42.5% [32.3%, 53.4%] | 41.2% |
+| 8 | 29.4% [20.5%, 40.1%] | 21.9% |
+
+The same picture from the outside: between level 6 and level 7, indistinguishable
+from run 5 at 80 games per level.
+
+One thing the cross-generation table (`docs/ratings/run6-e12-crossgen.json`)
+adds: E1+E2 does not show the plateau at generation 100 that every other run has.
+Generations 100, 114 and 120 rate 956, 988 and 1006, still rising, where run 5's
+were flat at 984, 956, 968. The intervals overlap, so this is a hint and not a
+finding. If it is real, the big network with the head would pull ahead of the
+small one given more generations than 120, at 1.5 times the self-play cost per
+generation.
+
+### Reading
+
+The two changes are not independent levers. The bigger trunk learns faster per
+generation, reaching at 60 what the small trunk with the head reaches at 120, and
+then the small one catches up. Per game of self-play the big network is more
+efficient; per minute of GPU it is not, because each of its generations costs 1.5
+times as much. At a matched budget of 120 generations they land in the same place.
+
+For the question the run was submitted to answer, which network to ship, the
+third prediction row decides: **the 1.0 network is 6×64 with the ownership head**,
+run 5's recipe. It plays at the same strength as the big one at generation 120,
+its checkpoint is 1.8 MB against 12 MB, and the browser already runs it at full
+speed in WebAssembly. The WebGPU inference path, which the roadmap made a
+requirement on the assumption that the bigger network would be needed, is no
+longer required for 1.0; it stays on the list for a later network.
+
+### Decisions taken
+
+* The 1.0 recipe is `configs/full8x8_e2_ownership.yaml`: 6×64, ownership head,
+  weight 1.0, everything else as run 1. The 1.0 checkpoint is chosen among run 5
+  and its replicates (runs 7 and 8) once those are rated.
+* The WebGPU path moves from "required for 1.0" to "stretch" in the roadmap. The
+  hours it would have taken go to the difficulty ladder and the game features.
+* The big network's late climb is worth one cheap check later: rate its
+  generation 120 against its generation 100 with 1000 games. If decisive, a longer
+  run of E1+E2 becomes the candidate for a 1.1 network, served with WebGPU.
 
 ---
 
