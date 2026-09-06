@@ -2,13 +2,13 @@
  * The games this site offers, and what the hub says about each.
  *
  * One entry per game. The hub imports a game's *manifest* -- the generated list
- * of rated opponents -- and nothing else from it, so the hub page stays a few
- * kilobytes and never loads an engine. Adding a game is adding an entry here and
- * a directory under `src/games/`; the hub does not change.
+ * of rated opponents -- and its board, and nothing else from it, so the hub page
+ * never loads an engine. Adding a game is adding an entry here and a directory
+ * under `src/games/`; the hub does not change.
  *
- * Every number shown on a card comes from the manifest, which is generated from
- * a rating report. The rule that a difficulty label states a measured strength
- * and never an adjective applies to the hub too.
+ * Every number shown comes from the manifest, which is generated from a rating
+ * report. The rule that a difficulty label states a measured strength and never
+ * an adjective applies to the hub too.
  */
 
 import reversiManifest from "../games/reversi/engine/models.json";
@@ -38,7 +38,7 @@ export const GAMES: readonly GameEntry[] = [
   {
     id: "reversi",
     title: "Reversi",
-    tagline: "Learned the game from nothing by playing itself. Runs entirely in your browser.",
+    tagline: "Learned the game from nothing by playing itself, and runs entirely in your browser.",
     path: "/reversi/",
     status: "playable",
     opponents: reversiOpponents,
@@ -46,7 +46,7 @@ export const GAMES: readonly GameEntry[] = [
   {
     id: "gomoku",
     title: "Gomoku",
-    tagline: "Five in a row. The same method, a different board.",
+    tagline: "Five in a row. The same method on a different board.",
     path: "/gomoku/",
     status: "planned",
     opponents: [],

@@ -1,5 +1,5 @@
 /**
- * The controls beside the board, and the parts of the agent's thinking worth
+ * The scoreboard, the controls, and the parts of the agent's thinking worth
  * showing.
  *
  * The two selectors are separate on purpose. *Which generation* you play sets
@@ -12,7 +12,7 @@
  * more interesting to read.
  */
 
-import { useId } from "react";
+import { useId, type ReactNode } from "react";
 
 import { LEVELS, type Level } from "../engine/levels";
 import modelsManifest from "../engine/models.json";
@@ -32,40 +32,68 @@ const LEVEL_RATINGS = modelsManifest.levels ?? [];
  */
 function describeBudget(level: Level): string {
   if (level.maxMillis === undefined) return `${level.simulations} simulations`;
-  return `up to ${(level.maxMillis / 1000).toFixed(1)} s per move`;
+  return `up to ${(level.maxMillis / 1000).toFixed(1)} s a move`;
 }
 
 /**
  * A level's measured rating, if it has one.
  *
- * From the calibration report, never typed here. Before that report existed
- * these four labels asserted that moving up gets you a harder game -- which was
- * reasonable and was not evidence. Reading the numbers from the file that
- * measured them means the interface cannot claim a separation nobody checked.
+ * From the calibration report, never typed here. Reading the numbers from the
+ * file that measured them means the interface cannot claim a separation nobody
+ * checked.
  */
 function ratingFor(id: string): { elo: number; interval: [number, number] } | undefined {
-  const found = (LEVEL_RATINGS as Array<{ id: string; elo: number; eloInterval: [number, number] }>)
-    .find((entry) => entry.id === id);
+  const found = (
+    LEVEL_RATINGS as Array<{ id: string; elo: number; eloInterval: [number, number] }>
+  ).find((entry) => entry.id === id);
   return found ? { elo: found.elo, interval: found.eloInterval } : undefined;
 }
 
+function signed(elo: number): string {
+  const rounded = Math.round(elo);
+  return rounded > 0 ? `+${rounded}` : `${rounded}`;
+}
+
+// ---------------------------------------------------------------------------
+// The scoreboard
 // ---------------------------------------------------------------------------
 
-export function Score({
+/**
+ * Two numerals and two discs, the way a counter sits beside a board. The side
+ * to move carries the brass mark; nothing else on the strip is coloured.
+ */
+export function Scoreboard({
   black,
   white,
   toMove,
   humanColor,
+  opponentLabel,
+  terminal,
 }: {
   black: number;
   white: number;
   toMove: Player;
   humanColor: Player;
+  opponentLabel: string;
+  terminal: boolean;
 }) {
+  const nameFor = (colour: Player) => (colour === humanColor ? "You" : opponentLabel);
   return (
-    <div className="flex items-center justify-between">
-      <Side count={black} colour="black" active={toMove === BLACK} you={humanColor === BLACK} />
-      <Side count={white} colour="white" active={toMove === WHITE} you={humanColor === WHITE} />
+    <div className="flex items-end justify-between gap-6">
+      <Side
+        count={black}
+        colour="black"
+        name={nameFor(BLACK)}
+        active={!terminal && toMove === BLACK}
+        align="left"
+      />
+      <Side
+        count={white}
+        colour="white"
+        name={nameFor(WHITE)}
+        active={!terminal && toMove === WHITE}
+        align="right"
+      />
     </div>
   );
 }
@@ -73,28 +101,48 @@ export function Score({
 function Side({
   count,
   colour,
+  name,
   active,
-  you,
+  align,
 }: {
   count: number;
   colour: "black" | "white";
+  name: string;
   active: boolean;
-  you: boolean;
+  align: "left" | "right";
 }) {
+  const disc = (
+    <span
+      aria-hidden="true"
+      className={`size-7 shrink-0 rounded-full shadow ${
+        colour === "black" ? "bg-disc-black ring-1 ring-line-strong" : "bg-disc-white"
+      }`}
+    />
+  );
   return (
-    <div className={`flex items-center gap-2 ${active ? "text-ink" : "text-muted"}`}>
-      <span
-        aria-hidden="true"
-        className={`size-4 rounded-full border border-line ${
-          colour === "black" ? "bg-disc-black" : "bg-disc-white"
-        }`}
-      />
-      <span className="font-mono text-2xl font-semibold tabular-nums">{count}</span>
-      <span className="text-xs uppercase tracking-wider text-muted">{you ? "you" : "agent"}</span>
+    <div
+      className={`flex items-center gap-3 ${align === "right" ? "flex-row-reverse text-right" : ""}`}
+    >
+      {disc}
+      <div>
+        <div className={`score-number text-5xl sm:text-6xl ${active ? "text-ink" : "text-ink-2"}`}>
+          {count}
+        </div>
+        <div
+          className={`mt-1 flex items-center gap-1.5 text-sm ${
+            align === "right" ? "flex-row-reverse" : ""
+          } ${active ? "text-ink" : "text-muted"}`}
+        >
+          {active && <span aria-hidden="true" className="size-1.5 rounded-full bg-accent" />}
+          <span>{active ? `${name} to move` : name}</span>
+        </div>
+      </div>
     </div>
   );
 }
 
+// ---------------------------------------------------------------------------
+// The controls
 // ---------------------------------------------------------------------------
 
 export function OpponentPicker({
@@ -112,29 +160,28 @@ export function OpponentPicker({
   const id = useId();
 
   return (
-    <Field label="Opponent" htmlFor={id} hint={selected?.note}>
+    <Control label="Opponent" htmlFor={id} hint={selected?.note}>
       <select
         id={id}
         value={value}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded border border-line bg-surface px-2 py-1.5 text-sm text-ink disabled:opacity-50"
+        className="control-select"
       >
         {models.map((model) => (
           <option key={model.id} value={model.id}>
             {model.label}
-            {model.elo !== undefined ? ` — ${Math.round(model.elo)} Elo` : ""}
+            {model.elo !== undefined ? `, ${signed(model.elo)} Elo` : ""}
           </option>
         ))}
       </select>
-
       {selected?.eloInterval && (
-        <p className="mt-1 font-mono text-[0.7rem] text-muted tabular-nums">
-          95% interval {Math.round(selected.eloInterval[0])}–{Math.round(selected.eloInterval[1])},
-          random play = 0
-        </p>
+        <span className="text-sm text-muted">
+          95% interval {Math.round(selected.eloInterval[0])} to{" "}
+          {Math.round(selected.eloInterval[1])}. Random play is 0.
+        </span>
       )}
-    </Field>
+    </Control>
   );
 }
 
@@ -152,32 +199,31 @@ export function LevelPicker({
   const id = useId();
 
   return (
-    <Field label="Thinking time" htmlFor={id} hint={selected?.description}>
+    <Control label="Thinking time" htmlFor={id} hint={selected?.description}>
       <select
         id={id}
         value={value}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded border border-line bg-surface px-2 py-1.5 text-sm text-ink disabled:opacity-50"
+        className="control-select"
       >
         {LEVELS.map((level) => {
           const rated = ratingFor(level.id);
           return (
             <option key={level.id} value={level.id}>
               {level.label}
-              {rated ? ` — ${Math.round(rated.elo)} Elo` : ""} · {describeBudget(level)}
+              {rated ? `, ${signed(rated.elo)} Elo` : ""}, {describeBudget(level)}
             </option>
           );
         })}
       </select>
-
       {selectedRating && (
-        <p className="mt-1 font-mono text-[0.7rem] text-muted tabular-nums">
-          95% interval {Math.round(selectedRating.interval[0])}–
-          {Math.round(selectedRating.interval[1])}, random play = 0
-        </p>
+        <span className="text-sm text-muted">
+          95% interval {Math.round(selectedRating.interval[0])} to{" "}
+          {Math.round(selectedRating.interval[1])}. Random play is 0.
+        </span>
       )}
-    </Field>
+    </Control>
   );
 }
 
@@ -193,31 +239,31 @@ export function SidePicker({
   const id = useId();
 
   return (
-    <Field label="You play" htmlFor={id}>
+    <Control label="You play" htmlFor={id}>
       <select
         id={id}
         value={value === BLACK ? "black" : "white"}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value === "black" ? BLACK : WHITE)}
-        className="w-full rounded border border-line bg-surface px-2 py-1.5 text-sm text-ink disabled:opacity-50"
+        className="control-select"
       >
-        <option value="black">Black (moves first)</option>
+        <option value="black">Black, moves first</option>
         <option value="white">White</option>
       </select>
-    </Field>
+    </Control>
   );
 }
 
 /**
- * A labelled control.
+ * A control with its name beside it.
  *
- * The label is tied to its control by id rather than merely sitting above it.
+ * The label is tied to its control by id rather than merely sitting near it.
  * Without that the two are unrelated as far as assistive technology is
  * concerned: a screen reader announces an unlabelled combo box, and clicking
- * the word "Opponent" does nothing. The child is cloned to receive the id
- * because that keeps every caller from having to invent one.
+ * the word "Opponent" does nothing. The hint, when there is one, is a second
+ * line under the control, in plain words.
  */
-function Field({
+function Control({
   label,
   htmlFor,
   hint,
@@ -226,31 +272,28 @@ function Field({
   label: string;
   htmlFor: string;
   hint?: string | undefined;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
-    <div>
-      <label
-        htmlFor={htmlFor}
-        className="mb-1 block text-[0.7rem] font-semibold uppercase tracking-wider text-muted"
-      >
-        {label}
-      </label>
-      {children}
-      {hint && <p className="mt-1 text-xs leading-snug text-muted">{hint}</p>}
+    <div className="flex flex-col gap-1">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <label htmlFor={htmlFor} className="w-28 shrink-0 text-[0.95rem] text-ink-2">
+          {label}
+        </label>
+        <div className="flex min-w-0 flex-col gap-1">{children}</div>
+      </div>
+      {hint && <p className="ml-0 text-sm leading-snug text-muted sm:ml-31">{hint}</p>}
     </div>
   );
 }
 
 // ---------------------------------------------------------------------------
+// What is happening
+// ---------------------------------------------------------------------------
 
 export function Status({ line, thinking }: { line: string; thinking: boolean }) {
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      className="flex min-h-14 items-center gap-2 border-l-2 border-accent-2 bg-surface-2 px-3 py-2 text-sm"
-    >
+    <div role="status" aria-live="polite" className="flex min-h-7 items-center gap-2 text-[1.05rem]">
       {thinking && <Spinner />}
       <span>{line}</span>
     </div>
@@ -261,7 +304,7 @@ function Spinner() {
   return (
     <span
       aria-hidden="true"
-      className="size-3.5 shrink-0 animate-spin rounded-full border-2 border-line-strong border-t-accent-2"
+      className="size-3.5 shrink-0 animate-spin rounded-full border-2 border-line-strong border-t-accent"
     />
   );
 }
@@ -278,26 +321,22 @@ export function WinProbability({ probability }: { probability: number }) {
   const percent = Math.round(probability * 100);
 
   return (
-    <div>
-      <div className="mb-1 flex items-baseline justify-between">
-        <span className="text-[0.7rem] font-semibold uppercase tracking-wider text-muted">
-          Agent&rsquo;s estimate
-        </span>
-        <span className="font-mono text-sm tabular-nums">{percent}% you</span>
-      </div>
+    <div className="flex items-center gap-3">
+      <span className="w-28 shrink-0 text-[0.95rem] text-ink-2">Your chances</span>
       <div
         role="meter"
         aria-valuenow={percent}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label="Your estimated chance of winning"
-        className="h-2 w-full overflow-hidden rounded-full bg-surface-3"
+        className="h-1.5 w-40 overflow-hidden rounded-full bg-surface-2"
       >
         <div
-          className="h-full rounded-full bg-accent-2 transition-[width] duration-300"
+          className="h-full rounded-full bg-ink-2 transition-[width] duration-300"
           style={{ width: `${percent}%` }}
         />
       </div>
+      <span className="score-number text-xl">{percent}%</span>
     </div>
   );
 }
@@ -308,7 +347,7 @@ export function Button({
   disabled,
   variant = "secondary",
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   onClick: () => void;
   disabled?: boolean;
   variant?: "primary" | "secondary";
@@ -316,14 +355,14 @@ export function Button({
   const styles =
     variant === "primary"
       ? "bg-ink text-ground hover:opacity-90"
-      : "border border-line bg-surface text-ink hover:bg-surface-2";
+      : "border border-line-strong bg-surface text-ink hover:bg-surface-2";
 
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`rounded px-3 py-1.5 text-sm font-medium transition-opacity disabled:cursor-not-allowed disabled:opacity-40 ${styles}`}
+      className={`rounded-md px-3.5 py-1.5 text-[0.95rem] font-medium transition-opacity disabled:cursor-not-allowed disabled:opacity-40 ${styles}`}
     >
       {children}
     </button>
@@ -334,7 +373,7 @@ export function Toast({ message, onDismiss }: { message: string; onDismiss: () =
   return (
     <div
       role="alert"
-      className="fixed bottom-4 left-1/2 z-50 max-w-[90vw] -translate-x-1/2 rounded border border-bad/40 bg-surface px-4 py-2 text-sm shadow-lg"
+      className="fixed bottom-4 left-1/2 z-50 max-w-[90vw] -translate-x-1/2 rounded-md border border-bad/40 bg-surface px-4 py-2 text-sm shadow-lg"
     >
       <span className="text-bad">{message}</span>
       <button
@@ -342,7 +381,7 @@ export function Toast({ message, onDismiss }: { message: string; onDismiss: () =
         onClick={onDismiss}
         className="ml-3 text-muted underline underline-offset-2"
       >
-        dismiss
+        Dismiss
       </button>
     </div>
   );

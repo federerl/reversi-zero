@@ -35,38 +35,37 @@ class BrokenStorage {
 }
 
 describe("resolving the theme", () => {
-  it("follows the system unless a choice was made", () => {
-    expect(resolveTheme("system", true)).toBe("dark");
-    expect(resolveTheme("system", false)).toBe("light");
-    expect(resolveTheme("dark", false)).toBe("dark");
-    expect(resolveTheme("light", true)).toBe("light");
+  it("is dark unless light was chosen", () => {
+    expect(resolveTheme("default")).toBe("dark");
+    expect(resolveTheme("dark")).toBe("dark");
+    expect(resolveTheme("light")).toBe("light");
   });
 
-  it("toggles to the opposite of what is showing, whatever the choice was", () => {
-    expect(toggledChoice("system", true)).toBe("light");
-    expect(toggledChoice("system", false)).toBe("dark");
-    expect(toggledChoice("dark", false)).toBe("light");
+  it("toggles to the opposite of what is showing", () => {
+    expect(toggledChoice("default")).toBe("light");
+    expect(toggledChoice("dark")).toBe("light");
+    expect(toggledChoice("light")).toBe("dark");
   });
 });
 
 describe("remembering the theme", () => {
-  it("reads only the two known words and treats anything else as system", () => {
+  it("reads only the two known words and treats anything else as the default", () => {
     const storage = new FakeStorage();
-    expect(readChoice(storage)).toBe("system");
-    storage.setItem(THEME_KEY, "dark");
-    expect(readChoice(storage)).toBe("dark");
+    expect(readChoice(storage)).toBe("default");
+    storage.setItem(THEME_KEY, "light");
+    expect(readChoice(storage)).toBe("light");
     storage.setItem(THEME_KEY, "purple");
-    expect(readChoice(storage)).toBe("system");
-    expect(readChoice(null)).toBe("system");
+    expect(readChoice(storage)).toBe("default");
+    expect(readChoice(null)).toBe("default");
   });
 
-  it("applies the attribute and stores the choice, and system clears both", () => {
+  it("applies the attribute and stores the choice, and the default clears both", () => {
     const storage = new FakeStorage();
     const root = { dataset: {} as DOMStringMap };
-    applyChoice("dark", root, storage);
-    expect(root.dataset["theme"]).toBe("dark");
-    expect(storage.getItem(THEME_KEY)).toBe("dark");
-    applyChoice("system", root, storage);
+    applyChoice("light", root, storage);
+    expect(root.dataset["theme"]).toBe("light");
+    expect(storage.getItem(THEME_KEY)).toBe("light");
+    applyChoice("default", root, storage);
     expect(root.dataset["theme"]).toBeUndefined();
     expect(storage.getItem(THEME_KEY)).toBeNull();
   });
@@ -75,7 +74,7 @@ describe("remembering the theme", () => {
     const root = { dataset: {} as DOMStringMap };
     expect(() => applyChoice("light", root, new BrokenStorage())).not.toThrow();
     expect(root.dataset["theme"]).toBe("light");
-    expect(readChoice(new BrokenStorage())).toBe("system");
+    expect(readChoice(new BrokenStorage())).toBe("default");
   });
 });
 

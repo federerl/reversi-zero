@@ -1,13 +1,15 @@
 /**
- * The front page: the games this site offers, one card each.
+ * The front page: the games this site offers.
  *
- * A card shows what a visitor needs to choose: what the agent is, how many
- * opponents it offers, and how strong the strongest is on the same scale every
- * rating on this site uses. A game that is planned but not yet playable is shown
- * as exactly that, so the page reads as a collection from the first day without
- * pretending to more than it has.
+ * The board is the entrance. Reversi is shown as its own board in the opening
+ * position, large, with one line about what the agent is and the two numbers a
+ * visitor needs to choose: how many opponents, and how strong the strongest is
+ * on the scale every rating on this site uses. A game that is planned but not
+ * yet playable is drawn as an empty board, dimmed, and says so.
  */
 
+import { initialState } from "../games/reversi/engine/rules";
+import { Board } from "../games/reversi/ui/Board";
 import { Shell } from "../shared/ui/Shell";
 import { GAMES, strongestElo, type GameEntry } from "./registry";
 
@@ -16,8 +18,8 @@ export function HubPage() {
     <Shell
       lead={
         <>
-          Board-game agents that learned by playing themselves, with a measured rating on every
-          opponent. Everything runs in your browser &mdash; nothing is sent anywhere.
+          Board-game agents that learned by playing themselves, each opponent with a measured
+          rating. Everything runs in your browser and nothing is sent anywhere.
         </>
       }
       footer={
@@ -28,10 +30,10 @@ export function HubPage() {
         </>
       }
     >
-      <ul className="grid gap-4 sm:grid-cols-2" aria-label="Games">
+      <ul className="flex flex-col gap-12" aria-label="Games">
         {GAMES.map((game) => (
           <li key={game.id}>
-            <GameCard game={game} />
+            <GameEntry game={game} />
           </li>
         ))}
       </ul>
@@ -39,54 +41,79 @@ export function HubPage() {
   );
 }
 
-function GameCard({ game }: { game: GameEntry }) {
+function GameEntry({ game }: { game: GameEntry }) {
   const playable = game.status === "playable";
   const strongest = strongestElo(game);
 
   return (
     <article
       data-game={game.id}
-      className={[
-        "flex h-full flex-col gap-3 rounded-md border border-line bg-surface p-5",
-        playable ? "" : "opacity-70",
-      ].join(" ")}
+      className={`grid items-center gap-6 sm:grid-cols-[minmax(0,20rem)_1fr] ${playable ? "" : "opacity-60"}`}
     >
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-xl font-semibold tracking-tight">{game.title}</h2>
-        {!playable && (
-          <span className="rounded-full border border-line px-2 py-0.5 text-[0.7rem] font-semibold uppercase tracking-wider text-muted">
-            coming in 1.1
-          </span>
-        )}
-      </div>
-
-      <p className="text-sm leading-snug text-muted">{game.tagline}</p>
-
-      {playable && (
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-1 font-mono text-xs text-muted tabular-nums">
-          <dt>opponents</dt>
-          <dd className="text-ink">{game.opponents.length}</dd>
-          {strongest !== undefined && (
-            <>
-              <dt>strongest</dt>
-              <dd className="text-ink">+{Math.round(strongest)} Elo</dd>
-            </>
-          )}
-        </dl>
+      {playable ? (
+        <a href={game.path} aria-label={`Play ${game.title}`} className="block">
+          <Preview game={game} />
+        </a>
+      ) : (
+        <Preview game={game} />
       )}
 
-      <div className="mt-auto pt-2">
+      <div className="max-w-[46ch]">
+        <h2 className="font-display text-4xl font-bold leading-none tracking-tight">{game.title}</h2>
+        <p className="mt-2 text-[0.95rem] text-muted">{game.tagline}</p>
+
         {playable ? (
-          <a
-            href={game.path}
-            className="inline-block rounded bg-ink px-3 py-1.5 text-sm font-medium text-ground hover:opacity-90"
-          >
-            Play
-          </a>
+          <>
+            <p className="mt-3 text-[0.95rem] text-ink-2">
+              {game.opponents.length} opponents
+              {strongest !== undefined && (
+                <>
+                  , the strongest rated{" "}
+                  <span className="score-number text-xl">+{Math.round(strongest)} Elo</span>
+                </>
+              )}
+              .
+            </p>
+            <a
+              href={game.path}
+              className="mt-5 inline-block rounded-md bg-ink px-4 py-2 text-[0.95rem] font-medium text-ground hover:opacity-90"
+            >
+              Play
+            </a>
+          </>
         ) : (
-          <span className="text-xs text-muted">Not playable yet.</span>
+          <p className="mt-3 text-[0.95rem] text-muted">Next. Not playable yet.</p>
         )}
       </div>
     </article>
+  );
+}
+
+function Preview({ game }: { game: GameEntry }) {
+  if (game.id === "reversi") {
+    return (
+      <div aria-hidden="true" className="pointer-events-none select-none">
+        <Board state={initialState(8)} interactive={false} lastMove={null} onPlay={() => {}} />
+      </div>
+    );
+  }
+  // An empty board for a game that is not here yet: a 15-line grid, as Gomoku is played.
+  const lines = Array.from({ length: 15 }, (_, i) => 5 + i * (90 / 14));
+  return (
+    <div className="board-frame" aria-hidden="true" style={{ gridTemplateColumns: "1fr" }}>
+      <svg viewBox="0 0 100 100" className="block aspect-square w-full rounded-sm bg-board">
+        {lines.map((p) => (
+          <g key={p} stroke="rgba(16,17,18,0.45)" strokeWidth="0.35">
+            <line x1={p} y1="5" x2={p} y2="95" />
+            <line x1="5" y1={p} x2="95" y2={p} />
+          </g>
+        ))}
+        {[3, 7, 11].flatMap((x) =>
+          [3, 7, 11].map((y) => (
+            <circle key={`${x}-${y}`} cx={lines[x]} cy={lines[y]} r="1" fill="rgba(16,17,18,0.6)" />
+          )),
+        )}
+      </svg>
+    </div>
   );
 }

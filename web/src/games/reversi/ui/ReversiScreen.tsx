@@ -1,5 +1,6 @@
 /**
- * The Reversi screen: the board, its controls, and the agent's turn.
+ * The Reversi screen: the scoreboard, the board, its controls, and the agent's
+ * turn.
  *
  * The shape worth noticing: the agent's turn is driven by an effect that fires
  * whenever it becomes the agent's move, not by the click handler. A click makes
@@ -7,15 +8,27 @@
  * agent's turn and nobody is thinking, think" -- in one place, and it means
  * passes chain correctly without a special case. If the agent passes and it is
  * still the agent's turn, the same effect simply runs again.
+ *
+ * The layout is a table with a game on it: the count above the board the way a
+ * counter sits beside one, the board as wide as the page allows, and the
+ * controls in plain rows underneath. Nothing competes with a disc turning over.
  */
 
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 
-import modelsManifest from "../engine/models.json";
 import { BASELINES, isBaseline } from "../engine/baselines";
 import { LocalEngine } from "../engine/local";
+import modelsManifest from "../engine/models.json";
 import type { ModelDescriptor } from "../engine/onnx";
-import { isTerminal, legalActions, mustPass, passAction, winner, type Action } from "../engine/rules";
+import {
+  BLACK,
+  isTerminal,
+  legalActions,
+  mustPass,
+  passAction,
+  winner,
+  type Action,
+} from "../engine/rules";
 import type { Engine } from "../engine/types";
 import {
   current,
@@ -30,19 +43,17 @@ import {
 import { sounds } from "../../../shared/sound";
 import { GameOverDialog } from "../../../shared/ui/GameOverDialog";
 import { Shell } from "../../../shared/ui/Shell";
-import { FLIP_STAGGER_MS } from "./Board";
-import { Board, squareName } from "./Board";
+import { Board, FLIP_STAGGER_MS, squareName } from "./Board";
 import {
   Button,
   LevelPicker,
   OpponentPicker,
-  Score,
+  Scoreboard,
   SidePicker,
   Status,
   Toast,
   WinProbability,
 } from "./Panel";
-import { BLACK } from "../engine/rules";
 
 interface RatedBaseline {
   readonly name: string;
@@ -215,8 +226,8 @@ export function ReversiScreen() {
 
   // The agent's disc makes the same sound as yours, and the flips tick outward
   // in step with the animation. The agent's move is the only one that arrives
-  // here after the fact, so its sound is played when the history grows by its
-  // move rather than when it was decided.
+  // here after the fact, so its sound plays when the history grows by its move
+  // rather than when it was decided.
   const lastMover = lastTurn(game).thought;
   useEffect(() => {
     if (lastMover === null || ply <= 1) return;
@@ -248,6 +259,7 @@ export function ReversiScreen() {
   const { black, white } = score(game);
   const turn = lastTurn(game);
   const humanMustPass = humanTurn && mustPass(state);
+  const opponent = OPPONENTS.find((model) => model.id === game.modelId);
 
   const heatmap = useMemo(
     () => (game.showAnalysis ? turn.thought?.visits : undefined),
@@ -262,33 +274,33 @@ export function ReversiScreen() {
   return (
     <Shell
       title="Reversi"
-      lead={
-        <>
-          An agent that learned Reversi from scratch by playing against itself. It runs entirely in
-          your browser &mdash; nothing is sent anywhere.
-        </>
-      }
+      lead="An agent that learned Reversi from scratch by playing against itself. It runs entirely in your browser and nothing is sent anywhere."
       footer={
         <>
           Ratings come from a round robin of 210 games per entrant, fit with a Bradley&ndash;Terry
           model and anchored so that random play is 0. The intervals are 95% bootstrap intervals,
-          and they overlap between neighbouring generations &mdash; which is the honest way to say
-          that generation 40 and generation 60 are close.
+          and they overlap between neighbouring generations, which is the honest way to say that
+          generation 40 and generation 60 are close.
         </>
       }
     >
-      <div className="grid items-start gap-7 md:grid-cols-[minmax(0,1fr)_18rem]">
-        {/*
-          The board is square, so its size is bounded by whichever of width and
-          height runs out first. Capping the width by the remaining viewport
-          height is what stops a wide window producing a board taller than the
-          screen -- and, more usually, what lets the board actually use the room
-          a wide window gives it instead of staying the size it was on a laptop.
-        */}
-        <div
-          className="mx-auto w-full"
-          style={{ maxWidth: "min(100%, calc(100dvh - 12rem))" }}
-        >
+      {/*
+        The board is square, so its size is bounded by whichever of width and
+        height runs out first. Capping the width by the remaining viewport height
+        keeps the whole board on screen on a wide window, and lets it use the room
+        a wide window gives it instead of staying laptop-sized.
+      */}
+      <div className="mx-auto w-full" style={{ maxWidth: "min(100%, calc(100dvh - 17rem))" }}>
+        <Scoreboard
+          black={black}
+          white={white}
+          toMove={state.toMove}
+          humanColor={game.humanColor}
+          opponentLabel={opponent?.label ?? "Agent"}
+          terminal={terminal}
+        />
+
+        <div className="mt-4">
           <Board
             state={state}
             interactive={humanTurn && !game.thinking && !loading}
@@ -298,24 +310,33 @@ export function ReversiScreen() {
           />
         </div>
 
-        <aside className="flex flex-col gap-4 rounded-md border border-line bg-surface p-4">
-          <Score black={black} white={white} toMove={state.toMove} humanColor={game.humanColor} />
-
+        <div className="mt-5 flex min-h-9 flex-wrap items-center gap-3">
           <Status
             line={loading ? "Loading the agent…" : statusLine(game)}
             thinking={game.thinking || loading}
           />
-
           {humanMustPass && (
             <Button variant="primary" onClick={() => play(passAction(state.size))}>
               Pass
             </Button>
           )}
-
           {game.thinking && <Button onClick={stopThinking}>Stop thinking</Button>}
+          {turn.thought && (
+            <p className="ml-auto text-sm text-muted">
+              Played {squareName(turn.thought.action, state.size)}
+              {turn.thought.simulations > 0 && <> after {turn.thought.simulations} simulations</>} in{" "}
+              {Math.round(turn.thought.elapsedMs)} ms
+            </p>
+          )}
+        </div>
 
-          {yourChances !== null && !terminal && <WinProbability probability={yourChances} />}
+        {yourChances !== null && !terminal && (
+          <div className="mt-3">
+            <WinProbability probability={yourChances} />
+          </div>
+        )}
 
+        <div className="mt-6 flex flex-col gap-3 border-t border-line pt-5">
           <OpponentPicker
             models={OPPONENTS}
             value={game.modelId}
@@ -337,7 +358,7 @@ export function ReversiScreen() {
             disabled={game.thinking}
           />
 
-          <div className="flex flex-wrap gap-2">
+          <div className="mt-1 flex flex-wrap items-center gap-2">
             <Button variant="primary" onClick={() => dispatch({ type: "newGame" })}>
               New game
             </Button>
@@ -348,26 +369,18 @@ export function ReversiScreen() {
             >
               Take back
             </Button>
+
+            <label className="ml-auto flex cursor-pointer items-center gap-2 text-sm text-muted">
+              <input
+                type="checkbox"
+                checked={game.showAnalysis}
+                onChange={() => dispatch({ type: "toggleAnalysis" })}
+                className="accent-accent"
+              />
+              Show where the agent searched
+            </label>
           </div>
-
-          <label className="flex cursor-pointer items-center gap-2 text-xs text-muted">
-            <input
-              type="checkbox"
-              checked={game.showAnalysis}
-              onChange={() => dispatch({ type: "toggleAnalysis" })}
-              className="accent-accent-2"
-            />
-            Show where the agent searched
-          </label>
-
-          {turn.thought && (
-            <p className="font-mono text-[0.7rem] leading-relaxed text-muted tabular-nums">
-              played {squareName(turn.thought.action, state.size)}
-              {turn.thought.simulations > 0 && <> &middot; {turn.thought.simulations} sims</>}{" "}
-              &middot; {Math.round(turn.thought.elapsedMs)} ms
-            </p>
-          )}
-        </aside>
+        </div>
       </div>
 
       {game.error && (

@@ -1,12 +1,12 @@
 /**
- * The frame every page shares: a header with the site's name, a way back to the
- * games, the theme and sound switches, and a footer for the fine print.
+ * The frame every page shares: the site's name, a way back to the games, the
+ * theme and sound switches, and a footer for the fine print.
  *
- * Kept deliberately small. The board and its controls are the page; this only
- * has to say where you are, how to leave, and how you like it to look.
+ * Kept deliberately small. The board is the page; this only has to say where
+ * you are, how to leave, and how you like it to look.
  */
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import { sounds } from "../sound";
 import {
@@ -14,7 +14,6 @@ import {
   readChoice,
   resolveTheme,
   safeStorage,
-  systemPrefersDark,
   toggledChoice,
   type Theme,
   type ThemeChoice,
@@ -35,26 +34,25 @@ export function Shell({
   footer?: ReactNode;
 }) {
   return (
-    <div className="mx-auto max-w-6xl px-4 pb-12 pt-6">
-      <header className="mb-6 flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
-        <div>
+    <div className="mx-auto max-w-5xl px-4 pb-14 pt-5 sm:px-6">
+      <header className="mb-6 flex items-start justify-between gap-6">
+        <div className="min-w-0">
           {title === undefined ? (
-            <h1 className="text-2xl font-bold tracking-tight">{SITE_NAME}</h1>
+            <p className="font-display text-2xl font-semibold tracking-tight">{SITE_NAME}</p>
           ) : (
             <>
-              <a
-                href="/"
-                className="text-xs font-semibold uppercase tracking-wider text-muted hover:text-ink"
-              >
-                {SITE_NAME} · all games
+              <a href="/" className="text-sm text-muted hover:text-ink">
+                All games
               </a>
-              <h1 className="mt-1 text-2xl font-bold tracking-tight">{title}</h1>
+              <h1 className="font-display mt-0.5 text-4xl font-bold leading-none tracking-tight">
+                {title}
+              </h1>
             </>
           )}
-          {lead && <p className="mt-1 max-w-prose text-sm text-muted">{lead}</p>}
+          {lead && <p className="mt-2 max-w-[60ch] text-[0.95rem] text-muted">{lead}</p>}
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1">
           <ThemeSwitch />
           <SoundSwitch />
         </div>
@@ -63,7 +61,7 @@ export function Shell({
       {children}
 
       {footer && (
-        <footer className="mt-8 max-w-prose text-xs leading-relaxed text-muted">{footer}</footer>
+        <footer className="mt-10 max-w-[68ch] text-sm leading-relaxed text-muted">{footer}</footer>
       )}
     </div>
   );
@@ -71,19 +69,9 @@ export function Shell({
 
 function useTheme(): [Theme, () => void] {
   const [choice, setChoice] = useState<ThemeChoice>(() => readChoice(safeStorage()));
-  const [prefersDark, setPrefersDark] = useState(systemPrefersDark);
-
-  useEffect(() => {
-    if (typeof matchMedia !== "function") return;
-    const query = matchMedia("(prefers-color-scheme: dark)");
-    const onChange = (event: MediaQueryListEvent) => setPrefersDark(event.matches);
-    query.addEventListener("change", onChange);
-    return () => query.removeEventListener("change", onChange);
-  }, []);
-
-  const theme = resolveTheme(choice, prefersDark);
+  const theme = resolveTheme(choice);
   const toggle = () => {
-    const next = toggledChoice(choice, prefersDark);
+    const next = toggledChoice(choice);
     applyChoice(next);
     setChoice(next);
   };
@@ -92,21 +80,19 @@ function useTheme(): [Theme, () => void] {
 
 function ThemeSwitch() {
   const [theme, toggle] = useTheme();
-  const toDark = theme === "light";
+  const toLight = theme === "dark";
   return (
     <IconButton
-      label={toDark ? "Switch to the dark theme" : "Switch to the light theme"}
+      label={toLight ? "Switch to the light theme" : "Switch to the dark theme"}
       onClick={toggle}
     >
-      {toDark ? (
-        // a moon
-        <path d="M14.5 3.5a7 7 0 1 0 6 10.5A8 8 0 0 1 14.5 3.5z" />
-      ) : (
-        // a sun
+      {toLight ? (
         <>
           <circle cx="12" cy="12" r="4" />
           <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" />
         </>
+      ) : (
+        <path d="M14.5 3.5a7 7 0 1 0 6 10.5A8 8 0 0 1 14.5 3.5z" />
       )}
     </IconButton>
   );

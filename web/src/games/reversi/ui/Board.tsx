@@ -161,7 +161,7 @@ export function Board({ state, interactive, lastMove, visits, onPlay }: BoardPro
                 {share > 0.02 && (
                   <span
                     aria-hidden="true"
-                    className="absolute inset-0 bg-accent-2"
+                    className="absolute inset-0 bg-accent"
                     style={{ opacity: Math.min(0.55, share * 0.55) }}
                   />
                 )}

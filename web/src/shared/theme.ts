@@ -1,39 +1,37 @@
 /**
- * Light or dark, by choice or by the system's preference.
+ * Dark or light. Dark is the site's default; light is a choice.
  *
  * The stylesheet reads one attribute, `data-theme` on the root element. Absent,
- * the system preference decides through `prefers-color-scheme`; present, it
- * wins. That keeps every colour on the page flowing from the same tokens
- * whichever way the theme was chosen.
+ * the page is dark; set to "light", the light palette applies. That keeps every
+ * colour on the page flowing from the same tokens whichever way it was chosen.
  *
  * The choice is remembered in the browser only. A tiny inline script in each
- * page's `<head>` applies it before the first paint, so a visitor who chose dark
- * does not see a white flash on every load.
+ * page's `<head>` applies it before the first paint, so a visitor who chose
+ * light does not see a dark flash on every load.
  */
 
 export type Theme = "light" | "dark";
-export type ThemeChoice = Theme | "system";
+export type ThemeChoice = Theme | "default";
 
 export const THEME_KEY = "rz:theme:v1";
 
-/** What the page actually shows, given the choice and what the system prefers. */
-export function resolveTheme(choice: ThemeChoice, prefersDark: boolean): Theme {
-  if (choice === "system") return prefersDark ? "dark" : "light";
-  return choice;
+/** What the page shows for a choice. The default is dark. */
+export function resolveTheme(choice: ThemeChoice): Theme {
+  return choice === "light" ? "light" : "dark";
 }
 
 /** The choice to make when the visitor asks for the other theme. */
-export function toggledChoice(current: ThemeChoice, prefersDark: boolean): Theme {
-  return resolveTheme(current, prefersDark) === "dark" ? "light" : "dark";
+export function toggledChoice(current: ThemeChoice): Theme {
+  return resolveTheme(current) === "dark" ? "light" : "dark";
 }
 
-/** Read the stored choice. Anything unreadable or unknown is "system". */
+/** Read the stored choice. Anything unreadable or unknown is the default. */
 export function readChoice(storage: Pick<Storage, "getItem"> | null | undefined): ThemeChoice {
   try {
     const raw = storage?.getItem(THEME_KEY);
-    return raw === "light" || raw === "dark" ? raw : "system";
+    return raw === "light" || raw === "dark" ? raw : "default";
   } catch {
-    return "system";
+    return "default";
   }
 }
 
@@ -43,19 +41,15 @@ export function applyChoice(
   root: { dataset: DOMStringMap } = document.documentElement,
   storage: Pick<Storage, "setItem" | "removeItem"> | null | undefined = safeStorage(),
 ): void {
-  if (choice === "system") delete root.dataset["theme"];
+  if (choice === "default") delete root.dataset["theme"];
   else root.dataset["theme"] = choice;
   try {
-    if (choice === "system") storage?.removeItem(THEME_KEY);
+    if (choice === "default") storage?.removeItem(THEME_KEY);
     else storage?.setItem(THEME_KEY, choice);
   } catch {
     // A private window or a browser that blocks storage: the theme still
     // applies for this page, it just is not remembered.
   }
-}
-
-export function systemPrefersDark(): boolean {
-  return typeof matchMedia === "function" && matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
 export function safeStorage(): Storage | null {

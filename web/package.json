@@ -19,6 +19,8 @@
     "build:deploy": "node scripts/fetch-models.mjs && npm run build"
   },
   "dependencies": {
+    "@fontsource-variable/source-sans-3": "^5.3.0",
+    "@fontsource/barlow-condensed": "^5.3.0",
     "onnxruntime-web": "^1.20.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

@@ -17,19 +17,19 @@ test("the hub lists Reversi with a measured rating and a planned game marked as 
   const reversi = page.locator('[data-game="reversi"]');
   await expect(reversi.getByRole("heading", { name: "Reversi" })).toBeVisible();
   await expect(reversi.getByText(/\+\d+ Elo/)).toBeVisible();
-  await expect(reversi.getByRole("link", { name: "Play" })).toBeVisible();
+  await expect(reversi.getByRole("link", { name: "Play", exact: true })).toBeVisible();
 
   const gomoku = page.locator('[data-game="gomoku"]');
-  await expect(gomoku.getByText(/coming in 1\.1/i)).toBeVisible();
+  await expect(gomoku.getByText(/not playable yet/i)).toBeVisible();
   await expect(gomoku.getByRole("link", { name: "Play" })).toHaveCount(0);
 });
 
 test("Play opens the game and the game is ready", async ({ page }) => {
   await page.goto("/");
-  await page.locator('[data-game="reversi"]').getByRole("link", { name: "Play" }).click();
+  await page.locator('[data-game="reversi"]').getByRole("link", { name: "Play", exact: true }).click();
 
   await expect(page).toHaveURL(/\/reversi\/$/);
   await expect(page.getByRole("status")).toContainText("Your move.", { timeout: 60_000 });
   // And the way back is on the page.
-  await expect(page.getByRole("link", { name: /all games/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: "All games" })).toBeVisible();
 });

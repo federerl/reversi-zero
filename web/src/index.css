@@ -1,101 +1,115 @@
+@import "@fontsource/barlow-condensed/600.css";
+@import "@fontsource/barlow-condensed/700.css";
+@import "@fontsource-variable/source-sans-3";
 @import "tailwindcss";
 
 /*
- * The palette is the board. Deep felt green, the two disc colours, and amber
- * for anything the interface wants you to look at -- which on a board this
- * colour is the one hue that reads clearly without competing with the discs.
+ * The palette is the disc. Lacquer black and ivory are the two colours a disc
+ * has, and they are also the two grounds the page can have: black by default,
+ * ivory if the visitor asks. Felt green is the one saturated colour and it
+ * belongs to the board. A table-brown rim holds the board. Brass is the only
+ * accent, and it marks exactly two things: the last move and whose turn it is.
  *
- * The neutrals are biased slightly green rather than being pure greys, so the
- * page around the board looks like it belongs to it.
+ * Every colour on the page is read from these tokens rather than written as a
+ * literal, so a token redefined for the light theme changes the whole page
+ * consistently instead of leaving one theme's text on the other's background.
+ *
+ * The typefaces are self-hosted from the packages imported above. The site
+ * promises that nothing is sent anywhere, and a request to a font service would
+ * break that promise for the sake of a download the package already provides.
  */
 @theme {
-  --color-ground: #f7f8f4;
-  --color-surface: #ffffff;
-  --color-surface-2: #edf0e9;
-  --color-surface-3: #e3e8dd;
-  --color-line: #dbe0d5;
-  --color-line-strong: #c2cab9;
-  --color-ink: #171b16;
-  --color-ink-2: #414a3f;
-  --color-muted: #6b7869;
-  --color-accent: #9c5c0f;
-  --color-accent-2: #b46a15;
-  --color-accent-soft: #f7ebd9;
-  --color-board: #2e5943;
-  --color-board-line: #244635;
-  --color-board-edge: #1c3628;
-  --color-disc-black: #16191a;
-  --color-disc-white: #f2f0ea;
+  --color-ground: #101112;
+  --color-surface: #17191a;
+  --color-surface-2: #1f2223;
+  --color-line: #2a2e2f;
+  --color-line-strong: #3a3f40;
+  --color-ink: #f1ece2;
+  --color-ink-2: #cfc9bd;
+  --color-muted: #8a8f87;
+  --color-accent: #c79a3e;
+  --color-board: #2f5b44;
+  --color-board-line: #234739;
+  --color-board-edge: #3b2a1e;
+  --color-disc-black: #101112;
+  --color-disc-white: #f1ece2;
+  --color-good: #7fbf98;
+  --color-bad: #e08b7a;
+
+  --font-sans: "Source Sans 3 Variable", "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Barlow Condensed", "Arial Narrow", ui-sans-serif, sans-serif;
+}
+
+/* The light theme: ivory ground, lacquer text. The board keeps its own colours. */
+:root[data-theme="light"] {
+  --color-ground: #f1ece2;
+  --color-surface: #f8f5ee;
+  --color-surface-2: #ebe5d8;
+  --color-line: #d8d1c2;
+  --color-line-strong: #bfb7a6;
+  --color-ink: #101112;
+  --color-ink-2: #3a3a37;
+  --color-muted: #6f746c;
+  --color-accent: #a67c2a;
   --color-good: #2c6a45;
   --color-bad: #9c3626;
-
-  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
-}
-
-/*
- * The dark palette.
- *
- * The system preference decides unless the visitor chose a theme, in which case
- * `data-theme` on the root element wins (see src/shared/theme.ts). Every colour
- * on the page is read from these tokens rather than written as a literal, so a
- * token redefined here changes the whole page consistently instead of leaving
- * one theme's text on the other theme's background.
- */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --color-ground: #0f120f;
-    --color-surface: #171b17;
-    --color-surface-2: #1e241e;
-    --color-surface-3: #262d25;
-    --color-line: #2d342c;
-    --color-line-strong: #3d463c;
-    --color-ink: #e9ece6;
-    --color-ink-2: #b7c1b4;
-    --color-muted: #869382;
-    --color-accent: #e0973f;
-    --color-accent-2: #c98330;
-    --color-accent-soft: #2b2214;
-    --color-board: #35634c;
-    --color-board-line: #274c39;
-    --color-board-edge: #16281e;
-    --color-good: #6fbb8f;
-    --color-bad: #e07a68;
-  }
-}
-
-/* The same palette when dark was chosen by hand, whatever the system prefers. */
-:root[data-theme="dark"] {
-  --color-ground: #0f120f;
-  --color-surface: #171b17;
-  --color-surface-2: #1e241e;
-  --color-surface-3: #262d25;
-  --color-line: #2d342c;
-  --color-line-strong: #3d463c;
-  --color-ink: #e9ece6;
-  --color-ink-2: #b7c1b4;
-  --color-muted: #869382;
-  --color-accent: #e0973f;
-  --color-accent-2: #c98330;
-  --color-accent-soft: #2b2214;
-  --color-board: #35634c;
-  --color-board-line: #274c39;
-  --color-board-edge: #16281e;
-  --color-good: #6fbb8f;
-  --color-bad: #e07a68;
 }
 
 html {
-  color-scheme: light dark;
+  color-scheme: dark;
 }
 :root[data-theme="light"] {
   color-scheme: light;
 }
-:root[data-theme="dark"] {
-  color-scheme: dark;
+
+body {
+  margin: 0;
+  background: var(--color-ground);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* The game-over dialog: fade in, and the board behind it dims. */
+/* Focus has to be visible on the board as well as on the page: the board is
+   keyboard-navigable, and an outline that only shows on one ground would
+   disappear the moment focus moved onto a square. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Native selects, dressed to match the page rather than the operating system. */
+.control-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0.35rem 1.75rem 0.35rem 0.6rem;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 0.35rem;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5l3.5 3.5 3.5-3.5' fill='none' stroke='%238a8f87' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      no-repeat right 0.55rem center / 0.7rem,
+    var(--color-surface);
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 0.95rem;
+}
+.control-select:disabled {
+  opacity: 0.5;
+}
+
+/* The scoreboard's numerals: condensed, heavy, tabular, the way a counter beside
+   a board shows a score. */
+.score-number {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+}
+
+/* The game-over dialog: a short rise on open, and the board behind it dims. */
 .game-over[open] {
   animation: dialog-in 220ms ease-out;
 }
@@ -110,39 +124,27 @@ html {
   }
 }
 
-body {
-  margin: 0;
-  background: var(--color-ground);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-}
-
-/* Focus has to be visible on the board as well as in the panel: the board is
-   keyboard-navigable, and an outline that only shows on light surfaces would
-   disappear the moment focus moved onto a square. */
-:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
 /* ---------------------------------------------------------------------------
    The board
    ---------------------------------------------------------------------------
-   A wooden rim with the coordinates in it, felt squares, star points on the
-   intersections, and discs that turn over. Everything here reads its colours
-   from the tokens above, so both themes get the same board. */
+   A rim with the coordinates in it, felt squares, star points on the
+   intersections, and discs that turn over. Everything reads its colours from
+   the tokens above, so both themes get the same board. */
 
 .board-frame {
   display: grid;
   padding: 0.55rem;
-  border-radius: 0.6rem;
+  border-radius: 0.5rem;
   background:
-    linear-gradient(160deg, color-mix(in srgb, var(--color-board-edge) 78%, #6b4a2b) 0%,
-      var(--color-board-edge) 45%, color-mix(in srgb, var(--color-board-edge) 85%, #000) 100%);
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--color-board-edge) 80%, #8a5a34) 0%,
+      var(--color-board-edge) 45%,
+      color-mix(in srgb, var(--color-board-edge) 80%, #000) 100%
+    );
   box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.18),
-    0 14px 34px rgba(0, 0, 0, 0.16),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 18px 40px rgba(0, 0, 0, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
@@ -152,10 +154,10 @@ body {
   margin: 0;
   padding: 0;
   list-style: none;
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.04em;
-  color: rgba(255, 255, 255, 0.62);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: rgba(241, 236, 226, 0.62);
   user-select: none;
 }
 .board-ranks {
@@ -171,8 +173,8 @@ body {
 
 .board-well {
   position: relative;
-  border-radius: 0.25rem;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.45);
+  border-radius: 0.2rem;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
   padding: 2px;
   background: var(--color-board-line);
 }
@@ -201,7 +203,7 @@ body {
   content: "";
   position: absolute;
   inset: 3px;
-  border: 2px solid var(--color-accent-2);
+  border: 2px solid var(--color-accent);
   border-radius: 3px;
   pointer-events: none;
 }
@@ -211,7 +213,7 @@ body {
   aspect-ratio: 1;
   width: 22%;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(241, 236, 226, 0.35);
 }
 
 .board-star {
@@ -227,13 +229,14 @@ body {
 /* A disc is one element with two faces. Black shows by default; white is the
    back, pre-turned by half a rotation. Changing the data-disc attribute rotates
    the whole thing, and the transition is what the eye sees as the disc turning
-   over. --flip-delay staggers discs by their distance from the one just placed. */
+   over. --flip-delay staggers discs by their distance from the one just placed.
+
+   No filter on the disc itself: a filter flattens the 3D context and the back
+   face would never show. The shadow lives on the faces instead. */
 .disc {
   position: relative;
   aspect-ratio: 1;
   width: 80%;
-  /* No filter here: a filter flattens the 3D context and the back face would
-     never show. The shadow lives on the faces instead. */
   transform-style: preserve-3d;
   transition: transform 340ms cubic-bezier(0.3, 0.7, 0.3, 1);
   transition-delay: var(--flip-delay, 0ms);

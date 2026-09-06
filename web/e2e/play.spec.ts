@@ -66,7 +66,7 @@ test("the agent answers a move, and the game moves on", async ({ page }) => {
   expect(await discCount(page)).toBeGreaterThan(4);
 
   // And it reports what it did, rather than only that it did something.
-  await expect(page.getByText(/played \w+\d · \d+ ms/)).toBeVisible();
+  await expect(page.getByText(/Played \w+\d in \d+ ms/)).toBeVisible();
 });
 
 test("a network opponent searches, and says how much", async ({ page }) => {
@@ -92,7 +92,7 @@ test("a network opponent searches, and says how much", async ({ page }) => {
   await page.locator('[data-square="19"]').click();
   await expect(page.getByRole("status")).toContainText("Your move.", { timeout: 90_000 });
 
-  await expect(page.getByText(/played \w+\d · \d+ sims · \d+ ms/)).toBeVisible();
+  await expect(page.getByText(/Played \w+\d after \d+ simulations in \d+ ms/)).toBeVisible();
   // A network has an opinion about who is winning; the bar shows it.
   await expect(page.getByRole("meter")).toBeVisible();
 });
@@ -108,7 +108,7 @@ test("a baseline opponent offers no search controls and claims no opinion", asyn
   await expect(page.getByRole("status")).toContainText("Your move.", { timeout: 30_000 });
 
   await expect(page.getByRole("meter")).toBeHidden();
-  await expect(page.getByText(/sims/)).toBeHidden();
+  await expect(page.getByText(/simulations/)).toBeHidden();
 });
 
 test("the board is never clickable while the agent is thinking", async ({ page }) => {
@@ -235,8 +235,8 @@ test("taking a move back returns the board to the player", async ({ page }) => {
 test("the opponent is labelled with a measured rating", async ({ page }) => {
   // The repository's rule: difficulty labels state measured strength, never
   // adjectives. This is that rule, asserted where a reader would see it.
-  await expect(page.getByLabel("Opponent")).toContainText(/Generation \d+ — \d+ Elo/);
-  await expect(page.getByText(/95% interval \d+–\d+, random play = 0/)).toBeVisible();
+  await expect(page.getByLabel("Opponent")).toContainText(/Generation \d+, \+\d+ Elo/);
+  await expect(page.getByText(/95% interval \d+ to \d+\. Random play is 0\./)).toBeVisible();
 });
 
 test("the difficulty levels are labelled with their measured ratings too", async ({ page }) => {
@@ -248,8 +248,8 @@ test("the difficulty levels are labelled with their measured ratings too", async
   const levels = page.getByLabel("Thinking time");
   await expect(levels).toBeVisible();
 
-  await expect(levels).toContainText(/Casual — \d+ Elo/);
-  await expect(levels).toContainText(/Max — \d+ Elo/);
+  await expect(levels).toContainText(/Casual, \+\d+ Elo/);
+  await expect(levels).toContainText(/Max, \+\d+ Elo/);
 });
 
 test("the board can be played with the keyboard alone", async ({ page }) => {
