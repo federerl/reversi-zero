@@ -773,6 +773,61 @@ matches:
 
 ---
 
+## Run 7 — E2, second seed — `e2-ownership-seed2` (CSSE Slurm cluster, gebru)
+
+**Result: pending.** This section was written before the first generation finished.
+
+**Question.** Run 5's +74 Elo over the control at generation 120 is the largest
+gain in the project and rests on one seed. Run 3 measured about 24 Elo of noise
+between two instances of the same recipe. How much of run 5 is the head, and how
+much is the seed?
+
+**Change.** None to the recipe. `configs/full8x8_e2_ownership.yaml` with `seed`
+overridden to 2024 on the command line (run 5 used the profile's default, 1337).
+The run is on gebru, an RTX 6000 with 14 self-play workers, rather than gus with
+22; run 3 showed that the hardware and worker split change the games without
+changing the recipe, and this run measures that noise along with the seed's.
+
+**Scale.** 120 generations, one GPU, about 11 hours at gebru's pace.
+
+### The prediction, registered before the run
+
+Against run 3 (the control) at matched generations 60 and 120, 1000-game matches:
+
+| if | then |
+|---|---|
+| the second seed beats the control decisively at both generations, within about 25 Elo of run 5's +45 and +74 | the gain is the head's; run 5's numbers stand and go in the README as "about +60 Elo, two seeds" |
+| it beats the control decisively but by clearly less than run 5 | the head helps, and run 5 was a lucky seed; report the mean of the two seeds and say so |
+| it does not beat the control decisively | run 5 was mostly seed; the head's gain is inside the noise and the README claims only what both seeds support |
+
+Also: run 5 against run 7 directly at generation 120. Two seeds of the same recipe
+should split near 50%; a decisive result either way is the noise floor for this
+recipe, to set beside run 3's 24 Elo.
+
+---
+
+## Run 8 — E2, ownership weight halved — `e2-ownership-w05` (CSSE Slurm cluster, gebru)
+
+**Result: pending.** This section was written before the first generation finished.
+
+**Question.** Run 5 used an ownership weight of 1.0, the first value tried. Does
+the weight matter?
+
+**Change.** `train.ownership_loss_weight` overridden to 0.5 on the command line;
+everything else as run 5. Same node and worker count as run 7.
+
+### The prediction, registered before the run
+
+Against run 3 (the control) at matched generations 60 and 120, 1000-game matches:
+
+| if | then |
+|---|---|
+| within about 25 Elo of run 5 | the head's gain is robust to the weight over a factor of two; 1.0 stays because it is what was measured most |
+| clearly less than run 5 | the weight matters and 1.0 was on the low side; 2.0 is the next thing to try |
+| clearly more than run 5 | 1.0 was too much and the term was competing with the policy after all; 0.5 becomes the recipe's value |
+
+---
+
 ## Calibration: are the four difficulty levels actually different opponents?
 
 **Run:** 2026-08-31, `models/reversi-8x8-gen60.pt`, 21 pairings × 300 games,
