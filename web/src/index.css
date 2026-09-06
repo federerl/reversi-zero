@@ -36,14 +36,14 @@
 /*
  * The dark palette.
  *
- * Only `prefers-color-scheme` is consulted, because nothing on this site sets a
- * theme by hand -- there is no toggle. Every colour on the page is read from
- * these tokens rather than written as a literal, so a token redefined here
- * changes the whole page consistently instead of leaving one theme's text on
- * the other theme's background.
+ * The system preference decides unless the visitor chose a theme, in which case
+ * `data-theme` on the root element wins (see src/shared/theme.ts). Every colour
+ * on the page is read from these tokens rather than written as a literal, so a
+ * token redefined here changes the whole page consistently instead of leaving
+ * one theme's text on the other theme's background.
  */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --color-ground: #0f120f;
     --color-surface: #171b17;
     --color-surface-2: #1e241e;
@@ -64,8 +64,50 @@
   }
 }
 
+/* The same palette when dark was chosen by hand, whatever the system prefers. */
+:root[data-theme="dark"] {
+  --color-ground: #0f120f;
+  --color-surface: #171b17;
+  --color-surface-2: #1e241e;
+  --color-surface-3: #262d25;
+  --color-line: #2d342c;
+  --color-line-strong: #3d463c;
+  --color-ink: #e9ece6;
+  --color-ink-2: #b7c1b4;
+  --color-muted: #869382;
+  --color-accent: #e0973f;
+  --color-accent-2: #c98330;
+  --color-accent-soft: #2b2214;
+  --color-board: #35634c;
+  --color-board-line: #274c39;
+  --color-board-edge: #16281e;
+  --color-good: #6fbb8f;
+  --color-bad: #e07a68;
+}
+
 html {
   color-scheme: light dark;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* The game-over dialog: fade in, and the board behind it dims. */
+.game-over[open] {
+  animation: dialog-in 220ms ease-out;
+}
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 body {

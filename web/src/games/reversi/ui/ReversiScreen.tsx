@@ -15,7 +15,7 @@ import modelsManifest from "../engine/models.json";
 import { BASELINES, isBaseline } from "../engine/baselines";
 import { LocalEngine } from "../engine/local";
 import type { ModelDescriptor } from "../engine/onnx";
-import { isTerminal, legalActions, mustPass, passAction, type Action } from "../engine/rules";
+import { isTerminal, legalActions, mustPass, passAction, winner, type Action } from "../engine/rules";
 import type { Engine } from "../engine/types";
 import {
   current,
@@ -27,7 +27,10 @@ import {
   statusLine,
   type Game,
 } from "../state/game";
+import { sounds } from "../../../shared/sound";
+import { GameOverDialog } from "../../../shared/ui/GameOverDialog";
 import { Shell } from "../../../shared/ui/Shell";
+import { FLIP_STAGGER_MS } from "./Board";
 import { Board, squareName } from "./Board";
 import {
   Button,
@@ -206,8 +209,36 @@ export function ReversiScreen() {
   }, [loading, terminal, humanTurn, ply, game.levelId, game.modelId]);
 
   const play = useCallback((action: Action) => {
+    sounds.place();
     dispatch({ type: "play", action });
   }, []);
+
+  // The agent's disc makes the same sound as yours, and the flips tick outward
+  // in step with the animation. The agent's move is the only one that arrives
+  // here after the fact, so its sound is played when the history grows by its
+  // move rather than when it was decided.
+  const lastMover = lastTurn(game).thought;
+  useEffect(() => {
+    if (lastMover === null || ply <= 1) return;
+    sounds.place();
+    sounds.flip(3, FLIP_STAGGER_MS);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ply]);
+
+  // The ending, once, when the game reaches it.
+  const outcome = terminal ? winner(state) : null;
+  const playerResult: "win" | "loss" | "draw" | null =
+    outcome === null
+      ? null
+      : outcome === "draw"
+        ? "draw"
+        : (outcome === "black") === (game.humanColor === BLACK)
+          ? "win"
+          : "loss";
+  const [dismissedAt, setDismissedAt] = useState<number | null>(null);
+  useEffect(() => {
+    if (playerResult !== null) sounds.gameOver(playerResult);
+  }, [playerResult]);
 
   const stopThinking = useCallback(() => {
     searchRef.current?.abort();
@@ -341,6 +372,25 @@ export function ReversiScreen() {
 
       {game.error && (
         <Toast message={game.error} onDismiss={() => dispatch({ type: "error", message: null })} />
+      )}
+
+      {playerResult !== null && (
+        <GameOverDialog
+          open={dismissedAt !== ply}
+          result={playerResult}
+          black={black}
+          white={white}
+          humanIsBlack={game.humanColor === BLACK}
+          onPlayAgain={() => {
+            setDismissedAt(null);
+            dispatch({ type: "newGame" });
+          }}
+          onSwapSides={() => {
+            setDismissedAt(null);
+            dispatch({ type: "swapSides" });
+          }}
+          onReview={() => setDismissedAt(ply)}
+        />
       )}
     </Shell>
   );

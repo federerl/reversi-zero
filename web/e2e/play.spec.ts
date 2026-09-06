@@ -185,6 +185,40 @@ test("a whole game can be played to the end", async ({ page }) => {
 
   // And it was a real game rather than a two-move accident.
   expect(await discCount(page)).toBeGreaterThan(20);
+
+  // The ending is a real ending: a dialog that names the result and offers the
+  // next game, not a sentence in the status box. Its count agrees with the
+  // status line and the board, and "Play again" starts over.
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole("heading", { level: 2 })).toHaveText(/You win|The agent wins|A draw/);
+  const shown = (await dialog.textContent()) ?? "";
+  for (const n of counts.slice(0, 2)) expect(shown).toContain(String(n));
+
+  await dialog.getByRole("button", { name: "Play again" }).click();
+  await expect(dialog).toBeHidden();
+  await expect(page.getByRole("status")).toContainText("Your move.");
+  expect(await discCount(page)).toBe(4);
+});
+
+test("the theme and sound switches are on every page and remember their setting", async ({
+  page,
+}) => {
+  const html = page.locator("html");
+  await expect(html).not.toHaveAttribute("data-theme", /./);
+
+  await page.getByRole("button", { name: /Switch to the (dark|light) theme/ }).click();
+  await expect(html).toHaveAttribute("data-theme", /^(dark|light)$/);
+  const chosen = await html.getAttribute("data-theme");
+
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", chosen!);
+
+  const mute = page.getByRole("button", { name: "Mute sounds" });
+  await mute.click();
+  await expect(page.getByRole("button", { name: "Unmute sounds" })).toBeVisible();
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: "Unmute sounds" })).toBeVisible();
 });
 
 test("taking a move back returns the board to the player", async ({ page }) => {
