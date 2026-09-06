@@ -48,7 +48,11 @@ function GameEntry({ game }: { game: GameEntry }) {
   return (
     <article
       data-game={game.id}
-      className={`grid items-center gap-6 sm:grid-cols-[minmax(0,20rem)_1fr] ${playable ? "" : "opacity-60"}`}
+      className={`grid items-center gap-6 ${
+        playable
+          ? "sm:grid-cols-[minmax(0,20rem)_1fr]"
+          : "opacity-60 sm:grid-cols-[minmax(0,11rem)_1fr]"
+      }`}
     >
       {playable ? (
         <a href={game.path} aria-label={`Play ${game.title}`} className="block">
@@ -59,7 +63,11 @@ function GameEntry({ game }: { game: GameEntry }) {
       )}
 
       <div className="max-w-[46ch]">
-        <h2 className="font-display text-4xl font-bold leading-none tracking-tight">{game.title}</h2>
+        <h2
+          className={`font-display font-bold leading-none tracking-tight ${playable ? "text-4xl" : "text-3xl"}`}
+        >
+          {game.title}
+        </h2>
         <p className="mt-2 text-[0.95rem] text-muted">{game.tagline}</p>
 
         {playable ? (
@@ -100,7 +108,11 @@ function Preview({ game }: { game: GameEntry }) {
   // An empty board for a game that is not here yet: a 15-line grid, as Gomoku is played.
   const lines = Array.from({ length: 15 }, (_, i) => 5 + i * (90 / 14));
   return (
-    <div className="board-frame" aria-hidden="true" style={{ gridTemplateColumns: "1fr" }}>
+    <div
+      className="board-frame"
+      aria-hidden="true"
+      style={{ gridTemplateColumns: "1fr", padding: "0.35rem" }}
+    >
       <svg viewBox="0 0 100 100" className="block aspect-square w-full rounded-sm bg-board">
         {lines.map((p) => (
           <g key={p} stroke="rgba(16,17,18,0.45)" strokeWidth="0.35">
