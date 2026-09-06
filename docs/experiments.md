@@ -855,9 +855,14 @@ longer required for 1.0; it stays on the list for a later network.
   and its replicates (runs 7 and 8) once those are rated.
 * The WebGPU path moves from "required for 1.0" to "stretch" in the roadmap. The
   hours it would have taken go to the difficulty ladder and the game features.
-* The big network's late climb is worth one cheap check later: rate its
-  generation 120 against its generation 100 with 1000 games. If decisive, a longer
-  run of E1+E2 becomes the candidate for a 1.1 network, served with WebGPU.
+* The big network's late climb was checked: its generation 120 beat its
+  generation 100 by **54.9%** over 1000 games ([51.8%, 58.0%], 534W 436L 30D,
+  `docs/ratings/head-to-head-e12-late-1000.json`), about +34 Elo, decisive. The
+  small network's generations 100 and 120 split 50–50. So E1+E2 was still
+  improving when the run stopped, and the small network was not. That does not
+  change the 1.0 decision, which is about a matched budget, but it makes a longer
+  E1+E2 run the natural candidate for a 1.1 network, served through the WebGPU
+  path. Registered here as the next capacity question, not started.
 
 ---
 
