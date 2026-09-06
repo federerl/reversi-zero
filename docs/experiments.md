@@ -647,6 +647,28 @@ differ by about 24 Elo, and the +74 at generation 120 is comfortably past that,
 but the +45 at generation 60 is not far past it. And the gain is at 50
 simulations; the difficulty ladder plays at 16 to 800.
 
+### Against Edax: from level 5 to about level 6
+
+The 0.0 agent (run 1, generation 60, 256 simulations) was statistically even with
+Edax at level 5 and lost to level 6 and above. The same protocol on E2's
+generation 120 (`docs/ratings/edax-e2-g120.json`; 80 colour-balanced games per
+level, 4-ply seeded openings, 256 simulations, Edax 4.6 built from source on the
+cluster, book off, one thread):
+
+| Edax level | score for E2 | 95% Wilson | record |
+|---|---|---|---|
+| 5 | **71.2%** | [60.5%, 80.0%] | 55W 21L 4D |
+| 6 | 59.4% | [48.4%, 69.5%] | 45W 30L 5D |
+| 7 | 41.2% | [31.1%, 52.2%] | 32W 46L 2D |
+| 8 | 21.9% | [14.2%, 32.1%] | 15W 60L 5D |
+
+Level 5, where the 0.0 agent scored 53%, is now beaten decisively. Level 6 is
+probably beaten and level 7 probably not, but both of those intervals include
+50%, so at 80 games the honest statement is "somewhere between level 6 and
+level 7", up from "level 5". Level 8 is clearly out of reach. Eighty games per
+level is the 0.0 protocol and is kept for comparability; 320 games would settle
+levels 6 and 7 and is cheap on the cluster.
+
 ### Decisions taken
 
 * The ownership head is part of the 1.0 recipe. It costs nothing measurable and
@@ -950,6 +972,22 @@ match at full strength.
   crossover and should not be quoted as measurements.
 
 ### Getting Edax
+
+**On Linux, build it.** The v4.6 release's Linux binary is linked against
+glibc 2.38 and exits at once on anything older (Debian 12 ships 2.36) with
+`version 'GLIBC_2.38' not found`, which the adapter reports as "edax-l5 is no
+longer running". Building from source takes a minute:
+
+```bash
+git clone --depth 1 --branch v4.6 https://github.com/abulmo/edax-reversi.git edax-src
+mkdir -p edax-src/bin && cd edax-src/src
+make build ARCH=x86-64 OS=linux CC=gcc COMP=gcc
+cp ../bin/lEdax-x86-64 <repo>/tools/edax/
+```
+
+`tools/edax/data/eval.dat` still comes from the release tarball. The `bin`
+directory has to exist before the build, and the Makefile defaults to clang
+unless `CC=gcc` is given.
 
 Not in this repository: it is a binary and a 14 MB evaluation table, and the rule
 that keeps checkpoints out of git applies to it too.
