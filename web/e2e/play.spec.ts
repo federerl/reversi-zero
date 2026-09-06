@@ -43,7 +43,7 @@ test.beforeEach(async ({ page }) => {
   });
   page.on("pageerror", (error) => consoleLog.push(`[pageerror] ${error.message}`));
 
-  await page.goto("/");
+  await page.goto("/reversi/");
   // Loading a network is a download plus a compile; the status line says so
   // until it is ready, and clicking before then would be testing nothing.
   await expect(page.getByRole("status")).toContainText("Your move.", { timeout: 60_000 });

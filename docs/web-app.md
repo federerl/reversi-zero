@@ -56,7 +56,7 @@ uv run reversi export-onnx models/gen60.pt web/public/models/reversi-8x8-gen60.o
 
 Repeat for generations 5, 20 and 40 if you want the full opponent picker; the
 site offers whichever files are present and named in
-`web/src/engine/models.json`.
+`web/src/games/reversi/engine/models.json`.
 
 `export-onnx` checks its own output. It runs the PyTorch model and the exported
 one on the same random inputs and **deletes the file rather than keeping it** if
@@ -152,7 +152,7 @@ gh release create models-v1   web/public/models/*.onnx web/public/models/*.json 
 ```
 
 About 7 MB. `scripts/fetch-models.mjs` reads the filenames from
-`src/engine/models.json` rather than guessing them, downloads each one, and
+`src/games/reversi/engine/models.json` rather than guessing them, downloads each one, and
 **checks it against the SHA-256 recorded when it was exported** — before writing
 it to disk, so a damaged download never lands where a later build would find it
 and assume it was fine. A truncated file would otherwise be a valid-looking
@@ -239,25 +239,36 @@ unaffected, so the pause exists where it is needed and nowhere else.
 
 ```
 web/
-  src/engine/          the agent — no React anywhere in here
-    bitboard.ts        a 64-square board in two 32-bit halves
-    rules.ts           a port of reversi.game
-    mcts.ts            a port of reversi.search (PUCT, FPU, time budget)
-    features.ts        position → the three input planes
-    onnx.ts            the network, via onnxruntime-web
-    worker.ts          all of the above, off the main thread
-    local.ts           the worker, behind a promise-shaped interface
-    remote.ts          the FastAPI server, behind the same interface
-    levels.ts          the four difficulty levels and the value guardrail
-    hashStub.ts        a reproducible stand-in for the network, for tests
-    models.json        the opponent list — generated, see below
-    __fixtures__/      what the Python engine says the answers are
-  src/ui/              React components
-  src/state/           the game as a reducer over immutable positions
-  tests/               the engine against the fixtures
-  e2e/                 a whole game in a real browser
-  bench/               how fast is this device
+  index.html           the hub: one card per game, at /
+  reversi/index.html   the Reversi page, at /reversi/
+  bench/index.html     how fast is this device, at /bench/
+  src/hub/             the front page and the list of games it shows
+  src/shared/ui/       the frame every page shares
+  src/games/reversi/
+    engine/            the agent — no React anywhere in here
+      bitboard.ts      a 64-square board in two 32-bit halves
+      rules.ts         a port of reversi.game
+      mcts.ts          a port of reversi.search (PUCT, FPU, time budget)
+      features.ts      position → the three input planes
+      onnx.ts          the network, via onnxruntime-web
+      worker.ts        all of the above, off the main thread
+      local.ts         the worker, behind a promise-shaped interface
+      remote.ts        the FastAPI server, behind the same interface
+      levels.ts        the four difficulty levels and the value guardrail
+      hashStub.ts      a reproducible stand-in for the network, for tests
+      models.json      the opponent list — generated, see below
+      __fixtures__/    what the Python engine says the answers are
+    state/             the game as a reducer over immutable positions
+    ui/                React components: the board, the controls, the screen
+  tests/               the engine against the fixtures, and the hub's registry
+  e2e/                 a whole game in a real browser, and the hub
 ```
+
+Each page is its own HTML file and there is no client-side router. A second game
+is a new directory under `src/games/` and a new entry in `src/hub/registry.ts`;
+nothing in the Reversi directory changes. Separate pages also keep Cloudflare's
+`not_found_handling` on `"404-page"`: every URL maps to a file, so a missing
+`.onnx` is a 404 rather than a page of HTML handed to the model loader.
 
 ### The search runs in a worker
 
@@ -291,14 +302,14 @@ same search run against a real network or a stub without knowing the difference.
 ### The opponent list is generated, not typed
 
 `src/reversi/web/manifest.py` reads the cross-generation tournament report and
-writes `web/src/engine/models.json`:
+writes `web/src/games/reversi/engine/models.json`:
 
 ```bash
 uv run python -c "
 from pathlib import Path
 from reversi.web.manifest import build_manifest, write_manifest
 m = build_manifest(Path('runs/<run-id>/arena/crossgen.json'))
-write_manifest(Path('web/src/engine/models.json'), m)
+write_manifest(Path('web/src/games/reversi/engine/models.json'), m)
 "
 ```
 
@@ -322,7 +333,7 @@ what the frozen engine actually does, which is what the agent was trained
 against.
 
 ```bash
-uv run reversi export-fixtures web/src/engine/__fixtures__ --onnx models/gen60.onnx
+uv run reversi export-fixtures web/src/games/reversi/engine/__fixtures__ --onnx models/gen60.onnx
 ```
 
 | Fixture | Contents | What it catches |
@@ -435,7 +446,7 @@ demonstrated.
 disk. Serve it over HTTP: `npm run dev` or `npm run preview`.
 
 **"Loading the agent…" forever.** The `.onnx` file is missing. Check
-`web/public/models/` against the URLs in `web/src/engine/models.json`. If it is
+`web/public/models/` against the URLs in `web/src/games/reversi/engine/models.json`. If it is
 present, open the network tab: a 404 there is the answer.
 
 **It hangs at "Loading the agent…" with an empty console.** Two causes, and they
@@ -446,7 +457,7 @@ runtime — see "Every time" above. Use `npm run dev`.
 
 *Otherwise, it is the threading path.* The runtime starts its worker threads from
 a sibling `.mjs`, and if the bundler has renamed or moved that file the worker
-cannot find it and nothing reports the problem. `src/engine/onnx.ts` sets
+cannot find it and nothing reports the problem. `src/games/reversi/engine/onnx.ts` sets
 `wasmPaths` to a fixed directory and `scripts/stage-runtime.mjs` fills it; if you
 change either, change both.
 

@@ -9,8 +9,8 @@
 
 import { describe, expect, it } from "vitest";
 
-import { LEVELS, chooseMove, levelById } from "../src/engine/levels";
-import manifest from "../src/engine/models.json";
+import { LEVELS, chooseMove, levelById } from "../src/games/reversi/engine/levels";
+import manifest from "../src/games/reversi/engine/models.json";
 
 describe("the ladder", () => {
   it("gets harder in one direction only", () => {

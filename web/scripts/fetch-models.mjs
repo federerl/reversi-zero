@@ -25,7 +25,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const manifestPath = join(here, "..", "src", "engine", "models.json");
+const manifestPath = join(here, "..", "src", "games", "reversi", "engine", "models.json");
 const modelsDir = join(here, "..", "public", "models");
 
 // Overridable so a build can be pinned to an older set of weights, which is what

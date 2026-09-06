@@ -13,11 +13,11 @@
 
 import { describe, expect, it } from "vitest";
 
-import rulesFixture from "../src/engine/__fixtures__/rules.json";
-import gamesFixture from "../src/engine/__fixtures__/games.json";
-import encodingFixture from "../src/engine/__fixtures__/encoding.json";
+import rulesFixture from "../src/games/reversi/engine/__fixtures__/rules.json";
+import gamesFixture from "../src/games/reversi/engine/__fixtures__/games.json";
+import encodingFixture from "../src/games/reversi/engine/__fixtures__/encoding.json";
 
-import { fromHex, toHex, indices, popcount, type Bits } from "../src/engine/bitboard";
+import { fromHex, toHex, indices, popcount, type Bits } from "../src/games/reversi/engine/bitboard";
 import {
   BLACK,
   WHITE,
@@ -31,8 +31,8 @@ import {
   passAction,
   type Player,
   type State,
-} from "../src/engine/rules";
-import { encode, planeBits } from "../src/engine/features";
+} from "../src/games/reversi/engine/rules";
+import { encode, planeBits } from "../src/games/reversi/engine/features";
 
 const SIZE = rulesFixture.board_size;
 

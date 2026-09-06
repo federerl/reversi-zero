@@ -1,5 +1,5 @@
 /**
- * The whole application.
+ * The Reversi screen: the board, its controls, and the agent's turn.
  *
  * The shape worth noticing: the agent's turn is driven by an effect that fires
  * whenever it becomes the agent's move, not by the click handler. A click makes
@@ -27,6 +27,7 @@ import {
   statusLine,
   type Game,
 } from "../state/game";
+import { Shell } from "../../../shared/ui/Shell";
 import { Board, squareName } from "./Board";
 import {
   Button,
@@ -106,7 +107,7 @@ const DEFAULT_MODEL = "greedy";
  */
 const MIN_REPLY_MS = 650;
 
-export function App() {
+export function ReversiScreen() {
   const [game, dispatch] = useReducer(reduce, newGame(BLACK, "club", DEFAULT_MODEL));
   const [loading, setLoading] = useState(true);
 
@@ -228,15 +229,23 @@ export function App() {
   const yourChances = agentChances === undefined ? null : 1 - agentChances;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pb-12 pt-8">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">reversi-zero</h1>
-        <p className="mt-1 max-w-prose text-sm text-muted">
+    <Shell
+      title="Reversi"
+      lead={
+        <>
           An agent that learned Reversi from scratch by playing against itself. It runs entirely in
           your browser &mdash; nothing is sent anywhere.
-        </p>
-      </header>
-
+        </>
+      }
+      footer={
+        <>
+          Ratings come from a round robin of 210 games per entrant, fit with a Bradley&ndash;Terry
+          model and anchored so that random play is 0. The intervals are 95% bootstrap intervals,
+          and they overlap between neighbouring generations &mdash; which is the honest way to say
+          that generation 40 and generation 60 are close.
+        </>
+      }
+    >
       <div className="grid items-start gap-7 md:grid-cols-[minmax(0,1fr)_18rem]">
         {/*
           The board is square, so its size is bounded by whichever of width and
@@ -330,17 +339,10 @@ export function App() {
         </aside>
       </div>
 
-      <footer className="mt-8 max-w-prose text-xs leading-relaxed text-muted">
-        Ratings come from a round robin of 210 games per entrant, fit with a Bradley&ndash;Terry
-        model and anchored so that random play is 0. The intervals are 95% bootstrap intervals, and
-        they overlap between neighbouring generations &mdash; which is the honest way to say that
-        generation 40 and generation 60 are close.
-      </footer>
-
       {game.error && (
         <Toast message={game.error} onDismiss={() => dispatch({ type: "error", message: null })} />
       )}
-    </div>
+    </Shell>
   );
 }
 

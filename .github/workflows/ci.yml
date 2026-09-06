@@ -86,9 +86,9 @@ jobs:
         run: |
           uv run reversi export-fixtures /tmp/fixtures
           for name in rules encoding search games; do
-            if ! diff -q "/tmp/fixtures/$name.json" "web/src/engine/__fixtures__/$name.json"; then
+            if ! diff -q "/tmp/fixtures/$name.json" "web/src/games/reversi/engine/__fixtures__/$name.json"; then
               echo "::error::$name.json is out of date. Regenerate with:"
-              echo "::error::  uv run reversi export-fixtures web/src/engine/__fixtures__"
+              echo "::error::  uv run reversi export-fixtures web/src/games/reversi/engine/__fixtures__"
               exit 1
             fi
           done
