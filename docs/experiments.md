@@ -1019,6 +1019,64 @@ policy, is answered no: halving it did not help.
 
 ---
 
+## Play-time sweep: simulations — how much of the strength is search?
+
+**Result: search is the largest lever in the project. The same network that is
+even with Edax level 7 at 256 simulations beats level 8 decisively at 3200, and
+each doubling of the budget is worth roughly one Edax level up to level 8.**
+
+**Question.** Every rating so far is at 50 or 256 simulations per move, and the
+browser's strongest level searches 800 with a two-second cap. Recipe changes have
+moved the agent by tens of Elo. How much does the search budget move it?
+
+**Setup.** No training. Run 5's generation 120, the 1.0 candidate, at 50, 256,
+800, 1600 and 3200 simulations per move against Edax levels 6 to 9: 80
+colour-balanced games per cell, 4-ply seeded openings, no exploration noise, one
+thread each side (`docs/ratings/sims-curve-e2-g120.json`; 1,600 games, 71 minutes
+on 64 CPU cores).
+
+| simulations | vs level 6 | vs level 7 | vs level 8 | vs level 9 |
+|---|---|---|---|---|
+| 50 | 24.4% [16%, 35%] | 6.9% [3%, 15%] | 8.8% [4%, 17%] | 11.9% [6%, 21%] |
+| 256 | 51.2% [40%, 62%] | 41.9% [32%, 53%] | 17.5% [11%, 27%] | 17.5% [11%, 27%] |
+| 800 | 75.0% [65%, 83%] | 58.1% [47%, 68%] | 41.2% [31%, 52%] | 40.0% [30%, 51%] |
+| 1600 | 81.9% [72%, 89%] | 76.9% [67%, 85%] | 48.1% [38%, 59%] | 38.1% [28%, 49%] |
+| 3200 | **91.2%** [83%, 96%] | **73.8%** [63%, 82%] | **68.1%** [57%, 77%] | 37.5% [28%, 48%] |
+
+### Reading
+
+Read down a column. Against level 6 the agent goes from losing three games in
+four at 50 simulations to winning nine in ten at 3200. Against level 8 it goes
+from 9% to 68%. Every doubling from 256 to 3200 buys about one Edax level, up to
+level 8. Level 9 is the exception: 40%, 38%, 38% at 800, 1600 and 3200, flat
+within the intervals, so from 800 simulations up something other than search
+depth decides those games. That is the first place an exact endgame solver would
+show, and it is what the `sims300` question in `configs/full8x8_sims300.yaml` is
+really about.
+
+Two calibrations of the earlier numbers. The 256-simulation cell against level 6
+reads 51% here and 59% in run 5's own Edax table, same checkpoint, different
+seeds: at 80 games the interval is about ±11 points, and both readings sit inside
+it. And the browser's "Max" level, 800 simulations capped at two seconds, reaches
+about 560 simulations on a fast laptop and fewer on a phone, so what the website
+serves is closer to the 256 row than the 800 row. The network is capable of
+level 8. The browser search is not letting it show that.
+
+### Decisions taken
+
+* The strength ceiling of the shipped agent is set by play-time search, not by
+  the network. Making the browser search faster per simulation (batching several
+  leaves per network call, which the `Evaluator` interface already allows) is
+  worth more than any recipe change measured so far and goes into the 1.0 web
+  work in place of the WebGPU hours run 6 freed.
+* An exact endgame solver for the last empties is the second lever, and the one
+  that addresses the level-9 plateau. It is hand-written and will be labelled as
+  such wherever the agent is described.
+* Every future strength claim names its simulation budget, and the model card's
+  Edax line becomes a row of this table rather than one number.
+
+---
+
 ## Calibration: are the four difficulty levels actually different opponents?
 
 **Run:** 2026-08-31, `models/reversi-8x8-gen60.pt`, 21 pairings × 300 games,
