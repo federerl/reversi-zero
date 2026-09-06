@@ -1,9 +1,10 @@
 /**
- * The frame every page shares: the site's name, a way back to the games, the
- * theme and sound switches, and a footer for the fine print.
+ * The frame every page shares: a thin bar with the site's name or the way back
+ * to the games, the page's title, and the theme and sound switches.
  *
- * Kept deliberately small. The board is the page; this only has to say where
- * you are, how to leave, and how you like it to look.
+ * The bar is one line tall on purpose. A game page is a landscape screen with a
+ * square in it, and every line of chrome above the board is a line taken from
+ * the board.
  */
 
 import { useState, type ReactNode } from "react";
@@ -23,46 +24,38 @@ export const SITE_NAME = "reversi-zero";
 
 export function Shell({
   title,
-  lead,
   children,
-  footer,
+  wide = false,
 }: {
   /** The page's own heading. Omit on the hub, whose heading is the site name. */
   title?: string;
-  lead?: ReactNode;
   children: ReactNode;
-  footer?: ReactNode;
+  /** Use the whole window width. Game pages do; the hub reads better narrower. */
+  wide?: boolean;
 }) {
   return (
-    <div className="mx-auto max-w-5xl px-4 pb-14 pt-5 sm:px-6">
-      <header className="mb-6 flex items-start justify-between gap-6">
-        <div className="min-w-0">
-          {title === undefined ? (
-            <p className="font-display text-2xl font-semibold tracking-tight">{SITE_NAME}</p>
-          ) : (
-            <>
-              <a href="/" className="text-sm text-muted hover:text-ink">
-                All games
-              </a>
-              <h1 className="font-display mt-0.5 text-4xl font-bold leading-none tracking-tight">
-                {title}
-              </h1>
-            </>
-          )}
-          {lead && <p className="mt-2 max-w-[60ch] text-[0.95rem] text-muted">{lead}</p>}
-        </div>
-
-        <div className="flex shrink-0 items-center gap-1">
+    <div className={`flex min-h-dvh flex-col ${wide ? "" : "mx-auto max-w-5xl"}`}>
+      <header className="flex h-12 shrink-0 items-center gap-4 px-4 sm:px-6">
+        {title === undefined ? (
+          <p className="font-display text-2xl font-semibold tracking-tight">{SITE_NAME}</p>
+        ) : (
+          <>
+            <a href="/" className="text-sm text-muted hover:text-ink">
+              All games
+            </a>
+            <span aria-hidden="true" className="h-4 w-px bg-line-strong" />
+            <h1 className="font-display text-2xl font-semibold leading-none tracking-tight">
+              {title}
+            </h1>
+          </>
+        )}
+        <div className="ml-auto flex items-center gap-1">
           <ThemeSwitch />
           <SoundSwitch />
         </div>
       </header>
 
-      {children}
-
-      {footer && (
-        <footer className="mt-10 max-w-[68ch] text-sm leading-relaxed text-muted">{footer}</footer>
-      )}
+      <div className="flex-1 px-4 pb-6 sm:px-6">{children}</div>
     </div>
   );
 }

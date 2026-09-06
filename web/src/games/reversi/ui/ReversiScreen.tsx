@@ -1,6 +1,6 @@
 /**
- * The Reversi screen: the scoreboard, the board, its controls, and the agent's
- * turn.
+ * The Reversi screen: the board with a player on each side of it, the controls
+ * in a column beside it, and the agent's turn.
  *
  * The shape worth noticing: the agent's turn is driven by an effect that fires
  * whenever it becomes the agent's move, not by the click handler. A click makes
@@ -9,9 +9,10 @@
  * passes chain correctly without a special case. If the agent passes and it is
  * still the agent's turn, the same effect simply runs again.
  *
- * The layout is a table with a game on it: the count above the board the way a
- * counter sits beside one, the board as wide as the page allows, and the
- * controls in plain rows underneath. Nothing competes with a disc turning over.
+ * The layout is the one every serious play site converges on: a thin bar, a
+ * board sized to the window's height, a player plate above and below it, and
+ * the controls in a column that is always on screen. Nothing needs scrolling on
+ * a laptop, and nothing competes with a disc turning over.
  */
 
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
@@ -22,6 +23,7 @@ import modelsManifest from "../engine/models.json";
 import type { ModelDescriptor } from "../engine/onnx";
 import {
   BLACK,
+  WHITE,
   isTerminal,
   legalActions,
   mustPass,
@@ -48,7 +50,7 @@ import {
   Button,
   LevelPicker,
   OpponentPicker,
-  Scoreboard,
+  PlayerPlate,
   SidePicker,
   Status,
   Toast,
@@ -260,6 +262,12 @@ export function ReversiScreen() {
   const turn = lastTurn(game);
   const humanMustPass = humanTurn && mustPass(state);
   const opponent = OPPONENTS.find((model) => model.id === game.modelId);
+  const opponentName =
+    opponent === undefined
+      ? "Agent"
+      : opponent.elo === undefined
+        ? opponent.label
+        : `${opponent.label}, ${opponent.elo > 0 ? "+" : ""}${Math.round(opponent.elo)} Elo`;
 
   const heatmap = useMemo(
     () => (game.showAnalysis ? turn.thought?.visits : undefined),
@@ -271,36 +279,36 @@ export function ReversiScreen() {
   const agentChances = turn.thought?.winProbability;
   const yourChances = agentChances === undefined ? null : 1 - agentChances;
 
-  return (
-    <Shell
-      title="Reversi"
-      lead="An agent that learned Reversi from scratch by playing against itself. It runs entirely in your browser and nothing is sent anywhere."
-      footer={
-        <>
-          Ratings come from a round robin of 210 games per entrant, fit with a Bradley&ndash;Terry
-          model and anchored so that random play is 0. The intervals are 95% bootstrap intervals,
-          and they overlap between neighbouring generations, which is the honest way to say that
-          generation 40 and generation 60 are close.
-        </>
-      }
-    >
-      {/*
-        The board is square, so its size is bounded by whichever of width and
-        height runs out first. Capping the width by the remaining viewport height
-        keeps the whole board on screen on a wide window, and lets it use the room
-        a wide window gives it instead of staying laptop-sized.
-      */}
-      <div className="mx-auto w-full" style={{ maxWidth: "min(100%, calc(100dvh - 17rem))" }}>
-        <Scoreboard
-          black={black}
-          white={white}
-          toMove={state.toMove}
-          humanColor={game.humanColor}
-          opponentLabel={opponent?.label ?? "Agent"}
-          terminal={terminal}
-        />
+  // Whose plate goes above the board: the opponent's, as across a real table.
+  const humanIsBlack = game.humanColor === BLACK;
+  const topColour = humanIsBlack ? WHITE : BLACK;
+  const plate = (colour: typeof BLACK | typeof WHITE) => (
+    <PlayerPlate
+      colour={colour === BLACK ? "black" : "white"}
+      name={colour === game.humanColor ? "You" : opponentName}
+      count={colour === BLACK ? black : white}
+      active={!terminal && state.toMove === colour}
+    />
+  );
 
-        <div className="mt-4">
+  return (
+    <Shell title="Reversi" wide>
+      <div className="game-layout">
+        <aside className="game-aside-left flex flex-col gap-4 text-[0.95rem] leading-relaxed text-muted">
+          <p>
+            An agent that learned Reversi from scratch by playing against itself. It runs entirely
+            in your browser and nothing is sent anywhere.
+          </p>
+          <p>
+            Ratings come from a round robin of 210 games per entrant, fit with a Bradley&ndash;Terry
+            model and anchored so that random play is 0. The intervals are 95% bootstrap intervals,
+            and they overlap between neighbouring generations, which is the honest way to say that
+            generation 40 and generation 60 are close.
+          </p>
+        </aside>
+
+        <div className="game-board-column flex flex-col gap-2">
+          {plate(topColour)}
           <Board
             state={state}
             interactive={humanTurn && !game.thinking && !loading}
@@ -308,69 +316,70 @@ export function ReversiScreen() {
             visits={heatmap}
             onPlay={play}
           />
+          {plate(game.humanColor)}
         </div>
 
-        <div className="mt-5 flex min-h-9 flex-wrap items-center gap-3">
-          <Status
-            line={loading ? "Loading the agent…" : statusLine(game)}
-            thinking={game.thinking || loading}
-          />
-          {humanMustPass && (
-            <Button variant="primary" onClick={() => play(passAction(state.size))}>
-              Pass
-            </Button>
-          )}
-          {game.thinking && <Button onClick={stopThinking}>Stop thinking</Button>}
-          {turn.thought && (
-            <p className="ml-auto text-sm text-muted">
-              Played {squareName(turn.thought.action, state.size)}
-              {turn.thought.simulations > 0 && <> after {turn.thought.simulations} simulations</>} in{" "}
-              {Math.round(turn.thought.elapsedMs)} ms
-            </p>
-          )}
-        </div>
-
-        {yourChances !== null && !terminal && (
-          <div className="mt-3">
-            <WinProbability probability={yourChances} />
+        <aside className="game-aside-right flex flex-col gap-5">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <Status
+                line={loading ? "Loading the agent…" : statusLine(game)}
+                thinking={game.thinking || loading}
+              />
+              {humanMustPass && (
+                <Button variant="primary" onClick={() => play(passAction(state.size))}>
+                  Pass
+                </Button>
+              )}
+              {game.thinking && <Button onClick={stopThinking}>Stop thinking</Button>}
+            </div>
+            {yourChances !== null && !terminal && <WinProbability probability={yourChances} />}
+            {turn.thought && (
+              <p className="text-sm text-muted">
+                Played {squareName(turn.thought.action, state.size)}
+                {turn.thought.simulations > 0 && <> after {turn.thought.simulations} simulations</>}{" "}
+                in {Math.round(turn.thought.elapsedMs)} ms
+              </p>
+            )}
           </div>
-        )}
 
-        <div className="mt-6 flex flex-col gap-3 border-t border-line pt-5">
-          <OpponentPicker
-            models={OPPONENTS}
-            value={game.modelId}
-            onChange={(id) => dispatch({ type: "setModel", modelId: id })}
-            disabled={game.thinking}
-          />
-
-          {!isBaseline(game.modelId) && (
-            <LevelPicker
-              value={game.levelId}
-              onChange={(id) => dispatch({ type: "setLevel", levelId: id })}
+          <div className="flex flex-col gap-3 border-t border-line pt-4">
+            <OpponentPicker
+              models={OPPONENTS}
+              value={game.modelId}
+              onChange={(id) => dispatch({ type: "setModel", modelId: id })}
               disabled={game.thinking}
             />
-          )}
 
-          <SidePicker
-            value={game.humanColor}
-            onChange={(player) => dispatch({ type: "newGame", humanColor: player })}
-            disabled={game.thinking}
-          />
+            {!isBaseline(game.modelId) && (
+              <LevelPicker
+                value={game.levelId}
+                onChange={(id) => dispatch({ type: "setLevel", levelId: id })}
+                disabled={game.thinking}
+              />
+            )}
 
-          <div className="mt-1 flex flex-wrap items-center gap-2">
-            <Button variant="primary" onClick={() => dispatch({ type: "newGame" })}>
-              New game
-            </Button>
-            <Button onClick={() => dispatch({ type: "swapSides" })}>Swap sides</Button>
-            <Button
-              onClick={() => dispatch({ type: "undo" })}
-              disabled={game.history.length <= 1 || game.thinking}
-            >
-              Take back
-            </Button>
+            <SidePicker
+              value={game.humanColor}
+              onChange={(player) => dispatch({ type: "newGame", humanColor: player })}
+              disabled={game.thinking}
+            />
+          </div>
 
-            <label className="ml-auto flex cursor-pointer items-center gap-2 text-sm text-muted">
+          <div className="flex flex-col gap-3 border-t border-line pt-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button variant="primary" onClick={() => dispatch({ type: "newGame" })}>
+                New game
+              </Button>
+              <Button onClick={() => dispatch({ type: "swapSides" })}>Swap sides</Button>
+              <Button
+                onClick={() => dispatch({ type: "undo" })}
+                disabled={game.history.length <= 1 || game.thinking}
+              >
+                Take back
+              </Button>
+            </div>
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-muted">
               <input
                 type="checkbox"
                 checked={game.showAnalysis}
@@ -380,7 +389,7 @@ export function ReversiScreen() {
               Show where the agent searched
             </label>
           </div>
-        </div>
+        </aside>
       </div>
 
       {game.error && (
@@ -393,7 +402,7 @@ export function ReversiScreen() {
           result={playerResult}
           black={black}
           white={white}
-          humanIsBlack={game.humanColor === BLACK}
+          humanIsBlack={humanIsBlack}
           onPlayAgain={() => {
             setDismissedAt(null);
             dispatch({ type: "newGame" });

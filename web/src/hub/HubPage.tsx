@@ -15,21 +15,12 @@ import { GAMES, strongestElo, type GameEntry } from "./registry";
 
 export function HubPage() {
   return (
-    <Shell
-      lead={
-        <>
-          Board-game agents that learned by playing themselves, each opponent with a measured
-          rating. Everything runs in your browser and nothing is sent anywhere.
-        </>
-      }
-      footer={
-        <>
-          Ratings are Bradley&ndash;Terry fits over round-robin tournaments, anchored so that random
-          play is 0, with 95% bootstrap intervals. The numbers on each game&rsquo;s page come from
-          the same tables.
-        </>
-      }
-    >
+    <Shell>
+      <p className="mb-8 max-w-[60ch] text-[0.95rem] text-muted">
+        Board-game agents that learned by playing themselves, each opponent with a measured rating.
+        Everything runs in your browser and nothing is sent anywhere.
+      </p>
+
       <ul className="flex flex-col gap-12" aria-label="Games">
         {GAMES.map((game) => (
           <li key={game.id}>
@@ -37,6 +28,12 @@ export function HubPage() {
           </li>
         ))}
       </ul>
+
+      <p className="mt-12 max-w-[68ch] text-sm leading-relaxed text-muted">
+        Ratings are Bradley&ndash;Terry fits over round-robin tournaments, anchored so that random
+        play is 0, with 95% bootstrap intervals. The numbers on each game&rsquo;s page come from the
+        same tables.
+      </p>
     </Shell>
   );
 }

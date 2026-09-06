@@ -80,6 +80,49 @@ body {
   outline-offset: 2px;
 }
 
+/* The game page: a board sized to the window, with a column each side.
+
+   The board is square, so on a landscape screen its size is set by the height
+   that is left after the bar and the two player plates. The columns take what
+   width remains. Under 64rem the left column drops below; under 40rem it all
+   stacks and the board is as wide as the screen. */
+.game-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+.game-board-column {
+  width: 100%;
+  margin: 0 auto;
+  max-width: min(100%, calc(100dvh - 11.5rem));
+}
+@media (min-width: 40rem) {
+  .game-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+  }
+  .game-aside-left {
+    grid-column: 1 / -1;
+  }
+}
+@media (min-width: 64rem) {
+  .game-layout {
+    grid-template-columns: minmax(12rem, 1fr) auto minmax(18rem, 1fr);
+    justify-content: center;
+  }
+  .game-aside-left {
+    grid-column: auto;
+    max-width: 22rem;
+    justify-self: end;
+  }
+  .game-board-column {
+    width: min(calc(100dvh - 11.5rem), calc(100vw - 42rem));
+  }
+  .game-aside-right {
+    max-width: 24rem;
+  }
+}
+
 /* Native selects, dressed to match the page rather than the operating system. */
 .control-select {
   appearance: none;

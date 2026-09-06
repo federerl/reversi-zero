@@ -55,88 +55,38 @@ function signed(elo: number): string {
 }
 
 // ---------------------------------------------------------------------------
-// The scoreboard
+// The player plates
 // ---------------------------------------------------------------------------
 
 /**
- * Two numerals and two discs, the way a counter sits beside a board. The side
- * to move carries the brass mark; nothing else on the strip is coloured.
+ * One side of the game: the disc, who it is, and the count. One plate sits
+ * above the board and one below, the way a name and a clock frame a chess
+ * board. The side to move carries the brass mark; nothing else is coloured.
  */
-export function Scoreboard({
-  black,
-  white,
-  toMove,
-  humanColor,
-  opponentLabel,
-  terminal,
-}: {
-  black: number;
-  white: number;
-  toMove: Player;
-  humanColor: Player;
-  opponentLabel: string;
-  terminal: boolean;
-}) {
-  const nameFor = (colour: Player) => (colour === humanColor ? "You" : opponentLabel);
-  return (
-    <div className="flex items-end justify-between gap-6">
-      <Side
-        count={black}
-        colour="black"
-        name={nameFor(BLACK)}
-        active={!terminal && toMove === BLACK}
-        align="left"
-      />
-      <Side
-        count={white}
-        colour="white"
-        name={nameFor(WHITE)}
-        active={!terminal && toMove === WHITE}
-        align="right"
-      />
-    </div>
-  );
-}
-
-function Side({
-  count,
+export function PlayerPlate({
   colour,
   name,
+  count,
   active,
-  align,
 }: {
-  count: number;
   colour: "black" | "white";
   name: string;
+  count: number;
   active: boolean;
-  align: "left" | "right";
 }) {
-  const disc = (
-    <span
-      aria-hidden="true"
-      className={`size-7 shrink-0 rounded-full shadow ${
-        colour === "black" ? "bg-disc-black ring-1 ring-line-strong" : "bg-disc-white"
-      }`}
-    />
-  );
   return (
-    <div
-      className={`flex items-center gap-3 ${align === "right" ? "flex-row-reverse text-right" : ""}`}
-    >
-      {disc}
-      <div>
-        <div className={`score-number text-5xl sm:text-6xl ${active ? "text-ink" : "text-ink-2"}`}>
-          {count}
-        </div>
-        <div
-          className={`mt-1 flex items-center gap-1.5 text-sm ${
-            align === "right" ? "flex-row-reverse" : ""
-          } ${active ? "text-ink" : "text-muted"}`}
-        >
-          {active && <span aria-hidden="true" className="size-1.5 rounded-full bg-accent" />}
-          <span>{active ? `${name} to move` : name}</span>
-        </div>
-      </div>
+    <div className={`flex items-center gap-3 px-1 ${active ? "text-ink" : "text-muted"}`}>
+      <span
+        aria-hidden="true"
+        className={`size-6 shrink-0 rounded-full shadow ${
+          colour === "black" ? "bg-disc-black ring-1 ring-line-strong" : "bg-disc-white"
+        }`}
+      />
+      <span className="flex items-center gap-2 text-[0.95rem]">
+        {active && <span aria-hidden="true" className="size-1.5 rounded-full bg-accent" />}
+        {name}
+      </span>
+      <span className="score-number ml-auto text-4xl">{count}</span>
     </div>
   );
 }
@@ -282,7 +232,7 @@ function Control({
         </label>
         <div className="flex min-w-0 flex-col gap-1">{children}</div>
       </div>
-      {hint && <p className="ml-0 text-sm leading-snug text-muted sm:ml-31">{hint}</p>}
+      {hint && <p className="text-sm leading-snug text-muted">{hint}</p>}
     </div>
   );
 }
