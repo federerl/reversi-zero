@@ -84,6 +84,167 @@ body {
   outline-offset: 2px;
 }
 
+/* ---------------------------------------------------------------------------
+   The board
+   ---------------------------------------------------------------------------
+   A wooden rim with the coordinates in it, felt squares, star points on the
+   intersections, and discs that turn over. Everything here reads its colours
+   from the tokens above, so both themes get the same board. */
+
+.board-frame {
+  display: grid;
+  padding: 0.55rem;
+  border-radius: 0.6rem;
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--color-board-edge) 78%, #6b4a2b) 0%,
+      var(--color-board-edge) 45%, color-mix(in srgb, var(--color-board-edge) 85%, #000) 100%);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.18),
+    0 14px 34px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.board-ranks,
+.board-files {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.62);
+  user-select: none;
+}
+.board-ranks {
+  grid-template-rows: repeat(8, minmax(0, 1fr));
+  align-items: center;
+  justify-items: center;
+}
+.board-files {
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  align-items: center;
+  justify-items: center;
+}
+
+.board-well {
+  position: relative;
+  border-radius: 0.25rem;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.45);
+  padding: 2px;
+  background: var(--color-board-line);
+}
+
+.board-grid {
+  position: relative;
+  display: grid;
+  aspect-ratio: 1;
+  width: 100%;
+  gap: 2px;
+  background: var(--color-board-line);
+}
+
+.board-square {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.07), transparent 70%),
+    var(--color-board);
+  perspective: 320px;
+}
+.board-square-last::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 2px solid var(--color-accent-2);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.board-hint {
+  position: relative;
+  aspect-ratio: 1;
+  width: 22%;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.board-star {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-board-edge);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* A disc is one element with two faces. Black shows by default; white is the
+   back, pre-turned by half a rotation. Changing the data-disc attribute rotates
+   the whole thing, and the transition is what the eye sees as the disc turning
+   over. --flip-delay staggers discs by their distance from the one just placed. */
+.disc {
+  position: relative;
+  aspect-ratio: 1;
+  width: 80%;
+  /* No filter here: a filter flattens the 3D context and the back face would
+     never show. The shadow lives on the faces instead. */
+  transform-style: preserve-3d;
+  transition: transform 340ms cubic-bezier(0.3, 0.7, 0.3, 1);
+  transition-delay: var(--flip-delay, 0ms);
+}
+.disc[data-disc="white"] {
+  transform: rotateY(180deg);
+}
+.disc-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+.disc-face-black {
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.22), transparent 55%),
+    var(--color-disc-black);
+}
+.disc-face-white {
+  transform: rotateY(180deg);
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.9), transparent 55%),
+    var(--color-disc-white);
+}
+
+/* The disc just placed lands rather than appears. */
+.disc-placed {
+  animation: disc-place 260ms cubic-bezier(0.2, 0.8, 0.3, 1.2);
+}
+@keyframes disc-place {
+  from {
+    transform: scale(0.55);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+/* A white disc that was just placed must land already white. The placement
+   keyframe above sets its own transform, so the half turn goes here. */
+.disc-placed[data-disc="white"] {
+  animation-name: disc-place-white;
+}
+@keyframes disc-place-white {
+  from {
+    transform: rotateY(180deg) scale(0.55);
+  }
+  to {
+    transform: rotateY(180deg) scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -9,6 +9,14 @@
  * Legality is never encoded in colour alone: a legal square gets a visible dot,
  * and its accessible name says so outright. A player who cannot distinguish the
  * dot from the felt still gets told.
+ *
+ * **How a disc turns over.** Each disc is one element with two faces, black on
+ * the front and white on the back, and changing colour rotates it half a turn.
+ * React keeps the same element on a square across renders, so a flip is a CSS
+ * transition on that element rather than a swap, and the eye sees a disc turn
+ * rather than a colour change. Discs further from the placed disc start turning
+ * later, which is how the flips in a real game happen: the placed disc lands,
+ * and the line it captures turns over away from it.
  */
 
 import { useEffect, useRef } from "react";
@@ -17,6 +25,9 @@ import { indices, testBit } from "../engine/bitboard";
 import { legalActions, passAction, type Action, type State } from "../engine/rules";
 
 const FILES = "abcdefgh";
+
+/** Milliseconds between one ring of flips and the next, measured from the placed disc. */
+export const FLIP_STAGGER_MS = 60;
 
 interface BoardProps {
   state: State;
@@ -37,6 +48,7 @@ export function Board({ state, interactive, lastMove, visits, onPlay }: BoardPro
   const white = new Set(indices(state.white));
 
   const peakVisits = visits ? Math.max(1, ...visits.slice(0, size * size)) : 1;
+  const placed = lastMove !== null && lastMove !== passAction(size) ? lastMove : null;
 
   // Arrow keys move between squares. Without this the only way around a
   // 64-button grid is 64 presses of Tab.
@@ -73,83 +85,131 @@ export function Board({ state, interactive, lastMove, visits, onPlay }: BoardPro
     return () => grid.removeEventListener("keydown", onKeyDown);
   }, [size]);
 
+  // The coordinates around the board, and the board itself, share one grid so
+  // the labels line up with the squares whatever size the board is drawn at.
   return (
-    <div className="rounded-md bg-board-edge p-2 shadow-[0_1px_2px_rgba(0,0,0,.12),0_10px_26px_rgba(0,0,0,.10)]">
-      <div
-        ref={gridRef}
-        role="grid"
-        aria-label={`Reversi board, ${size} by ${size}`}
-        className="grid aspect-square w-full gap-[2px] border-2 border-board-line bg-board-line"
-        // Both axes, explicitly. Naming only the columns leaves the rows as
-        // implicit tracks, and an implicit track is sized by its content -- so a
-        // row holding a disc grew taller than an empty one and the squares
-        // stopped being square.
-        //
-        // `minmax(0, 1fr)` rather than `1fr`: a bare `1fr` is `minmax(auto, 1fr)`,
-        // whose floor is the content's minimum size, which would let a disc push
-        // its row open again on a small board. The zero floor is what keeps the
-        // grid in charge of the track sizes rather than what is sitting in them.
-        style={{
-          gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
-          gridTemplateRows: `repeat(${size}, minmax(0, 1fr))`,
-        }}
-      >
-        {Array.from({ length: size * size }, (_, square) => {
-          const row = Math.floor(square / size);
-          const column = square % size;
-          const name = `${FILES[column]}${row + 1}`;
+    <div
+      className="board-frame"
+      style={{
+        gridTemplateColumns: `1.35rem minmax(0, 1fr)`,
+        gridTemplateRows: `minmax(0, 1fr) 1.35rem`,
+      }}
+    >
+      <ol className="board-ranks" aria-hidden="true">
+        {Array.from({ length: size }, (_, row) => (
+          <li key={row}>{row + 1}</li>
+        ))}
+      </ol>
 
-          const hasBlack = black.has(square);
-          const hasWhite = white.has(square);
-          const playable = interactive && legal.has(square);
-          const share = visits ? (visits[square] ?? 0) / peakVisits : 0;
+      <div className="board-well">
+        <div
+          ref={gridRef}
+          role="grid"
+          aria-label={`Reversi board, ${size} by ${size}`}
+          className="board-grid"
+          // Both axes, explicitly. Naming only the columns leaves the rows as
+          // implicit tracks, and an implicit track is sized by its content -- so a
+          // row holding a disc grew taller than an empty one and the squares
+          // stopped being square.
+          //
+          // `minmax(0, 1fr)` rather than `1fr`: a bare `1fr` is `minmax(auto, 1fr)`,
+          // whose floor is the content's minimum size, which would let a disc push
+          // its row open again on a small board. The zero floor is what keeps the
+          // grid in charge of the track sizes rather than what is sitting in them.
+          style={{
+            gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
+            gridTemplateRows: `repeat(${size}, minmax(0, 1fr))`,
+          }}
+        >
+          {Array.from({ length: size * size }, (_, square) => {
+            const row = Math.floor(square / size);
+            const column = square % size;
+            const name = `${FILES[column]}${row + 1}`;
 
-          return (
-            <button
-              key={square}
-              type="button"
-              data-square={square}
-              disabled={!playable}
-              onClick={() => playable && onPlay(square)}
-              aria-label={describeSquare(name, hasBlack, hasWhite, playable)}
-              className={[
-                "relative grid place-items-center bg-board p-0",
-                playable ? "cursor-pointer" : "cursor-default",
-                lastMove === square ? "outline outline-2 -outline-offset-2 outline-accent-2" : "",
-              ].join(" ")}
-            >
-              {/* The heat map sits under the disc so it never obscures the
-                  position itself -- it is commentary, not state. */}
-              {share > 0.02 && (
-                <span
-                  aria-hidden="true"
-                  className="absolute inset-0 bg-accent-2"
-                  style={{ opacity: Math.min(0.55, share * 0.55) }}
-                />
-              )}
+            const hasBlack = black.has(square);
+            const hasWhite = white.has(square);
+            const playable = interactive && legal.has(square);
+            const share = visits ? (visits[square] ?? 0) / peakVisits : 0;
 
-              {(hasBlack || hasWhite) && (
-                <span
-                  aria-hidden="true"
-                  data-disc={hasBlack ? "black" : "white"}
-                  className={[
-                    "relative aspect-square w-4/5 rounded-full transition-colors duration-300",
-                    "shadow-[0_1px_2px_rgba(0,0,0,.45)]",
-                    hasBlack ? "bg-disc-black" : "bg-disc-white",
-                  ].join(" ")}
-                />
-              )}
+            // How far this square is from the disc just placed, in king moves.
+            // Only discs that actually changed colour animate; the delay simply
+            // makes those further along the captured line turn later.
+            const ring =
+              placed === null
+                ? 0
+                : Math.max(
+                    Math.abs(row - Math.floor(placed / size)),
+                    Math.abs(column - (placed % size)),
+                  );
 
-              {playable && !hasBlack && !hasWhite && (
-                <span
-                  aria-hidden="true"
-                  className="relative aspect-square w-[22%] rounded-full bg-white/35"
-                />
-              )}
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={square}
+                type="button"
+                data-square={square}
+                disabled={!playable}
+                onClick={() => playable && onPlay(square)}
+                aria-label={describeSquare(name, hasBlack, hasWhite, playable)}
+                className={[
+                  "board-square",
+                  playable ? "cursor-pointer" : "cursor-default",
+                  placed === square ? "board-square-last" : "",
+                ].join(" ")}
+              >
+                {/* The heat map sits under the disc so it never obscures the
+                    position itself -- it is commentary, not state. */}
+                {share > 0.02 && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-0 bg-accent-2"
+                    style={{ opacity: Math.min(0.55, share * 0.55) }}
+                  />
+                )}
+
+                {(hasBlack || hasWhite) && (
+                  <span
+                    aria-hidden="true"
+                    data-disc={hasBlack ? "black" : "white"}
+                    className={["disc", placed === square ? "disc-placed" : ""].join(" ")}
+                    style={{ "--flip-delay": `${ring * FLIP_STAGGER_MS}ms` } as React.CSSProperties}
+                  >
+                    <span className="disc-face disc-face-black" />
+                    <span className="disc-face disc-face-white" />
+                  </span>
+                )}
+
+                {playable && !hasBlack && !hasWhite && (
+                  <span aria-hidden="true" className="board-hint" />
+                )}
+              </button>
+            );
+          })}
+
+          {/* Star points at the four classic intersections. Decoration only,
+              positioned over the grid lines rather than inside any square. */}
+          {size === 8 &&
+            [
+              [2, 2],
+              [2, 6],
+              [6, 2],
+              [6, 6],
+            ].map(([x, y]) => (
+              <span
+                key={`${x}${y}`}
+                aria-hidden="true"
+                className="board-star"
+                style={{ left: `${(x! / size) * 100}%`, top: `${(y! / size) * 100}%` }}
+              />
+            ))}
+        </div>
       </div>
+
+      <span aria-hidden="true" />
+      <ol className="board-files" aria-hidden="true">
+        {Array.from({ length: size }, (_, column) => (
+          <li key={column}>{FILES[column]}</li>
+        ))}
+      </ol>
     </div>
   );
 }
