@@ -36,7 +36,7 @@ def main() -> None:
     parser.add_argument(
         "--manifest",
         type=Path,
-        default=Path("web/src/engine/models.json"),
+        default=Path("web/src/games/reversi/engine/models.json"),
         help="Read the expected filenames from here, so the names always match.",
     )
     # Small on purpose. CI is not measuring inference speed, and a full-size

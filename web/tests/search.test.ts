@@ -20,12 +20,12 @@
 
 import { describe, expect, it } from "vitest";
 
-import searchFixture from "../src/engine/__fixtures__/search.json";
+import searchFixture from "../src/games/reversi/engine/__fixtures__/search.json";
 
-import { fromHex } from "../src/engine/bitboard";
-import { BLACK, WHITE, isTerminal, legalActions, type Player, type State } from "../src/engine/rules";
-import { MCTS, bestAction, visitCounts, type SearchResult } from "../src/engine/mcts";
-import { hashStubEvaluator, mix32, stubSeed, stubLogit, stubValue } from "../src/engine/hashStub";
+import { fromHex } from "../src/games/reversi/engine/bitboard";
+import { BLACK, WHITE, isTerminal, legalActions, type Player, type State } from "../src/games/reversi/engine/rules";
+import { MCTS, bestAction, visitCounts, type SearchResult } from "../src/games/reversi/engine/mcts";
+import { hashStubEvaluator, mix32, stubSeed, stubLogit, stubValue } from "../src/games/reversi/engine/hashStub";
 
 const SIZE = searchFixture.board_size;
 const SIMULATIONS = searchFixture.simulations;

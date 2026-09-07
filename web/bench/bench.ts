@@ -19,12 +19,12 @@
  * Open `/bench/` on the device in question. It prints a table.
  */
 
-import modelsManifest from "../src/engine/models.json";
+import modelsManifest from "../src/games/reversi/engine/models.json";
 
-import { encodeBatch } from "../src/engine/features";
-import { MCTS } from "../src/engine/mcts";
-import { loadModel, type ModelDescriptor } from "../src/engine/onnx";
-import { apply, initialState, legalActions, type State } from "../src/engine/rules";
+import { encodeBatch } from "../src/games/reversi/engine/features";
+import { MCTS } from "../src/games/reversi/engine/mcts";
+import { loadModel, type ModelDescriptor } from "../src/games/reversi/engine/onnx";
+import { apply, initialState, legalActions, type State } from "../src/games/reversi/engine/rules";
 
 const MODELS = modelsManifest.models as unknown as ModelDescriptor[];
 const out = document.getElementById("out")!;

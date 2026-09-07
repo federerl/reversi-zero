@@ -1,87 +1,564 @@
+@import "@fontsource/barlow-condensed/600.css";
+@import "@fontsource/barlow-condensed/700.css";
+@import "@fontsource-variable/source-sans-3";
 @import "tailwindcss";
 
 /*
- * The palette is the board. Deep felt green, the two disc colours, and amber
- * for anything the interface wants you to look at -- which on a board this
- * colour is the one hue that reads clearly without competing with the discs.
+ * Reversi Zero.
  *
- * The neutrals are biased slightly green rather than being pure greys, so the
- * page around the board looks like it belongs to it.
+ * The palette is the disc and the table it sits on. Lacquer black and ivory are
+ * the two faces a disc has, and they are the two grounds the page can have:
+ * charcoal-green by default, ivory if the visitor asks. Emerald belongs to the
+ * board and to nothing else. Brass is the only accent, and it marks exactly
+ * three things: whose turn it is, the last move played, and the primary action.
+ *
+ * Every colour is read from these tokens rather than written as a literal, so a
+ * token redefined for the light theme changes the whole page consistently
+ * instead of leaving one theme's text on the other's background.
+ *
+ * The typefaces are self-hosted from the packages imported above. The site
+ * promises that nothing is sent anywhere, and a request to a font service would
+ * break that promise for the sake of a download the package already provides.
  */
 @theme {
-  --color-ground: #f7f8f4;
-  --color-surface: #ffffff;
-  --color-surface-2: #edf0e9;
-  --color-surface-3: #e3e8dd;
-  --color-line: #dbe0d5;
-  --color-line-strong: #c2cab9;
-  --color-ink: #171b16;
-  --color-ink-2: #414a3f;
-  --color-muted: #6b7869;
-  --color-accent: #9c5c0f;
-  --color-accent-2: #b46a15;
-  --color-accent-soft: #f7ebd9;
-  --color-board: #2e5943;
-  --color-board-line: #244635;
-  --color-board-edge: #1c3628;
-  --color-disc-black: #16191a;
-  --color-disc-white: #f2f0ea;
-  --color-good: #2c6a45;
-  --color-bad: #9c3626;
+  --color-ground: #0f1412;
+  --color-surface: #171e1b;
+  --color-surface-2: #1f2825;
+  --color-line: #2a3531;
+  --color-line-strong: #3d4a45;
+  --color-ink: #f1ece2;
+  --color-ink-2: #cfc9bd;
+  --color-muted: #98a69e;
+  --color-accent: #d4a24c;
+  --color-accent-ink: #14100a;
+  --color-board: #2d6a4f;
+  --color-board-line: #1f4c38;
+  --color-board-edge: #3a2a1f;
+  --color-disc-black: #111315;
+  --color-disc-white: #f1ece2;
+  --color-good: #7fbf98;
+  --color-bad: #e08b7a;
 
-  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --font-sans: "Source Sans 3 Variable", "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Barlow Condensed", "Arial Narrow", ui-sans-serif, sans-serif;
 }
 
-/*
- * The dark palette.
- *
- * Only `prefers-color-scheme` is consulted, because nothing on this site sets a
- * theme by hand -- there is no toggle. Every colour on the page is read from
- * these tokens rather than written as a literal, so a token redefined here
- * changes the whole page consistently instead of leaving one theme's text on
- * the other theme's background.
- */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-ground: #0f120f;
-    --color-surface: #171b17;
-    --color-surface-2: #1e241e;
-    --color-surface-3: #262d25;
-    --color-line: #2d342c;
-    --color-line-strong: #3d463c;
-    --color-ink: #e9ece6;
-    --color-ink-2: #b7c1b4;
-    --color-muted: #869382;
-    --color-accent: #e0973f;
-    --color-accent-2: #c98330;
-    --color-accent-soft: #2b2214;
-    --color-board: #35634c;
-    --color-board-line: #274c39;
-    --color-board-edge: #16281e;
-    --color-good: #6fbb8f;
-    --color-bad: #e07a68;
-  }
+/* The light theme: ivory ground, lacquer text. The board keeps its own colours,
+   because a board is the same board whatever the room is lit like. */
+:root[data-theme="light"] {
+  --color-ground: #efe9dc;
+  --color-surface: #f7f2e8;
+  --color-surface-2: #e8e1d3;
+  --color-line: #d7cfbe;
+  --color-line-strong: #b9b09c;
+  --color-ink: #111315;
+  --color-ink-2: #3a3f3c;
+  --color-muted: #5f6a64;
+  --color-accent: #a97b25;
+  --color-accent-ink: #fdf8ee;
+  --color-good: #2c6a45;
+  --color-bad: #9c3626;
 }
 
 html {
-  color-scheme: light dark;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
+/* The environment: a room with a light over the table. The vignette is fixed, so
+   it belongs to the window rather than sliding with the content. */
 body {
   margin: 0;
-  background: var(--color-ground);
+  min-height: 100dvh;
+  background:
+    radial-gradient(
+      120% 90% at 50% -10%,
+      color-mix(in srgb, var(--color-ground) 82%, #ffffff) 0%,
+      var(--color-ground) 58%
+    )
+    fixed;
   color: var(--color-ink);
   font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.45;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Focus has to be visible on the board as well as in the panel: the board is
-   keyboard-navigable, and an outline that only shows on light surfaces would
+/* Focus has to be visible on the board as well as on the panel: the board is
+   keyboard-navigable, and an outline that only shows on one ground would
    disappear the moment focus moved onto a square. */
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
+}
+
+/* Condensed, heavy, tabular: disc counts, the result, the wordmark. */
+.display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+}
+.wordmark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------------------
+   Surfaces, controls, buttons
+   --------------------------------------------------------------------------- */
+
+/* One panel encloses everything a player acts on. It is the only card on the
+   page; plates and rows sit inside it without borders of their own. */
+.panel {
+  border: 1px solid var(--color-line);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+/* A disc shown away from the board: on a plate, in the ending, in the mark.
+   The board lends a disc its edge; a dark panel does not, so a lacquer disc gets
+   a rim of the page's own ink and an ivory one gets a shadow. */
+.chip {
+  display: inline-block;
+  border-radius: 9999px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
+}
+.chip-black {
+  background: var(--color-disc-black);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--color-ink) 32%, transparent),
+    inset 0 1px 1px rgba(255, 255, 255, 0.14),
+    0 2px 4px rgba(0, 0, 0, 0.45);
+}
+.chip-white {
+  background: var(--color-disc-white);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.18),
+    0 2px 4px rgba(0, 0, 0, 0.45);
+}
+
+/* A player's side of the game, above and below the board. */
+.plate {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.25rem;
+  min-height: 3.25rem;
+}
+
+/* What is happening, in words, at the top of the panel. */
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.75rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 0.6rem;
+  background: var(--color-surface-2);
+  font-size: 1.05rem;
+}
+.status-pill[data-tone="you"] {
+  background: color-mix(in srgb, var(--color-accent) 16%, var(--color-surface-2));
+  color: var(--color-ink);
+}
+
+/* A label on the left, its control on the right, one line per setting. */
+.control-row {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+}
+.control-row > label {
+  color: var(--color-ink-2);
+}
+
+/* Native selects, dressed to match the page rather than the operating system. */
+.control-select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.45rem 2rem 0.45rem 0.7rem;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 0.5rem;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5l3.5 3.5 3.5-3.5' fill='none' stroke='%2398a69e' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      no-repeat right 0.6rem center / 0.75rem,
+    var(--color-surface-2);
+  color: var(--color-ink);
+  font: inherit;
+  cursor: pointer;
+}
+.control-select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 0.5rem;
+  background: var(--color-surface-2);
+  color: var(--color-ink);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+.btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-surface-2) 80%, var(--color-ink));
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-primary {
+  border-color: transparent;
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  font-weight: 600;
+}
+.btn-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-accent) 88%, #ffffff);
+}
+.btn-lg {
+  min-height: 3.25rem;
+  padding: 0.7rem 1.6rem;
+  font-size: 1.15rem;
+}
+
+/* A disclosure for the things a player does not need mid-game: what an opponent
+   is, how the ratings were measured. Closed by default, and it never moves the
+   board when it opens because it sits at the bottom of its column. */
+.disclosure > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  color: var(--color-muted);
+  cursor: pointer;
+  list-style: none;
+}
+.disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+.disclosure > summary::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 150ms ease;
+}
+.disclosure[open] > summary::before {
+  transform: rotate(45deg);
+}
+.disclosure > summary:hover {
+  color: var(--color-ink);
+}
+
+/* ---------------------------------------------------------------------------
+   The game page
+   ---------------------------------------------------------------------------
+   Two regions: the table (the plates and the board) and the panel. The board is
+   square, so on a landscape screen its size is set by the height left after the
+   header and the two plates; the panel takes a fixed share of the width. */
+.game-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  /* The panel is as tall as its contents. Stretching it to the board's height
+     put four hundred pixels of nothing inside a bordered box, which looks worse
+     than letting the ground show under a compact panel. */
+  align-items: start;
+  justify-content: center;
+}
+.game-table {
+  width: 100%;
+  max-width: min(100%, calc(100dvh - 13.5rem));
+  margin: 0 auto;
+}
+@media (min-width: 60rem) {
+  .game-layout {
+    grid-template-columns: auto minmax(17rem, 20rem);
+  }
+  .game-table {
+    width: min(calc(100dvh - 13.5rem), calc(100vw - 24rem));
+    max-width: none;
+  }
+}
+@media (min-width: 80rem) {
+  .game-layout {
+    grid-template-columns: auto minmax(19rem, 22rem);
+    gap: 2.5rem;
+  }
+  .game-table {
+    width: min(calc(100dvh - 13.5rem), calc(100vw - 28rem));
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The home screen
+   --------------------------------------------------------------------------- */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  align-items: center;
+}
+@media (min-width: 60rem) {
+  .hero {
+    grid-template-columns: minmax(0, 30rem) minmax(0, 1fr);
+    gap: 3.5rem;
+  }
+}
+/* The preview board is lit from behind, so it reads as the object the page is
+   about rather than as a diagram of one. */
+.hero-preview {
+  position: relative;
+}
+/* The glow sits inside the preview's own box. A negatively-inset child would
+   look the same and would widen the page: overflow from an absolutely positioned
+   element still counts as scrollable width, which on a phone showed up as 27
+   pixels of sideways scroll. */
+.hero-preview::before {
+  content: "";
+  position: absolute;
+  inset: 2%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-board) 60%, transparent) 0%,
+    transparent 70%
+  );
+  filter: blur(34px);
+  z-index: -1;
+}
+
+/* ---------------------------------------------------------------------------
+   The board
+   ---------------------------------------------------------------------------
+   A table rim with the coordinates in it, felt squares, star points on the
+   intersections, and discs that turn over. Both themes get the same board. */
+
+.board-frame {
+  display: grid;
+  grid-template-columns: 1.35rem minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) 1.35rem;
+  padding: 0.55rem;
+  border-radius: 0.5rem;
+  background:
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--color-board-edge) 78%, #8a5a34) 0%,
+      var(--color-board-edge) 45%,
+      color-mix(in srgb, var(--color-board-edge) 78%, #000) 100%
+    );
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 20px 44px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09);
+}
+
+.board-ranks,
+.board-files {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: rgba(241, 236, 226, 0.6);
+  user-select: none;
+}
+.board-ranks {
+  grid-template-rows: repeat(8, minmax(0, 1fr));
+  align-items: center;
+  justify-items: center;
+}
+.board-files {
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  align-items: center;
+  justify-items: center;
+}
+/* On a phone the coordinates are clutter around an already small board. The
+   frame's grid template is set inline, so the columns collapse rather than the
+   labels merely hiding. */
+@media (max-width: 40rem) {
+  .board-frame {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .board-ranks,
+  .board-files,
+  .board-spacer {
+    display: none;
+  }
+}
+
+.board-well {
+  position: relative;
+  border-radius: 0.2rem;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
+  padding: 2px;
+  background: var(--color-board-line);
+}
+
+.board-grid {
+  position: relative;
+  display: grid;
+  aspect-ratio: 1;
+  width: 100%;
+  gap: 2px;
+  background: var(--color-board-line);
+}
+
+.board-square {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.07), transparent 70%),
+    var(--color-board);
+  perspective: 320px;
+}
+/* A square you can play on lifts slightly under the pointer. Legal moves are
+   marked by their dot; this only answers the mouse. */
+.board-square:not(:disabled):hover {
+  background:
+    radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.14), transparent 72%),
+    color-mix(in srgb, var(--color-board) 88%, #ffffff);
+}
+.board-square-last::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 2px solid var(--color-accent);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+/* A legal move: quieter than a disc, and clearly not one. */
+.board-hint {
+  position: relative;
+  aspect-ratio: 1;
+  width: 24%;
+  border-radius: 9999px;
+  background: rgba(241, 236, 226, 0.32);
+  transition: transform 120ms ease, background-color 120ms ease;
+}
+.board-square:not(:disabled):hover .board-hint {
+  transform: scale(1.35);
+  background: rgba(241, 236, 226, 0.55);
+}
+
+.board-star {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-board-edge);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* A disc is one element with two faces. Black shows by default; white is the
+   back, pre-turned by half a rotation. Changing the data-disc attribute rotates
+   the whole thing, and the transition is what the eye sees as the disc turning
+   over. --flip-delay staggers discs by their distance from the one just placed.
+ *
+   No filter on the disc itself: a filter flattens the 3D context and the back
+   face would never show. The shadow lives on the faces instead. */
+.disc {
+  position: relative;
+  aspect-ratio: 1;
+  width: 80%;
+  transform-style: preserve-3d;
+  transition: transform 340ms cubic-bezier(0.3, 0.7, 0.3, 1);
+  transition-delay: var(--flip-delay, 0ms);
+}
+.disc[data-disc="white"] {
+  transform: rotateY(180deg);
+}
+.disc-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow:
+    0 2px 3px rgba(0, 0, 0, 0.5),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.25);
+}
+.disc-face-black {
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.24), transparent 56%),
+    var(--color-disc-black);
+}
+.disc-face-white {
+  transform: rotateY(180deg);
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.92), transparent 56%),
+    var(--color-disc-white);
+}
+
+/* The disc just placed lands rather than appears. */
+.disc-placed {
+  animation: disc-place 260ms cubic-bezier(0.2, 0.8, 0.3, 1.2);
+}
+@keyframes disc-place {
+  from {
+    transform: scale(0.55);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+/* A white disc that was just placed must land already white. The placement
+   keyframe above sets its own transform, so the half turn goes here. */
+.disc-placed[data-disc="white"] {
+  animation-name: disc-place-white;
+}
+@keyframes disc-place-white {
+  from {
+    transform: rotateY(180deg) scale(0.55);
+  }
+  to {
+    transform: rotateY(180deg) scale(1);
+  }
+}
+
+/* The end of a game: a short rise, and the table behind it dims. */
+.game-over[open] {
+  animation: dialog-in 220ms ease-out;
+}
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -9,11 +9,11 @@
 
 import { describe, expect, it } from "vitest";
 
-import gamesFixture from "../src/engine/__fixtures__/games.json";
-import manifest from "../src/engine/models.json";
+import gamesFixture from "../src/games/reversi/engine/__fixtures__/games.json";
+import manifest from "../src/games/reversi/engine/models.json";
 
-import { fromHex, popcount } from "../src/engine/bitboard";
-import { BASELINES, GREEDY_BASELINE, RANDOM_BASELINE, baselineById } from "../src/engine/baselines";
+import { fromHex, popcount } from "../src/games/reversi/engine/bitboard";
+import { BASELINES, GREEDY_BASELINE, RANDOM_BASELINE, baselineById } from "../src/games/reversi/engine/baselines";
 import {
   BLACK,
   WHITE,
@@ -24,7 +24,7 @@ import {
   legalActions,
   type Player,
   type State,
-} from "../src/engine/rules";
+} from "../src/games/reversi/engine/rules";
 
 const SIZE = 8;
 
