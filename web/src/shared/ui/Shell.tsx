@@ -1,10 +1,10 @@
 /**
- * The frame every page shares: a thin bar with the site's name or the way back
- * to the games, the page's title, and the theme and sound switches.
+ * The frame every page shares: one line with the mark, the way back to the
+ * games, and the theme and sound switches.
  *
- * The bar is one line tall on purpose. A game page is a landscape screen with a
- * square in it, and every line of chrome above the board is a line taken from
- * the board.
+ * The header is one line tall on purpose. A game page is a landscape screen
+ * with a square board in it, and every line of chrome above the board is a line
+ * taken from the board.
  */
 
 import { useState, type ReactNode } from "react";
@@ -19,34 +19,27 @@ import {
   type Theme,
   type ThemeChoice,
 } from "../theme";
-
-export const SITE_NAME = "reversi-zero";
+import { Wordmark } from "./Brand";
 
 export function Shell({
-  title,
+  /** The page a visitor is on, when it is not the launcher. Shows the way back. */
+  breadcrumb,
   children,
+  /** Use the whole window. Game pages do; the launcher reads better bounded. */
   wide = false,
 }: {
-  /** The page's own heading. Omit on the hub, whose heading is the site name. */
-  title?: string;
+  breadcrumb?: string;
   children: ReactNode;
-  /** Use the whole window width. Game pages do; the hub reads better narrower. */
   wide?: boolean;
 }) {
   return (
-    <div className={`flex min-h-dvh flex-col ${wide ? "" : "mx-auto max-w-5xl"}`}>
-      <header className="flex h-12 shrink-0 items-center gap-4 px-4 sm:px-6">
-        {title === undefined ? (
-          <p className="font-display text-2xl font-semibold tracking-tight">{SITE_NAME}</p>
-        ) : (
+    <div className="flex min-h-dvh flex-col">
+      <header className="flex h-14 shrink-0 items-center gap-4 px-4 sm:px-6">
+        {breadcrumb === undefined ? <Wordmark as="text" /> : <Wordmark />}
+        {breadcrumb !== undefined && (
           <>
-            <a href="/" className="text-sm text-muted hover:text-ink">
-              All games
-            </a>
-            <span aria-hidden="true" className="h-4 w-px bg-line-strong" />
-            <h1 className="font-display text-2xl font-semibold leading-none tracking-tight">
-              {title}
-            </h1>
+            <span aria-hidden="true" className="h-5 w-px bg-line-strong" />
+            <h1 className="display text-xl text-ink-2">{breadcrumb}</h1>
           </>
         )}
         <div className="ml-auto flex items-center gap-1">
@@ -55,7 +48,11 @@ export function Shell({
         </div>
       </header>
 
-      <div className="flex-1 px-4 pb-6 sm:px-6">{children}</div>
+      <main
+        className={`flex-1 px-4 pb-8 sm:px-6 ${wide ? "" : "mx-auto w-full max-w-5xl"}`}
+      >
+        {children}
+      </main>
     </div>
   );
 }
@@ -127,12 +124,12 @@ function IconButton({
       aria-label={label}
       title={label}
       aria-pressed={pressed}
-      className="grid size-9 place-items-center rounded-md text-ink-2 hover:bg-surface-2 hover:text-ink"
+      className="grid size-11 place-items-center rounded-lg text-ink-2 hover:bg-surface-2 hover:text-ink"
     >
       <svg
         viewBox="0 0 24 24"
-        width="18"
-        height="18"
+        width="19"
+        height="19"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.8"

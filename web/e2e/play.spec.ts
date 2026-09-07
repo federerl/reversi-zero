@@ -46,7 +46,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/reversi/");
   // Loading a network is a download plus a compile; the status line says so
   // until it is ready, and clicking before then would be testing nothing.
-  await expect(page.getByRole("status")).toContainText("Your move.", { timeout: 60_000 });
+  await expect(page.getByRole("status")).toContainText("Your turn", { timeout: 60_000 });
 });
 
 test("the opening position is the standard one", async ({ page }) => {
@@ -59,8 +59,8 @@ test("the agent answers a move, and the game moves on", async ({ page }) => {
   await page.locator('[data-square="19"]').click();
 
   // It thinks, and then it does not.
-  await expect(page.getByRole("status")).toContainText("Thinking", { timeout: 5_000 });
-  await expect(page.getByRole("status")).toContainText("Your move.", { timeout: 30_000 });
+  await expect(page.getByRole("status")).toContainText("thinking", { timeout: 5_000 });
+  await expect(page.getByRole("status")).toContainText("Your turn", { timeout: 30_000 });
 
   // Black played one disc and flipped one; white then played and flipped.
   expect(await discCount(page)).toBeGreaterThan(4);
@@ -81,7 +81,7 @@ test("a network opponent searches, and says how much", async ({ page }) => {
   test.slow();
 
   await page.getByLabel("Opponent").selectOption("gen05");
-  await expect(page.getByRole("status")).toContainText("Your move.", { timeout: 90_000 });
+  await expect(page.getByRole("status")).toContainText("Your turn", { timeout: 90_000 });
 
   // If the network failed to load, the app says so in a toast. Checking here
   // turns that into an immediate, readable failure instead of a later assertion
@@ -90,7 +90,7 @@ test("a network opponent searches, and says how much", async ({ page }) => {
 
   await expect(page.getByLabel("Thinking time")).toBeVisible();
   await page.locator('[data-square="19"]').click();
-  await expect(page.getByRole("status")).toContainText("Your move.", { timeout: 90_000 });
+  await expect(page.getByRole("status")).toContainText("Your turn", { timeout: 90_000 });
 
   await expect(page.getByText(/Played \w+\d after \d+ simulations in \d+ ms/)).toBeVisible();
   // A network has an opinion about who is winning; the bar shows it.
@@ -105,7 +105,7 @@ test("a baseline opponent offers no search controls and claims no opinion", asyn
   await expect(page.getByLabel("Thinking time")).toBeHidden();
 
   await page.locator('[data-square="19"]').click();
-  await expect(page.getByRole("status")).toContainText("Your move.", { timeout: 30_000 });
+  await expect(page.getByRole("status")).toContainText("Your turn", { timeout: 30_000 });
 
   await expect(page.getByRole("meter")).toBeHidden();
   await expect(page.getByText(/simulations/)).toBeHidden();
@@ -115,7 +115,7 @@ test("the board is never clickable while the agent is thinking", async ({ page }
   // Otherwise a fast player can queue a move into a position that no longer
   // exists by the time it lands.
   await page.locator('[data-square="19"]').click();
-  await expect(page.getByRole("status")).toContainText("Thinking");
+  await expect(page.getByRole("status")).toContainText("thinking");
   expect(await playableSquares(page)).toEqual([]);
 });
 
@@ -136,8 +136,8 @@ test("a whole game can be played to the end", async ({ page }) => {
     if (/win|draw/.test(status)) break;
 
     // Not our move yet. Wait for it rather than burning the turn on a poll.
-    if (status.includes("Thinking")) {
-      await expect(page.getByRole("status")).not.toContainText("Thinking", { timeout: 30_000 });
+    if (status.includes("thinking")) {
+      await expect(page.getByRole("status")).not.toContainText("thinking", { timeout: 30_000 });
       continue;
     }
 
@@ -161,7 +161,7 @@ test("a whole game can be played to the end", async ({ page }) => {
       }
       await page.locator(`[data-square="${squares[0]}"]`).click();
     }
-    await expect(page.getByRole("status")).not.toContainText("Thinking", { timeout: 30_000 });
+    await expect(page.getByRole("status")).not.toContainText("thinking", { timeout: 30_000 });
   }
 
   // A finished game says who won and by how much.
@@ -191,13 +191,14 @@ test("a whole game can be played to the end", async ({ page }) => {
   // status line and the board, and "Play again" starts over.
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByRole("heading", { level: 2 })).toHaveText(/You win|The agent wins|A draw/);
+  // The ending names the opponent it was played against, whichever it was.
+  await expect(dialog.getByRole("heading", { level: 2 })).toHaveText(/You win|wins|A draw/);
   const shown = (await dialog.textContent()) ?? "";
   for (const n of counts.slice(0, 2)) expect(shown).toContain(String(n));
 
-  await dialog.getByRole("button", { name: "Play again" }).click();
+  await dialog.getByRole("button", { name: "Rematch" }).click();
   await expect(dialog).toBeHidden();
-  await expect(page.getByRole("status")).toContainText("Your move.");
+  await expect(page.getByRole("status")).toContainText("Your turn");
   expect(await discCount(page)).toBe(4);
 });
 
@@ -223,7 +224,7 @@ test("the theme and sound switches are on every page and remember their setting"
 
 test("taking a move back returns the board to the player", async ({ page }) => {
   await page.locator('[data-square="19"]').click();
-  await expect(page.getByRole("status")).toContainText("Your move.", { timeout: 30_000 });
+  await expect(page.getByRole("status")).toContainText("Your turn", { timeout: 30_000 });
   const afterOneMove = await discCount(page);
 
   await page.getByRole("button", { name: "Take back" }).click();
@@ -236,7 +237,13 @@ test("the opponent is labelled with a measured rating", async ({ page }) => {
   // The repository's rule: difficulty labels state measured strength, never
   // adjectives. This is that rule, asserted where a reader would see it.
   await expect(page.getByLabel("Opponent")).toContainText(/Generation \d+, \+\d+ Elo/);
-  await expect(page.getByText(/95% interval \d+ to \d+\. Random play is 0\./)).toBeVisible();
+
+  // The interval is true and secondary: a reader who wants to check the claim
+  // opens it, a player never has to see it.
+  const about = page.locator("details", { hasText: "About this opponent" });
+  await expect(about.getByText(/95% interval/)).toBeHidden();
+  await about.getByText("About this opponent").click();
+  await expect(about.getByText(/95% interval from \d+ to \d+/)).toBeVisible();
 });
 
 test("the difficulty levels are labelled with their measured ratings too", async ({ page }) => {
@@ -255,6 +262,6 @@ test("the difficulty levels are labelled with their measured ratings too", async
 test("the board can be played with the keyboard alone", async ({ page }) => {
   await page.locator('[data-square="19"]').focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("status")).toContainText("Your move.", { timeout: 30_000 });
+  await expect(page.getByRole("status")).toContainText("Your turn", { timeout: 30_000 });
   expect(await discCount(page)).toBeGreaterThan(4);
 });

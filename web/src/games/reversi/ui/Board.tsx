@@ -87,14 +87,10 @@ export function Board({ state, interactive, lastMove, visits, onPlay }: BoardPro
 
   // The coordinates around the board, and the board itself, share one grid so
   // the labels line up with the squares whatever size the board is drawn at.
+  // The template lives in CSS, because on a phone the labels are dropped and
+  // their tracks have to collapse with them.
   return (
-    <div
-      className="board-frame"
-      style={{
-        gridTemplateColumns: `1.35rem minmax(0, 1fr)`,
-        gridTemplateRows: `minmax(0, 1fr) 1.35rem`,
-      }}
-    >
+    <div className="board-frame">
       <ol className="board-ranks" aria-hidden="true">
         {Array.from({ length: size }, (_, row) => (
           <li key={row}>{row + 1}</li>
@@ -162,7 +158,7 @@ export function Board({ state, interactive, lastMove, visits, onPlay }: BoardPro
                   <span
                     aria-hidden="true"
                     className="absolute inset-0 bg-accent"
-                    style={{ opacity: Math.min(0.55, share * 0.55) }}
+                    style={{ opacity: Math.min(0.5, share * 0.5) }}
                   />
                 )}
 
@@ -204,7 +200,7 @@ export function Board({ state, interactive, lastMove, visits, onPlay }: BoardPro
         </div>
       </div>
 
-      <span aria-hidden="true" />
+      <span aria-hidden="true" className="board-spacer" />
       <ol className="board-files" aria-hidden="true">
         {Array.from({ length: size }, (_, column) => (
           <li key={column}>{FILES[column]}</li>

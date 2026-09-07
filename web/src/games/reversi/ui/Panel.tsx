@@ -1,18 +1,18 @@
 /**
- * The scoreboard, the controls, and the parts of the agent's thinking worth
- * showing.
+ * The two player plates, the turn indicator, and the control panel.
  *
  * The two selectors are separate on purpose. *Which generation* you play sets
  * how good the agent's intuition is; *how long it thinks* sets how much search
- * it does on top of that. Collapsing them into one "difficulty" slider would
- * hide the thing this project is actually about.
+ * it does on top of that. Collapsing them into one difficulty slider would hide
+ * the thing this project is actually about.
  *
- * Every opponent is labelled with a measured rating and its interval, never an
- * adjective. That is a standing rule in the repository, and it is also simply
- * more interesting to read.
+ * Every opponent is labelled with a measured rating, never an adjective. That
+ * is a standing rule in the repository. The interval and the description of what
+ * an opponent *is* sit in a disclosure: true, worth reading once, and not what a
+ * player needs while it is their move.
  */
 
-import { useId, type ReactNode } from "react";
+import { useId } from "react";
 
 import { LEVELS, type Level } from "../engine/levels";
 import modelsManifest from "../engine/models.json";
@@ -49,190 +49,56 @@ function ratingFor(id: string): { elo: number; interval: [number, number] } | un
   return found ? { elo: found.elo, interval: found.eloInterval } : undefined;
 }
 
-function signed(elo: number): string {
+export function signedElo(elo: number): string {
   const rounded = Math.round(elo);
-  return rounded > 0 ? `+${rounded}` : `${rounded}`;
+  return `${rounded > 0 ? "+" : ""}${rounded}`;
 }
 
 // ---------------------------------------------------------------------------
-// The player plates
+// The players
 // ---------------------------------------------------------------------------
 
 /**
- * One side of the game: the disc, who it is, and the count. One plate sits
- * above the board and one below, the way a name and a clock frame a chess
- * board. The side to move carries the brass mark; nothing else is coloured.
+ * One side of the game: the disc, who it is, their rating if they have one, and
+ * their count. One plate sits above the board and one below, the way a name and
+ * a clock frame a chess board -- so a score is never floating at a corner with
+ * nothing to attach it to.
  */
 export function PlayerPlate({
   colour,
   name,
+  rating,
   count,
   active,
+  thinking,
 }: {
   colour: "black" | "white";
   name: string;
+  /** The opponent's measured strength. The human has none, and gets none. */
+  rating?: number | undefined;
   count: number;
   active: boolean;
+  thinking?: boolean;
 }) {
   return (
-    <div className={`flex items-center gap-3 px-1 ${active ? "text-ink" : "text-muted"}`}>
+    <div className={`plate ${active ? "text-ink" : "text-muted"}`}>
       <span
         aria-hidden="true"
-        className={`size-6 shrink-0 rounded-full shadow ${
-          colour === "black" ? "bg-disc-black ring-1 ring-line-strong" : "bg-disc-white"
-        }`}
+        className={`chip ${colour === "black" ? "chip-black" : "chip-white"} size-8 shrink-0`}
       />
-      <span className="flex items-center gap-2 text-[0.95rem]">
-        {active && <span aria-hidden="true" className="size-1.5 rounded-full bg-accent" />}
-        {name}
+
+      <span className="flex min-w-0 flex-col leading-tight">
+        <span className="flex items-center gap-2">
+          {active && !thinking && (
+            <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-accent" />
+          )}
+          {thinking && <Spinner />}
+          <span className="truncate text-[1.05rem]">{name}</span>
+        </span>
+        {rating !== undefined && <span className="text-sm text-muted">{signedElo(rating)} Elo</span>}
       </span>
-      <span className="score-number ml-auto text-4xl">{count}</span>
-    </div>
-  );
-}
 
-// ---------------------------------------------------------------------------
-// The controls
-// ---------------------------------------------------------------------------
-
-export function OpponentPicker({
-  models,
-  value,
-  onChange,
-  disabled,
-}: {
-  models: readonly ModelDescriptor[];
-  value: string;
-  onChange: (id: string) => void;
-  disabled: boolean;
-}) {
-  const selected = models.find((model) => model.id === value);
-  const id = useId();
-
-  return (
-    <Control label="Opponent" htmlFor={id} hint={selected?.note}>
-      <select
-        id={id}
-        value={value}
-        disabled={disabled}
-        onChange={(event) => onChange(event.target.value)}
-        className="control-select"
-      >
-        {models.map((model) => (
-          <option key={model.id} value={model.id}>
-            {model.label}
-            {model.elo !== undefined ? `, ${signed(model.elo)} Elo` : ""}
-          </option>
-        ))}
-      </select>
-      {selected?.eloInterval && (
-        <span className="text-sm text-muted">
-          95% interval {Math.round(selected.eloInterval[0])} to{" "}
-          {Math.round(selected.eloInterval[1])}. Random play is 0.
-        </span>
-      )}
-    </Control>
-  );
-}
-
-export function LevelPicker({
-  value,
-  onChange,
-  disabled,
-}: {
-  value: string;
-  onChange: (id: string) => void;
-  disabled: boolean;
-}) {
-  const selected = LEVELS.find((level) => level.id === value);
-  const selectedRating = ratingFor(value);
-  const id = useId();
-
-  return (
-    <Control label="Thinking time" htmlFor={id} hint={selected?.description}>
-      <select
-        id={id}
-        value={value}
-        disabled={disabled}
-        onChange={(event) => onChange(event.target.value)}
-        className="control-select"
-      >
-        {LEVELS.map((level) => {
-          const rated = ratingFor(level.id);
-          return (
-            <option key={level.id} value={level.id}>
-              {level.label}
-              {rated ? `, ${signed(rated.elo)} Elo` : ""}, {describeBudget(level)}
-            </option>
-          );
-        })}
-      </select>
-      {selectedRating && (
-        <span className="text-sm text-muted">
-          95% interval {Math.round(selectedRating.interval[0])} to{" "}
-          {Math.round(selectedRating.interval[1])}. Random play is 0.
-        </span>
-      )}
-    </Control>
-  );
-}
-
-export function SidePicker({
-  value,
-  onChange,
-  disabled,
-}: {
-  value: Player;
-  onChange: (player: Player) => void;
-  disabled: boolean;
-}) {
-  const id = useId();
-
-  return (
-    <Control label="You play" htmlFor={id}>
-      <select
-        id={id}
-        value={value === BLACK ? "black" : "white"}
-        disabled={disabled}
-        onChange={(event) => onChange(event.target.value === "black" ? BLACK : WHITE)}
-        className="control-select"
-      >
-        <option value="black">Black, moves first</option>
-        <option value="white">White</option>
-      </select>
-    </Control>
-  );
-}
-
-/**
- * A control with its name beside it.
- *
- * The label is tied to its control by id rather than merely sitting near it.
- * Without that the two are unrelated as far as assistive technology is
- * concerned: a screen reader announces an unlabelled combo box, and clicking
- * the word "Opponent" does nothing. The hint, when there is one, is a second
- * line under the control, in plain words.
- */
-function Control({
-  label,
-  htmlFor,
-  hint,
-  children,
-}: {
-  label: string;
-  htmlFor: string;
-  hint?: string | undefined;
-  children: ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <label htmlFor={htmlFor} className="w-28 shrink-0 text-[0.95rem] text-ink-2">
-          {label}
-        </label>
-        <div className="flex min-w-0 flex-col gap-1">{children}</div>
-      </div>
-      {hint && <p className="text-sm leading-snug text-muted">{hint}</p>}
+      <span className="display ml-auto text-4xl sm:text-5xl">{count}</span>
     </div>
   );
 }
@@ -241,11 +107,31 @@ function Control({
 // What is happening
 // ---------------------------------------------------------------------------
 
-export function Status({ line, thinking }: { line: string; thinking: boolean }) {
+/**
+ * The turn indicator: the one thing a player checks between moves.
+ *
+ * It keeps the live region, so a screen reader hears every change, and it holds
+ * the detailed sentence as well -- "You win, 34 to 30" says more than "Game
+ * over", and the reducer already writes it.
+ */
+export function StatusPill({
+  headline,
+  detail,
+  tone,
+  thinking,
+}: {
+  headline: string;
+  detail?: string | undefined;
+  tone: "you" | "quiet";
+  thinking: boolean;
+}) {
   return (
-    <div role="status" aria-live="polite" className="flex min-h-7 items-center gap-2 text-[1.05rem]">
+    <div role="status" aria-live="polite" className="status-pill" data-tone={tone}>
       {thinking && <Spinner />}
-      <span>{line}</span>
+      <span className="min-w-0">
+        <span className="font-medium">{headline}</span>
+        {detail && <span className="text-muted"> {detail}</span>}
+      </span>
     </div>
   );
 }
@@ -272,67 +158,163 @@ export function WinProbability({ probability }: { probability: number }) {
 
   return (
     <div className="flex items-center gap-3">
-      <span className="w-28 shrink-0 text-[0.95rem] text-ink-2">Your chances</span>
+      <span className="shrink-0 text-[0.95rem] text-ink-2">Your chances</span>
       <div
         role="meter"
         aria-valuenow={percent}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label="Your estimated chance of winning"
-        className="h-1.5 w-40 overflow-hidden rounded-full bg-surface-2"
+        className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-surface-2"
       >
         <div
           className="h-full rounded-full bg-ink-2 transition-[width] duration-300"
           style={{ width: `${percent}%` }}
         />
       </div>
-      <span className="score-number text-xl">{percent}%</span>
+      <span className="display shrink-0 text-xl">{percent}%</span>
     </div>
   );
 }
 
-export function Button({
-  children,
-  onClick,
+// ---------------------------------------------------------------------------
+// The controls
+// ---------------------------------------------------------------------------
+
+export function OpponentPicker({
+  models,
+  value,
+  onChange,
   disabled,
-  variant = "secondary",
 }: {
-  children: ReactNode;
-  onClick: () => void;
-  disabled?: boolean;
-  variant?: "primary" | "secondary";
+  models: readonly ModelDescriptor[];
+  value: string;
+  onChange: (id: string) => void;
+  disabled: boolean;
 }) {
-  const styles =
-    variant === "primary"
-      ? "bg-ink text-ground hover:opacity-90"
-      : "border border-line-strong bg-surface text-ink hover:bg-surface-2";
-
+  const id = useId();
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className={`rounded-md px-3.5 py-1.5 text-[0.95rem] font-medium transition-opacity disabled:cursor-not-allowed disabled:opacity-40 ${styles}`}
-    >
-      {children}
-    </button>
+    <div className="control-row">
+      <label htmlFor={id}>Opponent</label>
+      <select
+        id={id}
+        value={value}
+        disabled={disabled}
+        onChange={(event) => onChange(event.target.value)}
+        className="control-select"
+      >
+        {models.map((model) => (
+          <option key={model.id} value={model.id}>
+            {model.label}
+            {model.elo !== undefined ? `, ${signedElo(model.elo)} Elo` : ""}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 }
 
-export function Toast({ message, onDismiss }: { message: string; onDismiss: () => void }) {
+export function LevelPicker({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: string;
+  onChange: (id: string) => void;
+  disabled: boolean;
+}) {
+  const id = useId();
   return (
-    <div
-      role="alert"
-      className="fixed bottom-4 left-1/2 z-50 max-w-[90vw] -translate-x-1/2 rounded-md border border-bad/40 bg-surface px-4 py-2 text-sm shadow-lg"
-    >
-      <span className="text-bad">{message}</span>
-      <button
-        type="button"
-        onClick={onDismiss}
-        className="ml-3 text-muted underline underline-offset-2"
+    <div className="control-row">
+      <label htmlFor={id}>Thinking time</label>
+      <select
+        id={id}
+        value={value}
+        disabled={disabled}
+        onChange={(event) => onChange(event.target.value)}
+        className="control-select"
       >
-        Dismiss
-      </button>
+        {LEVELS.map((level) => {
+          const rated = ratingFor(level.id);
+          return (
+            <option key={level.id} value={level.id}>
+              {level.label}
+              {rated ? `, ${signedElo(rated.elo)} Elo` : ""}, {describeBudget(level)}
+            </option>
+          );
+        })}
+      </select>
     </div>
+  );
+}
+
+export function SidePicker({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: Player;
+  onChange: (player: Player) => void;
+  disabled: boolean;
+}) {
+  const id = useId();
+  return (
+    <div className="control-row">
+      <label htmlFor={id}>You play</label>
+      <select
+        id={id}
+        value={value === BLACK ? "black" : "white"}
+        disabled={disabled}
+        onChange={(event) => onChange(event.target.value === "black" ? BLACK : WHITE)}
+        className="control-select"
+      >
+        <option value="black">Black, moves first</option>
+        <option value="white">White</option>
+      </select>
+    </div>
+  );
+}
+
+/**
+ * What this opponent is, and how sure the rating is.
+ *
+ * A disclosure rather than a paragraph: the interval matters to a reader who
+ * wants to check the claim, and it is noise to a player who wants a game. Both
+ * are served, in that order.
+ */
+export function OpponentDetails({
+  model,
+  levelId,
+  showLevel,
+}: {
+  model: ModelDescriptor | undefined;
+  levelId: string;
+  showLevel: boolean;
+}) {
+  const level = LEVELS.find((entry) => entry.id === levelId);
+  const levelRating = ratingFor(levelId);
+  if (model === undefined) return null;
+
+  return (
+    <details className="disclosure">
+      <summary>About this opponent</summary>
+      <div className="flex flex-col gap-2 pb-1 text-sm leading-relaxed text-muted">
+        {model.note && <p>{model.note}</p>}
+        {model.eloInterval && (
+          <p>
+            Rated {signedElo(model.elo ?? 0)}, with a 95% interval from{" "}
+            {Math.round(model.eloInterval[0])} to {Math.round(model.eloInterval[1])}. Random play is
+            0.
+          </p>
+        )}
+        {showLevel && level && (
+          <p>
+            {level.label} searches {describeBudget(level)}
+            {levelRating ? `, and rates ${signedElo(levelRating.elo)} on the same scale` : ""}.{" "}
+            {level.description}
+          </p>
+        )}
+      </div>
+    </details>
   );
 }

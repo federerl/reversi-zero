@@ -1,128 +1,125 @@
 /**
- * The front page: the games this site offers.
+ * The launcher.
  *
- * The board is the entrance. Reversi is shown as its own board in the opening
- * position, large, with one line about what the agent is and the two numbers a
- * visitor needs to choose: how many opponents, and how strong the strongest is
- * on the scale every rating on this site uses. A game that is planned but not
- * yet playable is drawn as an empty board, dimmed, and says so.
+ * One game to play, one coming, and the research behind them folded away. The
+ * board is the hero: a position from a real self-play game, lit from behind, big
+ * enough to be the thing you look at first. Everything a visitor needs to decide
+ * fits on one screen -- what it is, how strong it is, and the button that starts
+ * it.
+ *
+ * The methodology that used to run down the page now sits in a disclosure beside
+ * the game it explains. It is the honest part of the project and it belongs one
+ * click away, not between a player and the board.
  */
 
-import { initialState } from "../games/reversi/engine/rules";
 import { Board } from "../games/reversi/ui/Board";
 import { Shell } from "../shared/ui/Shell";
+import { previewPosition } from "./preview";
 import { GAMES, strongestElo, type GameEntry } from "./registry";
 
 export function HubPage() {
+  const reversi = GAMES.find((game) => game.id === "reversi");
+  const soon = GAMES.filter((game) => game.status === "planned");
+
   return (
     <Shell>
-      <p className="mb-8 max-w-[60ch] text-[0.95rem] text-muted">
-        Board-game agents that learned by playing themselves, each opponent with a measured rating.
-        Everything runs in your browser and nothing is sent anywhere.
-      </p>
+      <div className="flex min-h-[calc(100dvh-8rem)] flex-col justify-center gap-14 py-6">
+        {reversi && <Hero game={reversi} />}
 
-      <ul className="flex flex-col gap-12" aria-label="Games">
-        {GAMES.map((game) => (
-          <li key={game.id}>
-            <GameEntry game={game} />
-          </li>
-        ))}
-      </ul>
-
-      <p className="mt-12 max-w-[68ch] text-sm leading-relaxed text-muted">
-        Ratings are Bradley&ndash;Terry fits over round-robin tournaments, anchored so that random
-        play is 0, with 95% bootstrap intervals. The numbers on each game&rsquo;s page come from the
-        same tables.
-      </p>
+        {soon.length > 0 && (
+          <section aria-labelledby="soon" className="border-t border-line pt-6">
+            <h2 id="soon" className="text-[0.95rem] text-muted">
+              Coming soon
+            </h2>
+            <ul className="mt-3 flex flex-col gap-3">
+              {soon.map((game) => (
+                <li key={game.id} data-game={game.id} className="flex items-center gap-4">
+                  <GomokuTile />
+                  <div>
+                    <p className="display text-xl text-ink-2">{game.title}</p>
+                    <p className="text-[0.95rem] text-muted">{game.tagline}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </div>
     </Shell>
   );
 }
 
-function GameEntry({ game }: { game: GameEntry }) {
-  const playable = game.status === "playable";
+function Hero({ game }: { game: GameEntry }) {
   const strongest = strongestElo(game);
 
   return (
-    <article
-      data-game={game.id}
-      className={`grid items-center gap-6 ${
-        playable
-          ? "sm:grid-cols-[minmax(0,20rem)_1fr]"
-          : "opacity-60 sm:grid-cols-[minmax(0,11rem)_1fr]"
-      }`}
-    >
-      {playable ? (
-        <a href={game.path} aria-label={`Play ${game.title}`} className="block">
-          <Preview game={game} />
+    <section data-game={game.id} className="hero">
+      <div className="hero-preview">
+        <a href={game.path} aria-label={`Start a game of ${game.title}`} className="block">
+          <Board state={previewPosition()} interactive={false} lastMove={null} onPlay={() => {}} />
         </a>
-      ) : (
-        <Preview game={game} />
-      )}
-
-      <div className="max-w-[46ch]">
-        <h2
-          className={`font-display font-bold leading-none tracking-tight ${playable ? "text-4xl" : "text-3xl"}`}
-        >
-          {game.title}
-        </h2>
-        <p className="mt-2 text-[0.95rem] text-muted">{game.tagline}</p>
-
-        {playable ? (
-          <>
-            <p className="mt-3 text-[0.95rem] text-ink-2">
-              {game.opponents.length} opponents
-              {strongest !== undefined && (
-                <>
-                  , the strongest rated{" "}
-                  <span className="score-number text-xl">+{Math.round(strongest)} Elo</span>
-                </>
-              )}
-              .
-            </p>
-            <a
-              href={game.path}
-              className="mt-5 inline-block rounded-md bg-ink px-4 py-2 text-[0.95rem] font-medium text-ground hover:opacity-90"
-            >
-              Play
-            </a>
-          </>
-        ) : (
-          <p className="mt-3 text-[0.95rem] text-muted">Next. Not playable yet.</p>
-        )}
       </div>
-    </article>
+
+      <div>
+        <h2 className="display text-6xl leading-[0.85] sm:text-7xl">Reversi</h2>
+        <p className="mt-4 max-w-[34ch] text-lg text-ink-2">
+          Play against an AI that taught itself the game, right here in your browser.
+        </p>
+
+        <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
+          <a href={game.path} className="btn btn-primary btn-lg">
+            Play Reversi
+          </a>
+          <p className="text-[0.95rem] text-muted">
+            {game.opponents.length} opponents
+            {strongest !== undefined && (
+              <>
+                , up to <span className="display text-xl text-ink-2">+{Math.round(strongest)}</span>
+              </>
+            )}
+          </p>
+        </div>
+
+        <details className="disclosure mt-6 max-w-[46ch]">
+          <summary>How the AI learned</summary>
+          <div className="pb-2 text-[0.95rem] leading-relaxed text-muted">
+            <p>
+              Nobody taught it Reversi. It started from random weights and played itself sixty
+              thousand times, keeping what worked: a small neural network guesses which moves look
+              promising and who is winning, a search checks those guesses a few hundred positions
+              deep, and the result of every finished game trains the network that plays the next
+              one.
+            </p>
+            <p className="mt-3">
+              Each opponent here is a checkpoint from that run, and the number beside it was
+              measured, not chosen. Every agent played every other in a round robin, and the results
+              were fitted into one rating scale anchored so that random play sits at 0. The interval
+              beside a rating is where the true strength probably lies; neighbouring generations
+              overlap, which is the honest way to say they are close.
+            </p>
+          </div>
+        </details>
+      </div>
+    </section>
   );
 }
 
-function Preview({ game }: { game: GameEntry }) {
-  if (game.id === "reversi") {
-    return (
-      <div aria-hidden="true" className="pointer-events-none select-none">
-        <Board state={initialState(8)} interactive={false} lastMove={null} onPlay={() => {}} />
-      </div>
-    );
-  }
-  // An empty board for a game that is not here yet: a 15-line grid, as Gomoku is played.
-  const lines = Array.from({ length: 15 }, (_, i) => 5 + i * (90 / 14));
+/** A quiet stand-in for a game that has no board yet: the grid it will be played on. */
+function GomokuTile() {
+  const lines = Array.from({ length: 9 }, (_, i) => 8 + i * 10.5);
   return (
-    <div
-      className="board-frame"
+    <span
       aria-hidden="true"
-      style={{ gridTemplateColumns: "1fr", padding: "0.35rem" }}
+      className="grid size-14 shrink-0 place-items-center rounded-md border border-line bg-surface"
     >
-      <svg viewBox="0 0 100 100" className="block aspect-square w-full rounded-sm bg-board">
+      <svg viewBox="0 0 100 100" className="size-9 opacity-45">
         {lines.map((p) => (
-          <g key={p} stroke="rgba(16,17,18,0.45)" strokeWidth="0.35">
-            <line x1={p} y1="5" x2={p} y2="95" />
-            <line x1="5" y1={p} x2="95" y2={p} />
+          <g key={p} stroke="var(--color-muted)" strokeWidth="2">
+            <line x1={p} y1="8" x2={p} y2="92" />
+            <line x1="8" y1={p} x2="92" y2={p} />
           </g>
         ))}
-        {[3, 7, 11].flatMap((x) =>
-          [3, 7, 11].map((y) => (
-            <circle key={`${x}-${y}`} cx={lines[x]} cy={lines[y]} r="1" fill="rgba(16,17,18,0.6)" />
-          )),
-        )}
       </svg>
-    </div>
+    </span>
   );
 }
