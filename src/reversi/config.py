@@ -184,9 +184,32 @@ class ArenaConfig(_Base):
     noise disabled.
     """
 
-    every_n_generations: int = Field(default=5, ge=1)
+    every_n_generations: int = Field(
+        default=5,
+        ge=0,
+        description="Rate the newest checkpoint inside the training loop this often. "
+        "0 turns the quick evaluation off.",
+    )
     games: int = Field(
         default=200, ge=2, description="Per matchup; must be even for colour balance"
+    )
+    quick_games: int = Field(
+        default=20,
+        ge=2,
+        description="Games per pairing in the in-loop quick evaluation. Even. Small on "
+        "purpose: the estimate draws a curve and picks best.pt, it is not a published rating.",
+    )
+    quick_simulations: int = Field(
+        default=50, ge=1, description="Search budget per move for the quick evaluation."
+    )
+    quick_opponents: tuple[str, ...] = Field(
+        default=("random", "greedy", "minimax-d2"),
+        description="Fixed opponents for the quick evaluation. Random anchors the scale.",
+    )
+    quick_workers: int = Field(
+        default=6,
+        ge=1,
+        description="Pairings played at once during the quick evaluation, on the CPU.",
     )
     opening_plies: int = Field(
         default=4,
@@ -202,6 +225,12 @@ class ArenaConfig(_Base):
     def _check_even(self) -> ArenaConfig:
         if self.games % 2 != 0:
             msg = f"arena.games must be even so colours split 50/50, got {self.games}"
+            raise ValueError(msg)
+        if self.quick_games % 2 != 0:
+            msg = f"arena.quick_games must be even so colours split 50/50, got {self.quick_games}"
+            raise ValueError(msg)
+        if not self.quick_opponents:
+            msg = "arena.quick_opponents must name at least one opponent"
             raise ValueError(msg)
         return self
 

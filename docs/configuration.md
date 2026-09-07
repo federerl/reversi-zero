@@ -453,6 +453,10 @@ most 200 steps.
 ```yaml
 arena:
   every_n_generations: 5
+  quick_games: 20
+  quick_simulations: 50
+  quick_opponents: [random, greedy, minimax-d2]
+  quick_workers: 6
   games: 200
   opening_plies: 4
   min_legal_after_opening: 2
@@ -467,8 +471,33 @@ stagnates. The only way to know is to play matches and count.
 
 ### `every_n_generations: 5`
 
-Run an evaluation every 5 generations. More often gives a finer strength curve
-but spends GPU time on measuring instead of learning.
+Every 5 generations, the training loop rates the checkpoint it just wrote: a
+quick match against the `quick_opponents`, fitted to one rating anchored at
+Random = 0. The number is written into the checkpoint's `.json` sidecar as
+`elo_estimate`, logged to `metrics/arena.jsonl`, and used to keep `best.pt`
+pointing at the strongest checkpoint so far. `0` turns this off.
+
+More often gives a finer curve but spends time measuring instead of learning. At
+the defaults the cost is a few minutes every five generations, on the CPU while
+the GPU waits.
+
+### `quick_games: 20`, `quick_simulations: 50`, `quick_opponents`, `quick_workers: 6`
+
+The shape of that in-loop match. **It is a curve and a selector, not a published
+rating.** Twenty games per pairing has a margin of about ±20 percentage points,
+which is plenty to tell generation 5 from generation 50 and to pick `best.pt`,
+and far too little to tell two neighbouring generations apart. The real table
+comes from `reversi arena --suite crossgen` afterwards, with hundreds of games per
+pairing; the two scales agree on the anchor and on nothing else, so never compare
+an `elo_estimate` to a number from a cross-generation table.
+
+Once the agent beats all three quick opponents nearly every game the estimate
+stops moving. That is the signal to put a stronger opponent in `quick_opponents`
+(`minimax-d4`, say), or to accept that the quick match has said what it can.
+
+`quick_workers` is how many pairings play at once, in separate CPU processes. A
+tournament asks the network about one position at a time, and a GPU is barely
+faster than a CPU core at that.
 
 ### `games: 200`
 

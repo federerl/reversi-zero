@@ -43,3 +43,6 @@ arena:
   every_n_generations: 2
   games: 100
   opening_plies: 2
+  quick_games: 20             # the in-loop rating; small, it only draws a curve
+  quick_simulations: 16
+  quick_workers: 2

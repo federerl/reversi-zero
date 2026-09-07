@@ -18,10 +18,15 @@ unanswerable -- a bad trade when the deliverable is evidence rather than a score
 running at once. Same reason: a resume has an unambiguous point to restart from,
 and every checkpoint has an exact data lineage.
 
-**What is deliberately missing until day 7.** Resume, signal handling, and proper
-checkpoint metadata. The weights are saved each generation so a run leaves
-something behind, but restarting from one is not supported yet, and this file will
-hand that job to the checkpoint manager rather than growing one.
+**Resume and stopping** belong to the checkpoint manager and the signal handler,
+not to this file. The loop asks the manager for the newest checkpoint that
+verifies and continues from there, and checks a stop flag between generations,
+which is the only place stopping is safe.
+
+**Rating** happens inside the loop every few generations: a quick match against
+fixed opponents on the checkpoint just written (``train.evaluate``). It writes
+``elo_estimate`` into the sidecar and keeps ``best.pt`` current. It is coarse by
+design; the rated table is produced afterwards by ``reversi arena``.
 """
 
 from __future__ import annotations
@@ -53,6 +58,7 @@ from reversi.seeding import rng as make_rng
 from reversi.selfplay.game_batch import BatchedSelfPlay
 from reversi.selfplay.runner import merge_summaries, run_workers
 from reversi.selfplay.worker import SelfPlaySummary, play_games
+from reversi.train.evaluate import quick_evaluate
 from reversi.train.trainer import Trainer
 
 __all__ = ["GenerationReport", "run_training"]
@@ -72,6 +78,8 @@ class GenerationReport:
     selfplay: dict[str, Any] = field(default_factory=dict)
     training: dict[str, Any] = field(default_factory=dict)
     checkpoint: Path | None = None
+    elo_estimate: float | None = None
+    """The quick evaluation's rating, on the generations it ran; see ``train.evaluate``."""
 
 
 def run_training(
@@ -153,6 +161,9 @@ def run_training(
                 total_generations,
             )
             return []
+
+    best = checkpoints.best_estimate()
+    best_elo = best[1] if best is not None else None
 
     reports: list[GenerationReport] = []
     for generation in range(first_generation, total_generations + 1):
@@ -245,6 +256,21 @@ def run_training(
         if removed:
             log.debug("pruned %d shard(s) older than the retention window", len(removed))
 
+        # ---- 5. rate it, sometimes -------------------------------------
+        # A quick match against fixed opponents, on the checkpoint just written.
+        # It is on the critical path on purpose: the loop stays one process that
+        # does one thing at a time, and the cost is a few minutes every few
+        # generations. See train/evaluate.py for what the number means.
+        quick = None
+        every = config.arena.every_n_generations
+        if every > 0 and generation % every == 0:
+            quick = quick_evaluate(checkpoint, config=config, generation=generation)
+            checkpoints.update_meta(generation, elo_estimate=quick.elo_estimate)
+            if best_elo is None or quick.elo_estimate > best_elo:
+                best_elo = quick.elo_estimate
+                checkpoints.mark_best(generation)
+                log.info("generation %d is the best so far; best.pt updated", generation)
+
         elapsed = time.perf_counter() - started
         buffer_stats = buffer.stats(generation)
         selfplay_metrics = summary.as_metrics()
@@ -258,6 +284,7 @@ def run_training(
             selfplay=selfplay_metrics,
             training=training,
             checkpoint=checkpoint,
+            elo_estimate=quick.elo_estimate if quick is not None else None,
         )
         reports.append(report)
 
@@ -300,6 +327,13 @@ def run_training(
                 shards=len(manifest.shards),
                 **buffer_stats,
             )
+            if quick is not None:
+                metrics.log(
+                    "arena",
+                    generation=generation,
+                    global_step=trainer.global_step,
+                    **quick.as_metrics(),
+                )
 
     return reports
 

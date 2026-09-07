@@ -54,7 +54,7 @@ def test_every_generation_leaves_a_shard_and_a_checkpoint(
     assert shards == ["gen_00001_w00.npz", "gen_00002_w00.npz", "gen_00003_w00.npz"]
 
     checkpoints = sorted(p.name for p in paths.checkpoints.glob("*.pt"))
-    assert checkpoints == ["gen_00001.pt", "gen_00002.pt", "gen_00003.pt", "latest.pt"]
+    assert checkpoints == ["best.pt", "gen_00001.pt", "gen_00002.pt", "gen_00003.pt", "latest.pt"]
 
 
 def test_the_manifest_agrees_with_what_is_on_disk(smoke_config: Config, paths: RunPaths) -> None:
