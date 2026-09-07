@@ -71,7 +71,7 @@ for (const size of SIZES) {
         const box = (await button.boundingBox())!;
         expect(box.height).toBeGreaterThanOrEqual(43);
       }
-      const select = page.getByLabel("Opponent");
+      const select = page.getByLabel("Level");
       await expect(select).toBeVisible();
       expect((await select.boundingBox())!.height).toBeGreaterThanOrEqual(43);
     });

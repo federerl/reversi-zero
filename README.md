@@ -35,13 +35,13 @@ confidence intervals and Bradley–Terry ratings, never by pointing at a trainin
 > only 63% — a real non-transitivity that `docs/experiments.md` records and explains but does not
 > resolve.
 
-![The board mid-game against generation 60. Legal moves show as dots, the panel names the
-opponent as "Generation 60 - 877 Elo" with its 95% interval, and reports the agent's own estimate
-of who is winning.](docs/figures/demo.gif)
+![The board mid-game against level 6. Legal moves show as dots, the panel names the level and how
+hard it is, and reports the agent's own estimate of who is winning. A note beside the level opens to
+give the checkpoint it plays, its rating and the 95% interval.](docs/figures/demo.gif)
 
-*Playing generation 60 in the browser. Every opponent and every thinking-time setting is labelled
-with a measured rating and its interval, not an adjective — and the whole search runs locally, so
-nothing about the game leaves the page.*
+*Playing level 6 in the browser. A player picks a numbered level; every level and every thinking
+time still carries a measured rating and its interval, one click away rather than in the way. The
+whole search runs locally, so nothing about the game leaves the page.*
 
 ## Quickstart
 
@@ -89,16 +89,25 @@ uv run reversi export runs/<run-id>/checkpoints/gen_00060.pt models/gen60.pt
 uv run reversi export-onnx models/gen60.pt web/public/models/reversi-8x8-gen60.onnx
 ```
 
-**What you can choose.** Who to play — Random (0 Elo), Greedy (+313), or the agent at generation 5
-(+547), 20, 40 or 60 (+877), each labelled with its measured rating — and, for the networks, how long
-it thinks.
+**What you can choose.** A level, 1 to 6, and for the levels a network plays, how long it thinks.
 
-The two weakest are not the network. Generation 5 already rates above the depth-4 search it was
-measured against, so there was no rung a new player could beat; Random and Greedy are the baselines
-the whole project was measured against, and they fill it in. The page starts on Greedy, which is
-beatable and needs no model downloaded at all. Those are separate knobs on purpose: the generation sets how good
-the agent's intuition is, and the search budget sets how much it improves on that intuition before
-moving. The difference between those two is the whole idea behind the method.
+The ladder is not a difficulty dial with six positions. Each level *is* an opponent, and the order
+they are in was measured rather than chosen: random play at level 1 (0 Elo), a disc-counting rule at
+level 2 (+313), then four checkpoints from the self-play run — generation 5 (+547), 20 (+758), 40
+(+855) and 60 (+877). The ladder is computed from those ratings, so adding a checkpoint inserts a
+level in the right place with no code change.
+
+Levels 1 and 2 are not the network, and that is not a shortcut. Generation 5 already rates above the
+depth-4 search it was measured against, so there was no rung a new player could beat; Random and
+Greedy are the baselines the whole project was measured against, and they fill it in. The page starts
+on level 2, which is beatable and needs no model downloaded at all.
+
+Level and thinking time are separate controls on purpose: the level sets how good the agent's
+intuition is, and the search budget sets how much it improves on that intuition before moving. The
+difference between those two is the whole idea behind the method.
+
+A level shows a number and a word. Which checkpoint it is, what it rates and how wide the interval
+is sit under a note beside it — true, checkable, and not between a player and their move.
 
 **How fast it is.** Measured in Chrome on a 20-core laptop, with four threads:
 

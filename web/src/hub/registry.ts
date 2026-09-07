@@ -1,17 +1,22 @@
 /**
  * The games this site offers, and what the hub says about each.
  *
- * One entry per game. The hub imports a game's *manifest* -- the generated list
- * of rated opponents -- and its board, and nothing else from it, so the hub page
+ * One entry per game. The hub imports a game's *ladder* -- the numbered levels a
+ * player picks from -- and its board, and nothing else from it, so the hub page
  * never loads an engine. Adding a game is adding an entry here and a directory
  * under `src/games/`; the hub does not change.
  *
- * Every number shown comes from the manifest, which is generated from a rating
- * report. The rule that a difficulty label states a measured strength and never
- * an adjective applies to the hub too.
+ * The count on the front page is the number of levels a visitor can actually
+ * play, which is not the same as the number of rows in a rating report: the
+ * cross-generation tournament rates two search baselines this build does not
+ * offer as opponents. Counting report rows would have advertised eight levels
+ * and shown six. Reading the ladder makes that impossible.
+ *
+ * Every number shown still comes from a rating report by way of the ladder.
+ * Nothing about strength is typed here.
  */
 
-import reversiManifest from "../games/reversi/engine/models.json";
+import { LADDER, describeLadder } from "../games/reversi/ladder";
 
 export interface RatedEntry {
   readonly elo?: number;
@@ -25,14 +30,11 @@ export interface GameEntry {
   /** Where the game lives. A directory with its own HTML file, see vite.config.ts. */
   readonly path: string;
   readonly status: "playable" | "planned";
-  /** Rated opponents the game offers: the networks plus the fixed baselines. */
-  readonly opponents: readonly RatedEntry[];
+  /** The levels a player can choose, weakest first. Empty for a planned game. */
+  readonly levels: readonly RatedEntry[];
+  /** The ladder in one phrase: "six levels, beginner to expert". */
+  readonly ladderSummary: string | undefined;
 }
-
-const reversiOpponents: RatedEntry[] = [
-  ...reversiManifest.baselines.map((baseline) => ({ elo: baseline.elo })),
-  ...reversiManifest.models.map((model) => ({ elo: model.elo })),
-];
 
 export const GAMES: readonly GameEntry[] = [
   {
@@ -41,7 +43,8 @@ export const GAMES: readonly GameEntry[] = [
     tagline: "Learned the game from nothing by playing itself, and runs entirely in your browser.",
     path: "/reversi/",
     status: "playable",
-    opponents: reversiOpponents,
+    levels: LADDER.map((rung) => ({ elo: rung.elo })),
+    ladderSummary: describeLadder(),
   },
   {
     id: "gomoku",
@@ -49,12 +52,13 @@ export const GAMES: readonly GameEntry[] = [
     tagline: "Five in a row. The same method on a different board.",
     path: "/gomoku/",
     status: "planned",
-    opponents: [],
+    levels: [],
+    ladderSummary: undefined,
   },
 ];
 
 /** The strongest measured rating a game offers, or undefined if nothing is rated. */
 export function strongestElo(game: GameEntry): number | undefined {
-  const rated = game.opponents.map((o) => o.elo).filter((e): e is number => e !== undefined);
+  const rated = game.levels.map((o) => o.elo).filter((e): e is number => e !== undefined);
   return rated.length === 0 ? undefined : Math.max(...rated);
 }

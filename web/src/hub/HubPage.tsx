@@ -9,7 +9,9 @@
  *
  * The methodology that used to run down the page now sits in a disclosure beside
  * the game it explains. It is the honest part of the project and it belongs one
- * click away, not between a player and the board.
+ * click away, not between a player and the board. The ratings went in there with
+ * it: a visitor deciding whether to play wants to know how many levels there are
+ * and how far they go, not what any of them measured.
  */
 
 import { Board } from "../games/reversi/ui/Board";
@@ -70,14 +72,9 @@ function Hero({ game }: { game: GameEntry }) {
           <a href={game.path} className="btn btn-primary btn-lg">
             Play Reversi
           </a>
-          <p className="text-[0.95rem] text-muted">
-            {game.opponents.length} opponents
-            {strongest !== undefined && (
-              <>
-                , up to <span className="display text-xl text-ink-2">+{Math.round(strongest)}</span>
-              </>
-            )}
-          </p>
+          {game.ladderSummary !== undefined && (
+            <p className="text-[0.95rem] text-muted">{capitalise(game.ladderSummary)}</p>
+          )}
         </div>
 
         <details className="disclosure mt-6 max-w-[46ch]">
@@ -91,17 +88,27 @@ function Hero({ game }: { game: GameEntry }) {
               one.
             </p>
             <p className="mt-3">
-              Each opponent here is a checkpoint from that run, and the number beside it was
-              measured, not chosen. Every agent played every other in a round robin, and the results
-              were fitted into one rating scale anchored so that random play sits at 0. The interval
-              beside a rating is where the true strength probably lies; neighbouring generations
-              overlap, which is the honest way to say they are close.
+              The levels are not settings on a dial. Each one is a real opponent -- a checkpoint
+              saved during that run, or a simple rule to start you off -- and the order they are in
+              was measured rather than chosen. Every one of them played every other in a round
+              robin, and the results were fitted into a single rating scale anchored so that random
+              play sits at 0.
+              {strongest !== undefined && (
+                <> The top level rates about +{Math.round(strongest)} on that scale.</>
+              )}{" "}
+              Pick a level in the game and open the note beside it to see its rating, how sure that
+              rating is, and which checkpoint it came from.
             </p>
           </div>
         </details>
       </div>
     </section>
   );
+}
+
+/** "six levels, beginner to expert" as a sentence. */
+function capitalise(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
 /** A quiet stand-in for a game that has no board yet: the grid it will be played on. */

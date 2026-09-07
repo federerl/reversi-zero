@@ -2,22 +2,26 @@
  * The launcher, in a real browser.
  *
  * There is little logic here to break; what these guard are the three things
- * that would make it lie or fail to do its job. The rating on the page must come
- * from the manifest rather than from a typed number, the button must actually
- * start a game, and the research the project rests on must be reachable without
- * being in a player's way.
+ * that would make it lie or fail to do its job. The level count on the page has
+ * to be the number of levels a visitor can really play, the button has to
+ * actually start a game, and the research the project rests on has to be
+ * reachable without being in a player's way.
  */
 
 import { expect, test } from "@playwright/test";
 
-test("the launcher leads with Reversi and its measured strength", async ({ page }) => {
+test("the launcher leads with Reversi and the levels it offers", async ({ page }) => {
   await page.goto("/");
 
   const reversi = page.locator('[data-game="reversi"]');
   await expect(reversi.getByRole("heading", { name: "Reversi" })).toBeVisible();
-  await expect(reversi.getByText(/\d+ opponents/)).toBeVisible();
-  await expect(reversi.getByText(/\+\d+/)).toBeVisible();
+  await expect(reversi.getByText(/^\w+ levels, \w+ to \w+$/)).toBeVisible();
   await expect(page.getByRole("link", { name: "Play Reversi" })).toBeVisible();
+
+  // A rating is a fact about the project, not the first thing to tell somebody
+  // deciding whether to play. It belongs in the disclosure, and this pins that
+  // it is not on the page beside the button.
+  await expect(reversi.getByText(/\+\d+/)).toBeHidden();
 
   // The board on the page is a real position, so it holds more than the four
   // discs an opening has.
@@ -40,6 +44,8 @@ test("the research is one click away and closed by default", async ({ page }) =>
   await expect(details.getByText(/round robin/)).toBeHidden();
   await details.getByText("How the AI learned").click();
   await expect(details.getByText(/round robin/)).toBeVisible();
+  // And the strongest rating is in there, from the manifest, not typed.
+  await expect(details.getByText(/top level rates about \+\d+/)).toBeVisible();
 });
 
 test("Play Reversi opens the game, and the game is ready", async ({ page }) => {

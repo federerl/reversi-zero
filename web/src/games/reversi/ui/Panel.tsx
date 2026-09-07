@@ -1,28 +1,30 @@
 /**
  * The two player plates, the turn indicator, and the control panel.
  *
- * The two selectors are separate on purpose. *Which generation* you play sets
- * how good the agent's intuition is; *how long it thinks* sets how much search
- * it does on top of that. Collapsing them into one difficulty slider would hide
- * the thing this project is actually about.
+ * What a player picks is a **level**: Level 1 to Level 6, with a word for how
+ * hard it is. What a level actually *is* -- which checkpoint of the training run,
+ * or which hand-written baseline, and what it measured against everything else
+ * -- is one click away under "About this level", because it is true and worth
+ * reading once and it is not what anybody needs while it is their move.
  *
- * Every opponent is labelled with a measured rating, never an adjective. That
- * is a standing rule in the repository. The interval and the description of what
- * an opponent *is* sit in a disclosure: true, worth reading once, and not what a
- * player needs while it is their move.
+ * Thinking time stays a separate control for the levels a network plays. It is
+ * the second dial this project is about: *which* network sets how good the
+ * intuition is, and *how long it thinks* sets how much search runs on top. A
+ * single difficulty slider would hide that, and the levels would stop being
+ * measurable things.
  */
 
 import { useId } from "react";
 
+import { LADDER, rungName, type Rung } from "../ladder";
 import { LEVELS, type Level } from "../engine/levels";
 import modelsManifest from "../engine/models.json";
-import type { ModelDescriptor } from "../engine/onnx";
 import { BLACK, WHITE, type Player } from "../engine/rules";
 
 const LEVEL_RATINGS = modelsManifest.levels ?? [];
 
 /**
- * What to promise a player about a level.
+ * What to promise a player about a thinking time.
  *
  * A time-capped level must not advertise a simulation count, because on most
  * devices it will not reach it -- on the machine this was written on, "Max"
@@ -31,18 +33,31 @@ const LEVEL_RATINGS = modelsManifest.levels ?? [];
  * waiting.
  */
 function describeBudget(level: Level): string {
-  if (level.maxMillis === undefined) return `${level.simulations} simulations`;
-  return `up to ${(level.maxMillis / 1000).toFixed(1)} s a move`;
+  if (level.maxMillis === undefined) return `${level.simulations} simulations a move`;
+  return `up to ${(level.maxMillis / 1000).toFixed(1)} seconds a move`;
 }
 
 /**
- * A level's measured rating, if it has one.
+ * The same promise, short enough for the select.
  *
- * From the calibration report, never typed here. Reading the numbers from the
- * file that measured them means the interface cannot claim a separation nobody
- * checked.
+ * A native select does not wrap and does not grow, so an option longer than the
+ * control is silently cut off mid-word -- "Strong, up to 1.2 second". The prose
+ * version above is for the note, where there is room for a sentence.
  */
-function ratingFor(id: string): { elo: number; interval: [number, number] } | undefined {
+function shortBudget(level: Level): string {
+  if (level.maxMillis === undefined) return `${level.simulations} simulations`;
+  return `up to ${(level.maxMillis / 1000).toFixed(1)} s`;
+}
+
+/**
+ * A thinking time's measured rating, if it has one.
+ *
+ * From the calibration report, never typed here. That report is its own
+ * tournament on one checkpoint, so its numbers are only ever shown against the
+ * thinking time they belong to -- never mixed into the ladder, which is ordered
+ * by a different tournament.
+ */
+function ratingForBudget(id: string): { elo: number; interval: [number, number] } | undefined {
   const found = (
     LEVEL_RATINGS as Array<{ id: string; elo: number; eloInterval: [number, number] }>
   ).find((entry) => entry.id === id);
@@ -59,23 +74,22 @@ export function signedElo(elo: number): string {
 // ---------------------------------------------------------------------------
 
 /**
- * One side of the game: the disc, who it is, their rating if they have one, and
- * their count. One plate sits above the board and one below, the way a name and
- * a clock frame a chess board -- so a score is never floating at a corner with
- * nothing to attach it to.
+ * One side of the game: the disc, who it is, and their count. One plate sits
+ * above the board and one below, the way a name and a clock frame a chess board
+ * -- so a score is never floating at a corner with nothing to attach it to.
  */
 export function PlayerPlate({
   colour,
   name,
-  rating,
+  detail,
   count,
   active,
   thinking,
 }: {
   colour: "black" | "white";
   name: string;
-  /** The opponent's measured strength. The human has none, and gets none. */
-  rating?: number | undefined;
+  /** A word under the name: how hard this level is. The human gets none. */
+  detail?: string | undefined;
   count: number;
   active: boolean;
   thinking?: boolean;
@@ -95,7 +109,7 @@ export function PlayerPlate({
           {thinking && <Spinner />}
           <span className="truncate text-[1.05rem]">{name}</span>
         </span>
-        {rating !== undefined && <span className="text-sm text-muted">{signedElo(rating)} Elo</span>}
+        {detail !== undefined && <span className="text-sm text-muted">{detail}</span>}
       </span>
 
       <span className="display ml-auto text-4xl sm:text-5xl">{count}</span>
@@ -110,9 +124,8 @@ export function PlayerPlate({
 /**
  * The turn indicator: the one thing a player checks between moves.
  *
- * It keeps the live region, so a screen reader hears every change, and it holds
- * the detailed sentence as well -- "You win, 34 to 30" says more than "Game
- * over", and the reducer already writes it.
+ * This is also the live region, so a screen reader hears every change, and it
+ * carries the result sentence at the end of a game.
  */
 export function StatusPill({
   headline,
@@ -181,21 +194,27 @@ export function WinProbability({ probability }: { probability: number }) {
 // The controls
 // ---------------------------------------------------------------------------
 
-export function OpponentPicker({
-  models,
+/**
+ * The ladder, as a player meets it.
+ *
+ * The option values are opponent ids rather than level numbers, because the
+ * level *is* a view of which opponent is playing -- there is no second piece of
+ * state to keep in step, and the ladder can gain a rung without anything here
+ * changing.
+ */
+export function LevelPicker({
   value,
   onChange,
   disabled,
 }: {
-  models: readonly ModelDescriptor[];
   value: string;
-  onChange: (id: string) => void;
+  onChange: (modelId: string) => void;
   disabled: boolean;
 }) {
   const id = useId();
   return (
     <div className="control-row">
-      <label htmlFor={id}>Opponent</label>
+      <label htmlFor={id}>Level</label>
       <select
         id={id}
         value={value}
@@ -203,10 +222,9 @@ export function OpponentPicker({
         onChange={(event) => onChange(event.target.value)}
         className="control-select"
       >
-        {models.map((model) => (
-          <option key={model.id} value={model.id}>
-            {model.label}
-            {model.elo !== undefined ? `, ${signedElo(model.elo)} Elo` : ""}
+        {LADDER.map((rung) => (
+          <option key={rung.modelId} value={rung.modelId}>
+            {rungName(rung)}, {rung.word}
           </option>
         ))}
       </select>
@@ -214,7 +232,7 @@ export function OpponentPicker({
   );
 }
 
-export function LevelPicker({
+export function ThinkingTimePicker({
   value,
   onChange,
   disabled,
@@ -234,15 +252,11 @@ export function LevelPicker({
         onChange={(event) => onChange(event.target.value)}
         className="control-select"
       >
-        {LEVELS.map((level) => {
-          const rated = ratingFor(level.id);
-          return (
-            <option key={level.id} value={level.id}>
-              {level.label}
-              {rated ? `, ${signedElo(rated.elo)} Elo` : ""}, {describeBudget(level)}
-            </option>
-          );
-        })}
+        {LEVELS.map((level) => (
+          <option key={level.id} value={level.id}>
+            {level.label}, {shortBudget(level)}
+          </option>
+        ))}
       </select>
     </div>
   );
@@ -276,42 +290,50 @@ export function SidePicker({
 }
 
 /**
- * What this opponent is, and how sure the rating is.
+ * What this level really is, for anyone who wants to know.
  *
- * A disclosure rather than a paragraph: the interval matters to a reader who
- * wants to check the claim, and it is noise to a player who wants a game. Both
- * are served, in that order.
+ * Everything technical about an opponent lives here: which checkpoint of the
+ * self-play run it is, what it measured, and how sure that measurement is. A
+ * player who never opens it loses nothing; a reader who does gets the whole
+ * claim, including its error bar.
  */
-export function OpponentDetails({
-  model,
+export function LevelDetails({
+  rung,
   levelId,
-  showLevel,
 }: {
-  model: ModelDescriptor | undefined;
+  rung: Rung;
   levelId: string;
-  showLevel: boolean;
 }) {
-  const level = LEVELS.find((entry) => entry.id === levelId);
-  const levelRating = ratingFor(levelId);
-  if (model === undefined) return null;
+  const budget = LEVELS.find((entry) => entry.id === levelId);
+  const budgetRating = ratingForBudget(levelId);
 
   return (
     <details className="disclosure">
-      <summary>About this opponent</summary>
+      <summary>About {rungName(rung).toLowerCase()}</summary>
       <div className="flex flex-col gap-2 pb-1 text-sm leading-relaxed text-muted">
-        {model.note && <p>{model.note}</p>}
-        {model.eloInterval && (
+        <p>
+          <span className="text-ink-2">{rung.opponentLabel}.</span> {rung.note}
+        </p>
+        <p>
+          It rates {signedElo(rung.elo)} against the other levels, where random play is 0
+          {rung.interval && (
+            <>
+              , with a 95% interval from {Math.round(rung.interval[0])} to{" "}
+              {Math.round(rung.interval[1])}
+            </>
+          )}
+          . Neighbouring levels can overlap, which is the honest way to say they are close.
+        </p>
+        {rung.usesNetwork && budget && (
           <p>
-            Rated {signedElo(model.elo ?? 0)}, with a 95% interval from{" "}
-            {Math.round(model.eloInterval[0])} to {Math.round(model.eloInterval[1])}. Random play is
-            0.
-          </p>
-        )}
-        {showLevel && level && (
-          <p>
-            {level.label} searches {describeBudget(level)}
-            {levelRating ? `, and rates ${signedElo(levelRating.elo)} on the same scale` : ""}.{" "}
-            {level.description}
+            It is searching {describeBudget(budget)}
+            {budgetRating && (
+              <>
+                , a setting that rates {signedElo(budgetRating.elo)} in its own tournament on the
+                final network
+              </>
+            )}
+            . {budget.description}
           </p>
         )}
       </div>

@@ -54,7 +54,7 @@ uv run reversi export runs/<run-id>/checkpoints/gen_00060.pt models/gen60.pt
 uv run reversi export-onnx models/gen60.pt web/public/models/reversi-8x8-gen60.onnx
 ```
 
-Repeat for generations 5, 20 and 40 if you want the full opponent picker; the
+Repeat for generations 5, 20 and 40 if you want the full ladder; the
 site offers whichever files are present and named in
 `web/src/games/reversi/engine/models.json`.
 
@@ -313,10 +313,63 @@ write_manifest(Path('web/src/games/reversi/engine/models.json'), m)
 "
 ```
 
-The repository's rule is that difficulty labels state measured strength rather
-than adjectives, and the way to keep a rule like that is to make breaking it
-impossible. If a rating changes the labels change with it; a generation that was
-never rated cannot appear in the list at all.
+The repository's rule is that no claim about strength is typed by hand, and the
+way to keep a rule like that is to make breaking it impossible. If a rating
+changes, everything derived from it changes with it; a generation that was never
+rated cannot appear in the list at all.
+
+### The ladder is derived from the ratings
+
+A player picks **Level 1** to **Level 6**, not "Generation 20". The mapping lives
+in `web/src/games/reversi/ladder.ts`, and it is computed rather than written:
+the rungs are the opponents the app can play, sorted by the rating each measured
+in the cross-generation round robin, numbered from the weakest.
+
+| Level | Word | Plays as | Elo |
+|---|---|---|---:|
+| 1 | Beginner | Random | 0 |
+| 2 | Easy | Greedy | 313 |
+| 3 | Fair | Generation 5 | 547 |
+| 4 | Tough | Generation 20 | 758 |
+| 5 | Expert | Generation 40 | 855 |
+| 6 | Expert | Generation 60 | 877 |
+
+Three consequences worth stating.
+
+**Adding a level is a data change.** Export a checkpoint, rate it in the
+cross-generation tournament, regenerate the manifest, publish the `.onnx` in the
+models release. A rung appears in the right place and every label renumbers
+itself. No TypeScript changes. This is how `gen30` or `gen10` would be added if
+the ladder ever wants finer steps near the middle, where the gap from level 3 to
+level 4 is over 200 Elo.
+
+**Levels 5 and 6 share a word on purpose.** Generations 40 and 60 are 22 rating
+points apart with heavily overlapping intervals. Calling one "strong" and the
+other "expert" would invent a difference the tournament did not find.
+
+**One scale, never two.** Every number the ladder orders by comes from the
+cross-generation table. The difficulty calibration below is a separate tournament
+with its own fit, so its ratings are only ever shown beside the thinking time
+they belong to — mixing the two would sort the ladder by numbers that were never
+compared.
+
+### Where the technical description went
+
+Nothing was removed; it moved one click. The panel shows a level number and a
+word, and a `<details>` beside it — "About level 4" — holds which checkpoint it
+is, what it rates, the 95% interval, and what the current thinking time buys. The
+launcher says "Six levels, beginner to expert" and keeps the ratings inside "How
+the AI learned".
+
+The reasoning: "Generation 20" means nothing before you know what a generation
+is, and "+758 Elo" means nothing before you know what the scale is anchored to.
+Both facts are worth reading once and neither is worth reading while it is your
+move. A player who never opens the disclosure loses nothing; a reader who does
+gets the whole claim including its error bar.
+
+The count on the launcher is read from the ladder rather than from the manifest,
+because the rating report holds two search baselines the app does not offer as
+opponents. Counting report rows advertised eight levels and showed six.
 
 ---
 
@@ -378,24 +431,33 @@ regression, not rounding.
 
 ## Two knobs, on purpose
 
-**Which generation** you play sets how good the agent's intuition is — these are
-real checkpoints, labelled with their Bradley–Terry ratings from a round robin
-of 210 games per entrant, anchored so random play is 0.
+The panel has two selects, and they are the two halves of the method.
 
-**How long it thinks** sets how much the search improves on that intuition
-before it moves.
+**Level** picks which opponent plays: a real checkpoint from the self-play run,
+or one of the two rule-only baselines. That sets how good the agent's intuition
+is. The ratings come from a round robin of 210 games per entrant, fitted with
+Bradley–Terry and anchored so random play is 0.
 
-| Opponent | Elo | 95% interval | Runs |
-|---|---:|---|---|
-| Generation 60 | 877 | 774 – 1028 | the network |
-| Generation 40 | 855 | 747 – 1018 | the network |
-| Generation 20 | 758 | 659 – 898 | the network |
-| Generation 5 | 547 | 467 – 686 | the network |
-| *Minimax, depth 4* | *523* | *434 – 653* | *not offered in the app* |
-| **Greedy** | **313** | **220 – 468** | **the rules alone** |
-| **Random** | **0** | — | **the rules alone** |
+**Thinking time** sets how much search runs on top of that intuition before it
+moves.
 
-### Why the two weakest are not the network
+Keeping them separate is deliberate. A player can face the final agent thinking
+briefly, or an early agent thinking hard, and the difference between those two
+is the whole idea behind the method: the network supplies a fast opinion, and the
+search improves on it. A single difficulty slider would hide that, and the levels
+would stop being measurable things.
+
+| Level | Plays as | Elo | 95% interval | Runs |
+|---|---|---:|---|---|
+| 6 | Generation 60 | 877 | 774 – 1028 | the network |
+| 5 | Generation 40 | 855 | 747 – 1018 | the network |
+| 4 | Generation 20 | 758 | 659 – 898 | the network |
+| 3 | Generation 5 | 547 | 467 – 686 | the network |
+| — | *Minimax, depth 4* | *523* | *434 – 653* | *rated, not offered as a level* |
+| 2 | **Greedy** | **313** | **220 – 468** | **the rules alone** |
+| 1 | **Random** | **0** | — | **the rules alone** |
+
+### Why levels 1 and 2 are not the network
 
 The network is strong even at its earliest checkpoint. Generation 5 rates +547,
 which is *above* the depth-4 alpha-beta search it was measured against, and no
@@ -405,21 +467,17 @@ to decide, not weaker.
 
 So the bottom of the ladder is Random and Greedy — the same baselines every
 rating in this project is measured against, rated in the same round robin as
-every generation. Without them the easiest opponent on offer was already stronger
+every generation. Without them the easiest level on offer was already stronger
 than a classical engine, and a new player had nothing to beat.
 
 They also cost nothing. Neither needs the 1.8 MB network, so picking one is
-instant and a visitor who only plays Greedy downloads no model at all — which is
-why Greedy is the opponent the page starts on.
+instant and a visitor who only plays level 2 downloads no model at all — which is
+why level 2 is where the page starts.
 
 Neither reports a win probability or a simulation count, and the interface hides
 both rather than inventing them: one picks uniformly at random and the other
-counts discs. Neither holds an opinion about who is winning.
-
-Keeping these separate is deliberate. A beginner can play the final agent
-thinking briefly, or an early agent thinking hard, and the difference between
-those two is the whole idea behind the method: the network supplies a fast
-opinion, and the search improves on it.
+counts discs. Neither holds an opinion about who is winning. The thinking-time
+select is hidden for these two as well, because there is no search to budget.
 
 ### The value guardrail
 
@@ -433,10 +491,27 @@ blunder through whenever it happened to be drawn, which is exactly what the
 guardrail exists to prevent. It is what makes an easy opponent *weak* rather than
 *stupid* — it plays a second-best move instead of giving away a corner.
 
-**These levels are not calibrated.** The simulation counts and thresholds are
-designed, not measured against each other. Criterion S15 — strictly monotonic
-ratings with non-overlapping intervals and gaps of at least 80 Elo — is not yet
-demonstrated.
+### The thinking times are calibrated
+
+The four thinking times were rated against each other and against the frozen
+baselines, all on one checkpoint, in a single Bradley–Terry fit anchored at random
+play = 0. Using one network is the point: if the rungs separate, the separation
+comes from the search rather than from four different models.
+
+| Thinking time | Simulations | Elo | 95% interval | Gap below |
+|---|---:|---:|---|---:|
+| Casual | 16 | 431 | 400 – 465 | — |
+| Club | 64 | 623 | 588 – 664 | +192 |
+| Strong | 256 | 891 | 845 – 943 | +267 |
+| Max | 800 | 1053 | 1001 – 1115 | +163 |
+
+Criterion S15 — strictly monotonic ratings, non-overlapping intervals, gaps of at
+least 80 Elo — is met with room to spare, and the guardrail held over 500 of
+Casual's moves at a worst drop of 0.326 against its 0.35 limit. Full setup,
+including the run where it first failed, is in `docs/experiments.md`.
+
+These numbers sit on their own scale. They are shown in the app only inside the
+note beside a level, never mixed into the ladder's ordering.
 
 ---
 

@@ -14,14 +14,17 @@
  * holds what a player acts on, in the order they need it: what is happening, who
  * they are playing, and what they can do about it. Everything fits a laptop
  * window without scrolling.
+ *
+ * The opponent is named by its rung on the ladder -- "Level 4" -- everywhere a
+ * player reads it: the plate, the turn indicator, the game-over dialog. Which
+ * checkpoint that is, and what it measured, sits under a disclosure in the panel.
+ * See `../ladder.ts` for why the ladder is derived from the ratings rather than
+ * written down.
  */
 
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 
-import { BASELINES, isBaseline } from "../engine/baselines";
 import { LocalEngine } from "../engine/local";
-import modelsManifest from "../engine/models.json";
-import type { ModelDescriptor } from "../engine/onnx";
 import {
   BLACK,
   WHITE,
@@ -34,6 +37,7 @@ import {
   type Player,
 } from "../engine/rules";
 import type { Engine } from "../engine/types";
+import { rungFor, rungName } from "../ladder";
 import {
   current,
   isHumanTurn,
@@ -49,62 +53,26 @@ import { GameOverDialog } from "../../../shared/ui/GameOverDialog";
 import { Shell } from "../../../shared/ui/Shell";
 import { Board, FLIP_STAGGER_MS, squareName } from "./Board";
 import {
+  LevelDetails,
   LevelPicker,
-  OpponentDetails,
-  OpponentPicker,
   PlayerPlate,
   SidePicker,
   StatusPill,
+  ThinkingTimePicker,
   WinProbability,
 } from "./Panel";
 
-interface RatedBaseline {
-  readonly name: string;
-  readonly elo: number;
-  readonly interval: [number, number];
-}
-
-const NETWORKS = modelsManifest.models as unknown as ModelDescriptor[];
-const RATED = modelsManifest.baselines as unknown as RatedBaseline[];
-
 /**
- * Every opponent, weakest first.
+ * Start on level 2.
  *
- * The baselines come first deliberately. The network is strong even at its
- * earliest checkpoint -- generation 5 rates above the depth-4 search it was
- * measured against -- so before these were offered there was nothing on the
- * ladder a new player could actually beat, and no simulation budget makes a
- * +547 network into a beginner's opponent.
+ * A first game you lose is a bad demonstration, and every network on the ladder
+ * beats a casual player comfortably -- the weakest checkpoint rates above the
+ * depth-4 search it was measured against. Level 2 is the disc-counting baseline:
+ * beatable, still a measured opponent rather than a hobbled agent, and the rest
+ * of the ladder is one select away from the first second.
  *
- * The order is by measured rating, not by what feels like it should be easier.
- */
-const OPPONENTS: readonly ModelDescriptor[] = [
-  ...BASELINES.map((baseline) => {
-    const rated = RATED.find((entry) => entry.name === baseline.ratingName);
-    return {
-      id: baseline.id,
-      label: baseline.label,
-      generation: -1,
-      url: "",
-      boardSize: 8,
-      ...(rated ? { elo: rated.elo, eloInterval: rated.interval } : {}),
-      note: baseline.note,
-    } satisfies ModelDescriptor;
-  }),
-  ...[...NETWORKS].sort((a, b) => a.generation - b.generation),
-];
-
-/**
- * Start on Greedy.
- *
- * A first game you lose is a bad demonstration, and every network on this ladder
- * beats a casual player comfortably -- the weakest of them rates above the
- * depth-4 search it was measured against. Greedy is beatable, it is a measured
- * baseline rather than a hobbled agent, and the ladder above it is visible in
- * the picker from the first second.
- *
- * It also means the page is playable immediately: no network is fetched until
- * somebody chooses one.
+ * It also means the page is playable immediately, because a baseline needs no
+ * download -- no network is fetched until somebody picks a level that uses one.
  */
 const DEFAULT_MODEL = "greedy";
 
@@ -262,9 +230,9 @@ export function ReversiScreen() {
   const { black, white } = score(game);
   const turn = lastTurn(game);
   const humanMustPass = humanTurn && mustPass(state);
-  const opponent = OPPONENTS.find((model) => model.id === game.modelId);
-  const opponentName = opponent?.label ?? "The AI";
-  const playsNetwork = !isBaseline(game.modelId);
+  const rung = rungFor(game.modelId);
+  const levelName = rungName(rung);
+  const playsNetwork = rung.usesNetwork;
 
   const heatmap = useMemo(
     () => (game.showAnalysis ? turn.thought?.visits : undefined),
@@ -283,8 +251,8 @@ export function ReversiScreen() {
     return (
       <PlayerPlate
         colour={colour === BLACK ? "black" : "white"}
-        name={isHuman ? "You" : opponentName}
-        rating={isHuman ? undefined : opponent?.elo}
+        name={isHuman ? "You" : levelName}
+        detail={isHuman ? undefined : rung.word}
         count={colour === BLACK ? black : white}
         active={!terminal && state.toMove === colour}
         thinking={!isHuman && (game.thinking || loading)}
@@ -297,7 +265,7 @@ export function ReversiScreen() {
     thinking: game.thinking,
     humanTurn,
     humanMustPass,
-    opponentName,
+    levelName,
     result: playerResult,
     black,
     white,
@@ -342,14 +310,13 @@ export function ReversiScreen() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <OpponentPicker
-              models={OPPONENTS}
+            <LevelPicker
               value={game.modelId}
               onChange={(id) => dispatch({ type: "setModel", modelId: id })}
               disabled={game.thinking}
             />
             {playsNetwork && (
-              <LevelPicker
+              <ThinkingTimePicker
                 value={game.levelId}
                 onChange={(id) => dispatch({ type: "setLevel", levelId: id })}
                 disabled={game.thinking}
@@ -391,7 +358,7 @@ export function ReversiScreen() {
                 in {Math.round(turn.thought.elapsedMs)} ms
               </p>
             )}
-            <OpponentDetails model={opponent} levelId={game.levelId} showLevel={playsNetwork} />
+            <LevelDetails rung={rung} levelId={game.levelId} />
           </div>
         </aside>
       </div>
@@ -407,7 +374,7 @@ export function ReversiScreen() {
           black={black}
           white={white}
           humanIsBlack={humanIsBlack}
-          opponentName={opponentName}
+          opponentName={levelName}
           onRematch={() => {
             setDismissedAt(null);
             dispatch({ type: "newGame" });
@@ -429,7 +396,7 @@ export function ReversiScreen() {
  * The headline is the state in two or three words, because that is what a player
  * checks between moves. At the end it is the result, worded exactly as the
  * dialog words it: the interface must not say "the agent wins" in one place and
- * "Greedy wins" in another about the same game.
+ * "Level 2 wins" in another about the same game.
  *
  * This is also the live region, so a screen reader hears the whole sentence.
  */
@@ -438,7 +405,7 @@ function describeTurn({
   thinking,
   humanTurn,
   humanMustPass,
-  opponentName,
+  levelName,
   result,
   black,
   white,
@@ -447,7 +414,8 @@ function describeTurn({
   thinking: boolean;
   humanTurn: boolean;
   humanMustPass: boolean;
-  opponentName: string;
+  /** How the opponent is named to the player: "Level 4". */
+  levelName: string;
   result: "win" | "loss" | "draw" | null;
   black: number;
   white: number;
@@ -461,16 +429,16 @@ function describeTurn({
       return { headline: "A draw", detail: `${black} discs each.`, tone: "quiet" };
     }
     return {
-      headline: result === "win" ? "You win" : `${opponentName} wins`,
+      headline: result === "win" ? "You win" : `${levelName} wins`,
       detail: `${high} to ${low}.`,
       tone: result === "win" ? "you" : "quiet",
     };
   }
 
-  if (thinking) return { headline: `${opponentName} is thinking…`, tone: "quiet" };
+  if (thinking) return { headline: `${levelName} is thinking…`, tone: "quiet" };
   if (humanMustPass) return { headline: "You must pass", tone: "you" };
   if (humanTurn) return { headline: "Your turn", tone: "you" };
-  return { headline: `${opponentName} to move`, tone: "quiet" };
+  return { headline: `${levelName} to move`, tone: "quiet" };
 }
 
 /** Exported for the tests: which squares the board should be offering. */
