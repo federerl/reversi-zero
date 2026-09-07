@@ -360,8 +360,9 @@ small, and finished by generation 100, where the cross-generation table goes fla
 ### Decisions taken
 
 * Run 1 stands as a representative result, with one qualification: two instances
-  of the same recipe differ by about 25 Elo. A recipe change that shows less than
-  that against a single control has not shown anything.
+  of the same recipe differ by about 25 Elo here, and by 48 Elo in the pair runs 5
+  and 7 form. A recipe change that shows less than about 50 Elo against a single
+  control has not shown anything; it has earned a second seed.
 * 120 generations is the length for the capacity experiments, because that is
   where this recipe stops improving. Anything a change buys after that is the
   change's, not the extra generations'.
@@ -736,7 +737,12 @@ recalibrated on the 1.0 network anyway, and that is the place to ask it.
 
 ## Run 6 — E1+E2, capacity and the ownership head together — `e12-10x128-ownership`
 
-**Result: pending.** This section was written before the run was submitted.
+**Result: the gains do not add by generation 120. The big network with the head
+is far ahead at generation 60 (+73 Elo over E2 alone) and level with it at 120
+(+13 Elo, interval spanning 50%). The 1.0 network is the small one with the head,
+and the browser does not need WebGPU to run it.** The prediction table below was
+written before the run was submitted; the result sections after it were written
+on 2026-09-06 once the run had been rated.
 
 **Question.** Run 4 gained 30 to 40 Elo from a 10×128 network. Run 5 gained 45 to
 74 Elo from an ownership head on the 6×64 network. Do the two gains add?
@@ -770,6 +776,304 @@ matches:
 | E1+E2 beats E2 decisively but by less than 20 Elo | the gains mostly overlap; the 1.0 network is 6×64 with the head, which the browser already runs at full speed, and the WebGPU path is for later networks rather than this one |
 | no decisive difference either way | same decision as the row above; capacity is not the lever at this self-play budget once the trunk is fed properly |
 | E1+E2 loses to E2 | the bigger trunk overfits the 64-square target; halve the ownership weight before growing the network again |
+
+### What it cost
+
+5.3 minutes of self-play per generation against E2's 3.5, the same ratio run 4
+showed against the control. 120 generations in 12 hours 31 minutes on one L40S.
+
+### The losses
+
+| generation | E1 (10×128) value / policy | E2 (6×64 + head) value / policy | E1+E2 value / policy / ownership |
+|---|---|---|---|
+| 10 | 0.599 / 1.837 | 0.651 / 1.793 | 0.605 / 1.876 / 0.858 |
+| 30 | 0.584 / 1.368 | 0.640 / 1.347 | 0.605 / 1.348 / 0.859 |
+| 60 | 0.591 / 1.183 | 0.646 / 1.168 | 0.598 / 1.164 / 0.864 |
+| 100 | 0.571 / 1.111 | 0.640 / 1.111 | 0.580 / 1.069 / 0.864 |
+| 120 | 0.620 / 1.096 | 0.649 / 1.124 | 0.595 / 1.055 / 0.864 |
+
+The value loss sits where E1's did, the ownership term where E2's did, and the
+policy loss ends lowest of any run. None of that is evidence of strength; it is
+recorded because it is consistent with each change doing what it did alone.
+
+### Strength: ahead early, level by the end
+
+1000-game head-to-head matches against run 5 (E2 alone) at matched generations
+(`docs/ratings/head-to-head-e12-1000.json`; colour-balanced, 4-ply seeded openings,
+50 simulations, no exploration noise):
+
+| pairing | score for E1+E2 | 95% Wilson | record | about |
+|---|---|---|---|---|
+| E1+E2 gen 60 vs E2 gen 60 | **60.3%** | [57.2%, 63.3%] | 581W 375L 44D | +73 Elo |
+| E1+E2 gen 120 vs E2 gen 120 | 51.9% | [48.9%, 55.0%] | 484W 445L 71D | +13 Elo |
+
+At generation 60 the first prediction row holds, and by a wide margin: the big
+network with the head is 73 Elo ahead of the small one with the head, twice E1's
+own gain over the control. At generation 120 the third row holds: the interval
+spans 50%, and 13 Elo is well inside the 24 Elo noise floor. The small network
+caught up.
+
+Against Edax, same protocol as runs 1 and 5 (`docs/ratings/edax-e12-g120.json`):
+
+| Edax level | E1+E2 gen 120 | E2 gen 120 (run 5) |
+|---|---|---|
+| 5 | 74.4% [63.8%, 82.7%] | 71.2% |
+| 6 | 52.5% [41.7%, 63.1%] | 59.4% |
+| 7 | 42.5% [32.3%, 53.4%] | 41.2% |
+| 8 | 29.4% [20.5%, 40.1%] | 21.9% |
+
+The same picture from the outside: between level 6 and level 7, indistinguishable
+from run 5 at 80 games per level.
+
+One thing the cross-generation table (`docs/ratings/run6-e12-crossgen.json`)
+adds: E1+E2 does not show the plateau at generation 100 that every other run has.
+Generations 100, 114 and 120 rate 956, 988 and 1006, still rising, where run 5's
+were flat at 984, 956, 968. The intervals overlap, so this is a hint and not a
+finding. If it is real, the big network with the head would pull ahead of the
+small one given more generations than 120, at 1.5 times the self-play cost per
+generation.
+
+### Reading
+
+The two changes are not independent levers. The bigger trunk learns faster per
+generation, reaching at 60 what the small trunk with the head reaches at 120, and
+then the small one catches up. Per game of self-play the big network is more
+efficient; per minute of GPU it is not, because each of its generations costs 1.5
+times as much. At a matched budget of 120 generations they land in the same place.
+
+For the question the run was submitted to answer, which network to ship, the
+third prediction row decides: **the 1.0 network is 6×64 with the ownership head**,
+run 5's recipe. It plays at the same strength as the big one at generation 120,
+its checkpoint is 1.8 MB against 12 MB, and the browser already runs it at full
+speed in WebAssembly. The WebGPU inference path, which the roadmap made a
+requirement on the assumption that the bigger network would be needed, is no
+longer required for 1.0; it stays on the list for a later network.
+
+### Decisions taken
+
+* The 1.0 recipe is `configs/full8x8_e2_ownership.yaml`: 6×64, ownership head,
+  weight 1.0, everything else as run 1. The 1.0 checkpoint is chosen among run 5
+  and its replicates (runs 7 and 8) once those are rated.
+* The WebGPU path moves from "required for 1.0" to "stretch" in the roadmap. The
+  hours it would have taken go to the difficulty ladder and the game features.
+* The big network's late climb was checked: its generation 120 beat its
+  generation 100 by **54.9%** over 1000 games ([51.8%, 58.0%], 534W 436L 30D,
+  `docs/ratings/head-to-head-e12-late-1000.json`), about +34 Elo, decisive. The
+  small network's generations 100 and 120 split 50–50. So E1+E2 was still
+  improving when the run stopped, and the small network was not. That does not
+  change the 1.0 decision, which is about a matched budget, but it makes a longer
+  E1+E2 run the natural candidate for a 1.1 network, served through the WebGPU
+  path. Registered here as the next capacity question, not started.
+
+---
+
+## Run 7 — E2, second seed — `e2-ownership-seed2` (CSSE Slurm cluster, gebru)
+
+**Result: the head helps, and run 5 was a lucky seed. The second seed beats the
+control decisively at both generations, by +25 and +33 Elo, against run 5's +45
+and +74. Two seeds of the same recipe differ by 48 Elo at generation 120, twice
+the noise floor run 3 measured.** The prediction table below was written before
+the first generation finished; the result sections after it on 2026-09-06.
+
+**Question.** Run 5's +74 Elo over the control at generation 120 is the largest
+gain in the project and rests on one seed. Run 3 measured about 24 Elo of noise
+between two instances of the same recipe. How much of run 5 is the head, and how
+much is the seed?
+
+**Change.** None to the recipe. `configs/full8x8_e2_ownership.yaml` with `seed`
+overridden to 2024 on the command line (run 5 used the profile's default, 1337).
+The run is on gebru, an RTX 6000 with 14 self-play workers, rather than gus with
+22; run 3 showed that the hardware and worker split change the games without
+changing the recipe, and this run measures that noise along with the seed's.
+
+**Scale.** 120 generations, one GPU, about 11 hours at gebru's pace.
+
+### The prediction, registered before the run
+
+Against run 3 (the control) at matched generations 60 and 120, 1000-game matches:
+
+| if | then |
+|---|---|
+| the second seed beats the control decisively at both generations, within about 25 Elo of run 5's +45 and +74 | the gain is the head's; run 5's numbers stand and go in the README as "about +60 Elo, two seeds" |
+| it beats the control decisively but by clearly less than run 5 | the head helps, and run 5 was a lucky seed; report the mean of the two seeds and say so |
+| it does not beat the control decisively | run 5 was mostly seed; the head's gain is inside the noise and the README claims only what both seeds support |
+
+Also: run 5 against run 7 directly at generation 120. Two seeds of the same recipe
+should split near 50%; a decisive result either way is the noise floor for this
+recipe, to set beside run 3's 24 Elo.
+
+### What it cost
+
+4.1 minutes of self-play per generation on an RTX 6000 with 14 workers, against
+3.5 on the L40S with 22. 120 generations in 10 hours 27 minutes.
+
+### The losses
+
+Indistinguishable from run 5's at every matched generation: value 0.64 to 0.66
+throughout, ownership 0.87, policy within 0.04. Nothing in the curves tells the
+two seeds apart.
+
+### Strength
+
+1000-game matches (`docs/ratings/head-to-head-e2s2-1000.json`):
+
+| pairing | score for run 7 | 95% Wilson | record | about |
+|---|---|---|---|---|
+| run 7 gen 60 vs control gen 60 | **53.6%** | [50.6%, 56.7%] | 521W 448L 31D | +25 Elo |
+| run 7 gen 120 vs control gen 120 | **54.8%** | [51.7%, 57.8%] | 527W 432L 41D | +33 Elo |
+| run 7 gen 120 vs run 5 gen 120 | **43.2%** | [40.2%, 46.3%] | 395W 530L 75D | −48 Elo |
+
+Both intervals against the control exclude 50%, so the head's gain is real on a
+second seed. It is less than half of run 5's. And the third row is the one to
+remember: two runs of the *same* recipe, differing only in the seed and the node
+they ran on, are 48 Elo apart at generation 120, decisively. Run 3 put that
+noise at about 24 Elo from one pair of runs; with a second pair the honest range
+is 25 to 50 Elo.
+
+### Reading
+
+The second prediction row is what happened: the head helps, and run 5 drew a good
+seed. Reported as the recipe's effect, the ownership head is worth about **+45 Elo
+at generation 120, the mean of two seeds (+74 and +33)**, with the two seeds far
+enough apart that a third would move the mean by 10 or 15 Elo either way.
+
+The noise floor matters beyond this run. Run 4's capacity gain of 30 to 40 Elo
+was a single-seed comparison and now sits inside the range two seeds of one recipe
+can span. Run 6's +73 at generation 60 is outside it; its +13 at 120 was never
+claimed. The README carries what both seeds support and nothing that one seed
+produced alone.
+
+### Decisions taken
+
+* The ownership head stays in the 1.0 recipe: three runs with it (5, 7 and 8) all
+  beat the control decisively at generation 120, and no run without it does that
+  at the same cost.
+* Run 5's generation 120 remains the 1.0 checkpoint candidate. It is the best of
+  three seeds, so its +74 over the control is a best-of-three number and is said
+  to be one; its strength against Edax is measured directly and does not depend
+  on how it was chosen.
+* A claim of less than about 50 Elo from a single pair of runs is not a claim on
+  this project. It is a hint that buys a second seed.
+
+---
+
+
+---
+
+## Run 8 — E2, ownership weight halved — `e2-ownership-w05` (CSSE Slurm cluster, gebru)
+
+**Result: no better and no worse than the second seed at full weight. Nothing at
+generation 60, +26 Elo over the control at 120. The weight does not matter over a
+factor of two, as far as one run can tell; 1.0 stays.** The prediction table
+below was written before the first generation finished; the result sections after
+it on 2026-09-06.
+
+**Question.** Run 5 used an ownership weight of 1.0, the first value tried. Does
+the weight matter?
+
+**Change.** `train.ownership_loss_weight` overridden to 0.5 on the command line;
+everything else as run 5. Same node and worker count as run 7.
+
+### The prediction, registered before the run
+
+Against run 3 (the control) at matched generations 60 and 120, 1000-game matches:
+
+| if | then |
+|---|---|
+| within about 25 Elo of run 5 | the head's gain is robust to the weight over a factor of two; 1.0 stays because it is what was measured most |
+| clearly less than run 5 | the weight matters and 1.0 was on the low side; 2.0 is the next thing to try |
+| clearly more than run 5 | 1.0 was too much and the term was competing with the policy after all; 0.5 becomes the recipe's value |
+
+### Strength
+
+1000-game matches (`docs/ratings/head-to-head-e2w05-1000.json`):
+
+| pairing | score for run 8 | 95% Wilson | record | about |
+|---|---|---|---|---|
+| run 8 gen 60 vs control gen 60 | 50.0% | [46.9%, 53.1%] | 471W 471L 58D | 0 |
+| run 8 gen 120 vs control gen 120 | **53.7%** | [50.6%, 56.8%] | 504W 430L 66D | +26 Elo |
+
+The losses match runs 5 and 7 at every matched generation, with the ownership term
+a little higher (0.877 against 0.865), as a smaller weight would predict.
+
+### Reading
+
+Against run 5, which the table was written to compare with, this is the second
+row: clearly less. But run 7 has since shown that run 5 was the lucky seed of the
+recipe, and against run 7's +33 the halved weight's +26 is well inside the noise.
+Read against the two-seed mean, the first row holds: the head's gain is robust to
+the weight over a factor of two, and 1.0 stays because it is the value with the
+most games behind it. The third row's question, whether the term competes with the
+policy, is answered no: halving it did not help.
+
+### Decisions taken
+
+* `train.ownership_loss_weight` stays at 1.0.
+* Weight 2.0 is not worth a run on this evidence. Halving changed nothing that
+  1000 games could see, so doubling is unlikely to either, and the GPU time is
+  better spent on a longer run of the big network with the head (run 6's late
+  climb).
+
+---
+
+
+---
+
+## Play-time sweep: simulations — how much of the strength is search?
+
+**Result: search is the largest lever in the project. The same network that is
+even with Edax level 7 at 256 simulations beats level 8 decisively at 3200, and
+each doubling of the budget is worth roughly one Edax level up to level 8.**
+
+**Question.** Every rating so far is at 50 or 256 simulations per move, and the
+browser's strongest level searches 800 with a two-second cap. Recipe changes have
+moved the agent by tens of Elo. How much does the search budget move it?
+
+**Setup.** No training. Run 5's generation 120, the 1.0 candidate, at 50, 256,
+800, 1600 and 3200 simulations per move against Edax levels 6 to 9: 80
+colour-balanced games per cell, 4-ply seeded openings, no exploration noise, one
+thread each side (`docs/ratings/sims-curve-e2-g120.json`; 1,600 games, 71 minutes
+on 64 CPU cores).
+
+| simulations | vs level 6 | vs level 7 | vs level 8 | vs level 9 |
+|---|---|---|---|---|
+| 50 | 24.4% [16%, 35%] | 6.9% [3%, 15%] | 8.8% [4%, 17%] | 11.9% [6%, 21%] |
+| 256 | 51.2% [40%, 62%] | 41.9% [32%, 53%] | 17.5% [11%, 27%] | 17.5% [11%, 27%] |
+| 800 | 75.0% [65%, 83%] | 58.1% [47%, 68%] | 41.2% [31%, 52%] | 40.0% [30%, 51%] |
+| 1600 | 81.9% [72%, 89%] | 76.9% [67%, 85%] | 48.1% [38%, 59%] | 38.1% [28%, 49%] |
+| 3200 | **91.2%** [83%, 96%] | **73.8%** [63%, 82%] | **68.1%** [57%, 77%] | 37.5% [28%, 48%] |
+
+### Reading
+
+Read down a column. Against level 6 the agent goes from losing three games in
+four at 50 simulations to winning nine in ten at 3200. Against level 8 it goes
+from 9% to 68%. Every doubling from 256 to 3200 buys about one Edax level, up to
+level 8. Level 9 is the exception: 40%, 38%, 38% at 800, 1600 and 3200, flat
+within the intervals, so from 800 simulations up something other than search
+depth decides those games. That is the first place an exact endgame solver would
+show, and it is what the `sims300` question in `configs/full8x8_sims300.yaml` is
+really about.
+
+Two calibrations of the earlier numbers. The 256-simulation cell against level 6
+reads 51% here and 59% in run 5's own Edax table, same checkpoint, different
+seeds: at 80 games the interval is about ±11 points, and both readings sit inside
+it. And the browser's "Max" level, 800 simulations capped at two seconds, reaches
+about 560 simulations on a fast laptop and fewer on a phone, so what the website
+serves is closer to the 256 row than the 800 row. The network is capable of
+level 8. The browser search is not letting it show that.
+
+### Decisions taken
+
+* The strength ceiling of the shipped agent is set by play-time search, not by
+  the network. Making the browser search faster per simulation (batching several
+  leaves per network call, which the `Evaluator` interface already allows) is
+  worth more than any recipe change measured so far and goes into the 1.0 web
+  work in place of the WebGPU hours run 6 freed.
+* An exact endgame solver for the last empties is the second lever, and the one
+  that addresses the level-9 plateau. It is hand-written and will be labelled as
+  such wherever the agent is described.
+* Every future strength claim names its simulation budget, and the model card's
+  Edax line becomes a row of this table rather than one number.
 
 ---
 

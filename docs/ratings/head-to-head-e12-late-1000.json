@@ -1,0 +1,19 @@
+[
+ {
+  "a": "e12-g120",
+  "b": "e12-g100",
+  "wins": 534,
+  "losses": 436,
+  "draws": 30,
+  "games": 1000,
+  "wins_as_black": 285,
+  "wins_as_white": 249,
+  "score": 0.549,
+  "ci_low": 0.5180304041955376,
+  "ci_high": 0.5795945734728781,
+  "simulations": 50,
+  "opening_plies": 4,
+  "chunks": 50,
+  "seed": 20260909
+ }
+]

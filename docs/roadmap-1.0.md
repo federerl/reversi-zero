@@ -68,7 +68,8 @@ Sixty hours against fifty-six is deliberately tight. Section 6 says what is cut 
 
 E2b playout cap randomisation · E3 Gumbel root selection · `reversi bench` · a hint button ·
 save and resume of an in-progress game · a mobile bottom-sheet layout · a self-hosted font · a full
-sound set.
+sound set · the WebGPU inference path (moved here on 2026-09-06: run 6 showed the 1.0 network is the
+small one with the ownership head, which the browser already runs at full speed).
 
 ### Out of scope for 1.0
 
@@ -263,7 +264,7 @@ shows a Reversi card with the opponent count, the strongest rating, and the visi
 muted card for Gomoku marked as coming in 1.1. The TypeScript search stays Reversi-specific in 1.0,
 because its visit counts must match Python count for count.
 
-**WebGPU path.** The session loader imports either `onnxruntime-web/webgpu` or `onnxruntime-web/wasm`
+**WebGPU path (stretch since 2026-09-06; see run 6 in `experiments.md`).** The session loader imports either `onnxruntime-web/webgpu` or `onnxruntime-web/wasm`
 dynamically, so a visitor who gets the CPU path never downloads the GPU build. Backend choice is a pure
 function of the visitor's preference, whether a GPU adapter exists, and the network's size, so today's
 small networks keep the measured WebAssembly path and only a network of 96 channels or more asks for
@@ -370,8 +371,8 @@ Whole items only, never half-finished ones.
 
 **Never cut:** E1, the control and E2a (they cost cluster time, not hours); the SLURM scripts;
 `reversi arena crossgen` (nothing else can regenerate a file three consumers read); G1–G4; the hub and
-directory move (structural for 1.1); the WebGPU path (required by the bigger network); the board, flip
-and game-over dialog; move history and replay; manifest v2.
+directory move (structural for 1.1); the board, flip and game-over dialog; move history and replay;
+manifest v2. (The WebGPU path left this list on 2026-09-06 when run 6 settled the network size.)
 
 ---
 
