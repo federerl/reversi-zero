@@ -9,6 +9,13 @@
  * The reducer knows the rules -- it is the same engine the agent is using, so
  * there is no second opinion about what is legal. What it does *not* do is
  * decide moves; that belongs to the engine, and arrives back here as an action.
+ *
+ * Reviewing a game is a second cursor, not a second copy. `viewing` is an index
+ * into the same history; the game itself does not move. That distinction is the
+ * whole reason browsing an earlier position cannot disturb a search in progress:
+ * the engine is driven by the *live* position, which scrubbing never touches.
+ * Taking a move back is the opposite -- it really does shorten the history, and
+ * the agent is expected to notice.
  */
 
 import {
@@ -40,6 +47,12 @@ export interface Turn {
 
 export interface Game {
   readonly history: readonly Turn[];
+  /**
+   * Which position is on screen: an index into `history`, or null for the live
+   * one. Anything that changes the game resets it to null, because reviewing a
+   * position that a new move has just invalidated is a state with no meaning.
+   */
+  readonly viewing: number | null;
   readonly humanColor: Player;
   readonly levelId: string;
   readonly modelId: string;
@@ -54,6 +67,8 @@ export type GameAction =
   | { type: "play"; action: Action }
   | { type: "agentPlayed"; action: Action; thought: Thought }
   | { type: "undo" }
+  | { type: "view"; ply: number }
+  | { type: "viewLive" }
   | { type: "thinking"; value: boolean }
   | { type: "error"; message: string | null }
   | { type: "setLevel"; levelId: string }
@@ -63,6 +78,7 @@ export type GameAction =
 export function newGame(humanColor: Player, levelId: string, modelId: string): Game {
   return {
     history: [{ state: initialState(BOARD_SIZE), move: null, thought: null }],
+    viewing: null,
     humanColor,
     levelId,
     modelId,
@@ -78,6 +94,29 @@ export function current(game: Game): State {
 
 export function lastTurn(game: Game): Turn {
   return game.history[game.history.length - 1]!;
+}
+
+/** How many moves have been played. The opening position is move 0. */
+export function moveCount(game: Game): number {
+  return game.history.length - 1;
+}
+
+/** True when the screen is showing the position the game is actually at. */
+export function isLive(game: Game): boolean {
+  return game.viewing === null || game.viewing >= game.history.length - 1;
+}
+
+/** Which ply is on screen: the live one unless the player is reviewing. */
+export function viewedPly(game: Game): number {
+  if (game.viewing === null) return game.history.length - 1;
+  // Clamped rather than trusted. A stale index would otherwise reach the board
+  // as `undefined` and render nothing at all.
+  return Math.min(Math.max(game.viewing, 0), game.history.length - 1);
+}
+
+/** The turn on screen. Identical to `lastTurn` unless the player is reviewing. */
+export function viewedTurn(game: Game): Turn {
+  return game.history[viewedPly(game)]!;
 }
 
 export function isHumanTurn(game: Game): boolean {
@@ -134,6 +173,10 @@ export function reduce(game: Game, action: GameAction): Game {
             thought: action.type === "agentPlayed" ? action.thought : null,
           },
         ],
+        // A move lands on the live board, so that is what to show. Leaving the
+        // view where it was would mean the player made a move and watched
+        // nothing happen.
+        viewing: null,
         error: null,
       };
     }
@@ -150,8 +193,20 @@ export function reduce(game: Game, action: GameAction): Game {
       ) {
         history = history.slice(0, -1);
       }
-      return { ...game, history, thinking: false, error: null };
+      return { ...game, history, viewing: null, thinking: false, error: null };
     }
+
+    case "view": {
+      const last = game.history.length - 1;
+      const ply = Math.min(Math.max(Math.trunc(action.ply), 0), last);
+      // Landing on the final position *is* going live, rather than reviewing a
+      // position that happens to be the current one. Otherwise scrubbing to the
+      // end would leave the board inert with no obvious way back.
+      return { ...game, viewing: ply >= last ? null : ply };
+    }
+
+    case "viewLive":
+      return { ...game, viewing: null };
 
     case "thinking":
       return { ...game, thinking: action.value };

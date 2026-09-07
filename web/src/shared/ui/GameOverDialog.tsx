@@ -109,7 +109,12 @@ function Count({
         aria-hidden="true"
         className={`chip ${colour === "black" ? "chip-black" : "chip-white"} size-10`}
       />
-      <span className="display text-5xl">{count}</span>
+      {/* Named for the tests: the dialog's heading contains the opponent's
+          level number, so reading the score out of the dialog's text picks up a
+          digit that is not part of it. */}
+      <span data-count={colour} className="display text-5xl">
+        {count}
+      </span>
       <span className="max-w-[9rem] truncate text-sm text-muted">{name}</span>
     </div>
   );

@@ -20,6 +20,13 @@
  * checkpoint that is, and what it measured, sits under a disclosure in the panel.
  * See `../ladder.ts` for why the ladder is derived from the ratings rather than
  * written down.
+ *
+ * Two positions matter here and they are not the same one. The *live* position
+ * drives the engine, decides whose turn it is, and ends the game. The *viewed*
+ * position is what the board draws, and it differs whenever the player is
+ * reviewing an earlier move. Keeping them apart is what lets somebody scrub back
+ * through a game while the agent is still thinking about the current one --
+ * nothing the review does touches the search.
  */
 
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
@@ -28,6 +35,7 @@ import { LocalEngine } from "../engine/local";
 import {
   BLACK,
   WHITE,
+  discCounts,
   isTerminal,
   legalActions,
   mustPass,
@@ -41,10 +49,12 @@ import { rungFor, rungName } from "../ladder";
 import {
   current,
   isHumanTurn,
+  isLive,
   lastTurn,
   newGame,
   reduce,
-  score,
+  viewedPly,
+  viewedTurn,
   type Game,
 } from "../state/game";
 import { sounds } from "../../../shared/sound";
@@ -52,6 +62,7 @@ import { Button, Toast, Toggle } from "../../../shared/ui/Button";
 import { GameOverDialog } from "../../../shared/ui/GameOverDialog";
 import { Shell } from "../../../shared/ui/Shell";
 import { Board, FLIP_STAGGER_MS, squareName } from "./Board";
+import { MoveHistory } from "./MoveHistory";
 import {
   LevelDetails,
   LevelPicker,
@@ -133,9 +144,11 @@ export function ReversiScreen() {
     };
   }, [game.modelId]);
 
+  // The live position: what the game is at, and what the engine plays from.
   const state = current(game);
   const terminal = isTerminal(state);
   const humanTurn = isHumanTurn(game);
+  const live = isLive(game);
 
   // The agent's turn. One rule, one place: if it is the agent's move and
   // nothing is in flight, think.
@@ -227,21 +240,26 @@ export function ReversiScreen() {
     dispatch({ type: "thinking", value: false });
   }, []);
 
-  const { black, white } = score(game);
-  const turn = lastTurn(game);
+  // The viewed position: what the board draws. The same thing as the live one
+  // unless the player is reviewing.
+  const shown = viewedTurn(game);
+  const { black, white } = discCounts(shown.state);
   const humanMustPass = humanTurn && mustPass(state);
   const rung = rungFor(game.modelId);
   const levelName = rungName(rung);
   const playsNetwork = rung.usesNetwork;
 
   const heatmap = useMemo(
-    () => (game.showAnalysis ? turn.thought?.visits : undefined),
-    [game.showAnalysis, turn.thought],
+    () => (game.showAnalysis ? shown.thought?.visits : undefined),
+    [game.showAnalysis, shown.thought],
   );
 
   // The agent's estimate, read from the player's side of the board. Random and
   // Greedy hold no opinion about who is winning, so there is nothing to show.
-  const agentChances = turn.thought?.winProbability;
+  //
+  // Taken from the *viewed* position, so scrubbing back through a game shows how
+  // the estimate moved rather than freezing on the last one.
+  const agentChances = shown.thought?.winProbability;
   const yourChances = agentChances === undefined ? null : 1 - agentChances;
 
   // Whose plate goes above the board: the opponent's, as across a real table.
@@ -254,7 +272,7 @@ export function ReversiScreen() {
         name={isHuman ? "You" : levelName}
         detail={isHuman ? undefined : rung.word}
         count={colour === BLACK ? black : white}
-        active={!terminal && state.toMove === colour}
+        active={live && !terminal && state.toMove === colour}
         thinking={!isHuman && (game.thinking || loading)}
       />
     );
@@ -269,6 +287,7 @@ export function ReversiScreen() {
     result: playerResult,
     black,
     white,
+    reviewing: live ? null : { ply: viewedPly(game), total: game.history.length - 1 },
   });
 
   return (
@@ -277,9 +296,9 @@ export function ReversiScreen() {
         <div className="game-table">
           {plateFor(humanIsBlack ? WHITE : BLACK)}
           <Board
-            state={state}
-            interactive={humanTurn && !game.thinking && !loading}
-            lastMove={turn.move}
+            state={shown.state}
+            interactive={live && humanTurn && !game.thinking && !loading}
+            lastMove={shown.move}
             visits={heatmap}
             onPlay={play}
           />
@@ -306,7 +325,9 @@ export function ReversiScreen() {
               </div>
             )}
 
-            {yourChances !== null && !terminal && <WinProbability probability={yourChances} />}
+            {yourChances !== null && (!terminal || !live) && (
+              <WinProbability probability={yourChances} />
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -350,12 +371,20 @@ export function ReversiScreen() {
             </Toggle>
           </div>
 
+          <MoveHistory
+            game={game}
+            onView={(ply) => dispatch({ type: "view", ply })}
+            onLive={() => dispatch({ type: "viewLive" })}
+          />
+
           <div className="flex flex-col gap-1 border-t border-line pt-2">
-            {turn.thought && (
+            {shown.thought && (
               <p className="text-sm text-muted">
-                Played {squareName(turn.thought.action, state.size)}
-                {turn.thought.simulations > 0 && <> after {turn.thought.simulations} simulations</>}{" "}
-                in {Math.round(turn.thought.elapsedMs)} ms
+                Played {squareName(shown.thought.action, shown.state.size)}
+                {shown.thought.simulations > 0 && (
+                  <> after {shown.thought.simulations} simulations</>
+                )}{" "}
+                in {Math.round(shown.thought.elapsedMs)} ms
               </p>
             )}
             <LevelDetails rung={rung} levelId={game.levelId} />
@@ -383,7 +412,12 @@ export function ReversiScreen() {
             setDismissedAt(null);
             dispatch({ type: "swapSides" });
           }}
-          onReview={() => setDismissedAt(ply)}
+          onReview={() => {
+            setDismissedAt(ply);
+            // Open the review at the start of the game rather than at the
+            // position they just lost from, which they have been staring at.
+            dispatch({ type: "view", ply: 0 });
+          }}
         />
       )}
     </Shell>
@@ -409,6 +443,7 @@ function describeTurn({
   result,
   black,
   white,
+  reviewing,
 }: {
   loading: boolean;
   thinking: boolean;
@@ -419,8 +454,24 @@ function describeTurn({
   result: "win" | "loss" | "draw" | null;
   black: number;
   white: number;
+  /** Set when the board is showing an earlier position than the live one. */
+  reviewing: { ply: number; total: number } | null;
 }): { headline: string; detail?: string; tone: "you" | "quiet" } {
   if (loading) return { headline: "Loading the AI…", tone: "quiet" };
+
+  // Reviewing wins over everything else, because the board is not showing the
+  // game any more and saying "your turn" over a position from twelve moves ago
+  // is the interface telling a lie about what the player is looking at.
+  if (reviewing !== null) {
+    return {
+      headline: "Reviewing",
+      detail:
+        reviewing.ply === 0
+          ? `The opening position, of ${reviewing.total} moves.`
+          : `Move ${reviewing.ply} of ${reviewing.total}.`,
+      tone: "quiet",
+    };
+  }
 
   if (result !== null) {
     const high = Math.max(black, white);
