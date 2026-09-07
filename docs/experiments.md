@@ -1211,6 +1211,89 @@ not any number this repository has produced.
 
 ---
 
+## Measuring the spread: is a level the same opponent twice?
+
+**Registered 2026-09-07, before the run.** This is item 1 of the three above.
+`reversi spread models/reversi-8x8-gen60.pt`, one command, on the cpu partition.
+
+The complaint is about variation, and the calibration only ever reported means.
+"Inconsistent" turns out to name two different things, so both are measured.
+
+**Within a game: the drop distribution.** After each search, the difference in
+value between the move the level played and the best move the search actually
+examined. The guardrail is the ceiling on that difference and the calibration
+already checks the ceiling holds — 500 moves, worst drop 0.326 against a limit of
+0.35, no violations. What no report has shown is the shape underneath. A level
+whose drops are almost always zero but occasionally 0.3 is two opponents wearing
+one name, and that is exactly what "sometimes unbeatable, sometimes losing badly"
+would feel like from the other side of the board.
+
+**Between games: the dispersion of block scores.** Each level plays
+`minimax-d4` in 15 blocks of 20 games, and the variance between block scores is
+compared against the variance chance alone would produce.
+
+Two protocol choices are worth stating, because either one done the other way
+would produce a wrong answer that looks fine:
+
+*The unit is an opening pair, not a game.* Every opening is played twice with the
+colours swapped, so the two games of a pair are strongly anti-correlated —
+whoever the opening favours tends to win one and lose the other. Treating those
+as independent draws understates the chance variance, and the measurement would
+then report overdispersion that is an artefact of the protocol rather than a
+property of the level. Pairs are independent of each other; games within a pair
+are not.
+
+*The reference opponent sits inside the ladder, at +358.* A level that wins 99%
+of its games has almost no variance left to measure, and no amount of blocking
+recovers information the scoreline never contained. Against `random` or `greedy`
+the two strongest levels would sweep and the measurement would be empty. Depth-4
+minimax keeps Casual near 60% and Club near 82%, which is where the statistic has
+power.
+
+**Subjects and controls.** Only Casual and Club sample their move; Strong and Max
+play the most-visited survivor of the guard at temperature 0, so in a given
+position they always answer the same way. Whatever dispersion *they* show is
+contributed by the opening book and the opponent, not by the level — which makes
+them the control for the protocol itself. They are measured at a quarter of the
+games and a quarter of the moves, because Max searches fifty times as deep as
+Casual and matching the sample sizes would spend nine tenths of the compute on
+the two levels nobody has complained about.
+
+### The prediction, registered before the run
+
+| if | then |
+|---|---|
+| Casual and Club overdispersed, Strong and Max near 1.0 | sampling is the cause, and the fix is the choice rule rather than the search budget |
+| **all four near 1.0, but Casual's drop distribution has a heavy tail** | **the variation is within games, not between them — a player meets it move by move and the scoreline averages it away** |
+| Casual and Club overdispersed *and* Strong and Max overdispersed too | the opening book or the reference opponent is contributing, and the protocol needs fixing before the levels can be judged |
+| all four near 1.0 and every drop distribution tight | the reported effect is not in the agent; look at the interface, the thinking-time cap, or expectation |
+
+The second row is the one to expect. A block of 20 games averages away a great
+deal, and a level with a 0.35 guard has room to play one materially worse move
+per game without that ever showing up in a win rate — while a person playing it
+would notice every one of them.
+
+**No pass mark.** Unlike the calibration, this run has no criterion to meet.
+Criterion S15 asks the levels to be *separated*, which is a claim about means and
+is already demonstrated. There is no agreed figure for how consistent a
+difficulty level ought to be, and inventing one before seeing the first
+measurement would be a guess written down as a standard. What the numbers are
+for is deciding item 3: whether temperature is the right way to make a level
+weak, or whether fewer simulations at temperature 0 would give the same strength
+with less variance.
+
+**Cost.** About 1,700 games and 5,000 searched positions, dominated by Max at 800
+simulations. Roughly three hours on eight laptop cores; well under an hour on 64.
+
+```bash
+sbatch slurm/cpu.sbatch uv run reversi spread models/reversi-8x8-gen60.pt \
+    --out runs/calibration/difficulty_spread.json --workers "$SLURM_CPUS_PER_TASK"
+```
+
+Evidence lands in `docs/difficulty_spread.json`.
+
+---
+
 ## External check: how does the agent compare to Edax?
 
 **Run:** 2026-09-01, generation 60 at the `strong` setting (256 simulations),

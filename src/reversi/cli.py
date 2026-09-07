@@ -557,6 +557,79 @@ def calibrate(
         raise typer.Exit(code=1)
 
 
+@app.command()
+def spread(
+    model: Annotated[Path, typer.Argument(help="An exported model, from `reversi export`")],
+    out: Annotated[Path, typer.Option("--out", help="Where to write the report.")] = Path(
+        "runs/calibration/difficulty_spread.json"
+    ),
+    blocks: Annotated[
+        int, typer.Option("--blocks", help="Blocks of games per level. 15 is the plan's figure.")
+    ] = 15,
+    pairs: Annotated[
+        int,
+        typer.Option("--pairs", help="Opening pairs per block; each pair is two games."),
+    ] = 10,
+    drop_samples: Annotated[
+        int, typer.Option("--drop-samples", help="Moves to inspect per level.")
+    ] = 2000,
+    opponent: Annotated[
+        str, typer.Option("--opponent", help="Who every level is measured against.")
+    ] = "minimax-d4",
+    board_size: Annotated[int, typer.Option("--board-size")] = 8,
+    seed: Annotated[int, typer.Option("--seed")] = 20260907,
+    device: Annotated[
+        str, typer.Option("--device", help="'cpu' or 'cuda'. CPU is usually faster here.")
+    ] = "cpu",
+    workers: Annotated[
+        int,
+        typer.Option("--workers", help="Opening pairs to play at once. 1 runs here."),
+    ] = 1,
+) -> None:
+    """Measure how *consistently* each difficulty level plays.
+
+    `reversi calibrate` shows the four levels are separated. That is a claim
+    about averages, and an average is not an experience: an opponent that plays
+    two good moves and then throws away a corner rates the same as one that
+    plays three mediocre moves, and only one of them is worth a second game.
+
+    This measures the variation instead, in the two senses it can mean. Within a
+    game: how far below its own best move the level actually plays, reported as
+    a distribution rather than the single worst case the calibration checks.
+    Between games: whether its results against a fixed opponent swing more than
+    independent games would, block by block.
+
+    It reports rather than judges. There is no pass mark for consistency yet --
+    the point of a first measurement is to find out what the numbers are, and a
+    threshold invented before the data would only be a guess written down.
+    """
+    from reversi.difficulty.spread import measure_spread, write_report
+
+    setup_logging()
+    try:
+        report = measure_spread(
+            model,
+            board_size=board_size,
+            opponent=opponent,
+            blocks=blocks,
+            pairs_per_block=pairs,
+            drop_samples=drop_samples,
+            seed=seed,
+            device=device,
+            workers=workers,
+        )
+    except ReversiError as error:
+        typer.secho(str(error), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2) from error
+
+    typer.echo("")
+    typer.echo(report.summary())
+
+    write_report(out, report)
+    typer.echo("")
+    typer.echo(f"report: {out}")
+
+
 @app.command("export")
 def export_cmd(
     checkpoint: Annotated[Path, typer.Argument(help="A training checkpoint, e.g. .../latest.pt")],
