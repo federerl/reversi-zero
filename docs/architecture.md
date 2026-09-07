@@ -245,6 +245,8 @@ checkpointing — does something, and it is the gate every later result depends 
 | ADR-0003 | Symmetry and reachability (C6) |
 | ADR-0004 | Process architecture: independent workers, synchronous trainer |
 | ADR-0005 | The agent runs in the browser, not on a server |
+| ADR-0006 | The `Game` interface ships with the second game, not before it |
+| ADR-0007 | A published model is identified by its run, not by its generation |
 
 ## Related documents
 
