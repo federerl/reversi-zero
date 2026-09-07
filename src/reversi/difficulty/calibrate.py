@@ -263,7 +263,7 @@ def _bounds(rating: Any) -> tuple[float, float]:
     return rating.interval.low, rating.interval.high
 
 
-def _evaluator_for(model_path: Path, device: str) -> Evaluator:
+def evaluator_for(model_path: Path, device: str) -> Evaluator:
     """Load either kind of file this project produces.
 
     A *training checkpoint* keeps its architecture at the top level; an
@@ -341,7 +341,7 @@ def calibrate(
     )
 
     guardrail = check_guardrail(
-        _evaluator_for(model_path, device),
+        evaluator_for(model_path, device),
         rungs[0],
         board_size=board_size,
         samples=guard_samples,
@@ -620,7 +620,7 @@ def agent_named(name: str, evaluator: Evaluator | None) -> Agent:
     return DifficultyAgent(evaluator, level_by_name(name))
 
 
-def _needs_network(name: str) -> bool:
+def needs_network(name: str) -> bool:
     """Only the difficulty levels need the trained network loaded."""
     return not (
         name in {"random", "greedy"} or name.startswith("minimax-d") or name.startswith("edax-l")
@@ -640,8 +640,8 @@ def _play_pairing(job: _PairJob) -> MatchResult:
     torch.set_num_threads(1)
 
     evaluator = None
-    if _needs_network(job.a) or _needs_network(job.b):
-        evaluator = _evaluator_for(Path(job.model_path), job.device)
+    if needs_network(job.a) or needs_network(job.b):
+        evaluator = evaluator_for(Path(job.model_path), job.device)
 
     return play_match(
         agent_named(job.a, evaluator),
