@@ -77,6 +77,66 @@ From the laptop, in Git Bash:
 slurm/fetch_run.sh e1-10x128 <you>@slurm.csse.rose-hulman.edu
 ```
 
+Add generation numbers to bring specific checkpoints back as well:
+
+```bash
+slurm/fetch_run.sh e2-ownership <you>@slurm.csse.rose-hulman.edu 120
+```
+
+`latest.pt` is whatever the run stopped on and `best.pt` follows the in-loop
+quick evaluation, so neither is a stable name for a particular network. A release
+publishes a checkpoint by its generation, because that is what the rating report
+and the web manifest call it.
+
+## Sending a model the other way
+
+```bash
+slurm/push_model.sh models/reversi-8x8-gen60.pt <you>@slurm.csse.rose-hulman.edu
+```
+
+Files land in `~/reversi-models/`, deliberately outside the run directories:
+they are not the output of any run there.
+
+This is needed to rate a network trained somewhere else. Run 1 predates the
+cluster, so its generation 60 -- the network the site currently serves -- exists
+only on the laptop, and putting it on the same scale as a cluster run means one
+of them has to travel. A 1.9 MB checkpoint going up is cheaper than a
+120-generation run coming down.
+
+The sidecar travels with the checkpoint. Without it there is no architecture
+record and no checksum, and the entrant gets named after its file rather than
+after its generation.
+
+## Rating two runs on one scale
+
+Ratings from two tournaments are not comparable, even when both are anchored at
+random play. Depth-4 minimax is frozen and played in both of this project's
+cross-generation tables; it rates +523 in one and +503 in the other. To compare
+networks from different runs, they have to play in the same round robin.
+
+`crossgen` takes extra entrants, so this is one command:
+
+```bash
+sbatch slurm/cpu.sbatch uv run reversi arena --suite crossgen     --run-id e2-ownership --max-checkpoints 6     --entrant "run1-gen60=$HOME/reversi-models/reversi-8x8-gen60.pt"     --games 100 --simulations 50 --workers "$SLURM_CPUS_PER_TASK"     --out docs/ratings/release-one-scale.json
+```
+
+Name an outside entrant something that does not start with `gen`. The web
+manifest reads a `genNN` entrant as a playable model and parses the digits after
+the prefix, so `run1-gen60` becomes a rated reference row while `gen60-run1`
+would fail the manifest build.
+
+The round robin gives each pairing 100 games. For a claim about one specific
+pairing, follow it with a 1000-game match — the standard this project holds a
+two-way strength statement to:
+
+```bash
+sbatch slurm/cpu.sbatch uv run reversi arena --suite custom     -e "gen120=$HOME/reversi-runs/e2-ownership/checkpoints/gen_00120.pt"     -e "run1-gen60=$HOME/reversi-models/reversi-8x8-gen60.pt"     -e random     --games 1000 --simulations 50 --workers "$SLURM_CPUS_PER_TASK"     --out docs/ratings/release-head-to-head-1000.json
+```
+
+`random` is in the field so the fit is anchored where every other table in this
+repository is anchored. Without it the ratings would be anchored at whichever
+entrant came first and would not be comparable to anything.
+
 ## Habits
 
 * Never run training on the login node. It is shared by everyone.

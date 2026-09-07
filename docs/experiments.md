@@ -1294,6 +1294,117 @@ Evidence lands in `docs/difficulty_spread.json`.
 
 ---
 
+## The release tournament: putting two runs on one scale
+
+**Registered 2026-09-07, before the run.** Nothing about the agent changes here.
+This exists because a number the project wants to state cannot currently be
+stated.
+
+**The problem.** The 1.0 network is run 5's generation 120. The network the site
+serves is run 1's generation 60. Their ratings come from different tournaments:
+
+| | rated in | its own table says |
+|---|---|---:|
+| run 5, generation 120 | `docs/ratings/run5-e2-ownership-crossgen.json` | +968 |
+| run 1, generation 60 | `docs/crossgen.json` | +877 |
+
+Subtracting those gives +91 and means nothing. Two Bradley-Terry fits anchored at
+random play agree on the anchor and on nothing else, and the size of the
+disagreement is measurable right here: depth-4 minimax is a frozen opponent that
+played in both, and it rates **+523** in run 1's table and **+503** in run 5's.
+Greedy rates +313 and +324. So the two scales differ by roughly 20 points on
+opponents that did not change at all, and the +91 could reasonably be anything
+from about +70 to about +110 before any other source of error.
+
+That is not good enough for a release. It is also not good enough for the web
+app, whose difficulty ladder sorts levels by measured rating and therefore cannot
+mix two tables.
+
+**The run.** One round robin containing run 5's checkpoints, the four frozen
+baselines, **and** run 1's generation 60 as an entrant. Every pairing played,
+one fit, one scale. 100 games per pairing at 50 simulations, 4 opening plies --
+the same protocol as run 5's own table, so the two are comparable in method as
+well as in field.
+
+Then a dedicated 1000-game match on the one pairing that carries the release
+claim, because that is this project's standard for a two-way strength statement
+and the round robin gives that pairing only 100 games.
+
+Run 1's generation 60 has to travel to the cluster to do this: run 1 was trained
+on a laptop before the cluster existed, so its checkpoint exists nowhere else.
+`slurm/push_model.sh` is that direction, which `fetch_run.sh` did not cover.
+
+### The prediction, registered before the run
+
+| if | then |
+|---|---|
+| **run 5's gen 120 beats run 1's gen 60 by 60-110 Elo, interval excluding 0** | **the naive subtraction was about right, the ownership head and the longer run both paid, and the release is a straightforward upgrade** |
+| it beats it by more than 110 | one of the two tables was flattering its own entrants more than the frozen baselines suggested; worth understanding before quoting either historical number again |
+| it beats it by less than 60 | most of the apparent gain was the difference between two fits, and the honest release note is a smaller number than the tables implied |
+| it does not beat it decisively | the 1.0 choice was made on a within-run comparison that does not survive contact with the network actually shipped, and the release should wait |
+
+The first row is what to expect. Run 5's generation 120 beat *its own control* by
++74 at 1000 games, and run 1's recipe is that control's recipe at half the
+generations, so a gain in the 60-110 band is the arithmetic working out.
+
+### What the result decides
+
+**Which generations become levels.** Run 5's rated generations will be roughly
+05, 35, 65, 100, 114 and 120, and its own table puts the top three at +984, +956
+and +968 -- three networks a player cannot tell apart. Publishing all six would
+give the ladder three top rungs that differ by noise, which is the same mistake
+the difficulty calibration exists to prevent. So the tournament rates six and the
+release publishes the subset that is actually separated, chosen from the fit
+rather than in advance. On run 5's own numbers that is likely 05, 35, 65 and 120,
+which with random and greedy gives six levels whose smallest gap is larger than
+the smallest gap in today's ladder (22 Elo, between run 1's generations 40 and
+60).
+
+**What the release note may claim.** One number, from the 1000-game match, on one
+scale, with its interval.
+
+**Nothing about the ladder's ordering is decided by hand.** `ladder.ts` sorts by
+measured rating, so the levels renumber themselves from whatever this produces.
+
+### Cost
+
+55 pairings at 100 games is about 5,500 games; run 5's 45-pairing table took 14.5
+minutes on the cpu partition. The 1000-game match adds three pairings. Under an
+hour in total.
+
+```bash
+# once, from the laptop -- run 1's checkpoint has to reach the cluster
+slurm/push_model.sh models/reversi-8x8-gen60.pt <you>@slurm.csse.rose-hulman.edu
+
+# on the cluster, from ~/reversi-zero
+sbatch slurm/cpu.sbatch uv run reversi arena --suite crossgen \
+    --run-id e2-ownership --max-checkpoints 6 \
+    --entrant "run1-gen60=$HOME/reversi-models/reversi-8x8-gen60.pt" \
+    --games 100 --simulations 50 --workers "$SLURM_CPUS_PER_TASK" \
+    --out docs/ratings/release-one-scale.json \
+    --notes "1.0 release: run 5 and the network 0.0 shipped, one fit"
+
+sbatch slurm/cpu.sbatch uv run reversi arena --suite custom \
+    -e "gen120=$HOME/reversi-runs/e2-ownership/checkpoints/gen_00120.pt" \
+    -e "run1-gen60=$HOME/reversi-models/reversi-8x8-gen60.pt" \
+    -e random \
+    --games 1000 --simulations 50 --workers "$SLURM_CPUS_PER_TASK" \
+    --out docs/ratings/release-head-to-head-1000.json \
+    --notes "1.0 release: the shipped network against the one it replaces"
+```
+
+The entrant name for run 1's checkpoint must not begin with `gen` followed by
+something that is not a number. The web manifest treats a `genNN` entrant as a
+playable model and parses the digits after the prefix, so `gen60-run1` would
+crash the manifest build while `run1-gen60` becomes a rated reference row -- which
+is what it should be, since the ladder's levels are one run's progression rather
+than a mixture of two.
+
+Evidence lands in `docs/ratings/release-one-scale.json` and
+`docs/ratings/release-head-to-head-1000.json`.
+
+---
+
 ## External check: how does the agent compare to Edax?
 
 **Run:** 2026-09-01, generation 60 at the `strong` setting (256 simulations),
