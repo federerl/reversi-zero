@@ -56,13 +56,19 @@ All of this is verified in the code as of the 0.0 release.
 |---|---|---|
 | A | Cluster bring-up, SLURM scripts, experiments E1 (capacity), a control run, E2a (ownership head), a `c_puct` sweep | 12 |
 | B | Evaluation tooling: `reversi arena`, in-loop quick evaluation, `best.pt` | 9 |
-| C | `Game` interface, steps G1–G4, plus the seam test | 11 |
+| ~~C~~ | ~~`Game` interface, steps G1–G4, plus the seam test~~ — **moved to 1.1 on 2026-09-07, see ADR-0006** | ~~11~~ |
 | D | Difficulty consistency: measure spread, compare weakening methods, rate the offered combinations, recalibrate on the new network | 4 |
 | E | Web 1.0: hub and directory move, WebGPU path, visual identity, replay and win-rate chart, records, manifest v2 | 20 |
 | F | Docs, hygiene, release: experiment entries, model card, README, stale docstrings, the `v1.0.0` tag | 4 |
 | | **Total** | **~60** |
 
 Sixty hours against fifty-six is deliberately tight. Section 6 says what is cut first.
+
+**Amended 2026-09-07.** Workstream C moved to 1.1. Its whole payoff is a cheaper
+start for Gomoku, which is a 1.1 feature, and an interface extracted from one
+implementation is a guess until the second game it has to fit exists. ADR-0006
+records the reasoning, what it costs, and what would reverse it. The remaining
+scope is unchanged; nothing in 1.0 depended on it.
 
 ### Stretch, only if ahead
 
@@ -203,7 +209,14 @@ five minutes per five generations, roughly 10% overhead, accepted so the loop st
 (ADR-0004). Stated plainly in the docs: `elo_estimate` is a within-run, low-precision curve for
 choosing `best`. It is not the cross-generation rating, and the two scales agree only on the anchor.
 
-### C. The `Game` interface
+### C. The `Game` interface — moved to 1.1
+
+**Moved out of 1.0 on 2026-09-07 (ADR-0006).** The design below is kept as
+written, because it is the plan 1.1 starts from rather than a plan that was
+abandoned. Two things to revisit when it is picked up: the second game exercising
+the seam should be Gomoku itself rather than the 3×3 fixture, and the "two
+bitboards and a side to move" storage limitation should be settled against the
+games that break it rather than deferred again.
 
 New `src/reversi/game/protocol.py`, standard library and numpy only, never torch. It names what the
 rest of the pipeline needs from a game: identity and shape (`board_size`, `policy_size`, `pass_action`,
@@ -338,6 +351,44 @@ manifest swap plus one bench run.
 
 ---
 
+## 4b. Where 1.0 stands, 2026-09-07
+
+Two thirds of the way through the window. What is done, what is open, and what
+moved — so the plan can be read against the repository rather than beside it.
+
+**Done and evidenced.** The cluster bring-up and SLURM scripts, with the resume
+path verified end to end on three real jobs (S9). E1 capacity, a control run,
+E2a the ownership head, a second seed of it, the `c_puct` sweep and a
+search-budget sweep — all with entries in `docs/experiments.md` carrying the
+prediction that was registered before the run. `reversi arena` with the four
+suites, in-loop quick evaluation and `best.pt`. The difficulty calibration, which
+met S15 with room to spare. The hub and directory move, the visual identity, the
+board with its 3D flip, the game-over dialog, and the difficulty ladder that
+turned checkpoint names into numbered levels.
+
+**Open, in 1.0.**
+
+| Item | State |
+|---|---|
+| Move history and replay | the reducer already keeps an immutable per-ply history; there is no scrubber and the dialog's "Review" only closes it |
+| Manifest v2 | the generator emits version 2; the committed manifest stays at version 1 until the models release is published, because the two must move together |
+| Difficulty spread | `reversi spread` written and registered; the run has not been made |
+| Docs, hygiene, release | model card refresh, the `v1.0.0` tag |
+
+**Moved out.** Workstream C, the `Game` interface, to 1.1 (ADR-0006). The WebGPU
+path to stretch on 2026-09-06, once run 6 settled that the 1.0 network is the
+small one the browser already runs at full speed.
+
+**Not attempted, and deliberately.** The `combos` suite — rating all 24
+generation-by-thinking-time combinations the interface offers. It is item 4 in the
+cut order and the fallback the plan specified is in place: the ladder only offers
+generations the cross-generation tournament rated, and the thinking-time ratings
+are shown only against the thinking time they belong to, never mixed into the
+ladder's ordering. What the interface cannot yet say is what a *combination*
+rates, and `docs/experiments.md` says so in as many words.
+
+---
+
 ## 5. Verification
 
 | Item | Must still pass | New evidence |
@@ -370,9 +421,16 @@ Whole items only, never half-finished ones.
 9. Quick evaluation inside training. Fallback: `arena --suite crossgen` after the fact only.
 
 **Never cut:** E1, the control and E2a (they cost cluster time, not hours); the SLURM scripts;
-`reversi arena crossgen` (nothing else can regenerate a file three consumers read); G1–G4; the hub and
+`reversi arena crossgen` (nothing else can regenerate a file three consumers read); the hub and
 directory move (structural for 1.1); the board, flip and game-over dialog; move history and replay;
-manifest v2. (The WebGPU path left this list on 2026-09-06 when run 6 settled the network size.)
+manifest v2. (The WebGPU path left this list on 2026-09-06 when run 6 settled the network size.
+G1–G4 left it on 2026-09-07, moved whole into 1.1 rather than cut — see ADR-0006.)
+
+A note on how this list is meant to work, since it has now been changed twice.
+An item leaving it is a decision that gets written down with its reasoning, in an
+ADR or an experiments entry, on the day it happens. An item leaving it silently
+is the failure the list exists to prevent: a reader six months later cannot tell
+whether it was descoped on purpose or forgotten, and neither can its author.
 
 ---
 

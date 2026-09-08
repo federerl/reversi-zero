@@ -695,6 +695,93 @@ def export_onnx_cmd(
     typer.echo(f"  sha256 {meta['sha256']}")
 
 
+@app.command("web-manifest")
+def web_manifest_cmd(
+    tournament: Annotated[
+        Path, typer.Argument(help="A cross-generation tournament report, from `reversi arena`")
+    ],
+    out: Annotated[
+        Path, typer.Option("--out", help="Where the app reads its opponent list from.")
+    ] = Path("web/src/games/reversi/engine/models.json"),
+    sidecars: Annotated[
+        Path,
+        typer.Option("--sidecars", help="Directory holding the .json files export-onnx wrote."),
+    ] = Path("models"),
+    release: Annotated[
+        str, typer.Option("--release", help="The GitHub Release tag hosting the .onnx files.")
+    ] = "models-v1",
+    calibration: Annotated[
+        Path | None,
+        typer.Option("--calibration", help="A difficulty report, to carry the level ratings."),
+    ] = None,
+    generations: Annotated[
+        str | None,
+        typer.Option("--generations", help="Comma-separated, e.g. '5,20,40,60'. Default: all."),
+    ] = None,
+    board_size: Annotated[int, typer.Option("--board-size")] = 8,
+    url_prefix: Annotated[
+        str, typer.Option("--url-prefix", help="Where the app fetches models from.")
+    ] = "/models",
+) -> None:
+    """Build the web app's opponent list from a tournament report.
+
+    One command rather than a snippet to paste, because this file is the join
+    between what was measured and what a visitor is told, and a manifest edited
+    by hand is a rating attached to whatever weights happen to be published.
+
+    Every generation named here needs the sidecar its ONNX export wrote, which
+    carries the run, the architecture and the checksum. A generation with no
+    sidecar cannot be published: there would be no way to verify the file the
+    manifest points at.
+
+    Nothing is published by running this. It writes a JSON file that the site
+    reads at build time; uploading the matching `.onnx` files to a release is a
+    separate, deliberate step.
+    """
+    from reversi.web.manifest import build_manifest, write_manifest
+
+    setup_logging()
+    wanted = None
+    if generations is not None:
+        try:
+            wanted = [int(part) for part in generations.split(",") if part.strip()]
+        except ValueError as error:
+            typer.secho(f"--generations must be integers: {error}", fg=typer.colors.RED, err=True)
+            raise typer.Exit(code=2) from error
+
+    try:
+        manifest = build_manifest(
+            tournament,
+            sidecars=sidecars,
+            release=release,
+            generations=wanted,
+            board_size=board_size,
+            url_prefix=url_prefix,
+            calibration=calibration,
+        )
+    except ReversiError as error:
+        typer.secho(str(error), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2) from error
+
+    size = write_manifest(out, manifest)
+
+    typer.echo(f"manifest v{manifest['manifest_version']} for release {manifest['release']}")
+    for model in manifest["models"]:
+        arch = model["arch"]
+        typer.echo(
+            f"  {model['id']}: {model['elo']:+.0f} Elo, "
+            f"{arch['n_blocks']}x{arch['channels']}, run {model['run']}"
+        )
+    for baseline in manifest["baselines"]:
+        typer.echo(f"  {baseline['name']}: {baseline['elo']:+.0f} Elo (rated, not a model)")
+    typer.echo("")
+    typer.echo(f"wrote {out} ({size} bytes)")
+    typer.echo(
+        "The .onnx files this points at are not uploaded by this command. "
+        f"Publishing release {manifest['release']!r} is a separate step."
+    )
+
+
 @app.command("export-fixtures")
 def export_fixtures_cmd(
     destination: Annotated[Path, typer.Argument(help="Directory to write the fixture JSON into")],
