@@ -1287,7 +1287,7 @@ simulations. Roughly three hours on eight laptop cores; well under an hour on 64
 
 ```bash
 sbatch slurm/cpu.sbatch uv run reversi spread models/reversi-8x8-gen60.pt \
-    --out runs/calibration/difficulty_spread.json --workers "$SLURM_CPUS_PER_TASK"
+    --out runs/calibration/difficulty_spread.json --workers @CPUS@
 ```
 
 Evidence lands in `docs/difficulty_spread.json`.
@@ -1380,7 +1380,7 @@ slurm/push_model.sh models/reversi-8x8-gen60.pt <you>@slurm.csse.rose-hulman.edu
 sbatch slurm/cpu.sbatch uv run reversi arena --suite crossgen \
     --run-id e2-ownership --max-checkpoints 6 \
     --entrant "run1-gen60=$HOME/reversi-models/reversi-8x8-gen60.pt" \
-    --games 100 --simulations 50 --workers "$SLURM_CPUS_PER_TASK" \
+    --games 100 --simulations 50 --workers @CPUS@ \
     --out docs/ratings/release-one-scale.json \
     --notes "1.0 release: run 5 and the network 0.0 shipped, one fit"
 
@@ -1388,7 +1388,7 @@ sbatch slurm/cpu.sbatch uv run reversi arena --suite custom \
     -e "gen120=$HOME/reversi-runs/e2-ownership/checkpoints/gen_00120.pt" \
     -e "run1-gen60=$HOME/reversi-models/reversi-8x8-gen60.pt" \
     -e random \
-    --games 1000 --simulations 50 --workers "$SLURM_CPUS_PER_TASK" \
+    --games 1000 --simulations 50 --workers @CPUS@ \
     --out docs/ratings/release-head-to-head-1000.json \
     --notes "1.0 release: the shipped network against the one it replaces"
 ```

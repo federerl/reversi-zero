@@ -114,10 +114,18 @@ random play. Depth-4 minimax is frozen and played in both of this project's
 cross-generation tables; it rates +523 in one and +503 in the other. To compare
 networks from different runs, they have to play in the same round robin.
 
-`crossgen` takes extra entrants, so this is one command:
+`crossgen` takes extra entrants, so this is one command. `@CPUS@` is filled
+in by `cpu.sbatch` with the cores the job was given -- writing
+`$SLURM_CPUS_PER_TASK` there does not work, because the login shell expands
+it to nothing before sbatch sees it and the job runs with an empty
+`--workers`:
 
 ```bash
-sbatch slurm/cpu.sbatch uv run reversi arena --suite crossgen     --run-id e2-ownership --max-checkpoints 6     --entrant "run1-gen60=$HOME/reversi-models/reversi-8x8-gen60.pt"     --games 100 --simulations 50 --workers "$SLURM_CPUS_PER_TASK"     --out docs/ratings/release-one-scale.json
+sbatch slurm/cpu.sbatch uv run reversi arena --suite crossgen \
+    --run-id e2-ownership --max-checkpoints 6 \
+    --entrant "run1-gen60=$HOME/reversi-models/reversi-8x8-gen60.pt" \
+    --games 100 --simulations 50 --workers @CPUS@ \
+    --out docs/ratings/release-one-scale.json
 ```
 
 Name an outside entrant something that does not start with `gen`. The web
@@ -130,7 +138,12 @@ pairing, follow it with a 1000-game match — the standard this project holds a
 two-way strength statement to:
 
 ```bash
-sbatch slurm/cpu.sbatch uv run reversi arena --suite custom     -e "gen120=$HOME/reversi-runs/e2-ownership/checkpoints/gen_00120.pt"     -e "run1-gen60=$HOME/reversi-models/reversi-8x8-gen60.pt"     -e random     --games 1000 --simulations 50 --workers "$SLURM_CPUS_PER_TASK"     --out docs/ratings/release-head-to-head-1000.json
+sbatch slurm/cpu.sbatch uv run reversi arena --suite custom \
+    -e "gen120=$HOME/reversi-runs/e2-ownership/checkpoints/gen_00120.pt" \
+    -e "run1-gen60=$HOME/reversi-models/reversi-8x8-gen60.pt" \
+    -e random \
+    --games 1000 --simulations 50 --workers @CPUS@ \
+    --out docs/ratings/release-head-to-head-1000.json
 ```
 
 `random` is in the field so the fit is anchored where every other table in this
@@ -139,6 +152,11 @@ entrant came first and would not be comparable to anything.
 
 ## Habits
 
+* Submit from `~/reversi-zero`, always. `sbatch slurm/cpu.sbatch ...` is a
+  relative path, so from anywhere else it fails with
+  `Unable to open file slurm/cpu.sbatch` -- which names the file rather than the
+  working directory and reads like a missing script. `env.sh` catches the same
+  mistake once the script is found, but sbatch has to find it first.
 * Never run training on the login node. It is shared by everyone.
 * Request the CPU cores the job uses. Workers that exceed the request are throttled.
 * One `--set` on the command line is fine; anything more belongs in a config file so the
