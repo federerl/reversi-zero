@@ -373,6 +373,68 @@ opponents. Counting report rows advertised eight levels and showed six.
 
 ---
 
+## Reviewing a game is a cursor, not a copy
+
+A board game you cannot look back at is a board game you cannot learn from. The
+question after losing is never what the score was; it is where it went wrong, and
+answering that needs the position from twelve moves ago on the screen.
+
+The reducer already kept every position -- one immutable `Turn` per move, which is
+what makes a take-back a matter of dropping the last entry. Reviewing adds one
+field beside that history:
+
+```ts
+readonly viewing: number | null;   // an index into history, or null for live
+```
+
+**Two positions, and they are not the same one.** The *live* position drives the
+engine, decides whose turn it is and ends the game. The *viewed* position is what
+the board draws. They differ only while somebody is reviewing.
+
+That separation is the whole feature. The screen restarts the agent's search
+whenever the position, the opponent or the budget changes, and it identifies a
+position by the history length. If reviewing worked by rewinding the game, then
+scrubbing back while the AI was thinking would silently abort the move the player
+was waiting for -- and the symptom is a board that never answers. Because
+`viewing` is a second cursor over the same history, none of the things the search
+keys on move, so the search finishes and the move lands. There is an end-to-end
+test that does exactly this: start a search at the slowest thinking time, scrub
+back mid-search, and assert the move still arrives.
+
+**Anything that changes the game clears the cursor.** A move, a take-back, a new
+game, a side swap. Reviewing a position that a new move has just invalidated is a
+state with nothing sensible to draw, and a player who makes a move must see it
+happen.
+
+That includes the AI's reply arriving while somebody is mid-review, and the
+decision there is deliberate. Staying put would be gentler -- the player chose to
+look away -- but only the live position is interactive, so a board left in review
+is a board that will not accept a move for a reason the player cannot see.
+Snapping forward keeps the game playable, and the search still completes either
+way, which is the part that would have been a bug.
+
+**A stale index is clamped rather than trusted.** `undo` shortens the history, so
+an index that survived would reach the board as `undefined` and render an empty
+board instead of a position. `viewedPly` clamps; the reducer also clears on undo,
+so it is belt and braces on the one failure that looks like a rendering bug
+rather than a state bug.
+
+**Landing on the last position counts as going live.** Otherwise scrubbing to the
+end leaves the board inert on a position that happens to be the current one, with
+no obvious way back.
+
+The control is a native `<input type="range">`, restyled. Dragging, clicking the
+track, arrow keys, Home and End, and the screen-reader announcement all come free,
+and none of them would from two divs and a pointer handler. It is absent until
+there is a move to review, because an inert slider on the opening position is a
+promise the interface has not earned.
+
+While reviewing, the turn indicator says so. It has to: the board is not showing
+the game any more, and "Your turn" over a position from twelve moves ago is the
+interface lying about what the player is looking at. The win-probability meter
+stays visible during a review of a finished game, which is the one time it is
+genuinely interesting -- scrubbing shows where the agent thought the game turned.
+
 ## The rules are written three times now
 
 Twice in Python — an obvious list-of-lists version written as the specification,
@@ -519,6 +581,21 @@ note beside a level, never mixed into the ladder's ordering.
 
 **Blank page, nothing in the console.** You probably opened `index.html` from
 disk. Serve it over HTTP: `npm run dev` or `npm run preview`.
+
+**End-to-end tests fail on code you can see is correct.** A `vite preview` left
+listening on port 4173 is reused instead of started, and `reuseExistingServer`
+skips the build with it -- so the tests run against whatever `dist/` held when
+that server came up. The symptom is a selector that cannot find an element you
+are looking at in your own browser. Kill the listener and run again:
+
+```powershell
+Get-NetTCPConnection -LocalPort 4173 -State Listen | ForEach-Object {
+    Stop-Process -Id $_.OwningProcess -Force
+}
+```
+
+This has now caused two rounds of confusion, both times looking like a bug in the
+component under test.
 
 **"Loading the agent…" forever.** The `.onnx` file is missing. Check
 `web/public/models/` against the URLs in `web/src/games/reversi/engine/models.json`. If it is

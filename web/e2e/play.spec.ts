@@ -179,9 +179,17 @@ test("a whole game can be played to the end", async ({ page }) => {
   // both true of every game and a much better check -- it ties the status line,
   // the reducer and the rules engine together at the end of a real sequence of
   // moves.
-  const counts = [...final.matchAll(/(\d+)/g)].map((m) => Number(m[1]));
-  expect(counts.length).toBeGreaterThanOrEqual(2);
-  expect(counts[0]! + counts[1]!).toBe(await discCount(page));
+  // The scoreline is matched by its shape, not by taking the first two numbers
+  // in the sentence. The opponent is named by its rung -- "Level 2 wins, 47 to
+  // 17" -- so the level number is a digit in the same string, and reading
+  // digits positionally summed 2 + 47. It passed or failed depending on who won,
+  // because "You win" contains no number.
+  const margin = final.match(/(\d+) to (\d+)/);
+  const drawn = final.match(/(\d+) discs each/);
+  const reported = margin
+    ? Number(margin[1]) + Number(margin[2])
+    : 2 * Number(drawn![1]);
+  expect(reported).toBe(await discCount(page));
 
   // And it was a real game rather than a two-move accident.
   expect(await discCount(page)).toBeGreaterThan(20);
@@ -193,8 +201,9 @@ test("a whole game can be played to the end", async ({ page }) => {
   await expect(dialog).toBeVisible();
   // The ending names the opponent it was played against, whichever it was.
   await expect(dialog.getByRole("heading", { level: 2 })).toHaveText(/You win|wins|A draw/);
-  const shown = (await dialog.textContent()) ?? "";
-  for (const n of counts.slice(0, 2)) expect(shown).toContain(String(n));
+  const dialogBlack = Number(await dialog.locator("[data-count='black']").textContent());
+  const dialogWhite = Number(await dialog.locator("[data-count='white']").textContent());
+  expect(dialogBlack + dialogWhite).toBe(reported);
 
   await dialog.getByRole("button", { name: "Rematch" }).click();
   await expect(dialog).toBeHidden();
@@ -267,6 +276,66 @@ test("thinking time is offered as time, and rated where it is explained", async 
   const about = page.locator("details", { hasText: /About level \d/ });
   await about.locator("summary").click();
   await expect(about.getByText(/rates \+\d+ in its own tournament/)).toBeVisible();
+});
+
+test("a played game can be reviewed move by move", async ({ page }) => {
+  // The scrubber is absent until there is something to review, so the opening
+  // position must not offer one.
+  await expect(page.getByLabel("Move to review")).toBeHidden();
+
+  await page.locator('[data-square="19"]').click();
+  await expect(page.getByRole("status")).toContainText("Your turn", { timeout: 30_000 });
+
+  const scrubber = page.getByLabel("Move to review");
+  await expect(scrubber).toBeVisible();
+
+  const liveDiscs = await discCount(page);
+
+  // Back to the opening position. Four discs, and the interface says plainly
+  // that what is on screen is not the game.
+  await page.getByRole("button", { name: "Previous" }).click();
+  await page.getByRole("button", { name: "Previous" }).click();
+  await expect(page.getByRole("status")).toContainText("Reviewing");
+  expect(await discCount(page)).toBe(4);
+
+  // And nothing is clickable while reviewing: a move played into a position
+  // from three plies ago would land in a game that no longer exists.
+  expect(await playableSquares(page)).toEqual([]);
+
+  await page.getByRole("button", { name: "Latest" }).click();
+  await expect(page.getByRole("status")).toContainText("Your turn");
+  expect(await discCount(page)).toBe(liveDiscs);
+});
+
+test("reviewing while the AI thinks does not cancel its search", async ({ page }) => {
+  // The reason the review is a cursor rather than a second copy of the game.
+  // The screen restarts the agent's search whenever the position changes, so if
+  // scrubbing changed the position the player would silently abort the move
+  // they are waiting for -- and the symptom is a board that never answers.
+  test.slow();
+
+  await page.getByLabel("Level").selectOption("gen05");
+  await expect(page.getByRole("status")).toContainText("Your turn", { timeout: 90_000 });
+  await page.getByLabel("Thinking time").selectOption("max");
+
+  await page.locator('[data-square="19"]').click();
+  await expect(page.getByRole("status")).toContainText("thinking");
+
+  // Scrub back mid-search.
+  //
+  // This assertion races the reply, and deliberately: the AI's move clears the
+  // review cursor, so "Reviewing" is only on screen until it lands. The margin
+  // is the thinking time's two-second cap against one round-trip, which is wide
+  // enough -- but a level whose cap dropped to a fraction of a second would make
+  // this flaky rather than wrong, and that is the reason to look here first.
+  await page.getByRole("button", { name: "Previous" }).click();
+  await expect(page.getByRole("status")).toContainText("Reviewing");
+
+  // The search was still running underneath, so the move arrives and the game
+  // returns to the live position on its own.
+  await expect(page.getByRole("status")).toContainText("Your turn", { timeout: 90_000 });
+  await expect(page.getByRole("alert")).toBeHidden();
+  expect(await discCount(page)).toBeGreaterThan(4);
 });
 
 test("the board can be played with the keyboard alone", async ({ page }) => {
