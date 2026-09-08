@@ -278,8 +278,22 @@ def evaluator_for(model_path: Path, device: str) -> Evaluator:
 
     try:
         model = load_export(model_path, device=device).model
-    except CheckpointError:
-        model = load_model(model_path, device=device)
+    except CheckpointError as as_export:
+        try:
+            model = load_model(model_path, device=device)
+        except CheckpointError as as_checkpoint:
+            # Both readers refused it, so say both reasons. Reporting only the
+            # second is actively misleading: an export that fails to load reports
+            # "no architecture block", which is the training-checkpoint reader
+            # correctly observing that an export keeps its architecture under
+            # `meta` -- a true statement about the wrong file format, and nothing
+            # to do with why the file would not open.
+            msg = (
+                f"{model_path.name} could not be read either way. "
+                f"As an exported model: {as_export} "
+                f"As a training checkpoint: {as_checkpoint}"
+            )
+            raise CheckpointError(msg) from as_export
 
     return TorchEvaluator(model, device=device)
 
