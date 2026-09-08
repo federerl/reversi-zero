@@ -1296,9 +1296,15 @@ Evidence lands in `docs/difficulty_spread.json`.
 
 ## The release tournament: putting two runs on one scale
 
-**Registered 2026-09-07, before the run.** Nothing about the agent changes here.
-This exists because a number the project wants to state cannot currently be
-stated.
+**Result: the 1.0 network is +131 Elo over the one the site serves, and the
+prediction's expected row was wrong. Subtracting ratings from two tournaments
+understated the gap by 40 points, because the anchor is too far away from either
+network to bridge on.** The prediction table below was registered on 2026-09-07
+before the run; the result sections after it were written the same evening from
+jobs 7105 and 7107.
+
+Nothing about the agent changes here. This exists because a number the project
+wants to state cannot currently be stated.
 
 **The problem.** The 1.0 network is run 5's generation 120. The network the site
 serves is run 1's generation 60. Their ratings come from different tournaments:
@@ -1393,6 +1399,10 @@ sbatch slurm/cpu.sbatch uv run reversi arena --suite custom \
     --notes "1.0 release: the shipped network against the one it replaces"
 ```
 
+*As registered. The second command does not work as written: 1000 games needs 500
+distinct 4-ply openings and only 244 exist. It ran at `--games 480`. See "The
+1000-game match could not be run" below.*
+
 The entrant name for run 1's checkpoint must not begin with `gen` followed by
 something that is not a number. The web manifest treats a `genNN` entrant as a
 playable model and parses the digits after the prefix, so `gen60-run1` would
@@ -1401,7 +1411,173 @@ is what it should be, since the ladder's levels are one run's progression rather
 than a mixture of two.
 
 Evidence lands in `docs/ratings/release-one-scale.json` and
-`docs/ratings/release-head-to-head-1000.json`.
+`docs/ratings/release-head-to-head-480.json`. The second file is named 480
+rather than 1000 for a reason worth its own section below.
+
+### Result: +131 Elo, on one scale, decisive
+
+11 entrants, 55 pairings, 100 games each, 5,500 games in 21 minutes on 64 cores.
+
+| entrant | Elo | 95% interval |
+|---|---:|---|
+| gen100 | 962.2 | 904.5 - 1031.3 |
+| **gen120** | **959.0** | 902.7 - 1029.0 |
+| gen114 | 946.1 | 887.4 - 1015.4 |
+| gen65 | 881.1 | 824.6 - 944.5 |
+| **run1-gen60** | **828.3** | 771.9 - 893.3 |
+| gen35 | 811.5 | 755.6 - 875.2 |
+| gen05 | 529.3 | 478.7 - 584.6 |
+| *minimax, depth 4* | *486.0* | *435.6 - 542.5* |
+| *greedy* | *355.2* | *295.5 - 419.2* |
+| *minimax, depth 2* | *327.9* | *276.4 - 385.7* |
+| *random* | *0.0* | - |
+
+**gen120 - run1-gen60 = +130.7**, and the intervals do not overlap: 902.7 against
+893.3, by 9 points. In the same tournament that pairing scored 74.0%
+[64.6%, 81.6%] over 100 games.
+
+The second prediction row is what happened: more than 110, so one of the two
+original tables was flattering its own entrants relative to the frozen baselines.
+
+### Why the naive subtraction was low
+
+Every entrant moved when re-measured, and one moved much further than the rest.
+
+| entrant | in its own table | on one scale | moved |
+|---|---:|---:|---:|
+| run 1, gen 60 | 877.3 | 828.3 | **-49.0** |
+| run 5, gen 35 | 839.4 | 811.5 | -27.9 |
+| run 5, gen 05 | 554.4 | 529.3 | -25.0 |
+| run 5, gen 100 | 984.3 | 962.2 | -22.0 |
+| run 5, gen 65 | 899.4 | 881.1 | -18.3 |
+| minimax, depth 4 | 502.8 | 486.0 | -16.8 |
+| run 5, gen 114 | 956.2 | 946.1 | -10.1 |
+| run 5, gen 120 | 967.9 | 959.0 | -9.0 |
+
+Run 1's generation 60 fell furthest, and two things about its original
+measurement explain it. That table used **30 games per pairing** against run 5's
+100, so its intervals were roughly twice as wide. And in that field it was the
+strongest entrant, with nothing above it: a Bradley-Terry fit places the top
+entrant using only its wins over weaker opponents, which bounds it from below and
+barely from above. Here it has five stronger networks above it and is pinned from
+both sides.
+
+**The lesson is about which opponent to bridge on.** Both networks played
+depth-4 minimax in their own tables, so the gap to that frozen opponent is a
+second way to compare them without a shared fit:
+
+| method | predicts |
+|---|---:|
+| subtract the ratings, both anchored at random = 0 | +90.7 |
+| bridge on depth-4 minimax, the closest shared opponent | +110.5 |
+| **measured in one fit** | **+130.7** |
+
+Bridging on the nearest frozen opponent beat bridging on the anchor, and neither
+was good enough. The reason is visible in the score sheet: depth-2 minimax scored
+**0.0%** against gen35, gen100 and gen114, and random scores near nothing against
+anything strong. A pairing that saturates carries almost no information about
+where the winner sits, so an anchor 900 points below the entrants being compared
+is a very long lever with nothing on the end of it. For a cross-tournament
+comparison, prefer the shared opponent closest in strength -- and prefer one fit
+to either.
+
+### The 1000-game match could not be run, and 244 is why
+
+The registered plan called for 1000 games on the pairing carrying the release
+claim. That failed in fifteen seconds:
+
+```
+only found 244 usable openings of 500 asked for on a 8x8 board after 50000 attempts.
+```
+
+A match draws one opening per pair of games and plays it twice with the colours
+swapped, so 1000 games needs 500 distinct openings. **There are only 244 usable
+distinct 4-ply openings on an 8x8 board.** 488 games is the ceiling at this
+opening depth, and the match ran at 480.
+
+This is worth recording because it means the project's own standard -- a thousand
+games or it is not a claim -- was never reachable through `reversi arena` at 4-ply
+openings. The five earlier 1000-game head-to-heads got there by *chunking*: fifty
+separate 20-game matches, each drawing ten openings, which reuses openings across
+chunks. That is a defensible thing to do and it is not the same protocol, and
+until now nothing said so.
+
+Two ways out, neither taken yet: draw openings with replacement once the distinct
+supply is exhausted, stating that in the report; or use deeper openings, where far
+more distinct positions exist. Registered as an open question about the tool, not
+about the agent.
+
+### Result: the direct match agrees, and the small field does not
+
+480 games, 4-ply openings, the same 50 simulations.
+
+| | score | record |
+|---|---:|---|
+| gen120 vs run1-gen60 | **70.3%** [66.1%, 74.2%] | 328W 133L 19D |
+| gen120 vs random | 99.8% [98.8%, 100.0%] | 479W 1L 0D |
+| run1-gen60 vs random | 99.0% [97.6%, 99.6%] | 475W 5L 0D |
+
+The advantage holds with either colour -- 66.5% as black, 74.2% as white -- which
+is the cheap check that a result this size is a real strength difference and not
+a perspective bug. Contract C1 says the network never sees colour; a gap that
+appeared with one colour and not the other would say otherwise.
+
+70.3% is **+150 Elo** as a pairwise estimate, with the score interval mapping to
++116 to +184. The round robin's pooled answer of +131 sits inside that, and the
+round robin's own 100-game pairing gave 74.0%, so the tighter 480-game figure
+lands between the two. All three measures exclude zero comfortably.
+
+**The rating fit from this match should not be quoted**, and it is instructive
+why. With three entrants it reports gen120 at +972 [858, 1172] and run1-gen60 at
++821 [701, 1016] -- intervals that overlap heavily, on 1,440 games. The field is
+the problem, not the sample: both networks beat the only other entrant about 99%
+of the time, so nothing in the data locates either of them against the anchor. A
+big sample through a saturated pairing buys precision on the score and none on
+the rating. **The score is the statistic here; the rating is not.** The +131 from
+the 11-entrant fit is the number to quote.
+
+### An efficiency finding, for whoever runs the next one
+
+The round robin played 5,500 games in 21 minutes. This match played 1,440 games
+in 66 minutes. The parallelism in `round_robin_parallel` is one process per
+*pairing*, so a three-entrant field uses three of the 64 cores allocated and the
+rest idle. Small fields belong on fewer cores, or the games within a pairing need
+splitting -- which is what the chunked head-to-head scripts were doing without
+saying so.
+
+### Decisions taken
+
+* **The 1.0 network is run 5's generation 120**, confirmed rather than merely
+  chosen: +959 on the release scale, +131 over the network the site serves, both
+  measures decisive.
+* **generation 100 is not better.** It rates +962 to gen120's +959, and their
+  head-to-head is 49.0% [39.4%, 58.7%]. gen100, gen114 and gen120 are one
+  network as far as this measurement can tell, so the pre-registered choice
+  stands and the table must not be read as ranking them.
+* **The published ladder is gen05, gen35 and gen120**, plus the two rule-only
+  baselines. Five levels, and every adjacent pair has non-overlapping intervals:
+
+  | level | plays as | Elo | gap below |
+  |---|---|---:|---:|
+  | 1 | random | 0.0 | - |
+  | 2 | greedy | 355.2 | +355 |
+  | 3 | gen05 | 529.3 | +174 |
+  | 4 | gen35 | 811.5 | +282 |
+  | 5 | gen120 | 959.0 | +148 |
+
+  Adding gen65 breaks it: at +881 it overlaps gen35 below and gen120 above.
+
+* **The ladder that ships today is worse than this by the same test.** Measured
+  at 30 games per pairing, run 1's intervals are wide enough that *only*
+  random-to-greedy is separated -- greedy/gen05, gen05/gen20, gen20/gen40 and
+  gen40/gen60 all overlap. Six nominal levels, one distinguishable step. Five
+  separated levels is the better product and the more honest one.
+* **A sixth level goes in the gen05-to-gen35 gap**, which is 282 Elo wide and the
+  only place a rung would clearly separate. Generations 10 through 30 are on disk;
+  rating one of them in the same fit is the follow-up.
+* **run1-gen60 stays a rated reference row, not a level.** At +828 it overlaps
+  both gen35 and gen65, so it is not a distinguishable rung, and a ladder's levels
+  are one run's progression rather than a mixture of two.
 
 ---
 
