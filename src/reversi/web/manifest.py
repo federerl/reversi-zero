@@ -170,7 +170,7 @@ def build_manifest(
 
     for entry in ratings:
         name = entry["name"]
-        if not name.startswith("gen"):
+        if not _is_model_name(name):
             baselines.append(
                 {
                     "name": name,
@@ -180,7 +180,7 @@ def build_manifest(
             )
             continue
 
-        generation = int(name.removeprefix("gen"))
+        generation = int(name.removeprefix("gen"))  # _is_model_name checked this
         if generations is not None and generation not in generations:
             continue
 
@@ -206,7 +206,7 @@ def build_manifest(
         )
 
     if not models:
-        available = sorted(n for n in by_name if n.startswith("gen"))
+        available = sorted(n for n in by_name if _is_model_name(n))
         msg = (
             f"no playable generations found in {tournament.name}. "
             f"It rates: {', '.join(available) or 'nothing'}"
@@ -240,6 +240,35 @@ def build_manifest(
         "models": models,
         "baselines": baselines,
     }
+
+
+def _is_model_name(name: str) -> bool:
+    """Whether a tournament entrant is a publishable generation of the network.
+
+    ``gen20`` is; ``random`` and ``minimax-d4`` are not. The awkward case is a
+    name that begins with ``gen`` and then is not a number -- ``gen60-run1``, the
+    obvious thing to call run 1's generation 60 when it enters another run's
+    tournament as a reference. That used to reach ``int()`` and raise a bare
+    ``ValueError`` mentioning only ``'60-run1'``, which says nothing about what to
+    do instead.
+
+    It is refused rather than reclassified. Silently treating it as a baseline
+    would drop a level the author may have meant to publish, and silently
+    treating it as a model would need a rule for inventing its generation. The
+    manifest does not guess anywhere else and should not start here.
+    """
+    if not name.startswith("gen"):
+        return False
+    suffix = name.removeprefix("gen")
+    if suffix.isdigit():
+        return True
+    msg = (
+        f"entrant {name!r} starts with 'gen' but {suffix!r} is not a generation "
+        "number. Name a publishable checkpoint 'gen<number>', and name anything "
+        "else -- an entrant from another run, an external engine -- something "
+        "that does not begin with 'gen', so it is rated without being published"
+    )
+    raise ConfigError(msg)
 
 
 def _reject_colliding_urls(models: list[dict[str, Any]]) -> None:

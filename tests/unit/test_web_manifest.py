@@ -146,6 +146,50 @@ class TestWhatMayAppear:
         with pytest.raises(ConfigError, match="records generation 40"):
             build_manifest(report, sidecars=models, release="models-v2")
 
+    def test_a_gen_prefixed_name_that_is_not_a_generation_is_refused(self, tmp_path: Path) -> None:
+        """The obvious name for a reference entrant from another run.
+
+        Putting two runs on one scale means one run's checkpoint enters the
+        other's tournament, and `gen60-run1` is the natural thing to call it.
+        It used to reach `int()` and raise a bare ValueError mentioning only
+        '60-run1'. Now it says what to do instead, and says it before anything
+        is written.
+        """
+        models = tmp_path / "models"
+        _sidecar(models, 60)
+        report = _tournament(tmp_path, [_rating("gen60-run1", 877.3), _rating("random", 0.0)])
+
+        with pytest.raises(ConfigError, match="is not a generation number"):
+            build_manifest(report, sidecars=models, release="models-v2")
+
+    def test_a_reference_entrant_named_clearly_is_rated_but_not_published(
+        self, tmp_path: Path
+    ) -> None:
+        """The other half of that rule, and the reason it is a rule.
+
+        `run1-gen60` is rated on the same scale as everything else and appears in
+        the manifest, but as a rating row rather than a level. A ladder's levels
+        are one run's progression; a network from a different run belongs beside
+        them as a reference, not inside them as a rung.
+        """
+        models = tmp_path / "models"
+        _sidecar(models, 120, run_id=RUN_TWO)
+        report = _tournament(
+            tmp_path,
+            [
+                _rating("gen120", 967.9),
+                _rating("run1-gen60", 877.3),
+                _rating("random", 0.0),
+            ],
+        )
+
+        manifest = build_manifest(report, sidecars=models, release="models-v2")
+
+        assert [m["id"] for m in manifest["models"]] == ["gen120"]
+        rated = {b["name"]: b["elo"] for b in manifest["baselines"]}
+        assert rated["run1-gen60"] == 877.3
+        assert rated["random"] == 0.0
+
     def test_a_tournament_rating_nothing_playable_is_refused(self, tmp_path: Path) -> None:
         models = tmp_path / "models"
         report = _tournament(tmp_path, [_rating("random", 0.0), _rating("greedy", 313.1)])
