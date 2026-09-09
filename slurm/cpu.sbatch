@@ -17,10 +17,19 @@
 # root, for example:
 #
 #     sbatch slurm/cpu.sbatch uv run reversi calibrate models/reversi-8x8-gen60.pt \
-#         --out runs/calibration/report.json --workers 64
+#         --out runs/calibration/report.json --workers @CPUS@
 #
-# Use $SLURM_CPUS_PER_TASK in the command if the tool takes a worker count, so a
-# change to the header above is the only change needed.
+# Write @CPUS@ where the tool wants a worker count. It is replaced with the cores
+# this job was actually given, so changing the header above is the only change
+# needed.
+#
+# It is a placeholder rather than $SLURM_CPUS_PER_TASK because of *when* things
+# expand. The command is typed on the login node, where that variable does not
+# exist, so the login shell replaces it with nothing before sbatch ever sees the
+# argument -- and the job runs with an empty --workers. Escaping it does not help
+# either: these arguments are passed to a program, not evaluated as a script, so
+# the program would receive the literal text. Inside the job is the only place
+# the answer is known.
 
 source slurm/env.sh
 
@@ -29,5 +38,13 @@ if [ $# -eq 0 ]; then
     exit 2
 fi
 
-echo "command: $*"
-rz_run "$@"
+# Fill in @CPUS@ now that the allocation is known. Substituting inside each
+# argument rather than re-splitting the whole command line keeps a path with a
+# space in it intact.
+args=()
+for arg in "$@"; do
+    args+=("${arg//@CPUS@/${SLURM_CPUS_PER_TASK:-1}}")
+done
+
+echo "command: ${args[*]}"
+rz_run "${args[@]}"
