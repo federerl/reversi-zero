@@ -131,6 +131,47 @@ def test_the_guardrail_holds_for_the_level_that_has_one() -> None:
     assert report.worst_drop <= level_by_name("casual").guard + 1e-9
 
 
+def test_a_guard_of_zero_switches_the_filter_off_rather_than_tightening_it() -> None:
+    """The semantics the spread measurement caught, pinned so nobody "fixes" it.
+
+    `_acceptable` applies the guardrail only when `guard > 0`, so a level at 0.0
+    gets no value check at all and plays its most-visited move. That is correct --
+    visit counts already carry everything the search learned, and choosing on them
+    is stronger than choosing on value -- but it reads like the opposite, and the
+    docstring said the opposite for a year.
+
+    The observable consequence, measured on the shipped Max level: moves up to
+    0.067 below the best value its own search had found. This test builds the same
+    situation deliberately: the most-visited move is *not* the highest-valued one,
+    and a guard of zero must still play it.
+    """
+    from reversi.difficulty.levels import _acceptable, choose_move
+    from reversi.search.mcts import SearchResult
+
+    # Three moves. Index 0 is searched most; index 2 is valued highest.
+    result = SearchResult(
+        actions=(10, 20, 30),
+        visits=(90, 8, 2),
+        q_values=(0.10, 0.20, 0.90),
+        root_value=0.0,
+        board_size=BOARD,
+    )
+
+    wide_open = DifficultyLevel(
+        name="zero", label="Zero", simulations=1, temperature=0.0, top_k=None, guard=0.0
+    )
+    # No filtering happened: every move survived, and the most-visited one wins.
+    assert _acceptable(result, wide_open) == [0, 1, 2]
+    assert choose_move(result, wide_open) == 10
+
+    # A real guard does bite, and rejects the move a guard of zero allowed.
+    strict = DifficultyLevel(
+        name="strict", label="Strict", simulations=1, temperature=0.0, top_k=None, guard=0.05
+    )
+    assert _acceptable(result, strict) == [2]
+    assert choose_move(result, strict) == 30
+
+
 def test_a_loosened_guardrail_is_reported_as_violated() -> None:
     """The check has to be able to fail, or it is decoration.
 

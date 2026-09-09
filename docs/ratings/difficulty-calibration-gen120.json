@@ -1,0 +1,361 @@
+{
+  "kind": "difficulty_calibration",
+  "report_version": 1,
+  "created_utc": "2026-09-08T11:23:04+00:00",
+  "model": "reversi-8x8-gen120.pt",
+  "levels": [
+    "casual",
+    "club",
+    "strong",
+    "max"
+  ],
+  "passed": true,
+  "checks": {
+    "monotonic": {
+      "passed": true,
+      "detail": "casual 544 < club 821 < strong 1186 < max 1381"
+    },
+    "adjacent_gap": {
+      "passed": true,
+      "detail": "casual->club +277, club->strong +365, strong->max +195  (need >= 80)",
+      "gaps": [
+        276.5,
+        365.4,
+        195.2
+      ]
+    },
+    "intervals_disjoint": {
+      "passed": true,
+      "detail": "every adjacent pair is separated"
+    },
+    "easiest_beats_random": {
+      "passed": true,
+      "detail": "casual scored 298.0/300 vs random = 99.3% (95% lower bound 97.6%, need > 60%)"
+    },
+    "guardrail": {
+      "passed": true,
+      "detail": "casual: 500 moves, worst drop 0.348 against a guardrail of 0.35, 0 violation(s)"
+    }
+  },
+  "guardrail": {
+    "level": "casual",
+    "guard": 0.35,
+    "samples": 500,
+    "worst_drop": 0.3483,
+    "violations": 0
+  },
+  "ratings": [
+    {
+      "name": "max",
+      "elo": 1381.4,
+      "ci_low": 1302.1,
+      "ci_high": 1457.4,
+      "games": 1800
+    },
+    {
+      "name": "strong",
+      "elo": 1186.2,
+      "ci_low": 1120.2,
+      "ci_high": 1254.3,
+      "games": 1800
+    },
+    {
+      "name": "club",
+      "elo": 820.9,
+      "ci_low": 774.0,
+      "ci_high": 874.4,
+      "games": 1800
+    },
+    {
+      "name": "casual",
+      "elo": 544.3,
+      "ci_low": 508.4,
+      "ci_high": 585.4,
+      "games": 1800
+    },
+    {
+      "name": "minimax-d4",
+      "elo": 408.5,
+      "ci_low": 377.5,
+      "ci_high": 440.5,
+      "games": 1800
+    },
+    {
+      "name": "greedy",
+      "elo": 199.2,
+      "ci_low": 159.7,
+      "ci_high": 238.7,
+      "games": 1800
+    },
+    {
+      "name": "random",
+      "elo": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "games": 1800
+    }
+  ],
+  "matchups": [
+    {
+      "a": "casual",
+      "b": "club",
+      "games": 300,
+      "score_a": 0.08333333333333333,
+      "ci_low": 0.057080874056394275,
+      "ci_high": 0.12012160196406074,
+      "decisive": true,
+      "record": "21W 271L 8D",
+      "score_as_black": 0.07666666666666666,
+      "score_as_white": 0.09
+    },
+    {
+      "a": "casual",
+      "b": "strong",
+      "games": 300,
+      "score_a": 0.008333333333333333,
+      "ci_low": 0.002586169049464798,
+      "ci_high": 0.026512752654672136,
+      "decisive": true,
+      "record": "2W 297L 1D",
+      "score_as_black": 0.006666666666666667,
+      "score_as_white": 0.01
+    },
+    {
+      "a": "casual",
+      "b": "max",
+      "games": 300,
+      "score_a": 0.008333333333333333,
+      "ci_low": 0.002586169049464798,
+      "ci_high": 0.026512752654672136,
+      "decisive": true,
+      "record": "2W 297L 1D",
+      "score_as_black": 0.01,
+      "score_as_white": 0.006666666666666667
+    },
+    {
+      "a": "casual",
+      "b": "random",
+      "games": 300,
+      "score_a": 0.9933333333333333,
+      "ci_low": 0.9760224167496929,
+      "ci_high": 0.998169851642088,
+      "decisive": true,
+      "record": "298W 2L 0D",
+      "score_as_black": 0.9933333333333333,
+      "score_as_white": 0.9933333333333333
+    },
+    {
+      "a": "casual",
+      "b": "greedy",
+      "games": 300,
+      "score_a": 0.74,
+      "ci_low": 0.6875519770721528,
+      "ci_high": 0.7863793967400652,
+      "decisive": true,
+      "record": "222W 78L 0D",
+      "score_as_black": 0.6733333333333333,
+      "score_as_white": 0.8066666666666666
+    },
+    {
+      "a": "casual",
+      "b": "minimax-d4",
+      "games": 300,
+      "score_a": 0.8916666666666667,
+      "ci_low": 0.851418993382021,
+      "ci_high": 0.9220106791587513,
+      "decisive": true,
+      "record": "265W 30L 5D",
+      "score_as_black": 0.89,
+      "score_as_white": 0.8933333333333333
+    },
+    {
+      "a": "club",
+      "b": "strong",
+      "games": 300,
+      "score_a": 0.09833333333333333,
+      "ci_low": 0.06954769346550668,
+      "ci_high": 0.13727549341821194,
+      "decisive": true,
+      "record": "25W 266L 9D",
+      "score_as_black": 0.11333333333333333,
+      "score_as_white": 0.08333333333333333
+    },
+    {
+      "a": "club",
+      "b": "max",
+      "games": 300,
+      "score_a": 0.025,
+      "ci_low": 0.012451775869552963,
+      "ci_high": 0.04955904679376577,
+      "decisive": true,
+      "record": "4W 289L 7D",
+      "score_as_black": 0.03,
+      "score_as_white": 0.02
+    },
+    {
+      "a": "club",
+      "b": "random",
+      "games": 300,
+      "score_a": 1.0,
+      "ci_low": 0.9873570287754538,
+      "ci_high": 0.9999999999999998,
+      "decisive": true,
+      "record": "300W 0L 0D",
+      "score_as_black": 1.0,
+      "score_as_white": 1.0
+    },
+    {
+      "a": "club",
+      "b": "greedy",
+      "games": 300,
+      "score_a": 0.85,
+      "ci_low": 0.805182388854671,
+      "ci_high": 0.8859675312881468,
+      "decisive": true,
+      "record": "255W 45L 0D",
+      "score_as_black": 0.8466666666666667,
+      "score_as_white": 0.8533333333333334
+    },
+    {
+      "a": "club",
+      "b": "minimax-d4",
+      "games": 300,
+      "score_a": 0.9666666666666667,
+      "ci_low": 0.9397381741959452,
+      "ci_high": 0.9817950526611452,
+      "decisive": true,
+      "record": "290W 10L 0D",
+      "score_as_black": 0.9733333333333334,
+      "score_as_white": 0.96
+    },
+    {
+      "a": "strong",
+      "b": "max",
+      "games": 300,
+      "score_a": 0.24333333333333335,
+      "ci_low": 0.19822154125071836,
+      "ci_high": 0.2949351839778819,
+      "decisive": true,
+      "record": "64W 218L 18D",
+      "score_as_black": 0.23333333333333334,
+      "score_as_white": 0.25333333333333335
+    },
+    {
+      "a": "strong",
+      "b": "random",
+      "games": 300,
+      "score_a": 1.0,
+      "ci_low": 0.9873570287754538,
+      "ci_high": 0.9999999999999998,
+      "decisive": true,
+      "record": "300W 0L 0D",
+      "score_as_black": 1.0,
+      "score_as_white": 1.0
+    },
+    {
+      "a": "strong",
+      "b": "greedy",
+      "games": 300,
+      "score_a": 0.9633333333333334,
+      "ci_low": 0.9355461518281071,
+      "ci_high": 0.979404694837147,
+      "decisive": true,
+      "record": "289W 11L 0D",
+      "score_as_black": 0.9533333333333334,
+      "score_as_white": 0.9733333333333334
+    },
+    {
+      "a": "strong",
+      "b": "minimax-d4",
+      "games": 300,
+      "score_a": 0.9966666666666667,
+      "ci_low": 0.9813633063054688,
+      "ci_high": 0.9994113422781488,
+      "decisive": true,
+      "record": "299W 1L 0D",
+      "score_as_black": 0.9933333333333333,
+      "score_as_white": 1.0
+    },
+    {
+      "a": "max",
+      "b": "random",
+      "games": 300,
+      "score_a": 1.0,
+      "ci_low": 0.9873570287754538,
+      "ci_high": 0.9999999999999998,
+      "decisive": true,
+      "record": "300W 0L 0D",
+      "score_as_black": 1.0,
+      "score_as_white": 1.0
+    },
+    {
+      "a": "max",
+      "b": "greedy",
+      "games": 300,
+      "score_a": 0.9833333333333333,
+      "ci_low": 0.9615846051669054,
+      "ci_high": 0.9928605226493666,
+      "decisive": true,
+      "record": "295W 5L 0D",
+      "score_as_black": 0.9733333333333334,
+      "score_as_white": 0.9933333333333333
+    },
+    {
+      "a": "max",
+      "b": "minimax-d4",
+      "games": 300,
+      "score_a": 0.9966666666666667,
+      "ci_low": 0.9813633063054688,
+      "ci_high": 0.9994113422781488,
+      "decisive": true,
+      "record": "299W 1L 0D",
+      "score_as_black": 1.0,
+      "score_as_white": 0.9933333333333333
+    },
+    {
+      "a": "random",
+      "b": "greedy",
+      "games": 300,
+      "score_a": 0.3616666666666667,
+      "ci_low": 0.30936133912199637,
+      "ci_high": 0.41746988291679465,
+      "decisive": true,
+      "record": "105W 188L 7D",
+      "score_as_black": 0.3433333333333333,
+      "score_as_white": 0.38
+    },
+    {
+      "a": "random",
+      "b": "minimax-d4",
+      "games": 300,
+      "score_a": 0.011666666666666667,
+      "ci_low": 0.00427973047783033,
+      "ci_high": 0.031401571418142954,
+      "decisive": true,
+      "record": "3W 296L 1D",
+      "score_as_black": 0.0033333333333333335,
+      "score_as_white": 0.02
+    },
+    {
+      "a": "greedy",
+      "b": "minimax-d4",
+      "games": 300,
+      "score_a": 0.04,
+      "ci_low": 0.023027321487942308,
+      "ci_high": 0.06860421203864003,
+      "decisive": true,
+      "record": "12W 288L 0D",
+      "score_as_black": 0.02666666666666667,
+      "score_as_white": 0.05333333333333334
+    }
+  ],
+  "protocol": {
+    "board_size": 8,
+    "games_per_pair": 300,
+    "opening_plies": 4,
+    "seed": 20260830,
+    "anchor": "random",
+    "dirichlet_eps": 0.0
+  },
+  "elapsed_s": 25882.8
+}

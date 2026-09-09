@@ -50,8 +50,22 @@ class DifficultyLevel:
     top_k: int | None
     guard: float
     """How far below the best move's value a candidate may be and still be
-    played. 0 means "only the best move"; 0.35 means "anything not clearly
-    losing"."""
+    played. 0.35 means "anything not clearly losing".
+
+    **Zero switches the filter off; it does not tighten it.** ``_acceptable``
+    applies the guardrail only when ``guard > 0``, so a level at 0.0 plays its
+    most-visited move with no value check at all -- which is the standard
+    AlphaZero choice and stronger than picking on value, since visit counts
+    already reflect everything the search learned.
+
+    That is the right behaviour and it used to be described as the opposite
+    ("0 means only the best move"). The spread measurement caught it: Max, at
+    guard 0.0, played moves up to 0.067 below the best value its search had
+    found. Nothing else would have noticed, because the calibration's guardrail
+    check only ever inspects Casual.
+
+    A level that really wanted "only the highest-value move" would need a new
+    rule, not a guard of zero. None does."""
 
     description: str = ""
 
@@ -170,6 +184,11 @@ def _acceptable(result: SearchResult, level: DifficultyLevel) -> list[int]:
     order = sorted(range(len(result.actions)), key=lambda i: -result.visits[i])
 
     # The guardrail runs first, and top_k narrows what survives it.
+    #
+    # `guard > 0.0` is a switch, not a threshold comparison: a level at 0.0 skips
+    # the filter entirely and takes the most-visited move. See the note on
+    # `DifficultyLevel.guard` -- this is deliberate, and it is not what "0" reads
+    # like at a glance.
     #
     # The other order looks equivalent and is not. Taking the three most-visited
     # moves first makes the guard compare against the best of *those three*
