@@ -1,0 +1,104 @@
+{
+  "agent_specs": {
+    "gen120": {
+      "checkpoint": "gen_00120.pt",
+      "generation": 120,
+      "kind": "alphazero",
+      "run_id": "e2-ownership",
+      "simulations": 50
+    },
+    "random": {
+      "kind": "random"
+    },
+    "run1-gen60": {
+      "checkpoint": "reversi-8x8-gen60.pt",
+      "generation": 60,
+      "kind": "alphazero",
+      "run_id": "20260827-030939-full8x8-60cfdda-s1337",
+      "simulations": 50
+    }
+  },
+  "board_size": 8,
+  "kind": "round_robin",
+  "matchups": [
+    {
+      "a": "gen120",
+      "b": "run1-gen60",
+      "ci_high": 0.7422540827315964,
+      "ci_low": 0.6607704957641969,
+      "decisive": true,
+      "games": 480,
+      "record": "328W 133L 19D",
+      "score_a": 0.703125,
+      "score_as_black": 0.6645833333333333,
+      "score_as_white": 0.7416666666666667
+    },
+    {
+      "a": "gen120",
+      "b": "random",
+      "ci_high": 0.9996321457986198,
+      "ci_low": 0.988294769693633,
+      "decisive": true,
+      "games": 480,
+      "record": "479W 1L 0D",
+      "score_a": 0.9979166666666667,
+      "score_as_black": 0.9958333333333333,
+      "score_as_white": 1.0
+    },
+    {
+      "a": "run1-gen60",
+      "b": "random",
+      "ci_high": 0.9955426443352553,
+      "ci_low": 0.9758499294751184,
+      "decisive": true,
+      "games": 480,
+      "record": "475W 5L 0D",
+      "score_a": 0.9895833333333334,
+      "score_as_black": 0.9958333333333333,
+      "score_as_white": 0.9833333333333333
+    }
+  ],
+  "notes": "1.0 release: the shipped network against the one it replaces; 480 games is the ceiling at 4-ply openings",
+  "protocol": {
+    "anchor": "random",
+    "games_per_pair": 480,
+    "opening_plies": 4,
+    "seconds": 3956.5341223040014,
+    "seed": 1025319116
+  },
+  "provenance": {
+    "git": {
+      "available": true,
+      "branch": "exp/e2-ownership",
+      "commit": "b8e75b4dcb16971db39f3030481711b512526ec4",
+      "commit_short": "b8e75b4",
+      "diff": null,
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dirty": true
+    }
+  },
+  "ratings": [
+    {
+      "ci_high": 1172.0713495420869,
+      "ci_low": 858.3797734300654,
+      "elo": 971.6827888733185,
+      "games": 960,
+      "name": "gen120"
+    },
+    {
+      "ci_high": 1015.7115185228799,
+      "ci_low": 700.8568083901795,
+      "elo": 820.5522034397053,
+      "games": 960,
+      "name": "run1-gen60"
+    },
+    {
+      "ci_high": 0.0,
+      "ci_low": 0.0,
+      "elo": 0.0,
+      "games": 960,
+      "name": "random"
+    }
+  ],
+  "report_version": 1
+}
