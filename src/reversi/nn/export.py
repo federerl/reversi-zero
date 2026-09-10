@@ -98,6 +98,29 @@ def export_checkpoint(
         ),
     )
 
+    # Read back what was just written, before telling anybody it worked.
+    #
+    # `export-onnx` has always done this -- it runs both models on the same inputs
+    # and deletes the file rather than keep one it cannot trust. This path did
+    # not, and the gap was not theoretical: `load_export` was built without the
+    # ownership head for a year, so every network trained with one exported
+    # "successfully" into a file that no reader in the project could open. It
+    # surfaced at release time, on the network chosen to ship, and the error it
+    # produced pointed at the wrong file format.
+    #
+    # An export nothing can load is not an export. Better to fail here, next to
+    # the checkpoint that still exists, than downstream where the only evidence
+    # is a file and a puzzle.
+    try:
+        load_export(destination, verify=False)
+    except CheckpointError as error:
+        destination.unlink(missing_ok=True)
+        msg = (
+            f"{destination.name} was written but could not be read back, so it has "
+            f"been deleted rather than left to fail later: {error}"
+        )
+        raise CheckpointError(msg) from error
+
     # The checksum of the export itself goes in a sidecar, so a download can be
     # verified without trusting the transport that delivered it.
     meta["sha256"] = sha256_file(destination)
@@ -160,6 +183,13 @@ def load_export(path: Path, *, device: str = "cpu", verify: bool = True) -> Expo
         channels=arch["channels"],
         value_hidden=arch["value_hidden"],
         in_planes=arch["in_planes"],
+        # The ownership head, and it is not optional to pass. A network trained
+        # with one carries `ownership_head.*` tensors, and a model built without
+        # the flag has nowhere to put them -- `load_state_dict` then rejects the
+        # whole file over "unexpected keys". `loader.py` has always passed this;
+        # this path did not, and nothing noticed until the first network with the
+        # head was exported, which was the network chosen to ship.
+        ownership=bool(arch.get("ownership", False)),
     )
     try:
         model.load_state_dict(payload["model_state_dict"])
