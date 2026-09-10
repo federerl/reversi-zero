@@ -1,0 +1,14 @@
+# Cloudflare Pages reads this file and serves these redirects on the deployed
+# site, before it looks for a file on disk.
+#
+# The game is called Othello everywhere a visitor reads it, and the route is
+# /reversi/ because that is the directory the build produces and the address
+# already shared in links. So somebody who reasonably types the name they were
+# shown should land on the game rather than on a 404 -- which is exactly what
+# `not_found_handling: "404-page"` would otherwise give them.
+#
+# 301 rather than 302: this mapping is not going to change, and a permanent
+# redirect lets search engines fold the two addresses into one entry instead of
+# treating them as rival pages with identical content.
+/othello    /reversi/    301
+/othello/*  /reversi/    301

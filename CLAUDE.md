@@ -31,6 +31,22 @@ descriptions alike.
 
 If I have to re-read a sentence to parse it, it's too dense.
 
+### Call the game Othello
+
+Most people know it as Othello, not Reversi, and Othello is also the more precise
+name: it's the 1971 version with the fixed 8×8 board and the four-disc opening
+cross, which is what this implements.
+
+- **Othello** in anything a player or a reader meets — page titles, UI copy, the
+  README, docs prose, commit messages, PR descriptions.
+- **Reversi** stays as the identifier: the `reversi` package, module paths, model
+  filenames, the `/reversi/` route, and the *Reversi Zero* name. Those are
+  addresses, not descriptions, and renaming them would orphan a published model
+  release whose filenames carry their own provenance.
+
+Don't sweep existing code comments to match. Change them when you're editing
+that code anyway.
+
 ## Things not to re-derive
 
 - **Quality gates:** `ruff check`, `ruff format --check`, `pyright`, `pytest -m "not slow and not gpu"`. All must pass before you tell me something is done. `uv` is not installed yet; a throwaway venv in the scratchpad is the workaround, and it must not touch my conda base.

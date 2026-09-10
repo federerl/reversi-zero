@@ -63,14 +63,15 @@ function Hero({ game }: { game: GameEntry }) {
       </div>
 
       <div>
-        <h2 className="display text-6xl leading-[0.85] sm:text-7xl">Reversi</h2>
-        <p className="mt-4 max-w-[34ch] text-lg text-ink-2">
-          Play against an AI that taught itself the game, right here in your browser.
+        <h2 className="display text-6xl leading-[0.85] sm:text-7xl">{game.title}</h2>
+        <p className="mt-4 max-w-[38ch] text-lg text-ink-2">
+          Also called Reversi. Play against an AI that taught itself the game, right here in
+          your browser.
         </p>
 
         <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
           <a href={game.path} className="btn btn-primary btn-lg">
-            Play Reversi
+            Play {game.title}
           </a>
           {game.ladderSummary !== undefined && (
             <p className="text-[0.95rem] text-muted">{capitalise(game.ladderSummary)}</p>
@@ -81,7 +82,7 @@ function Hero({ game }: { game: GameEntry }) {
           <summary>How the AI learned</summary>
           <div className="pb-2 text-[0.95rem] leading-relaxed text-muted">
             <p>
-              Nobody taught it Reversi. It started from random weights and played itself sixty
+              Nobody taught it Othello. It started from random weights and played itself sixty
               thousand times, keeping what worked: a small neural network guesses which moves look
               promising and who is winning, a search checks those guesses a few hundred positions
               deep, and the result of every finished game trains the network that plays the next
@@ -98,6 +99,12 @@ function Hero({ game }: { game: GameEntry }) {
               )}{" "}
               Pick a level in the game and open the note beside it to see its rating, how sure that
               rating is, and which checkpoint it came from.
+            </p>
+            <p className="mt-3">
+              <span className="text-ink-2">Othello or Reversi?</span> The same game. Reversi is the
+              older name; Othello is the 1971 version that fixed the board at 8&times;8 and the
+              opening at four discs crossed in the centre, which is what this plays. The code and
+              the project name say Reversi because that is what they were called first.
             </p>
           </div>
         </details>

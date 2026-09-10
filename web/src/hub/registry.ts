@@ -39,7 +39,7 @@ export interface GameEntry {
 export const GAMES: readonly GameEntry[] = [
   {
     id: "reversi",
-    title: "Reversi",
+    title: "Othello",
     tagline: "Learned the game from nothing by playing itself, and runs entirely in your browser.",
     path: "/reversi/",
     status: "playable",
