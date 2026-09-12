@@ -28,6 +28,20 @@
       "run_id": "e2-ownership",
       "simulations": 50
     },
+    "gen15": {
+      "checkpoint": "gen_00015.pt",
+      "generation": 15,
+      "kind": "alphazero",
+      "run_id": "e2-ownership",
+      "simulations": 50
+    },
+    "gen20": {
+      "checkpoint": "gen_00020.pt",
+      "generation": 20,
+      "kind": "alphazero",
+      "run_id": "e2-ownership",
+      "simulations": 50
+    },
     "gen35": {
       "checkpoint": "gen_00035.pt",
       "generation": 35,
@@ -190,6 +204,30 @@
       "score_as_white": 0.0
     },
     {
+      "a": "random",
+      "b": "gen15",
+      "ci_high": 0.03699349820698568,
+      "ci_low": 3.469446951953614e-18,
+      "decisive": true,
+      "games": 100,
+      "record": "0W 100L 0D",
+      "score_a": 0.0,
+      "score_as_black": 0.0,
+      "score_as_white": 0.0
+    },
+    {
+      "a": "random",
+      "b": "gen20",
+      "ci_high": 0.054486196178705315,
+      "ci_low": 0.0017674320641406505,
+      "decisive": true,
+      "games": 100,
+      "record": "1W 99L 0D",
+      "score_a": 0.01,
+      "score_as_black": 0.02,
+      "score_as_white": 0.0
+    },
+    {
       "a": "greedy",
       "b": "minimax-d2",
       "ci_high": 0.23853076795190664,
@@ -298,6 +336,30 @@
       "score_as_white": 0.28
     },
     {
+      "a": "greedy",
+      "b": "gen15",
+      "ci_high": 0.2666735838630073,
+      "ci_low": 0.11700225498946351,
+      "decisive": true,
+      "games": 100,
+      "record": "18W 82L 0D",
+      "score_a": 0.18,
+      "score_as_black": 0.2,
+      "score_as_white": 0.16
+    },
+    {
+      "a": "greedy",
+      "b": "gen20",
+      "ci_high": 0.36432116767944994,
+      "ci_low": 0.1926958414957634,
+      "decisive": true,
+      "games": 100,
+      "record": "27W 73L 0D",
+      "score_a": 0.27,
+      "score_as_black": 0.2,
+      "score_as_white": 0.34
+    },
+    {
       "a": "minimax-d2",
       "b": "minimax-d4",
       "ci_high": 0.3215438302287378,
@@ -394,6 +456,30 @@
       "score_as_white": 0.0
     },
     {
+      "a": "minimax-d2",
+      "b": "gen15",
+      "ci_high": 0.054486196178705315,
+      "ci_low": 0.0017674320641406505,
+      "decisive": true,
+      "games": 100,
+      "record": "1W 99L 0D",
+      "score_a": 0.01,
+      "score_as_black": 0.02,
+      "score_as_white": 0.0
+    },
+    {
+      "a": "minimax-d2",
+      "b": "gen20",
+      "ci_high": 0.03699349820698568,
+      "ci_low": 3.469446951953614e-18,
+      "decisive": true,
+      "games": 100,
+      "record": "0W 100L 0D",
+      "score_a": 0.0,
+      "score_as_black": 0.0,
+      "score_as_white": 0.0
+    },
+    {
       "a": "minimax-d4",
       "b": "gen05",
       "ci_high": 0.4217919642519971,
@@ -478,6 +564,30 @@
       "score_as_white": 0.04
     },
     {
+      "a": "minimax-d4",
+      "b": "gen15",
+      "ci_high": 0.14998107700948735,
+      "ci_low": 0.041093461484380624,
+      "decisive": true,
+      "games": 100,
+      "record": "8W 92L 0D",
+      "score_a": 0.08,
+      "score_as_black": 0.12,
+      "score_as_white": 0.04
+    },
+    {
+      "a": "minimax-d4",
+      "b": "gen20",
+      "ci_high": 0.20397718407558438,
+      "ci_low": 0.07376793957965486,
+      "decisive": true,
+      "games": 100,
+      "record": "12W 87L 1D",
+      "score_a": 0.125,
+      "score_as_black": 0.14,
+      "score_as_white": 0.11
+    },
+    {
       "a": "gen05",
       "b": "gen35",
       "ci_high": 0.0700117907285439,
@@ -550,6 +660,30 @@
       "score_as_white": 0.05
     },
     {
+      "a": "gen05",
+      "b": "gen15",
+      "ci_high": 0.18035769627278944,
+      "ci_low": 0.058867167310729225,
+      "decisive": true,
+      "games": 100,
+      "record": "9W 88L 3D",
+      "score_a": 0.105,
+      "score_as_black": 0.08,
+      "score_as_white": 0.13
+    },
+    {
+      "a": "gen05",
+      "b": "gen20",
+      "ci_high": 0.1247681544589592,
+      "ci_low": 0.027786123963188192,
+      "decisive": true,
+      "games": 100,
+      "record": "6W 94L 0D",
+      "score_a": 0.06,
+      "score_as_black": 0.06,
+      "score_as_white": 0.06
+    },
+    {
       "a": "gen35",
       "b": "gen65",
       "ci_high": 0.5278461045078768,
@@ -610,6 +744,30 @@
       "score_as_white": 0.43
     },
     {
+      "a": "gen35",
+      "b": "gen15",
+      "ci_high": 0.8415673411969654,
+      "ci_low": 0.6784561697712622,
+      "decisive": true,
+      "games": 100,
+      "record": "75W 21L 4D",
+      "score_a": 0.77,
+      "score_as_black": 0.78,
+      "score_as_white": 0.76
+    },
+    {
+      "a": "gen35",
+      "b": "gen20",
+      "ci_high": 0.7766329600444682,
+      "ci_low": 0.5989395756548072,
+      "decisive": true,
+      "games": 100,
+      "record": "67W 28L 5D",
+      "score_a": 0.695,
+      "score_as_black": 0.7,
+      "score_as_white": 0.69
+    },
+    {
       "a": "gen65",
       "b": "gen100",
       "ci_high": 0.44234449611834176,
@@ -658,6 +816,30 @@
       "score_as_white": 0.6
     },
     {
+      "a": "gen65",
+      "b": "gen15",
+      "ci_high": 0.8707517859128872,
+      "ci_low": 0.7166821801808517,
+      "decisive": true,
+      "games": 100,
+      "record": "80W 19L 1D",
+      "score_a": 0.805,
+      "score_as_black": 0.76,
+      "score_as_white": 0.85
+    },
+    {
+      "a": "gen65",
+      "b": "gen20",
+      "ci_high": 0.8330867444305122,
+      "ci_low": 0.6676766365018553,
+      "decisive": true,
+      "games": 100,
+      "record": "72W 20L 8D",
+      "score_a": 0.76,
+      "score_as_black": 0.78,
+      "score_as_white": 0.74
+    },
+    {
       "a": "gen100",
       "b": "gen114",
       "ci_high": 0.5768342223477603,
@@ -694,6 +876,30 @@
       "score_as_white": 0.57
     },
     {
+      "a": "gen100",
+      "b": "gen15",
+      "ci_high": 0.9108509042720663,
+      "ci_low": 0.7728837120009737,
+      "decisive": true,
+      "games": 100,
+      "record": "84W 13L 3D",
+      "score_a": 0.855,
+      "score_as_black": 0.82,
+      "score_as_white": 0.89
+    },
+    {
+      "a": "gen100",
+      "b": "gen20",
+      "ci_high": 0.8457850210048047,
+      "ci_low": 0.6838685549813531,
+      "decisive": true,
+      "games": 100,
+      "record": "76W 21L 3D",
+      "score_a": 0.775,
+      "score_as_black": 0.79,
+      "score_as_white": 0.76
+    },
+    {
       "a": "gen114",
       "b": "gen120",
       "ci_high": 0.6009788714884068,
@@ -718,6 +924,30 @@
       "score_as_white": 0.8
     },
     {
+      "a": "gen114",
+      "b": "gen15",
+      "ci_high": 0.9030052541890865,
+      "ci_low": 0.7614692320480934,
+      "decisive": true,
+      "games": 100,
+      "record": "83W 14L 3D",
+      "score_a": 0.845,
+      "score_as_black": 0.83,
+      "score_as_white": 0.86
+    },
+    {
+      "a": "gen114",
+      "b": "gen20",
+      "ci_high": 0.8457850210048047,
+      "ci_low": 0.6838685549813531,
+      "decisive": true,
+      "games": 100,
+      "record": "76W 21L 3D",
+      "score_a": 0.775,
+      "score_as_black": 0.73,
+      "score_as_white": 0.82
+    },
+    {
       "a": "gen120",
       "b": "run1-gen60",
       "ci_high": 0.8159530153525186,
@@ -728,103 +958,177 @@
       "score_a": 0.74,
       "score_as_black": 0.71,
       "score_as_white": 0.77
+    },
+    {
+      "a": "gen120",
+      "b": "gen15",
+      "ci_high": 0.8950665546512223,
+      "ci_low": 0.7501478015500972,
+      "decisive": true,
+      "games": 100,
+      "record": "83W 16L 1D",
+      "score_a": 0.835,
+      "score_as_black": 0.87,
+      "score_as_white": 0.8
+    },
+    {
+      "a": "gen120",
+      "b": "gen20",
+      "ci_high": 0.9069401471634337,
+      "ci_low": 0.7671644040916763,
+      "decisive": true,
+      "games": 100,
+      "record": "83W 13L 4D",
+      "score_a": 0.85,
+      "score_as_black": 0.88,
+      "score_as_white": 0.82
+    },
+    {
+      "a": "run1-gen60",
+      "b": "gen15",
+      "ci_high": 0.7898516425087772,
+      "ci_low": 0.6146110882442888,
+      "decisive": true,
+      "games": 100,
+      "record": "68W 26L 6D",
+      "score_a": 0.71,
+      "score_as_black": 0.7,
+      "score_as_white": 0.72
+    },
+    {
+      "a": "run1-gen60",
+      "b": "gen20",
+      "ci_high": 0.8159530153525186,
+      "ci_low": 0.6462901055081282,
+      "decisive": true,
+      "games": 100,
+      "record": "73W 25L 2D",
+      "score_a": 0.74,
+      "score_as_black": 0.82,
+      "score_as_white": 0.66
+    },
+    {
+      "a": "gen15",
+      "b": "gen20",
+      "ci_high": 0.40626055719489407,
+      "ci_low": 0.22779697212376038,
+      "decisive": true,
+      "games": 100,
+      "record": "30W 68L 2D",
+      "score_a": 0.31,
+      "score_as_black": 0.3,
+      "score_as_white": 0.32
     }
   ],
-  "notes": "1.0 release: run 5 and the network 0.0 shipped, one fit",
+  "notes": "1.0 release: run 5 and the network 0.0 shipped, one fit; gen15 and gen20 added to fill the gap between gen05 and gen35",
   "protocol": {
     "anchor": "random",
     "games_per_pair": 100,
     "opening_plies": 4,
-    "seconds": 1260.1682758230017,
+    "seconds": 1881.8258459849749,
     "seed": 2344983883
   },
   "provenance": {
     "git": {
       "available": true,
-      "branch": "exp/e2-ownership",
-      "commit": "b8e75b4dcb16971db39f3030481711b512526ec4",
-      "commit_short": "b8e75b4",
-      "diff": null,
-      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "dirty": false
+      "branch": "main",
+      "commit": "2f2a2f74c2ca009cf85852a468c1b7f738eb32c4",
+      "commit_short": "2f2a2f7",
+      "diff": "diff --git a/src/reversi/difficulty/calibrate.py b/src/reversi/difficulty/calibrate.py\nindex ad74b3c..d2770a0 100644\n--- a/src/reversi/difficulty/calibrate.py\n+++ b/src/reversi/difficulty/calibrate.py\n@@ -278,8 +278,22 @@ def evaluator_for(model_path: Path, device: str) -> Evaluator:\n \n     try:\n         model = load_export(model_path, device=device).model\n-    except CheckpointError:\n-        model = load_model(model_path, device=device)\n+    except CheckpointError as as_export:\n+        try:\n+            model = load_model(model_path, device=device)\n+        except CheckpointError as as_checkpoint:\n+            # Both readers refused it, so say both reasons. Reporting only the\n+            # second is actively misleading: an export that fails to load reports\n+            # \"no architecture block\", which is the training-checkpoint reader\n+            # correctly observing that an export keeps its architecture under\n+            # `meta` -- a true statement about the wrong file format, and nothing\n+            # to do with why the file would not open.\n+            msg = (\n+                f\"{model_path.name} could not be read either way. \"\n+                f\"As an exported model: {as_export} \"\n+                f\"As a training checkpoint: {as_checkpoint}\"\n+            )\n+            raise CheckpointError(msg) from as_export\n \n     return TorchEvaluator(model, device=device)\n \ndiff --git a/src/reversi/nn/export.py b/src/reversi/nn/export.py\nindex c338939..81b581d 100644\n--- a/src/reversi/nn/export.py\n+++ b/src/reversi/nn/export.py\n@@ -98,6 +98,29 @@ def export_checkpoint(\n         ),\n     )\n \n+    # Read back what was just written, before telling anybody it worked.\n+    #\n+    # `export-onnx` has always done this -- it runs both models on the same inputs\n+    # and deletes the file rather than keep one it cannot trust. This path did\n+    # not, and the gap was not theoretical: `load_export` was built without the\n+    # ownership head for a year, so every network trained with one exported\n+    # \"successfully\" into a file that no reader in the project could open. It\n+    # surfaced at release time, on the network chosen to ship, and the error it\n+    # produced pointed at the wrong file format.\n+    #\n+    # An export nothing can load is not an export. Better to fail here, next to\n+    # the checkpoint that still exists, than downstream where the only evidence\n+    # is a file and a puzzle.\n+    try:\n+        load_export(destination, verify=False)\n+    except CheckpointError as error:\n+        destination.unlink(missing_ok=True)\n+        msg = (\n+            f\"{destination.name} was written but could not be read back, so it has \"\n+            f\"been deleted rather than left to fail later: {error}\"\n+        )\n+        raise CheckpointError(msg) from error\n+\n     # The checksum of the export itself goes in a sidecar, so a download can be\n     # verified without trusting the transport that delivered it.\n     meta[\"sha256\"] = sha256_file(destination)\n@@ -160,6 +183,13 @@ def load_export(path: Path, *, device: str = \"cpu\", verify: bool = True) -> Expo\n         channels=arch[\"channels\"],\n         value_hidden=arch[\"value_hidden\"],\n         in_planes=arch[\"in_planes\"],\n+        # The ownership head, and it is not optional to pass. A network trained\n+        # with one carries `ownership_head.*` tensors, and a model built without\n+        # the flag has nowhere to put them -- `load_state_dict` then rejects the\n+        # whole file over \"unexpected keys\". `loader.py` has always passed this;\n+        # this path did not, and nothing noticed until the first network with the\n+        # head was exported, which was the network chosen to ship.\n+        ownership=bool(arch.get(\"ownership\", False)),\n     )\n     try:\n         model.load_state_dict(payload[\"model_state_dict\"])",
+      "diff_sha256": "8d1b9465a4a000b4a4e5a8c7ad004c11b16804e155d66dbbcd18024c1529362b",
+      "dirty": true
     }
   },
   "ratings": [
     {
-      "ci_high": 1031.2791721413125,
-      "ci_low": 904.5382445985712,
-      "elo": 962.2379158661699,
-      "games": 1000,
-      "name": "gen100"
-    },
-    {
-      "ci_high": 1028.991560345345,
-      "ci_low": 902.7309124927921,
-      "elo": 958.9797708158585,
-      "games": 1000,
+      "ci_high": 1070.340486829393,
+      "ci_low": 948.9823845031558,
+      "elo": 1004.3107954213259,
+      "games": 1200,
       "name": "gen120"
     },
     {
-      "ci_high": 1015.3723137508673,
-      "ci_low": 887.4254679378357,
-      "elo": 946.0910383208178,
-      "games": 1000,
+      "ci_high": 1068.6951043252996,
+      "ci_low": 944.5082189876497,
+      "elo": 1001.9851389303885,
+      "games": 1200,
+      "name": "gen100"
+    },
+    {
+      "ci_high": 1060.2218456871196,
+      "ci_low": 931.6948480642432,
+      "elo": 987.3060842838897,
+      "games": 1200,
       "name": "gen114"
     },
     {
-      "ci_high": 944.4517449235974,
-      "ci_low": 824.5822565068717,
-      "elo": 881.1348104592754,
-      "games": 1000,
+      "ci_high": 991.7227274007979,
+      "ci_low": 867.6114548699832,
+      "elo": 927.5541248323538,
+      "games": 1200,
       "name": "gen65"
     },
     {
-      "ci_high": 893.3235573594984,
-      "ci_low": 771.9358978874494,
-      "elo": 828.3138589046039,
-      "games": 1000,
+      "ci_high": 937.8224499307305,
+      "ci_low": 818.5314793515545,
+      "elo": 874.09544840701,
+      "games": 1200,
       "name": "run1-gen60"
     },
     {
-      "ci_high": 875.2366327868826,
-      "ci_low": 755.5629694741735,
-      "elo": 811.478618444655,
-      "games": 1000,
+      "ci_high": 927.6241236489903,
+      "ci_low": 806.9051084664302,
+      "elo": 861.4579129157856,
+      "games": 1200,
       "name": "gen35"
     },
     {
-      "ci_high": 584.5917234354526,
-      "ci_low": 478.6652428533235,
-      "elo": 529.3461223271206,
-      "games": 1000,
+      "ci_high": 828.0624854230881,
+      "ci_low": 710.0063690840631,
+      "elo": 764.6911057569871,
+      "games": 1200,
+      "name": "gen20"
+    },
+    {
+      "ci_high": 785.415956553431,
+      "ci_low": 669.8095707357062,
+      "elo": 721.9639071116167,
+      "games": 1200,
+      "name": "gen15"
+    },
+    {
+      "ci_high": 574.0736939114225,
+      "ci_low": 468.73142770405406,
+      "elo": 515.6646305340942,
+      "games": 1200,
       "name": "gen05"
     },
     {
-      "ci_high": 542.5069808523424,
-      "ci_low": 435.5860470694212,
-      "elo": 485.9540483198954,
-      "games": 1000,
+      "ci_high": 543.5813791525529,
+      "ci_low": 431.48132219492646,
+      "elo": 481.9768696374329,
+      "games": 1200,
       "name": "minimax-d4"
     },
     {
-      "ci_high": 419.24591574705977,
-      "ci_low": 295.5034312971435,
-      "elo": 355.1609990956276,
-      "games": 1000,
+      "ci_high": 460.85711508965034,
+      "ci_low": 336.12560930096447,
+      "elo": 395.6761542754616,
+      "games": 1200,
       "name": "greedy"
     },
     {
-      "ci_high": 385.7053348562145,
-      "ci_low": 276.4498507220635,
-      "elo": 327.9229917372731,
-      "games": 1000,
+      "ci_high": 374.7901875977829,
+      "ci_low": 265.0726091996901,
+      "elo": 316.57786670152893,
+      "games": 1200,
       "name": "minimax-d2"
     },
     {
       "ci_high": 0.0,
       "ci_low": 0.0,
       "elo": 0.0,
-      "games": 1000,
+      "games": 1200,
       "name": "random"
     }
   ],

@@ -1296,12 +1296,13 @@ Evidence lands in `docs/difficulty_spread.json`.
 
 ## The release tournament: putting two runs on one scale
 
-**Result: the 1.0 network is +131 Elo over the one the site serves, and the
+**Result: the 1.0 network is +130 Elo over the one the site serves, and the
 prediction's expected row was wrong. Subtracting ratings from two tournaments
-understated the gap by 40 points, because the anchor is too far away from either
-network to bridge on.** The prediction table below was registered on 2026-09-07
-before the run; the result sections after it were written the same evening from
-jobs 7105 and 7107.
+understated the gap by 40 points, because a rating only means anything inside the
+fit that produced it.** The prediction table below was registered on 2026-09-07
+before the run; the result sections after it come from jobs 7105 and 7107 on
+2026-09-07 and job 7347 on 2026-09-11, which re-ran the round robin with two more
+generations in it -- see "What adding two entrants did" below.
 
 Nothing about the agent changes here. This exists because a number the project
 wants to state cannot currently be stated.
@@ -1378,6 +1379,9 @@ measured rating, so the levels renumber themselves from whatever this produces.
 minutes on the cpu partition. The 1000-game match adds three pairings. Under an
 hour in total.
 
+*As registered. The field grew to 13 entrants and 78 pairings when generations 15
+and 20 were added, which took 31 minutes.*
+
 ```bash
 # once, from the laptop -- run 1's checkpoint has to reach the cluster
 slurm/push_model.sh models/reversi-8x8-gen60.pt <you>@slurm.csse.rose-hulman.edu
@@ -1414,53 +1418,81 @@ Evidence lands in `docs/ratings/release-one-scale.json` and
 `docs/ratings/release-head-to-head-480.json`. The second file is named 480
 rather than 1000 for a reason worth its own section below.
 
-### Result: +131 Elo, on one scale, decisive
+### Result: +130 Elo, on one scale, decisive
 
-11 entrants, 55 pairings, 100 games each, 5,500 games in 21 minutes on 64 cores.
+13 entrants, 78 pairings, 100 games each, 7,800 games in 31 minutes on 64 cores.
 
 | entrant | Elo | 95% interval |
 |---|---:|---|
-| gen100 | 962.2 | 904.5 - 1031.3 |
-| **gen120** | **959.0** | 902.7 - 1029.0 |
-| gen114 | 946.1 | 887.4 - 1015.4 |
-| gen65 | 881.1 | 824.6 - 944.5 |
-| **run1-gen60** | **828.3** | 771.9 - 893.3 |
-| gen35 | 811.5 | 755.6 - 875.2 |
-| gen05 | 529.3 | 478.7 - 584.6 |
-| *minimax, depth 4* | *486.0* | *435.6 - 542.5* |
-| *greedy* | *355.2* | *295.5 - 419.2* |
-| *minimax, depth 2* | *327.9* | *276.4 - 385.7* |
+| **gen120** | **1004.3** | 949.0 - 1070.3 |
+| gen100 | 1002.0 | 944.5 - 1068.7 |
+| gen114 | 987.3 | 931.7 - 1060.2 |
+| gen65 | 927.6 | 867.6 - 991.7 |
+| **run1-gen60** | **874.1** | 818.5 - 937.8 |
+| gen35 | 861.5 | 806.9 - 927.6 |
+| gen20 | 764.7 | 710.0 - 828.1 |
+| gen15 | 722.0 | 669.8 - 785.4 |
+| gen05 | 515.7 | 468.7 - 574.1 |
+| *minimax, depth 4* | *482.0* | *431.5 - 543.6* |
+| *greedy* | *395.7* | *336.1 - 460.9* |
+| *minimax, depth 2* | *316.6* | *265.1 - 374.8* |
 | *random* | *0.0* | - |
 
-**gen120 - run1-gen60 = +130.7**, and the intervals do not overlap: 902.7 against
-893.3, by 9 points. In the same tournament that pairing scored 74.0%
+**gen120 - run1-gen60 = +130.2**, and the intervals do not overlap: 949.0 against
+937.8, by 11 points. In the same tournament that pairing scored 74.0%
 [64.6%, 81.6%] over 100 games.
 
-The second prediction row is what happened: more than 110, so one of the two
-original tables was flattering its own entrants relative to the frozen baselines.
+The second prediction row is what happened: more than 110.
 
-### Why the naive subtraction was low
+### What adding two entrants did, and what it showed
 
-Every entrant moved when re-measured, and one moved much further than the rest.
+The round robin was run twice. The first had 11 entrants; the second added
+generations 15 and 20, to see whether a sixth level would fit in the 282-Elo hole
+between generation 5 and generation 35. It did -- and it also produced a sharper
+lesson than the one first written here.
 
-| entrant | in its own table | on one scale | moved |
+**Every strong entrant's rating moved by about 40 points.** Nothing about any
+network changed; only the field did.
+
+| entrant | 11-entrant fit | 13-entrant fit | moved |
 |---|---:|---:|---:|
-| run 1, gen 60 | 877.3 | 828.3 | **-49.0** |
-| run 5, gen 35 | 839.4 | 811.5 | -27.9 |
-| run 5, gen 05 | 554.4 | 529.3 | -25.0 |
-| run 5, gen 100 | 984.3 | 962.2 | -22.0 |
-| run 5, gen 65 | 899.4 | 881.1 | -18.3 |
-| minimax, depth 4 | 502.8 | 486.0 | -16.8 |
-| run 5, gen 114 | 956.2 | 946.1 | -10.1 |
-| run 5, gen 120 | 967.9 | 959.0 | -9.0 |
+| run 5, gen 35 | 811.5 | 861.5 | +50.0 |
+| run 5, gen 65 | 881.1 | 927.6 | +46.5 |
+| run 1, gen 60 | 828.3 | 874.1 | +45.8 |
+| run 5, gen 120 | 959.0 | 1004.3 | +45.3 |
+| run 5, gen 114 | 946.1 | 987.3 | +41.2 |
+| *greedy* | *355.2* | *395.7* | *+40.5* |
+| run 5, gen 100 | 962.2 | 1002.0 | +39.8 |
+| run 5, gen 05 | 529.3 | 515.7 | -13.6 |
+| *minimax, depth 2* | *327.9* | *316.6* | *-11.3* |
+| *minimax, depth 4* | *486.0* | *482.0* | *-4.0* |
 
-Run 1's generation 60 fell furthest, and two things about its original
-measurement explain it. That table used **30 games per pairing** against run 5's
-100, so its intervals were roughly twice as wide. And in that field it was the
-strongest entrant, with nothing above it: a Bradley-Terry fit places the top
-entrant using only its wins over weaker opponents, which bounds it from below and
-barely from above. Here it has five stronger networks above it and is pinned from
-both sides.
+**The quantity being claimed moved by 0.5.**
+
+| | 11 entrants | 13 entrants |
+|---|---:|---:|
+| gen120 - run1-gen60 | +130.7 | **+130.2** |
+
+That is the whole lesson, stated more precisely than the first draft of this
+entry managed. An individual rating is not a property of a network; it is a
+coordinate the fit assigns given the field it was measured in. A *difference*
+between two entrants that both played the same opponents is far more stable.
+So "+1004" is a number to quote only alongside the table it came from, while
+"+130 over the network the site serves" is the durable claim.
+
+An earlier version of this section said run 1's generation 60 had been flattered
+by its own table, on the evidence that it fell 49 points when re-measured. The
+refit does not support that: with two more entrants it sits 3 points from where
+its own table put it, while run 5's checkpoints rose by 40. The movement was the
+scale's, not one entrant's.
+
+**Why the second fit is the better one.** Before, minimax-d4 scored 3.0% against
+gen35 and the next weakest network above it was 325 Elo away; almost every pairing
+that could have located the baselines against the networks was saturated. The two
+new entrants sit in that hole and give genuinely informative results -- minimax-d4
+takes 8.0% off gen15 and 12.5% off gen20, and greedy takes 18.0% and 27.0%. A fit
+constrained by pairings that are not 0% or 100% is better determined, which is why
+the baselines moved most.
 
 **The lesson is about which opponent to bridge on.** Both networks played
 depth-4 minimax in their own tables, so the gap to that frozen opponent is a
@@ -1470,16 +1502,21 @@ second way to compare them without a shared fit:
 |---|---:|
 | subtract the ratings, both anchored at random = 0 | +90.7 |
 | bridge on depth-4 minimax, the closest shared opponent | +110.5 |
-| **measured in one fit** | **+130.7** |
+| **measured in one fit** | **+130.2** |
 
 Bridging on the nearest frozen opponent beat bridging on the anchor, and neither
 was good enough. The reason is visible in the score sheet: depth-2 minimax scored
-**0.0%** against gen35, gen100 and gen114, and random scores near nothing against
+**0.0%** against gen20, gen100 and gen114, and random scores near nothing against
 anything strong. A pairing that saturates carries almost no information about
 where the winner sits, so an anchor 900 points below the entrants being compared
 is a very long lever with nothing on the end of it. For a cross-tournament
 comparison, prefer the shared opponent closest in strength -- and prefer one fit
 to either.
+
+**The individual pairings did not change at all.** `gen120 vs run1-gen60` is
+71W 23L 6D in both runs, identically. Each pairing derives its seed from the
+tournament seed and the two names, so adding entrants leaves every existing
+pairing playing exactly the same games. Only the fit over them moved.
 
 ### The 1000-game match could not be run, and 244 is why
 
@@ -1523,7 +1560,7 @@ a perspective bug. Contract C1 says the network never sees colour; a gap that
 appeared with one colour and not the other would say otherwise.
 
 70.3% is **+150 Elo** as a pairwise estimate, with the score interval mapping to
-+116 to +184. The round robin's pooled answer of +131 sits inside that, and the
++116 to +184. The round robin's pooled answer of +130 sits inside that, and the
 round robin's own 100-game pairing gave 74.0%, so the tighter 480-game figure
 lands between the two. All three measures exclude zero comfortably.
 
@@ -1533,12 +1570,12 @@ why. With three entrants it reports gen120 at +972 [858, 1172] and run1-gen60 at
 the problem, not the sample: both networks beat the only other entrant about 99%
 of the time, so nothing in the data locates either of them against the anchor. A
 big sample through a saturated pairing buys precision on the score and none on
-the rating. **The score is the statistic here; the rating is not.** The +131 from
-the 11-entrant fit is the number to quote.
+the rating. **The score is the statistic here; the rating is not.** The +130 from
+the 13-entrant fit is the number to quote.
 
 ### An efficiency finding, for whoever runs the next one
 
-The round robin played 5,500 games in 21 minutes. This match played 1,440 games
+The round robin played 7,800 games in 31 minutes. This match played 1,440 games
 in 66 minutes. The parallelism in `round_robin_parallel` is one process per
 *pairing*, so a three-entrant field uses three of the 64 cores allocated and the
 rest idle. Small fields belong on fewer cores, or the games within a pairing need
@@ -1548,34 +1585,49 @@ saying so.
 ### Decisions taken
 
 * **The 1.0 network is run 5's generation 120**, confirmed rather than merely
-  chosen: +959 on the release scale, +131 over the network the site serves, both
+  chosen: +1004 on the release scale, +130 over the network the site serves, both
   measures decisive.
-* **generation 100 is not better.** It rates +962 to gen120's +959, and their
+* **generation 100 is not better.** It rates +1002 to gen120's +1004, and their
   head-to-head is 49.0% [39.4%, 58.7%]. gen100, gen114 and gen120 are one
   network as far as this measurement can tell, so the pre-registered choice
   stands and the table must not be read as ranking them.
-* **The published ladder is gen05, gen35 and gen120**, plus the two rule-only
-  baselines. Five levels, and every adjacent pair has non-overlapping intervals:
+* **The published ladder is gen05, gen15, gen35 and gen120**, plus the two
+  rule-only baselines. Six levels, and every adjacent pair has non-overlapping
+  intervals:
 
-  | level | plays as | Elo | gap below |
-  |---|---|---:|---:|
-  | 1 | random | 0.0 | - |
-  | 2 | greedy | 355.2 | +355 |
-  | 3 | gen05 | 529.3 | +174 |
-  | 4 | gen35 | 811.5 | +282 |
-  | 5 | gen120 | 959.0 | +148 |
+  | level | plays as | Elo | 95% interval | gap below |
+  |---|---|---:|---|---:|
+  | 1 | random | 0.0 | - | - |
+  | 2 | greedy | 395.7 | 336.1 - 460.9 | +396 |
+  | 3 | gen05 | 515.7 | 468.7 - 574.1 | +120 |
+  | 4 | gen15 | 722.0 | 669.8 - 785.4 | +206 |
+  | 5 | gen35 | 861.5 | 806.9 - 927.6 | +140 |
+  | 6 | gen120 | 1004.3 | 949.0 - 1070.3 | +143 |
 
-  Adding gen65 breaks it: at +881 it overlaps gen35 below and gen120 above.
+* **Generation 15 is the sixth rung; generation 20 is not.** Both were rated to
+  find out. Generation 20 lands at +764.7 [710.0, 828.1] and overlaps generation
+  35 below it, which is the one thing a rung may not do. Generation 15 clears both
+  neighbours. Rating two and publishing one is the same discipline as rating six
+  generations and publishing four: the fit chooses, not the author.
+
+  Generations 15 and 20 cannot both appear either -- they are 43 Elo apart with
+  heavily overlapping intervals, even though their head-to-head is decisive at
+  69.0% to generation 20. A pairing can order two networks that the rating scale
+  cannot separate, and the ladder uses the conservative test.
+
+* **Generation 65 still does not fit.** At +927.6 it overlaps generation 35 below
+  and generation 120 above.
+
+* **The narrowest step is greedy to generation 5**, at 120 Elo with 8 points
+  between the intervals. It passes, barely. If a future refit closes that gap, the
+  honest response is to drop a rung rather than to keep six by relaxing the test.
 
 * **The ladder that ships today is worse than this by the same test.** Measured
   at 30 games per pairing, run 1's intervals are wide enough that *only*
   random-to-greedy is separated -- greedy/gen05, gen05/gen20, gen20/gen40 and
-  gen40/gen60 all overlap. Six nominal levels, one distinguishable step. Five
+  gen40/gen60 all overlap. Six nominal levels, one distinguishable step. Six
   separated levels is the better product and the more honest one.
-* **A sixth level goes in the gen05-to-gen35 gap**, which is 282 Elo wide and the
-  only place a rung would clearly separate. Generations 10 through 30 are on disk;
-  rating one of them in the same fit is the follow-up.
-* **run1-gen60 stays a rated reference row, not a level.** At +828 it overlaps
+* **run1-gen60 stays a rated reference row, not a level.** At +874 it overlaps
   both gen35 and gen65, so it is not a distinguishable rung, and a ladder's levels
   are one run's progression rather than a mixture of two.
 
