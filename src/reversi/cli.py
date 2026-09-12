@@ -706,7 +706,7 @@ def web_manifest_cmd(
     sidecars: Annotated[
         Path,
         typer.Option("--sidecars", help="Directory holding the .json files export-onnx wrote."),
-    ] = Path("models"),
+    ] = Path("web/public/models"),
     release: Annotated[
         str, typer.Option("--release", help="The GitHub Release tag hosting the .onnx files.")
     ] = "models-v1",

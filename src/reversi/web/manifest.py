@@ -102,27 +102,69 @@ def run_key(run_id: str) -> str:
 
 
 def _sidecar_for(sidecars: Path, board_size: int, generation: int) -> dict[str, Any]:
-    """Read the export sidecar for one generation, or say why it cannot.
+    """Read the ONNX export sidecar for one generation, or say why it cannot.
 
     A missing sidecar is an error rather than a field left blank. Without it
     there is no checksum, which means the manifest would be publishing a file
     nobody can verify -- and a rating attached to an unverifiable file is worth
     less than no rating at all.
+
+    Two names are accepted, because the file may or may not carry its run:
+    ``reversi-8x8-gen120.json`` and ``reversi-8x8-gen120-e2-ownership.json``.
+    Naming the local export the way it will be published is the tidier choice --
+    then the file on disk, the release asset and the manifest URL are the same
+    string, and nothing has to be renamed at upload time.
+
+    **More than one match is refused.** Once two runs' exports share a directory,
+    an unqualified `reversi-8x8-gen5.json` and a qualified
+    `reversi-8x8-gen5-<other run>.json` sit side by side, and silently preferring
+    either would attach one run's checksum to the other run's rating. That is the
+    exact failure this file exists to prevent, so it is named rather than
+    guessed.
     """
-    path = sidecars / f"reversi-{board_size}x{board_size}-gen{generation}.json"
-    if not path.exists():
+    stem = f"reversi-{board_size}x{board_size}-gen{generation}"
+    found = sorted(
+        {*sidecars.glob(f"{stem}.json"), *sidecars.glob(f"{stem}-*.json")},
+        key=lambda entry: entry.name,
+    )
+
+    if not found:
         msg = (
-            f"no export sidecar at {path}. Run `reversi export-onnx` for generation "
-            f"{generation} first; a model cannot be published without its checksum"
+            f"no export sidecar for generation {generation} in {sidecars}. Run "
+            f"`reversi export-onnx` for it first; a model cannot be published "
+            "without its checksum"
+        )
+        raise ConfigError(msg)
+    if len(found) > 1:
+        names = ", ".join(entry.name for entry in found)
+        msg = (
+            f"generation {generation} has more than one sidecar in {sidecars}: "
+            f"{names}. They describe different files, and guessing which one the "
+            "manifest should publish is how a rating ends up on the wrong weights. "
+            "Remove the ones that are not being published"
         )
         raise ConfigError(msg)
 
+    path = found[0]
     sidecar = json.loads(path.read_text(encoding="utf-8"))
 
     for field in ("sha256", "run_id", "arch"):
         if not sidecar.get(field):
             msg = f"{path.name} has no {field!r}; it is not a complete export sidecar"
             raise ConfigError(msg)
+
+    # The manifest publishes `.onnx` URLs, so the checksum beside them has to be
+    # the ONNX file's. A PyTorch export writes a sidecar of the same shape for a
+    # different file, and pointing at that directory would record a checksum that
+    # can never match what a visitor downloads -- a number that looks like
+    # evidence and is not. Only the ONNX exporter records an opset.
+    if "onnx_opset" not in sidecar:
+        msg = (
+            f"{path.name} describes a PyTorch export, not the ONNX file the "
+            "manifest publishes, so its checksum would never match what is served. "
+            "Point --sidecars at the directory `reversi export-onnx` wrote to"
+        )
+        raise ConfigError(msg)
 
     recorded = sidecar.get("generation")
     if recorded != generation:

@@ -23,7 +23,14 @@ describe("the game registry", () => {
     const reversi = GAMES.find((g) => g.id === "reversi");
     expect(reversi?.status).toBe("playable");
     expect(reversi?.levels.length).toBe(LADDER.length);
-    expect(reversi?.ladderSummary).toBe("six levels, beginner to expert");
+
+    // Derived from the ladder rather than pinned to a literal, because the
+    // wording follows the rungs: a published generation changes the count and
+    // the top word, and the front page should follow without a test edit.
+    const weakest = LADDER[0]!.word.toLowerCase();
+    const strongest = LADDER[LADDER.length - 1]!.word.toLowerCase();
+    expect(reversi?.ladderSummary).toBe(`six levels, ${weakest} to ${strongest}`);
+    expect(reversi?.ladderSummary).toMatch(/^\w+ levels, \w+ to \w+$/);
   });
 
   it("reports the strongest rating as the ladder's maximum, and none for a planned game", () => {

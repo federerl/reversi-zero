@@ -54,7 +54,15 @@ def _sidecar(
     channels: int = 64,
     omit: str | None = None,
     generation_field: int | None = None,
+    suffix: str = "",
+    onnx: bool = True,
 ) -> Path:
+    """An export sidecar, shaped the way `reversi export-onnx` writes them.
+
+    `onnx=False` produces the PyTorch exporter's sidecar instead, which is the
+    same shape minus the opset -- and which the manifest must refuse, because its
+    checksum describes a different file from the one being published.
+    """
     directory.mkdir(parents=True, exist_ok=True)
     payload: dict[str, Any] = {
         "generation": generation if generation_field is None else generation_field,
@@ -69,9 +77,11 @@ def _sidecar(
             "value_hidden": 64,
         },
     }
+    if onnx:
+        payload["onnx_opset"] = 18
     if omit is not None:
         payload.pop(omit)
-    path = directory / f"reversi-{board_size}x{board_size}-gen{generation}.json"
+    path = directory / f"reversi-{board_size}x{board_size}-gen{generation}{suffix}.json"
     path.write_text(json.dumps(payload), encoding="utf-8")
     return path
 
@@ -189,6 +199,51 @@ class TestWhatMayAppear:
         rated = {b["name"]: b["elo"] for b in manifest["baselines"]}
         assert rated["run1-gen60"] == 877.3
         assert rated["random"] == 0.0
+
+    def test_a_pytorch_sidecar_is_refused(self, tmp_path: Path) -> None:
+        """The checksum has to describe the file that gets served.
+
+        `reversi export` and `reversi export-onnx` both write sidecars of the
+        same shape, for different files. The manifest publishes `.onnx` URLs, so
+        pointing it at the PyTorch exports would record a checksum that can never
+        match what a visitor downloads -- and `fetch-models.mjs` verifies exactly
+        that checksum, so every build would fail with no hint as to why.
+        """
+        models = tmp_path / "models"
+        _sidecar(models, 60, onnx=False)
+        report = _tournament(tmp_path, [_rating("gen60", 877.3)])
+
+        with pytest.raises(ConfigError, match="describes a PyTorch export"):
+            build_manifest(report, sidecars=models, release="models-v2")
+
+    def test_a_sidecar_named_with_its_run_is_found(self, tmp_path: Path) -> None:
+        """Naming the local export the way it will be published is the tidy path.
+
+        Then the file on disk, the release asset and the manifest URL are one
+        string and nothing is renamed at upload time.
+        """
+        models = tmp_path / "models"
+        _sidecar(models, 60, suffix="-20260827-030939")
+        report = _tournament(tmp_path, [_rating("gen60", 877.3)])
+
+        manifest = build_manifest(report, sidecars=models, release="models-v2")
+
+        assert manifest["models"][0]["url"].endswith("gen60-20260827-030939.onnx")
+
+    def test_two_sidecars_for_one_generation_are_refused(self, tmp_path: Path) -> None:
+        """Once two runs' exports share a directory, guessing is unacceptable.
+
+        An unqualified name and a run-qualified one describe different files.
+        Preferring either silently attaches one run's checksum to the other run's
+        rating, which is the failure this whole file exists to prevent.
+        """
+        models = tmp_path / "models"
+        _sidecar(models, 60, run_id=RUN_ONE)
+        _sidecar(models, 60, run_id=RUN_TWO, suffix="-20260903-114500")
+        report = _tournament(tmp_path, [_rating("gen60", 877.3)])
+
+        with pytest.raises(ConfigError, match="more than one sidecar"):
+            build_manifest(report, sidecars=models, release="models-v2")
 
     def test_a_tournament_rating_nothing_playable_is_refused(self, tmp_path: Path) -> None:
         models = tmp_path / "models"

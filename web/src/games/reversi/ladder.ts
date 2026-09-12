@@ -60,28 +60,37 @@ interface ManifestBaseline {
 }
 
 /**
- * How hard a rating feels, in one word.
+ * How hard a rung is, in one word -- chosen by its position, not by its rating.
  *
- * The thresholds are read off the ladder the tournament produced: random play at
- * 0, a disc-counting heuristic at +313, the earliest checkpoint at +547, and the
- * finished agent at +877.
+ * This used to compare the rating against fixed thresholds, and that was wrong
+ * for a reason the release tournament demonstrated. Adding two entrants to that
+ * round robin moved every strong network's rating by about 40 points without a
+ * single one of their games being replayed: an Elo is a coordinate the fit
+ * assigns given the field it measured, not a property of the network. Thresholds
+ * read off one fit therefore expire the next time the field changes, and they
+ * did -- two rungs 143 points apart and cleanly separated both came out
+ * "Expert", while the disc-counting baseline sat four points from flipping word.
  *
- * The top two rungs share a word on purpose. Generations 40 and 60 are 22 rating
- * points apart with intervals that overlap heavily, so calling one of them
- * "strong" and the other "expert" would invent a difference the tournament did
- * not find. They are both expert; the numbers behind them are in the note.
+ * Position is the durable fact. The ladder's *order* is measured, and the gaps
+ * between neighbours are stable even when the absolute numbers are not, so the
+ * nth rung of n is a claim that survives a refit. The rating itself is still
+ * shown, one click away in the note, where it belongs with the interval that
+ * qualifies it.
  *
- * "Strong" is deliberately not one of these words, because it is already the
- * name of a thinking time. Two controls sit side by side, and a word that means
- * one thing under "Level" and another under "Thinking time" is a word that makes
- * the panel harder to read.
+ * "Strong" is deliberately not in this list, because it is already the name of a
+ * thinking time. Two controls sit side by side, and a word that means one thing
+ * under "Level" and another under "Thinking time" makes the panel harder to
+ * read.
  */
-function wordFor(elo: number): string {
-  if (elo < 150) return "Beginner";
-  if (elo < 400) return "Easy";
-  if (elo < 600) return "Fair";
-  if (elo < 750) return "Tough";
-  return "Expert";
+const WORDS = ["Beginner", "Easy", "Fair", "Tough", "Expert", "Master"] as const;
+
+function wordFor(index: number, total: number): string {
+  // The vocabulary is sized for the ladder this project expects. A longer ladder
+  // keeps its numbering and reuses the top word rather than inventing ranks
+  // nobody asked for -- the number is the claim, the word is a handle.
+  if (total <= WORDS.length) return WORDS[index] ?? WORDS[WORDS.length - 1]!;
+  const scaled = Math.round((index / (total - 1)) * (WORDS.length - 1));
+  return WORDS[scaled]!;
 }
 
 function buildLadder(): Rung[] {
@@ -112,9 +121,12 @@ function buildLadder(): Rung[] {
     })),
   ];
 
-  return entries
-    .sort((a, b) => a.elo - b.elo)
-    .map((entry, index) => ({ ...entry, level: index + 1, word: wordFor(entry.elo) }));
+  const sorted = entries.sort((a, b) => a.elo - b.elo);
+  return sorted.map((entry, index) => ({
+    ...entry,
+    level: index + 1,
+    word: wordFor(index, sorted.length),
+  }));
 }
 
 /** Every rung, weakest first. */
