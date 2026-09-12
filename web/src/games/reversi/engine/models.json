@@ -1,36 +1,38 @@
 {
-  "manifest_version": 1,
+  "manifest_version": 2,
+  "game": "reversi",
+  "release": "models-v2",
   "levels": [
     {
       "id": "casual",
-      "elo": 431.0,
+      "elo": 544.3,
       "eloInterval": [
-        400.1,
-        464.7
+        508.4,
+        585.4
       ]
     },
     {
       "id": "club",
-      "elo": 623.3,
+      "elo": 820.9,
       "eloInterval": [
-        587.9,
-        663.8
+        774.0,
+        874.4
       ]
     },
     {
       "id": "strong",
-      "elo": 890.6,
+      "elo": 1186.2,
       "eloInterval": [
-        844.6,
-        942.9
+        1120.2,
+        1254.3
       ]
     },
     {
       "id": "max",
-      "elo": 1053.3,
+      "elo": 1381.4,
       "eloInterval": [
-        1000.9,
-        1114.5
+        1302.1,
+        1457.4
       ]
     }
   ],
@@ -38,89 +40,141 @@
   "run_id": null,
   "rating_anchor": "random = 0",
   "rating_method": "Bradley-Terry, 95% bootstrap interval",
-  "games_per_entrant": 210,
-  "source": "crossgen.json",
+  "games_per_entrant": 1200,
+  "source": "release-one-scale.json",
   "models": [
     {
-      "id": "gen60",
-      "generation": 60,
-      "label": "Generation 60",
-      "url": "/models/reversi-8x8-gen60.onnx",
+      "id": "gen120",
+      "generation": 120,
+      "label": "Generation 120",
+      "url": "/models/reversi-8x8-gen120-e2-ownership.onnx",
       "boardSize": 8,
-      "elo": 877.3,
+      "elo": 1004.3,
       "eloInterval": [
-        774.2,
-        1028.2
+        949.0,
+        1070.3
       ],
-      "games": 210,
-      "note": "The final agent. Beat the depth-4 search 30 games to nil."
+      "games": 1200,
+      "note": "",
+      "run": "e2-ownership",
+      "arch": {
+        "board_size": 8,
+        "channels": 64,
+        "in_planes": 3,
+        "n_blocks": 6,
+        "ownership": true,
+        "policy_size": 65,
+        "value_hidden": 64
+      },
+      "sha256": "1af8088773c60bb282fca2a7994bc56a698a91db38b86b5ea27b6c4843d4d31a"
     },
     {
-      "id": "gen40",
-      "generation": 40,
-      "label": "Generation 40",
-      "url": "/models/reversi-8x8-gen40.onnx",
+      "id": "gen35",
+      "generation": 35,
+      "label": "Generation 35",
+      "url": "/models/reversi-8x8-gen35-e2-ownership.onnx",
       "boardSize": 8,
-      "elo": 855.0,
+      "elo": 861.5,
       "eloInterval": [
-        747.2,
-        1017.6
+        806.9,
+        927.6
       ],
-      "games": 210,
-      "note": "Two thirds through -- already close to its final strength."
+      "games": 1200,
+      "note": "",
+      "run": "e2-ownership",
+      "arch": {
+        "board_size": 8,
+        "channels": 64,
+        "in_planes": 3,
+        "n_blocks": 6,
+        "ownership": true,
+        "policy_size": 65,
+        "value_hidden": 64
+      },
+      "sha256": "0f81e7d0b600ebe559196e418b76978381b9d690d8e43511370dbcb2439e3362"
     },
     {
-      "id": "gen20",
-      "generation": 20,
-      "label": "Generation 20",
-      "url": "/models/reversi-8x8-gen20.onnx",
+      "id": "gen15",
+      "generation": 15,
+      "label": "Generation 15",
+      "url": "/models/reversi-8x8-gen15-e2-ownership.onnx",
       "boardSize": 8,
-      "elo": 758.0,
+      "elo": 722.0,
       "eloInterval": [
-        659.1,
-        898.3
+        669.8,
+        785.4
       ],
-      "games": 210,
-      "note": "A third of the way through training."
+      "games": 1200,
+      "note": "",
+      "run": "e2-ownership",
+      "arch": {
+        "board_size": 8,
+        "channels": 64,
+        "in_planes": 3,
+        "n_blocks": 6,
+        "ownership": true,
+        "policy_size": 65,
+        "value_hidden": 64
+      },
+      "sha256": "0e54bdcfe763eb766cea11e85d6750b26eff0a11c2ec00708bfb07537a0500c3"
     },
     {
       "id": "gen05",
       "generation": 5,
       "label": "Generation 5",
-      "url": "/models/reversi-8x8-gen5.onnx",
+      "url": "/models/reversi-8x8-gen5-e2-ownership.onnx",
       "boardSize": 8,
-      "elo": 547.3,
+      "elo": 515.7,
       "eloInterval": [
-        466.7,
-        685.8
+        468.7,
+        574.1
       ],
-      "games": 210,
-      "note": "About six hours into training. Already beats a classical search."
+      "games": 1200,
+      "note": "About six hours into training. Already beats a classical search.",
+      "run": "e2-ownership",
+      "arch": {
+        "board_size": 8,
+        "channels": 64,
+        "in_planes": 3,
+        "n_blocks": 6,
+        "ownership": true,
+        "policy_size": 65,
+        "value_hidden": 64
+      },
+      "sha256": "7c7b9bbcfaa66989c04c98b886b3e6d8f2491287bc78a2cf96ecdec671e24a0d"
     }
   ],
   "baselines": [
     {
-      "name": "minimax-d4",
-      "elo": 522.6,
+      "name": "run1-gen60",
+      "elo": 874.1,
       "interval": [
-        433.7,
-        653.4
+        818.5,
+        937.8
       ]
     },
     {
-      "name": "minimax-d2",
-      "elo": 333.8,
+      "name": "minimax-d4",
+      "elo": 482.0,
       "interval": [
-        249.9,
-        458.8
+        431.5,
+        543.6
       ]
     },
     {
       "name": "greedy",
-      "elo": 313.1,
+      "elo": 395.7,
       "interval": [
-        220.1,
-        467.6
+        336.1,
+        460.9
+      ]
+    },
+    {
+      "name": "minimax-d2",
+      "elo": 316.6,
+      "interval": [
+        265.1,
+        374.8
       ]
     },
     {
