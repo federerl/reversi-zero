@@ -1461,12 +1461,16 @@ routinely playing near the worst move it is permitted to.
 
 ### These numbers are on their own scale, again
 
-Greedy rates **+199** here, **+262** in the gen60 calibration, and **+355** in the
-release tournament. One frozen opponent, three fits, three answers, spanning 156
-Elo. Nothing about greedy changed. This is the third time this file records that
-lesson and it is worth repeating in the same breath as the ratings above: a level
-rating from this table may be compared with another level from this table, and
-with nothing else.
+Greedy rates **+199** here, **+262** in the gen60 calibration, and **+396** in the
+release tournament. One frozen opponent, three fits, three answers, spanning 197
+Elo. Nothing about greedy changed.
+
+The release tournament makes the point twice over: re-running it with two more
+generations in the field moved greedy from +355 to +396 on its own, without a
+single game between greedy and anything already in it being replayed. This is the
+third time this file records the lesson, and it is worth repeating in the same
+breath as the ratings above: a level rating from this table may be compared with
+another level from this table, and with nothing else.
 
 ### Decisions taken
 
