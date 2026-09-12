@@ -1213,6 +1213,14 @@ not any number this repository has produced.
 
 ## Measuring the spread: is a level the same opponent twice?
 
+**Result: yes between games, no within them. The scoreline of a block of games is
+no more variable than chance, and Casual plays a move other than its best one 27%
+of the time, occasionally by almost a third of a win. The second prediction row is
+what happened.** The prediction table below was registered on 2026-09-07 before
+the run; the results after it come from job 7115 on 2026-09-08, measured on the
+1.0 network rather than the one registered -- see "Measured on gen120, not gen60"
+below.
+
 **Registered 2026-09-07, before the run.** This is item 1 of the three above.
 `reversi spread models/reversi-8x8-gen60.pt`, one command, on the cpu partition.
 
@@ -1290,7 +1298,191 @@ sbatch slurm/cpu.sbatch uv run reversi spread models/reversi-8x8-gen60.pt \
     --out runs/calibration/difficulty_spread.json --workers @CPUS@
 ```
 
-Evidence lands in `docs/difficulty_spread.json`.
+*As registered. It ran on the 1.0 network instead, with a literal worker
+count: `reversi spread models/reversi-8x8-gen120.pt --workers 64`. See "Measured
+on gen120, not gen60" below.*
+
+Evidence: `docs/ratings/difficulty-spread-gen120.json`.
+
+### Measured on gen120, not gen60
+
+The registration named `reversi-8x8-gen60.pt`, the network the site was serving.
+By the time the run went out, the release tournament had settled that the network
+*shipping* is run 5's generation 120, and a consistency measurement of the
+outgoing network answers a question nobody will have. So it ran on gen120 and the
+file is named for it, which is the same rule ADR-0007 applies to published models:
+identify the artefact by what produced it, not by its position in a run.
+
+This has one consequence for the numbers below, and it is not a small one -- see
+the power caveat.
+
+### Result: the variation is inside games, not between them
+
+**Within a game.** 2,000 searched positions per sampling level, 500 for the two
+controls.
+
+| level | plays its best move | mean drop | p90 | p99 | worst | guard |
+|---|---:|---:|---:|---:|---:|---:|
+| casual | 73.3% | 0.025 | 0.092 | **0.295** | 0.338 | 0.35 |
+| club | 82.0% | 0.011 | 0.041 | 0.156 | 0.197 | 0.20 |
+| *strong* | *88.0%* | *0.002* | *0.007* | *0.036* | *0.036* | *0.05* |
+| *max* | *89.8%* | *0.003* | *0.001* | *0.067* | *0.067* | *0.00* |
+
+Casual declines its own best move **more than a quarter of the time**, and its
+99th percentile drop is 0.295 on a scale where 1.0 is the difference between
+winning and losing. So roughly one move in a hundred is nearly a third of a win
+worse than what the search had just found. The distribution is extremely skewed:
+the median is exactly zero and the mean is 0.025, so most declines cost almost
+nothing and a few cost a great deal.
+
+That is the reported effect, located. "Sometimes unbeatable, sometimes losing
+badly" is what a level feels like when it plays well and then, once or twice a
+game, hands something over.
+
+Both guardrails held: 0.338 against Casual's 0.35, 0.197 against Club's 0.20.
+Casual walks right up to its limit, which says the guard is binding rather than
+decorative -- the same thing the calibration found at 0.326.
+
+**Between games.** 15 blocks of 20 games against depth-4 minimax, 5 blocks for
+the controls, with the opening pair as the unit.
+
+| level | score | dispersion | p |
+|---|---:|---:|---:|
+| casual | 92.0% | 0.55 | 0.91 |
+| club | 98.3% | 0.73 | 0.74 |
+| *strong* | *100.0%* | *no variance to explain* | *-* |
+| *max* | *99.0%* | *1.00* | *0.41* |
+
+Nothing is overdispersed. Casual and Club are in fact slightly *less* variable
+than independent games would be, which the measurement deliberately does not
+flag: nobody has ever complained that an opponent was unpleasantly consistent.
+Strong won every one of its 50 opening pairs, so its block scores are identical
+and there is no ratio to report -- which the code says in those words rather than
+dividing two zeros.
+
+### The power caveat, which is mine
+
+The reference opponent was chosen to keep scores mid-range, and it was chosen
+against **gen60's** ladder, where Casual rated +431 and depth-4 minimax about
++500. On gen120 Casual rates +544 and the same frozen opponent +409, and Casual
+scored 92%. Strong and Max swept it.
+
+A level that wins nearly every game has almost no variance left to measure. So
+"consistent with chance" for Casual is weaker evidence than the p-value makes it
+look, and for the two controls it is barely evidence at all. The within-game half
+rests on 2,000 independent observations and is solid; the between-games half is
+suggestive.
+
+If the between-games question is worth settling properly, the reference has to be
+near the level being measured, which now means a *network* opponent rather than a
+classical one -- and by construction the nearest thing to Casual on gen120 is
+another instance of Casual. Registered as the open question, not run.
+
+### A bug the measurement found
+
+Max is configured with `guard: 0.0` and its measured worst drop is **0.067**,
+which is above its own stated limit. That is not a violation of the code; it is
+the code disagreeing with its own documentation.
+
+`_acceptable` applies the guardrail filter only `if level.guard > 0.0`. So zero
+does not mean "the strictest possible guard", it means **no guard at all**, and
+Max simply plays its most-visited move -- which is the standard AlphaZero choice
+and is stronger than picking on value. The behaviour is right. The docstring on
+`DifficultyLevel.guard` says `0 means "only the best move"`, and that is false.
+
+Worth knowing because the calibration's guardrail check (S15e) only ever inspects
+Casual, so nothing else would have caught it. Fixed by correcting the description
+rather than the filter.
+
+### Decisions taken
+
+* **Sampling is the cause, and it is a within-game effect.** Item 3 of the three
+  open questions -- whether to weaken a level with temperature or with fewer
+  simulations -- now has evidence to work from: temperature's cost is not erratic
+  *results*, it is a tail of individually bad moves.
+* **The guard is doing its job and is binding.** Both sampling levels approach
+  their limits without crossing them, so a narrower guard is the lever if the tail
+  is judged too heavy. Casual at 0.35 permits a 0.295 move at the 99th percentile;
+  0.25 would cut that tail without touching the median, at some cost in weakness.
+* **No change shipped yet.** The tail is now measured rather than suspected, and
+  what counts as too heavy is a judgement about the product. Recorded, not acted
+  on.
+* **The between-games protocol needs a stronger reference** before its half of
+  the question is worth quoting.
+
+---
+
+## Recalibration: do the four levels still separate on the 1.0 network?
+
+**Result: S15 passes with wider margins than before. Every gap grew -- +277, +365
+and +195 against the previous +192, +267 and +163 -- because search converts a
+better prior into more strength, so the same four settings spread further apart on
+a stronger network.** Job 7114, 2026-09-08, on run 5's generation 120.
+
+**Why it had to be re-run.** Everything the interface says about thinking time was
+measured on run 1's generation 60. The release replaces that network, and a
+difficulty ladder calibrated on the outgoing network is a set of numbers about
+something the visitor is no longer playing. Criterion S15 is a claim about the
+levels *as shipped*.
+
+**Setup.** Identical to the original: one checkpoint, four levels differing only
+in how much they search and how they choose, rated against each other and the
+three frozen baselines in a single Bradley-Terry fit anchored at random play = 0.
+21 pairings, 300 games each, colour-balanced from a seeded 4-ply book, no
+exploration noise. 500 of Casual's own moves inspected for the guardrail.
+
+### Result
+
+| level | simulations | Elo | 95% interval | gap below | on gen60 |
+|---|---:|---:|---|---:|---:|
+| Casual | 16 | 544.3 | 508.4 - 585.4 | - | 431 |
+| Club | 64 | 820.9 | 774.0 - 874.4 | **+277** | 623 |
+| Strong | 256 | 1186.2 | 1120.2 - 1254.3 | **+365** | 891 |
+| Max | 800 | 1381.4 | 1302.1 - 1457.4 | **+195** | 1053 |
+
+On the same fit: depth-4 minimax +409, greedy +199, random 0.
+
+All five conditions hold. Ratings rise strictly; every adjacent gap clears the
+80-Elo bar by at least double; no adjacent pair of intervals overlaps; Casual beat
+random 298 games to 2 (99.3%, Wilson lower bound 97.6%); and the guardrail held
+over 500 of Casual's moves at a worst drop of 0.348 against its 0.35 limit.
+
+**Every gap widened**, and that is the interesting part rather than a formality.
+The four settings did not change -- 16, 64, 256 and 800 simulations, same
+temperatures, same guards. What changed is the network underneath them. Search
+improves on a prior, so a better prior means each doubling of search buys more,
+and the ladder stretches. It is the same mechanism the simulations sweep measured
+directly, seen from the other side.
+
+**0.348 against a limit of 0.35** is the tightest the guardrail has ever been
+measured. It held, and it has almost nothing left to give: the spread measurement
+found Casual's 99th-percentile drop at 0.295 on the same network. Casual is
+routinely playing near the worst move it is permitted to.
+
+### These numbers are on their own scale, again
+
+Greedy rates **+199** here, **+262** in the gen60 calibration, and **+396** in the
+release tournament. One frozen opponent, three fits, three answers, spanning 197
+Elo. Nothing about greedy changed.
+
+The release tournament makes the point twice over: re-running it with two more
+generations in the field moved greedy from +355 to +396 on its own, without a
+single game between greedy and anything already in it being replayed. This is the
+third time this file records the lesson, and it is worth repeating in the same
+breath as the ratings above: a level rating from this table may be compared with
+another level from this table, and with nothing else.
+
+### Decisions taken
+
+* **The four difficulty settings ship unchanged.** They separate more clearly on
+  the 1.0 network than on the old one, so there is nothing to fix.
+* **`configs/difficulty.yaml` is regenerated as part of the release**, not now. It
+  is tracked, it records the settings *with the measurement that justifies them*,
+  and it currently describes gen60 -- which is still what production serves. The
+  two have to move together, the same rule the web manifest follows.
+* **The web manifest's level ratings come from this report** once the release
+  happens. The interface would otherwise show gen60's numbers beside gen120's
+  play.
 
 ---
 
