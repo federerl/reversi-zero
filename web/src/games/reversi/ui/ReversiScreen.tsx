@@ -291,7 +291,7 @@ export function ReversiScreen() {
   });
 
   return (
-    <Shell breadcrumb="Reversi" wide>
+    <Shell breadcrumb="Othello" wide>
       <div className="game-layout">
         <div className="game-table">
           {plateFor(humanIsBlack ? WHITE : BLACK)}

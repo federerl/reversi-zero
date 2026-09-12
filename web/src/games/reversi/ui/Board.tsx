@@ -101,7 +101,7 @@ export function Board({ state, interactive, lastMove, visits, onPlay }: BoardPro
         <div
           ref={gridRef}
           role="grid"
-          aria-label={`Reversi board, ${size} by ${size}`}
+          aria-label={`Othello board, ${size} by ${size}`}
           className="board-grid"
           // Both axes, explicitly. Naming only the columns leaves the rows as
           // implicit tracks, and an implicit track is sized by its content -- so a

@@ -51,7 +51,7 @@ for (const size of SIZES) {
 
     test("the launcher fits and its board is square", async ({ page }) => {
       await page.goto("/");
-      await expect(page.getByRole("link", { name: "Play Reversi" })).toBeVisible();
+      await expect(page.getByRole("link", { name: "Play Othello" })).toBeVisible();
       await boardIsSquare(page);
       await noSidewaysScroll(page);
     });

@@ -1,7 +1,15 @@
 # reversi-zero
 
-An AlphaZero-style Reversi system with self-play training, PUCT MCTS, calibrated difficulty levels,
-and an interactive web app.
+An AlphaZero-style **Othello** system with self-play training, PUCT MCTS, calibrated difficulty
+levels, and an interactive web app.
+
+> **Othello or Reversi?** The same game. Reversi is the older name; Othello is the 1971 version
+> that fixed the board at 8×8 and the opening at four discs crossed in the centre, which is what
+> this implements. The game is called Othello anywhere a player or a reader meets it. `Reversi`
+> stays as the identifier — the package, the module paths, the model filenames, the `/reversi/`
+> route and the *Reversi Zero* name — because those are addresses rather than descriptions, and
+> renaming them would orphan a published model release whose filenames carry their own
+> provenance.
 
 The agent starts from randomly initialised weights and learns **only** from self-play — no human
 games, no opening books, no hand-written evaluation. The point of the project is not just that it
@@ -223,7 +231,7 @@ intervals; they are wide because each point is 30 games.*
 | 4×4 agent vs Greedy | **93.2%** |
 
 The agent scores near 100% as white and lower as black. That is not a lopsided agent: **white wins
-4×4 Reversi with perfect play**, which `tests/unit/test_solved_4x4.py` proves by solving the game
+4×4 Othello with perfect play**, which `tests/unit/test_solved_4x4.py` proves by solving the game
 exactly (3,306 positions). As black it is defending a theoretically lost position. That test doubles
 as an independent check on the rules engine — it never inspects a flip or a legal-move list, it just
 plays every possible game to the end and asks who wins.

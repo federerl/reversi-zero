@@ -10,13 +10,13 @@
 
 import { expect, test } from "@playwright/test";
 
-test("the launcher leads with Reversi and the levels it offers", async ({ page }) => {
+test("the launcher leads with Othello and the levels it offers", async ({ page }) => {
   await page.goto("/");
 
   const reversi = page.locator('[data-game="reversi"]');
-  await expect(reversi.getByRole("heading", { name: "Reversi" })).toBeVisible();
+  await expect(reversi.getByRole("heading", { name: "Othello" })).toBeVisible();
   await expect(reversi.getByText(/^\w+ levels, \w+ to \w+$/)).toBeVisible();
-  await expect(page.getByRole("link", { name: "Play Reversi" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Play Othello" })).toBeVisible();
 
   // A rating is a fact about the project, not the first thing to tell somebody
   // deciding whether to play. It belongs in the disclosure, and this pins that
@@ -48,9 +48,9 @@ test("the research is one click away and closed by default", async ({ page }) =>
   await expect(details.getByText(/top level rates about \+\d+/)).toBeVisible();
 });
 
-test("Play Reversi opens the game, and the game is ready", async ({ page }) => {
+test("Play Othello opens the game, and the game is ready", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("link", { name: "Play Reversi" }).click();
+  await page.getByRole("link", { name: "Play Othello" }).click();
 
   await expect(page).toHaveURL(/\/reversi\/$/);
   await expect(page.getByRole("status")).toContainText("Your turn", { timeout: 60_000 });
