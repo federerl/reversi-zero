@@ -48,14 +48,10 @@ describe("the difficulty ladder", () => {
 
   it("gives a harder word to a higher rating, and never a weaker one", () => {
     const words = LADDER.map((rung) => rung.word);
-    const rank = ["Beginner", "Easy", "Fair", "Tough", "Expert"];
+    const rank = ["Beginner", "Easy", "Fair", "Tough", "Expert", "Master"];
     const positions = words.map((word) => rank.indexOf(word));
     expect(positions).not.toContain(-1);
     expect(positions).toEqual([...positions].sort((a, b) => a - b));
-
-    // A level word must not repeat a thinking-time label. The two controls are
-    // read together, so a word cannot mean two different things.
-    for (const level of LEVELS) expect(words).not.toContain(level.label);
   });
 
   it("names a rung the way the interface does, and the ladder as a phrase", () => {
@@ -65,7 +61,28 @@ describe("the difficulty ladder", () => {
   });
 
   it("always resolves an opponent id to a rung", () => {
-    expect(rungFor("gen60").opponentLabel).toBe("Generation 60");
+    for (const model of manifest.models) {
+      expect(rungFor(model.id).opponentLabel).toBe(model.label);
+    }
     expect(rungFor("nothing-like-this")).toBe(LADDER[0]);
+  });
+
+  it("gives every rung a distinct word when the ladder is short enough", () => {
+    /**
+     * Words follow position rather than rating, so two cleanly separated rungs
+     * can no longer share one. They did: before the release refit, generation 35
+     * and generation 120 came out "Expert" together despite being 143 Elo apart
+     * with non-overlapping intervals, because the thresholds had been read off a
+     * fit whose scale later moved.
+     */
+    const words = LADDER.map((rung) => rung.word);
+    expect(new Set(words).size).toBe(words.length);
+  });
+
+  it("does not reuse a thinking time's name", () => {
+    /** The two selects sit side by side; a word must not mean two things. */
+    for (const level of LEVELS) {
+      expect(LADDER.map((rung) => rung.word)).not.toContain(level.label);
+    }
   });
 });

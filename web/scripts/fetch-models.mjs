@@ -31,13 +31,22 @@ const modelsDir = join(here, "..", "public", "models");
 // Overridable so a build can be pinned to an older set of weights, which is what
 // you would want if a deploy ever had to be rolled back to match a checkpoint.
 const REPO = process.env["MODELS_REPO"] ?? "federerl/reversi-zero";
-const TAG = process.env["MODELS_TAG"] ?? "models-v1";
+
+/** Read once. The manifest knows both what to fetch and where it lives. */
+const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+
+// Manifest version 2 records the release its URLs belong to, so the tag stopped
+// being a constant that has to be remembered whenever the models change. Getting
+// those two out of step is a build that downloads the previous release's weights
+// and serves them under the current release's ratings -- which nothing
+// downstream could detect, since both files are valid and both checksums match.
+// The environment variable still wins, which is what a rollback needs.
+const TAG = process.env["MODELS_TAG"] ?? manifest.release ?? "models-v1";
 
 const base = `https://github.com/${REPO}/releases/download/${TAG}`;
 
 /** The filenames the app expects, taken from the manifest rather than guessed. */
 function wanted() {
-  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   return manifest.models.map((model) => model.url.split("/").pop());
 }
 
