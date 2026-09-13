@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "reversi-zero"
-version = "0.1.0"
+version = "1.0.0"
 description = "AlphaZero-style Reversi: self-play training, PUCT MCTS, calibrated difficulty, web play"
 readme = "README.md"
 license = { file = "LICENSE" }

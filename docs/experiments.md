@@ -1476,10 +1476,10 @@ another level from this table, and with nothing else.
 
 * **The four difficulty settings ship unchanged.** They separate more clearly on
   the 1.0 network than on the old one, so there is nothing to fix.
-* **`configs/difficulty.yaml` is regenerated as part of the release**, not now. It
-  is tracked, it records the settings *with the measurement that justifies them*,
-  and it currently describes gen60 -- which is still what production serves. The
-  two have to move together, the same rule the web manifest follows.
+* **`configs/difficulty.yaml` is regenerated as part of the release.** It is
+  tracked, and it records the settings *with the measurement that justifies them*,
+  so it has to describe whatever production actually serves. Done when the
+  `models-v2` release went out, alongside the manifest.
 * **The web manifest's level ratings come from this report** once the release
   happens. The interface would otherwise show gen60's numbers beside gen120's
   play.
