@@ -351,41 +351,83 @@ manifest swap plus one bench run.
 
 ---
 
-## 4b. Where 1.0 stands, 2026-09-07
+## 4b. What 1.0 shipped, 2026-09-14
 
-Two thirds of the way through the window. What is done, what is open, and what
-moved — so the plan can be read against the repository rather than beside it.
+Tagged `v1.0.0`. This section replaces the mid-flight status that sat here; the
+plan above is left as written so it can be read against what happened.
 
-**Done and evidenced.** The cluster bring-up and SLURM scripts, with the resume
-path verified end to end on three real jobs (S9). E1 capacity, a control run,
-E2a the ownership head, a second seed of it, the `c_puct` sweep and a
-search-budget sweep — all with entries in `docs/experiments.md` carrying the
-prediction that was registered before the run. `reversi arena` with the four
-suites, in-loop quick evaluation and `best.pt`. The difficulty calibration, which
-met S15 with room to spare. The hub and directory move, the visual identity, the
-board with its 3D flip, the game-over dialog, and the difficulty ladder that
-turned checkpoint names into numbered levels.
+### The agent
 
-**Open, in 1.0.**
+120 generations, 72,000 self-play games, 8 h 20 m on one L40S, from
+`configs/full8x8_e2_ownership.yaml` — E1 and E2 combined, then narrowed to the
+small network once run 6 showed the gains did not add at a matched budget.
 
-| Item | State |
-|---|---|
-| Move history and replay | the reducer already keeps an immutable per-ply history; there is no scrubber and the dialog's "Review" only closes it |
-| Manifest v2 | the generator emits version 2; the committed manifest stays at version 1 until the models release is published, because the two must move together |
-| Difficulty spread | `reversi spread` written and registered; the run has not been made |
-| Docs, hygiene, release | model card refresh, the `v1.0.0` tag |
+**+1004 Elo** in a 13-entrant round robin of 7,800 games, and **+130 Elo** over
+the network 0.0 shipped, measured in that same fit. Against Edax 4.6 at 256
+simulations it beats level 5 and is even with 6 and 7 — two levels better than
+0.0, which was even at 5.
 
-**Moved out.** Workstream C, the `Game` interface, to 1.1 (ADR-0006). The WebGPU
-path to stretch on 2026-09-06, once run 6 settled that the 1.0 network is the
-small one the browser already runs at full speed.
+Eight experiments ran on the cluster, each with its prediction registered before
+the run: E1 capacity, the control, E2a the ownership head, two replicate seeds,
+run 6 (E1+E2), the `c_puct` sweep and the search-budget sweep. The ownership head
+was the largest single gain, from 65 parameters, and it did **not** work the way
+the prediction said it would.
 
-**Not attempted, and deliberately.** The `combos` suite — rating all 24
-generation-by-thinking-time combinations the interface offers. It is item 4 in the
-cut order and the fallback the plan specified is in place: the ladder only offers
-generations the cross-generation tournament rated, and the thinking-time ratings
-are shown only against the thinking time they belong to, never mixed into the
-ladder's ordering. What the interface cannot yet say is what a *combination*
-rates, and `docs/experiments.md` says so in as many words.
+### The ladder
+
+Six levels, every adjacent pair separated by non-overlapping intervals. Four
+generations published out of eight rated — the four that separate. Four thinking
+times recalibrated on the shipped network, meeting S15 with every gap more than
+double the 80-Elo bar.
+
+### The app
+
+A launcher, a board-led game screen, dark by default, sound, a real game-over
+dialog, move-by-move review, and the technical description one click away. It is
+called Othello where a player reads it and `reversi` where code does.
+
+### Criteria, against section 5
+
+Met: the cluster resume path end to end on three real jobs (S9); S15 on the
+shipped network; every strength claim carrying an interval; the rules engine
+frozen and the TypeScript engine generated against it.
+
+### What moved, and where it is written down
+
+| | to | recorded in |
+|---|---|---|
+| Workstream C, the `Game` interface | 1.1 | ADR-0006 |
+| WebGPU | stretch, then dropped | run 6 in `experiments.md` |
+| The `combos` suite | cut (cut-order item 4) | `experiments.md` |
+| Records and streaks | cut (item 5) | here |
+| The win-rate chart | cut (item 6) | here; the meter remains |
+
+The cut order was written before any of it was needed and then followed. Items 5
+and 6 went because they are conveniences, and the fallbacks the plan named are in
+place: the win-probability meter still shows the agent's estimate, and scrubbing
+a finished game shows where it thought the game turned.
+
+### What the release deliberately does not claim
+
+An absolute rating is a coordinate a fit assigns given its field, not a property
+of a network. Adding two entrants to the release tournament moved every strong
+entrant about 40 Elo without replaying a game, while the difference being claimed
+moved 0.5. Only differences measured inside one tournament are quoted anywhere.
+
+Three limitations stand, in `docs/model_card.md`: the agent is still not
+transitive, it plateaued after generation 100, and the shipped checkpoint is the
+best of three seeds.
+
+### Open, and carried into 1.1
+
+* The `Game` interface and Gomoku (ADR-0006).
+* Rating the level x thinking-time combinations, which is the honest way to offer
+  finer granularity than six levels.
+* A stronger reference opponent for the consistency measurement: on the shipped
+  network the classical baseline is too weak for the between-games half of it to
+  have power.
+* Supervised pre-training on human games, then self-play, as a separate 2.0
+  track.
 
 ---
 

@@ -337,7 +337,6 @@ train:
   value_loss_weight: 1.0
   ownership_loss_weight: 0.0
   symmetry_aug: true
-  checkpoint_every_steps: 200
 ```
 
 ### `steps_per_generation: 400` and `batch_size: 512`
@@ -440,11 +439,6 @@ a different angle each epoch.
 > data by 8. The one detail to get right is that the "pass" action must stay put
 > while the 64 square-actions are permuted — it isn't a square, so no rotation
 > moves it.
-
-### `checkpoint_every_steps: 200`
-
-Save mid-training too, not just at generation boundaries, so a crash costs at
-most 200 steps.
 
 ---
 
@@ -567,23 +561,30 @@ confidence interval +215 to +285" — which is a claim you can actually defend.
 ```yaml
 obs:
   tensorboard: true
-  resource_sample_seconds: 1.0
-  diagnostic_positions: 512
-  wandb:
-    enabled: false
 ```
 
 | Setting | What it does |
 |---|---|
 | `tensorboard: true` | Live graphs while training runs |
-| `resource_sample_seconds: 1.0` | Record GPU usage, memory, and CPU once per second — this is how we find out whether the GPU is sitting idle waiting for Python |
-| `diagnostic_positions: 512` | A **fixed** set of 512 positions the network never trains on, used to measure quality consistently. Fixed so the numbers are comparable across generations. |
-| `wandb.enabled: false` | Weights & Biases is an optional hosted dashboard. Off by default so no core part of the project depends on an external service. |
 
-The two things measured on those 512 diagnostic positions are worth knowing:
+The JSONL metric stream is written either way and is the source of truth;
+TensorBoard only mirrors the scalars.
 
-- **Policy entropy** — how spread out the network's move preferences are. If it collapses toward zero the network has become overconfident and stopped exploring; if it stays at maximum it hasn't learned anything.
-- **Value calibration** — when the network says "I'm 70% likely to win," does it actually win about 70% of those positions? A network can predict winners correctly while being badly calibrated, and calibration is what the web app's win-probability bar depends on.
+### Four settings were removed in 1.0
+
+`checkpoint_every_steps`, `resource_sample_seconds`, `diagnostic_positions` and
+the whole `wandb` block were declared here and read by nothing. They described
+work that was planned and then done differently: resource sampling and the
+held-out diagnostic set are gathered by the observability code on its own
+schedule, mid-generation checkpointing never landed because a generation turned
+out to be short enough that resuming from its boundary is cheap, and no workflow
+ever reached for a hosted dashboard.
+
+A setting that nothing reads is worse than a missing one. It invites you to tune
+it, and then to conclude something from the result — so they are gone rather than
+documented as inert. Every config in `configs/` was re-loaded after the removal
+to confirm nothing still sets them, and the model forbids unknown keys, so a
+stale copy fails loudly rather than being ignored.
 
 ---
 

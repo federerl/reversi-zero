@@ -171,9 +171,6 @@ class TrainConfig(_Base):
         "at sampling time (not at storage time): 8x less disk, and every epoch "
         "sees a different orientation.",
     )
-    checkpoint_every_steps: int = Field(
-        default=200, ge=1, description="Mid-generation checkpoint cadence, for cheap resume"
-    )
 
 
 class ArenaConfig(_Base):
@@ -235,26 +232,10 @@ class ArenaConfig(_Base):
         return self
 
 
-class WandbConfig(_Base):
-    """Weights & Biases is strictly optional; no core workflow may require it."""
-
-    enabled: bool = False
-    project: str = "reversi-zero"
-    entity: str | None = None
-
-
 class ObsConfig(_Base):
     """Observability. JSONL is the source of truth; TensorBoard mirrors scalars."""
 
     tensorboard: bool = True
-    resource_sample_seconds: float = Field(default=1.0, gt=0.0)
-    diagnostic_positions: int = Field(
-        default=512,
-        ge=0,
-        description="Size of the fixed held-out set used for policy entropy and "
-        "value-calibration metrics.",
-    )
-    wandb: WandbConfig = WandbConfig()
 
 
 class Config(_Base):

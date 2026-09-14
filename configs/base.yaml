@@ -52,7 +52,6 @@ train:
   grad_clip: 5.0
   value_loss_weight: 1.0
   symmetry_aug: true          # random dihedral op per sample, at sampling time
-  checkpoint_every_steps: 200
 
 arena:
   every_n_generations: 5
@@ -64,9 +63,3 @@ arena:
 
 obs:
   tensorboard: true
-  resource_sample_seconds: 1.0
-  diagnostic_positions: 512
-  wandb:
-    enabled: false            # no core workflow may depend on a hosted service
-    project: reversi-zero
-    entity: null
