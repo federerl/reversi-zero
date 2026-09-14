@@ -1,6 +1,6 @@
 """The network: one board in, a move preference and a score prediction out.
 
-It has a shared body and two heads, because the two questions it answers need
+It has a shared body and up to three heads, because the questions it answers need
 most of the same understanding:
 
 * **Policy head** -- "which moves look worth considering?" One number per action.
@@ -10,10 +10,22 @@ most of the same understanding:
   the point of view of the player to move. This replaces the random playouts
   older programs used to estimate a position: instead of playing the game out to
   the end thousands of times, the network guesses the answer directly.
+* **Ownership head**, optional -- "who will own each square when this ends?"
+  Sixty-four numbers in [-1, +1]. Nothing at play time reads it and the ONNX
+  export does not emit it; it exists only during training. ``forward`` returns
+  two outputs whether or not it is present, and ``forward_all`` returns three.
 
-Both heads share the trunk because "what matters on this board" is nearly the
-same question either way, and training them together makes each one better --
-the value signal teaches the trunk things the policy signal alone would not.
+The heads share the trunk because "what matters on this board" is nearly the same
+question either way, and training them together makes each one better -- the
+value signal teaches the trunk things the policy signal alone would not.
+
+**The ownership head is the clearest case of that, and not for the reason it was
+added.** It costs 65 parameters and bought the largest single gain the project
+measured, worth about as much as a 6.7x bigger network. The expectation was a
+better value estimate; the diagnostic in ``docs/experiments.md`` found that
+ownership is nearly unpredictable in Othello until the endgame, so what it
+actually did was shape the shared trunk by asking it 64 questions per position
+instead of one.
 
 **On size.** Six blocks of 64 channels is about 400k numbers, which is small as
 networks go. That is deliberate. Self-play calls this network tens of millions
