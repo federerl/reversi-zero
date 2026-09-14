@@ -1,7 +1,7 @@
 {
   "name": "reversi-zero-web",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "Play an agent that learned Reversi from self-play. The agent runs in your browser.",
   "scripts": {

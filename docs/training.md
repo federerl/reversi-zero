@@ -252,7 +252,10 @@ all they are: a ladder whose rungs are not measurably separated is four names fo
 one opponent.
 
 ```bash
-uv run reversi calibrate models/reversi-8x8-gen60.pt   --games 300 --workers 8 --device cpu --guard-samples 500   --out runs/calibration/difficulty_report.json   --write-config configs/difficulty.yaml
+uv run reversi calibrate models/reversi-8x8-gen120.pt \
+  --games 300 --workers 8 --device cpu --guard-samples 500 \
+  --out runs/calibration/difficulty_report.json \
+  --write-config configs/difficulty.yaml
 ```
 
 On Windows, PowerShell continues a line with a backtick rather than a backslash.
@@ -260,7 +263,7 @@ A backslash there fails with `Missing expression after unary operator '--'`,
 which is PowerShell reading the next line as a fresh command:
 
 ```powershell
-uv run reversi calibrate models/reversi-8x8-gen60.pt `
+uv run reversi calibrate models/reversi-8x8-gen120.pt `
   --games 300 --workers 8 --device cpu --guard-samples 500 `
   --out runs/calibration/difficulty_report.json `
   --write-config configs/difficulty.yaml

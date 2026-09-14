@@ -18,26 +18,37 @@ confidence intervals and Bradley–Terry ratings, never by pointing at a trainin
 
 > **Status: the 8×8 run is done, rated, and playable in a browser.**
 >
-> Sixty generations, 36,000 self-play games, 9.1 hours on one laptop GPU. In a round robin of 210
-> games per entrant, the final agent rates **+877 Elo** (95% bootstrap interval 774–1028) against
-> random play at 0, and beat a hand-written depth-4 alpha–beta search **30 games to nil**. Generation
-> 60's interval lies entirely above generation 20's, which is the evidence the project set out to
-> produce: it got stronger, and the claim has error bars.
+> 120 generations, 72,000 self-play games, 8 hours 20 minutes on one L40S. In a 13-entrant round
+> robin of 7,800 games, the shipped agent rates **+1004 Elo** (95% bootstrap interval 949–1070)
+> against random play at 0. Its interval lies entirely above generation 35's, which lies entirely
+> above generation 15's, which lies above generation 5's — the evidence the project set out to
+> produce: it got stronger, and every step of the claim has error bars.
 >
-> **The agent now runs in your browser.** The trained network is 1.76 MB, so instead of renting a
+> It is also **+130 Elo over the network this project shipped at 0.0**, measured in that same fit
+> rather than by subtracting two tournaments, and confirmed by a 480-game match it won 70.3%
+> (95% interval 66.1–74.2%).
+>
+> **The agent runs in your browser.** The trained network is 1.8 MB, so instead of renting a
 > machine to run it, the site hands a copy to each visitor. It is a static site: nothing to keep
 > awake, nothing to overwhelm, no request that carries your game anywhere. See *Play it* below.
 >
-> **The difficulty ladder is measured too.** Casual, Club, Strong and Max rate **+431, +623,
-> +891 and +1053** over 21 pairings of 300 games — gaps of +192, +267 and +163 against a
-> requirement of 80, with no adjacent intervals overlapping. All from one checkpoint, so the
-> separation is a property of the method rather than of four different networks (criterion S15).
+> **Both dials are measured.** Six levels, every adjacent pair separated: random at 0, a
+> disc-counting rule at +396, then generations 5, 15, 35 and 120 at +516, +722, +862 and +1004.
+> Four generations published out of eight rated, because those four are the ones whose intervals do
+> not overlap their neighbours — a level you cannot tell from the one below is not a level.
+>
+> The four thinking times are measured separately, on the shipped network: Casual, Club, Strong and
+> Max rate **+544, +821, +1186 and +1381** over 21 pairings of 300 games — gaps of +277, +365 and
+> +195 against a requirement of 80, with no adjacent intervals overlapping. All from one checkpoint,
+> so the separation is a property of the method rather than of four different networks
+> (criterion S15).
 >
 > **It holds its own against a real engine.** Measured against
-> [Edax 4.6](https://github.com/abulmo/edax-reversi), the reference Othello engine: generation 60 at
-> 256 simulations scores **53.1%** over 80 games against Edax at level 5 (95% interval 42.3–63.7%) —
-> statistically even. It beats levels 1–4 and loses to 6 and above. That is the first claim here
-> that does not depend on a baseline written in this repository.
+> [Edax 4.6](https://github.com/abulmo/edax-reversi), the reference Othello engine: the shipped
+> network at 256 simulations **beats Edax level 5** 71.2% over 80 games (95% interval 60.5–80.0%)
+> and is statistically even with **levels 6 and 7** — 59.4% and 41.2%, both intervals spanning 50%.
+> It loses to level 8. That is the claim here that does not depend on a baseline written in this
+> repository, and it is two levels better than 0.0 managed.
 >
 > **One thing is honestly not fixed.** The agent beats depth-4 minimax 100% of the time but greedy
 > only 63% — a real non-transitivity that `docs/experiments.md` records and explains but does not
@@ -93,20 +104,32 @@ hangs at "Loading the agent…". `docs/web-app.md` has the details.
 The networks are not in git. To play against the real agent locally, export them first:
 
 ```bash
-uv run reversi export runs/<run-id>/checkpoints/gen_00060.pt models/gen60.pt
-uv run reversi export-onnx models/gen60.pt web/public/models/reversi-8x8-gen60.onnx
+uv run reversi export runs/<run-id>/checkpoints/gen_00120.pt models/reversi-8x8-gen120.pt
+uv run reversi export-onnx models/reversi-8x8-gen120.pt \
+    web/public/models/reversi-8x8-gen120-<run key>.onnx
+```
+
+Or fetch the published ones, which is what a deploy does and what the checksums are for:
+
+```bash
+cd web && npm run fetch-models
 ```
 
 **What you can choose.** A level, 1 to 6, and for the levels a network plays, how long it thinks.
 
 The ladder is not a difficulty dial with six positions. Each level *is* an opponent, and the order
 they are in was measured rather than chosen: random play at level 1 (0 Elo), a disc-counting rule at
-level 2 (+313), then four checkpoints from the self-play run — generation 5 (+547), 20 (+758), 40
-(+855) and 60 (+877). The ladder is computed from those ratings, so adding a checkpoint inserts a
+level 2 (+396), then four checkpoints from the self-play run — generation 5 (+516), 15 (+722), 35
+(+862) and 120 (+1004). The ladder is computed from those ratings, so adding a checkpoint inserts a
 level in the right place with no code change.
 
+Eight generations were rated and four are published. The other four — 20, 65, 100 and 114 — have
+intervals that overlap a neighbour, and a level you cannot tell apart from the one below makes the
+whole ladder feel arbitrary. Rating more than you ship and letting the fit choose is the rule.
+
 Levels 1 and 2 are not the network, and that is not a shortcut. Generation 5 already rates above the
-depth-4 search it was measured against, so there was no rung a new player could beat; Random and
+depth-4 search it was measured against (+516 against +482), so there was no rung a new player could
+beat; Random and
 Greedy are the baselines the whole project was measured against, and they fill it in. The page starts
 on level 2, which is beatable and needs no model downloaded at all.
 
@@ -182,38 +205,52 @@ killed partway through a write falls back one generation rather than loading a t
 
 Yes — and the claim is measured by playing, never by pointing at a loss curve.
 
-**8×8, after 60 generations of self-play from random weights** (36,000 games, 9.1 hours on a laptop
-GPU). Bradley–Terry ratings fitted across a 28-pairing round robin, anchored at Random = 0:
+**8×8, after 120 generations of self-play from random weights** (72,000 games, 8 h 20 m on one
+L40S). Bradley–Terry ratings fitted across a 78-pairing round robin of 7,800 games, anchored at
+Random = 0:
 
 | agent | Elo | 95% bootstrap interval |
 |---|---|---|
-| **generation 60** | **+877** | [+774, +1028] |
-| generation 20 | +758 | [+659, +898] |
-| generation 5 | +547 | [+467, +686] |
-| Minimax-d4 (hand-written, depth-4 alpha-beta) | +523 | [+434, +653] |
-| Greedy | +313 | [+220, +468] |
+| **generation 120** | **+1004** | [+949, +1070] |
+| generation 35 | +862 | [+807, +928] |
+| *0.0's generation 60, for comparison* | *+874* | *[+819, +938]* |
+| generation 15 | +722 | [+670, +785] |
+| generation 5 | +516 | [+469, +574] |
+| Minimax-d4 (hand-written, depth-4 alpha-beta) | +482 | [+432, +544] |
+| Greedy | +396 | [+336, +461] |
 | Random | 0 | — |
 
-![Bradley-Terry ratings for eight agents with 95% bootstrap intervals. Generation 60 leads at
-roughly +877, generation 40 is close behind and its interval overlaps heavily, minimax-d4 sits near
-+523, and Random is the zero point.](docs/figures/ratings.png)
+The network 0.0 shipped is in the same fit deliberately. Its own tournament put it at +877 and this
+one puts it at +874, but those two numbers are not comparable and the agreement is a coincidence:
+**a rating is a coordinate the fit assigns given the field it measured, not a property of a
+network.** Adding two generations to this very tournament moved every strong entrant by about 40
+points without replaying a single game. What survives a change of field is the *difference* between
+two entrants that both played the same opponents — which is why the claim is "+130 over what 0.0
+shipped" rather than any single number above.
 
-*Everyone placed on one scale by fitting all 28 pairings at once, rather than chaining head-to-head
+![Bradley-Terry ratings for thirteen agents with 95% bootstrap intervals. Generation 120 leads at
+roughly +1004 with generations 100 and 114 alongside it and their intervals overlapping almost
+entirely; the network 0.0 shipped sits near +874 between generations 35 and 65; minimax-d4 is near
++482 and Random is the zero point.](docs/figures/ratings.png)
+
+*Everyone placed on one scale by fitting all 78 pairings at once, rather than chaining head-to-head
 results — so the ordering does not depend on which matches happened to be played first. The bars for
-generations 40 and 60 overlap almost entirely; that overlap **is** the plateau, and it is why the
-claim below is made about generation 20 rather than 40.*
+generations 100, 114 and 120 overlap almost entirely; that overlap **is** the plateau, and it is why
+generation 120 ships as the run's final checkpoint rather than as its best one.*
 
-Generation 60 beat the depth-4 searcher **30 games to nothing**, and its rating interval lies
-entirely above generation 20's — the strict form of "later is stronger", rather than two point
-estimates that happen to be in the right order.
+Generation 120's interval lies entirely above generation 35's, which lies entirely above generation
+15's, which lies above generation 5's — the strict form of "later is stronger", three times over,
+rather than point estimates that happen to be in the right order.
 
 The baseline matters here: Minimax-d4 was *given* corner theory, mobility and frontier evaluation.
 The agent was given none of it and had to find those ideas from its own games.
 
-**Known limitations, stated rather than buried.** The agent plateaued — generations 40 and 60 are
-statistically indistinguishable — and it scores only 63% against Greedy despite beating Minimax-d4
-outright, because self-play narrows its training distribution away from the strange positions bad
-play produces. Both are written up in `docs/experiments.md`.
+**Known limitations, stated rather than buried.** The agent plateaued — generations 100, 114 and 120
+are statistically indistinguishable, their head-to-heads all spanning 50% — and it still scores less
+against Greedy (80%) than against the stronger Minimax-d4 (95%), because self-play narrows its
+training distribution away from the strange positions bad play produces. The non-transitivity is
+smaller than it was at 0.0, where the gap was 63% against 100%, but it has not gone. Both are
+written up in `docs/experiments.md`.
 
 ![Score against each baseline from generation 5 to 60. The line against minimax-d4 climbs from 0.57
 to 1.00 while the line against Greedy falls from 0.90 to 0.63; the two cross around generation 20.](docs/figures/strength.png)
