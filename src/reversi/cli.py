@@ -829,6 +829,91 @@ def export_fixtures_cmd(
 
 
 @app.command()
+def puzzles(
+    model: Annotated[
+        Path, typer.Option("--model", help="Exported model or training checkpoint to mine with.")
+    ] = Path("models/reversi-8x8-gen120.pt"),
+    fixtures: Annotated[
+        Path, typer.Option("--fixtures", help="Directory to write puzzles.json into.")
+    ] = Path("web/src/games/reversi/engine/__fixtures__"),
+    obf: Annotated[
+        Path, typer.Option("--obf", help="Edax problem file to write as evidence.")
+    ] = Path("docs/puzzles/endgame.obf"),
+    quota: Annotated[int, typer.Option("--quota", help="Puzzles to find per stage.")] = 12,
+    stage: Annotated[
+        list[int] | None,
+        typer.Option("--stage", help="Mine only these stages. Repeatable. Default: all five."),
+    ] = None,
+    max_games: Annotated[
+        int, typer.Option("--max-games", help="Give up after this many games.")
+    ] = 600,
+    seed: Annotated[int, typer.Option("--seed")] = 20260919,
+    device: Annotated[str, typer.Option("--device", help="'auto', 'cpu' or 'cuda'.")] = "cpu",
+) -> None:
+    """Mine endgame puzzles: won positions where the tempting move loses.
+
+    Plays games with the trained network at several difficulty levels, solves the
+    endings exactly, and keeps the positions where the side to move has a win and
+    a natural-looking move throws it away -- either the move the network likes
+    most, or the move that flips the most discs.
+
+    Slow, and honestly so: the deepest stage solves thirteen empty squares, which
+    costs about ten seconds a position, and most candidates are rejected. This is
+    a command you run when the curriculum changes, not one CI runs.
+
+    Writes the file the web app ships and an Edax problem file alongside it. The
+    second one is evidence: `wEdax -solve` on it checks every move's score
+    against an outside engine rather than merely re-solving the positions.
+    """
+    import time
+
+    from reversi.difficulty.calibrate import evaluator_for
+    from reversi.endgame.puzzles import STAGES, mine, write_obf
+    from reversi.web.fixtures import puzzles_fixture, write_fixture_file
+
+    setup_logging()
+    wanted = tuple(s for s in STAGES if stage is None or s.number in set(stage))
+    if not wanted:
+        known = ", ".join(str(s.number) for s in STAGES)
+        typer.secho(f"no such stage; the stages are {known}", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2)
+
+    started = time.perf_counter()
+    try:
+        evaluator = evaluator_for(model, _pick_device(device))
+        found = mine(
+            evaluator,
+            quota=quota,
+            stages=wanted,
+            seed=seed,
+            max_games=max_games,
+        )
+        out = fixtures / "puzzles.json"
+        written = write_fixture_file(out, puzzles_fixture(found, board_size=8, seed=seed))
+        obf_bytes = write_obf(obf, found)
+    except ReversiError as error:
+        typer.secho(str(error), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2) from error
+
+    elapsed = time.perf_counter() - started
+    for wanted_stage in wanted:
+        in_stage = [p for p in found if p.stage == wanted_stage.number]
+        got = len(in_stage)
+        spread = (
+            f"difficulty {in_stage[0].difficulty}-{in_stage[-1].difficulty}" if in_stage else "-"
+        )
+        flag = "" if got >= quota else f"  (short of {quota})"
+        typer.echo(
+            f"  stage {wanted_stage.number} {wanted_stage.title:22s} "
+            f"{got:3d} puzzles, {spread}{flag}"
+        )
+    typer.echo(f"  {len(found)} puzzles in {elapsed / 60:.1f} min")
+    typer.echo(f"wrote {out} ({written / 1024:.1f} KiB)")
+    typer.echo(f"wrote {obf} ({obf_bytes / 1024:.1f} KiB) -- check it with:")
+    typer.echo(f"  cd tools/edax && ./wEdax-x86-64.exe -solve ../../{obf.as_posix()}")
+
+
+@app.command()
 def serve(
     host: Annotated[str, typer.Option("--host")] = "127.0.0.1",
     port: Annotated[int, typer.Option("--port")] = 8000,
