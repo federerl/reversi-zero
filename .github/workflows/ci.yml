@@ -82,6 +82,15 @@ jobs:
       # The network fixture is skipped: it needs a trained model, which is not
       # in the repository. The rules, encoding, search and game fixtures are the
       # ones that guard the port.
+      #
+      # puzzles.json is deliberately not in this loop and should not be added.
+      # It is not an expectation a port reproduces -- it is mined content, and
+      # mining plays real games with the trained network, which takes an hour and
+      # depends on torch floating-point arithmetic that is not promised to be
+      # identical on another machine. A diff against a re-run would fail for
+      # reasons that are not mistakes. What guards that file is stronger and runs
+      # in the pytest job instead: every shipped puzzle is solved again and its
+      # stored answers checked move by move, which is what catches a wrong one.
       - name: Fixtures still describe the engine
         run: |
           uv run reversi export-fixtures /tmp/fixtures

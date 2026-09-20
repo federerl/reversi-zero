@@ -125,6 +125,29 @@ def board_string(state: State) -> str:
     return "".join(squares) + " " + to_move
 
 
+def obf_string(state: State) -> str:
+    """A position in the notation Edax's problem files use: ``X``/``O``/``-``.
+
+    The same 64 squares as ``board_string`` with different letters for the
+    colours. A separate function rather than a parameter because the two are read
+    by different things and a file in the wrong alphabet fails obscurely: Edax
+    reads a ``.obf`` line whose discs are ``*`` as an empty board, then solves it
+    and reports a disagreement that looks like a solver bug.
+    """
+    if state.size != 8:
+        msg = f"Edax problem files are 8x8 Othello; asked for a {state.size}x{state.size} board"
+        raise ArenaError(msg)
+
+    squares = ["-"] * 64
+    for index in indices(state.black):
+        squares[index] = "X"
+    for index in indices(state.white):
+        squares[index] = "O"
+
+    to_move = "X" if state.to_move is Player.BLACK else "O"
+    return "".join(squares) + " " + to_move
+
+
 class EdaxAgent:
     """One Edax process, answering one position at a time.
 

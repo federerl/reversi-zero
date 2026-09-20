@@ -285,7 +285,7 @@ def test_the_committed_fixtures_still_match_the_engine() -> None:
     Skips rather than fails when the fixtures have not been generated yet, so it
     does not block the first run of a fresh clone.
     """
-    directory = Path("web/src/engine/__fixtures__")
+    directory = Path("web/src/games/reversi/engine/__fixtures__")
     if not (directory / "rules.json").exists():
         pytest.skip("fixtures have not been generated yet")
 
@@ -297,5 +297,5 @@ def test_the_committed_fixtures_still_match_the_engine() -> None:
     )
     assert payload["cases"] == regenerated["cases"], (
         "the committed fixtures no longer match the engine. Regenerate them with "
-        "`reversi export-fixtures web/src/engine/__fixtures__`."
+        "`reversi export-fixtures web/src/games/reversi/engine/__fixtures__`."
     )
