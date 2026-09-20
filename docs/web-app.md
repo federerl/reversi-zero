@@ -241,6 +241,7 @@ unaffected, so the pause exists where it is needed and nowhere else.
 web/
   index.html           the hub: one card per game, at /
   reversi/index.html   the Reversi page, at /reversi/
+  puzzles/index.html   endgame puzzles, at /puzzles/
   bench/index.html     how fast is this device, at /bench/
   src/hub/             the front page and the list of games it shows
   src/shared/ui/       the frame every page shares
@@ -258,8 +259,11 @@ web/
       hashStub.ts      a reproducible stand-in for the network, for tests
       models.json      the opponent list — generated, see below
       __fixtures__/    what the Python engine says the answers are
-    state/             the game as a reducer over immutable positions
+    state/             the game and the puzzle session, each a reducer over
+                       immutable positions
     ui/                React components: the board, the controls, the screen
+    puzzles/           the endgame puzzle page: the mined curriculum, the
+                       screen, and the progress a visitor's browser remembers
   tests/               the engine against the fixtures, and the hub's registry
   e2e/                 a whole game in a real browser, and the hub
 ```
@@ -269,6 +273,14 @@ is a new directory under `src/games/` and a new entry in `src/hub/registry.ts`;
 nothing in the Reversi directory changes. Separate pages also keep Cloudflare's
 `not_found_handling` on `"404-page"`: every URL maps to a file, so a missing
 `.onnx` is a 404 rather than a page of HTML handed to the model loader.
+
+`/puzzles/` is a second way into Othello rather than a second game, so it is a
+field on the Reversi entry instead of an entry of its own -- it has no ladder and
+no rating, and giving it one would be inventing a number. It loads no network and
+runs no search: the exact result of every move in every puzzle was solved before
+the build and ships as `engine/__fixtures__/puzzles.json`, so a verdict is a table
+lookup rather than a search. `reversi puzzles` produces that file, from the solver
+in `src/reversi/endgame/`.
 
 ### The search runs in a worker
 

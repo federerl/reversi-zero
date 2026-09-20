@@ -29,6 +29,14 @@ export interface GameEntry {
   readonly tagline: string;
   /** Where the game lives. A directory with its own HTML file, see vite.config.ts. */
   readonly path: string;
+  /**
+   * A second way into the same game, when it has one. Othello has endgame
+   * puzzles: the same board and rules, no opponent, and exact answers rather
+   * than an agent's estimate. Not a separate entry in this list, because it is
+   * not a separate game and would otherwise need a ladder and a rating it does
+   * not have.
+   */
+  readonly puzzlesPath: string | undefined;
   readonly status: "playable" | "planned";
   /** The levels a player can choose, weakest first. Empty for a planned game. */
   readonly levels: readonly RatedEntry[];
@@ -42,6 +50,7 @@ export const GAMES: readonly GameEntry[] = [
     title: "Othello",
     tagline: "Learned the game from nothing by playing itself, and runs entirely in your browser.",
     path: "/reversi/",
+    puzzlesPath: "/puzzles/",
     status: "playable",
     levels: LADDER.map((rung) => ({ elo: rung.elo })),
     ladderSummary: describeLadder(),
@@ -51,6 +60,7 @@ export const GAMES: readonly GameEntry[] = [
     title: "Gomoku",
     tagline: "Five in a row. The same method on a different board.",
     path: "/gomoku/",
+    puzzlesPath: undefined,
     status: "planned",
     levels: [],
     ladderSummary: undefined,

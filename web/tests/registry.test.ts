@@ -19,6 +19,19 @@ describe("the game registry", () => {
     for (const path of paths) expect(path).toMatch(/^\/[a-z-]+\/$/);
   });
 
+  it("points Othello at its puzzles, and gives a planned game none", () => {
+    // Every URL on this site maps to a file on disk, so a path typed here that
+    // has no entry in vite.config.ts is a 404 rather than a broken link that
+    // still renders. Keeping the path in the registry is what lets one test
+    // stand between the front page and that.
+    const reversi = GAMES.find((g) => g.id === "reversi")!;
+    expect(reversi.puzzlesPath).toBe("/puzzles/");
+    expect(reversi.puzzlesPath).toMatch(/^\/[a-z-]+\/$/);
+
+    const planned = GAMES.find((g) => g.status === "planned")!;
+    expect(planned.puzzlesPath).toBeUndefined();
+  });
+
   it("counts the levels a visitor can actually play, not the rows of a report", () => {
     const reversi = GAMES.find((g) => g.id === "reversi");
     expect(reversi?.status).toBe("playable");

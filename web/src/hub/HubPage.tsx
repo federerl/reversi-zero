@@ -73,6 +73,11 @@ function Hero({ game }: { game: GameEntry }) {
           <a href={game.path} className="btn btn-primary btn-lg">
             Play {game.title}
           </a>
+          {game.puzzlesPath !== undefined && (
+            <a href={game.puzzlesPath} className="btn btn-lg">
+              Endgame puzzles
+            </a>
+          )}
           {game.ladderSummary !== undefined && (
             <p className="text-[0.95rem] text-muted">{capitalise(game.ladderSummary)}</p>
           )}

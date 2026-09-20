@@ -347,10 +347,17 @@ body {
      than letting the ground show under a compact panel. */
   align-items: start;
   justify-content: center;
+
+  /* Everything above and below the board on this page: the header, the page
+     padding, and the coordinate strip under the board. The board takes what is
+     left, which is what keeps a whole game on screen without scrolling.
+     A page that puts something else above the board raises this rather than
+     repeating the three width rules below with a different constant. */
+  --board-reserve: 13.5rem;
 }
 .game-table {
   width: 100%;
-  max-width: min(100%, calc(100dvh - 13.5rem));
+  max-width: min(100%, calc(100dvh - var(--board-reserve)));
   margin: 0 auto;
 }
 @media (min-width: 60rem) {
@@ -358,7 +365,7 @@ body {
     grid-template-columns: auto minmax(17rem, 20rem);
   }
   .game-table {
-    width: min(calc(100dvh - 13.5rem), calc(100vw - 24rem));
+    width: min(calc(100dvh - var(--board-reserve)), calc(100vw - 24rem));
     max-width: none;
   }
 }
@@ -368,7 +375,44 @@ body {
     gap: 2.5rem;
   }
   .game-table {
-    width: min(calc(100dvh - 13.5rem), calc(100vw - 28rem));
+    width: min(calc(100dvh - var(--board-reserve)), calc(100vw - 28rem));
+  }
+}
+
+/* The puzzles page has a row of stage buttons above the board and, unlike the
+   game, no player plates above and below it -- so it reserves the header, the
+   page padding and that one row, and nothing else. */
+.puzzles-layout {
+  --board-reserve: 9.5rem;
+
+  /* The question goes above the board on a narrow screen and beside it on a
+     wide one. Named areas rather than a second copy of the prompt hidden at one
+     breakpoint: the prompt is a live region, and two of them would announce
+     every verdict twice to a screen reader.
+
+     On a phone this is the difference between being asked something and being
+     shown a board -- the panel sits under the board there, so a prompt left
+     inside it is below the fold. */
+  grid-template-areas:
+    "prompt"
+    "board"
+    "panel";
+}
+.puzzles-layout > .puzzle-prompt {
+  grid-area: prompt;
+}
+.puzzles-layout > .game-table {
+  grid-area: board;
+}
+.puzzles-layout > .puzzle-panel {
+  grid-area: panel;
+}
+@media (min-width: 60rem) {
+  .puzzles-layout {
+    grid-template-areas:
+      "board prompt"
+      "board panel";
+    grid-template-rows: auto minmax(0, 1fr);
   }
 }
 
