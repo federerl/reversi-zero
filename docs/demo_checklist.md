@@ -88,6 +88,31 @@ something nobody ships. See `docs/web-app.md`.
       ONNX Runtime has to start — and the interface says it is loading rather
       than appearing broken.
 
+## Endgame puzzles, at `/puzzles/`
+
+This page makes a stronger claim than any other screen: its answers have no error
+bar. What to check is therefore mostly that the claim is kept.
+
+- [ ] It opens with a position and a question -- whose turn it is, that they are
+      winning, and how many squares are left -- without waiting for anything to
+      load. There is no network on this page; if it pauses, something is wrong.
+- [ ] Clicking a square answers immediately, in discs: "wins by 6", "loses by 2 --
+      the best move wins by 6". Never just "wrong".
+- [ ] A winning move that is not the best still counts as solved, and says so.
+      The puzzle asks you to keep the win, not to find the largest margin.
+- [ ] "Show the winning line" replays perfect play from the **puzzle's** position
+      to the end of the game, and the final score matches the number the page
+      promised.
+- [ ] "Every move, and where it leads" lists *every* legal move with its exact
+      result, best first, and marks the one you played.
+- [ ] All five stages are selectable from the start. Nothing is locked, and stage
+      5 is worth opening in front of an audience -- thirteen empty squares is a
+      position no one can read at a glance.
+- [ ] Solve one puzzle, reload the page, and the stage still shows it solved.
+- [ ] At 390 px the question is **above** the board, not below it. A visitor
+      should not have to scroll past the position to find out what is being asked.
+- [ ] The front page offers "Endgame puzzles" beside "Play Othello".
+
 ## Before showing it to anyone
 
 - [ ] Load the page fresh, with an empty cache, and time it. The first load is
@@ -96,3 +121,5 @@ something nobody ships. See `docs/web-app.md`.
       terminal path is a surprise.
 - [ ] Open `/bench/` once — it measures the visitor's own machine, and it is the
       answer to "how fast is it really".
+- [ ] Solve one stage 1 puzzle and get one stage 5 puzzle wrong, so both halves
+      of the feedback have been seen before anyone else sees them.

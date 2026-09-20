@@ -22,6 +22,10 @@ than remembered.
     ↑
   agents/        Random, Greedy, Minimax, the trained agent, Edax
     ↑
+  endgame/       exact solving of the last few moves, and the puzzles mined
+                 from it. Analysis, not play: nothing the agent uses to
+                 choose a move imports this
+    ↑
   ┌──────────────┴───────────────┐
   arena/  difficulty/            selfplay/  data/  train/  ckpt/
   measuring strength             producing checkpoints
@@ -39,6 +43,7 @@ than remembered.
 | `agents/` | `game`, numpy; the trained agent also `search` + `nn` | selfplay, train |
 | `selfplay/`, `train/`, `data/`, `ckpt/` | everything above | `api`, `web` |
 | `arena/`, `difficulty/` | `game`, `agents`, `search`, `ckpt` | `train`, `selfplay`, `data.replay` |
+| `endgame/` | `game`, numpy; `puzzles.py` also `nn.features` and, inside the mining function, `difficulty` | torch at import time, `search`, `train`, `selfplay` |
 | `api/` | `game`, `search`, `nn`, `agents`, `difficulty`, `ckpt` | **`train`, `selfplay`, `data`** |
 
 These are **tested, not documented**. `tests/api/test_api.py` imports
@@ -247,6 +252,7 @@ checkpointing — does something, and it is the gate every later result depends 
 | ADR-0005 | The agent runs in the browser, not on a server |
 | ADR-0006 | The `Game` interface ships with the second game, not before it |
 | ADR-0007 | A published model is identified by its run, not by its generation |
+| ADR-0008 | What counts as a puzzle: the exact answer and the tempting move disagree |
 
 ## Related documents
 
@@ -257,4 +263,5 @@ checkpointing — does something, and it is the gate every later result depends 
 | `docs/experiments.md` | one entry per run: question, setup, outcome, decision |
 | `docs/model_card.md` | compute, data provenance, measured strength, limitations |
 | `docs/web-app.md` | the browser build and what "no server" means |
+| `docs/endgame.md` | solving the last moves exactly, and the puzzles built from it |
 | `docs/configuration.md` | every setting and what breaks if you change it |

@@ -230,9 +230,17 @@ comparable to published Othello Elo.
 **8×8 only.** The engine is size-parametric and 4×4 and 6×6 work, but this
 network is trained for 8×8 and its input and output shapes are fixed to it.
 
-**No endgame solver.** Strong Othello programs solve the last ~20 plies exactly.
-This one searches them like any other position, which is where a classical engine
-gains the most on it.
+**The agent does not use an endgame solver when it plays.** Strong Othello
+programs solve the last ~20 plies exactly. This one searches them like any other
+position -- the network guesses, a tree search improves the guess, and it stops --
+which is where a classical engine gains the most on it.
+
+An exact solver now exists in the repository (`src/reversi/endgame/`, validated
+against Edax) and powers the endgame puzzles, but nothing in the playing path
+calls it. That is deliberate: wiring it in would very likely lift the level-9
+plateau recorded in `docs/experiments.md`, and it would invalidate every rating on
+this card, the difficulty calibration and the Edax table, all of which would have
+to be measured again. See `docs/endgame.md`.
 
 ---
 
