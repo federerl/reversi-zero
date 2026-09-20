@@ -11,8 +11,9 @@
   "assets": {
     "directory": "./dist",
 
-    // NOT "single-page-application". This site has two real entry points --
-    // index.html and bench/index.html -- and no client-side router, so every
+    // NOT "single-page-application". This site has four real entry points --
+    // the hub, the game, the puzzles and the benchmark, each its own HTML
+    // file (see vite.config.ts) -- and no client-side router, so every
     // URL already maps to a file on disk. In SPA mode a request for a file that
     // does not exist returns index.html with HTTP 200 instead of a 404, which
     // would hand the model loader a page of HTML and fail somewhere far away

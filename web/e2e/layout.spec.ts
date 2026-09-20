@@ -75,6 +75,21 @@ for (const size of SIZES) {
       await expect(select).toBeVisible();
       expect((await select.boundingBox())!.height).toBeGreaterThanOrEqual(43);
     });
+
+    test("the puzzles fit, the board is square, and a stage is reachable", async ({ page }) => {
+      await page.goto("/puzzles/");
+      await expect(page.getByRole("status")).toContainText("to play, and winning");
+
+      await boardIsSquare(page);
+      await noSidewaysScroll(page);
+
+      // The stage picker is a row of buttons above a square board, which is the
+      // arrangement most likely to push the board off a phone screen or to wrap
+      // into something untappable.
+      const stage = page.getByRole("navigation", { name: "Stages" }).getByRole("button").first();
+      await expect(stage).toBeVisible();
+      expect((await stage.boundingBox())!.height).toBeGreaterThanOrEqual(43);
+    });
   });
 }
 

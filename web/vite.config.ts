@@ -114,9 +114,12 @@ export default defineConfig({
 
     rollupOptions: {
       input: {
-        // Three pages, each its own HTML file, no client-side router. The hub
+        // Four pages, each its own HTML file, no client-side router. The hub
         // at / presents the games; each game is a directory with its own entry
         // so a second game is a new directory rather than a change to the first.
+        // /puzzles/ is a second way into Othello rather than a second game: it
+        // shares the board and the rules and loads no engine at all, because
+        // every answer it needs was solved before the build.
         // The benchmark is a real part of the project rather than a scratch
         // file: the decision to run the agent in the browser rests on how fast
         // it actually is on a given device, and that is not something to take on
@@ -128,6 +131,7 @@ export default defineConfig({
         // loader.
         main: fileURLToPath(new URL("./index.html", import.meta.url)),
         reversi: fileURLToPath(new URL("./reversi/index.html", import.meta.url)),
+        puzzles: fileURLToPath(new URL("./puzzles/index.html", import.meta.url)),
         bench: fileURLToPath(new URL("./bench/index.html", import.meta.url)),
       },
     },
