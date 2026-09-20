@@ -1072,6 +1072,9 @@ level 8. The browser search is not letting it show that.
 * An exact endgame solver for the last empties is the second lever, and the one
   that addresses the level-9 plateau. It is hand-written and will be labelled as
   such wherever the agent is described.
+  *Built and validated since* — see "The endgame solver" at the end of this file.
+  It is **not** wired into play, so the plateau above is still the measurement
+  that stands; the hypothesis is now testable rather than tested.
 * Every future strength claim names its simulation budget, and the model card's
   Edax line becomes a row of this table rather than one number.
 
@@ -1918,3 +1921,100 @@ gh release download v4.6 --repo abulmo/edax-reversi   --pattern '*MS-windows*' -
 `tools/edax/` is gitignored. The adapter finds it by convention and, when it is
 absent, says how to fetch it rather than failing obscurely; the tests that need
 it skip.
+
+---
+
+## The endgame solver: a result with no interval
+
+**Run:** 2026-09-19/20, laptop CPU. Evidence: `docs/puzzles/endgame.obf`,
+`tests/unit/test_endgame_solver.py`, `bench/endgame_bench.py`.
+
+Every other entry in this file reports a measurement and attaches an interval,
+because every other entry is a sample of games. This one is not a measurement.
+Near the end of an Othello game the position is small enough to search to the last
+square, so the result is proved.
+
+**Question.** Is the solver right, and is it fast enough to be useful?
+
+### Is it right
+
+Four independent checks. A solver that is a little bit wrong is worse than none:
+it teaches a wrong move under an interface that says the answer is certain.
+
+| # | Anchor | Result |
+|---|---|---|
+| 1 | Every reachable 4×4 position vs the exhaustive solver in `test_solved_4x4.py` | agrees everywhere |
+| 2 | Terminal positions vs `scoring.score_margin` | exact |
+| 3 | The negamax identity, including across a forced pass (contract C3) | holds |
+| 4 | Edax 4.6 on `full-10.txt`, the first 60 positions — the anchor the test suite pins | 60/60 exact |
+| 4b | Edax 4.6 on `full-10.txt`, 120 positions — a wider one-off | 120/120 exact |
+| 4c | Edax 4.6 on `full-15.txt`, 30 positions at 15 empties | 30/30 exact |
+| 4d | Edax 4.6 on the 60 shipped puzzles | 60/60 agree on the best score |
+
+Anchor 1 is worth its cost because the 4×4 solver shares no pruning, no ordering
+and no caching with this one, so it shares none of the ways this one could be
+wrong. It also reproduces the known 4×4 result with detail the old solver could
+not express: white wins by **8 discs**, and all four of black's openings lose by
+exactly 8.
+
+**Anchor 4 found a real disagreement that was not a bug.** The first comparison
+had 36 of 40 positions agreeing, with the four failures showing Edax's magnitude
+larger by exactly 1, 5, 1 and 1 — the number of squares left empty at the end.
+Edax awards leftover empty squares to the winner; this project awards them to
+nobody (contract C3, and what `scoring.result` does).
+
+The shape of that failure is the part worth recording. On the ~90% of positions
+whose perfect play fills the board the two conventions agree exactly, so a check
+that ignored the difference would have **passed** while hiding every case where it
+mattered. The solver now implements both: validation runs in Edax's convention,
+everything published uses this project's, and a test pins the relationship —
+awarding empties to the winner can only widen a margin, never narrow it.
+
+### Is it fast enough
+
+`bench/endgame_bench.py`, ranking every legal move at positions drawn from **real
+play** rather than random boards. A random position with twelve empty squares has
+a sparse shape that searches far faster than anything a game reaches, which would
+make these numbers flattering and useless.
+
+| empty squares | median | worst |
+|---|---:|---:|
+| 8 | 0.07 s | 0.13 s |
+| 10 | 0.64 s | 1.42 s |
+| 11 | 1.43 s | 3.34 s |
+| 12 | 4.46 s | 8.34 s |
+| 13 | 10.6 s | 14.7 s |
+| 14 | 24.3 s | 65.9 s |
+
+About ×2.4 per extra square. `MAX_EMPTIES = 16` is a guard rail set from this
+curve, not a capability claim: the search would start happily on thirty empty
+squares and never return.
+
+### Mining the puzzles
+
+53 games at mixed difficulty levels, 298 candidate positions screened, **60
+puzzles kept, 12 in each of five stages**, in about 30 minutes. Screening uses one
+or two plain solves before paying for the full ranking, which is roughly five
+times more expensive.
+
+Of the 60 kept positions, **55 are ones where taking the most discs loses** and
+**13 are ones where the network's own first choice loses**. That split is a
+measurement of the shipped network rather than of the selection rule: run 5's
+generation 120 is good enough at an ending that its top move rarely throws the
+game away, so the beginner trap carries most of the selection. A weaker network
+would shift the balance.
+
+### Decisions taken
+
+* The solver is **analysis only**. Nothing in the playing path calls it, so every
+  rating in this file, the difficulty calibration and the Edax table stand
+  untouched and nothing needs re-measuring.
+* The level-9 plateau is now **testable and deliberately not tested**. Wiring the
+  solver into play would very likely lift it, and would invalidate the ladder, the
+  calibration and the Edax table at once. That is a separate decision with a
+  re-measurement cost attached, not a free improvement.
+* The generated puzzle file is **not** added to the CI fixture drift check.
+  Mining depends on torch floating-point arithmetic that is not promised to be
+  identical across machines, so a regenerate-and-diff would fail for reasons that
+  are not mistakes. Every shipped puzzle is re-solved and its stored answers
+  checked instead, which is the check that catches a wrong one.
