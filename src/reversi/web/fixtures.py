@@ -584,8 +584,14 @@ def write_fixture_file(path: Path, payload: dict[str, Any]) -> int:
     quietly produce a whole-file diff the next time the others are regenerated.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
+    # LF regardless of platform. ``.gitattributes`` normalises the committed copy,
+    # but CI regenerates these on Linux and byte-compares them against what is in
+    # the repository, so a writer that followed the platform would make the check
+    # depend on which machine last ran it.
     path.write_text(
-        json.dumps(payload, separators=(",", ":"), sort_keys=False) + "\n", encoding="utf-8"
+        json.dumps(payload, separators=(",", ":"), sort_keys=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
     )
     return path.stat().st_size
 
