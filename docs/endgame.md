@@ -151,6 +151,22 @@ quietly does not. It also reproduces the known 4×4 result with detail the old
 solver could not express: white wins **by 8 discs**, and all four of black's
 opening moves lose by exactly 8.
 
+### And a third implementation, in the browser
+
+The page plays endings out with its own search (`web/.../engine/endgame.ts`),
+which is a third implementation of the same idea and could be wrong in its own
+ways. It is held to the standard the rules are: a generated `endgame` fixture
+carries the exact value of a position and of every move in it, CI regenerates it
+and compares byte for byte, and the sixty shipped puzzles are checked as well
+because they go deeper than the fixture does. It agrees with the Python solver on
+every move of every position.
+
+That check matters more here than a duplicate-code complaint would suggest. The
+browser search deliberately does **not** share the engine's board type: immutable
+pairs are right at one position per move and wrong at a hundred thousand
+positions per search, where allocation alone would dominate. The duplication is
+the price of that, and the fixture is what stops the two drifting apart.
+
 ### The two scoring conventions
 
 The first comparison against Edax had 36 of 40 positions agreeing. The four
@@ -310,26 +326,40 @@ All 60 agree.
 
 ## The page
 
-`/puzzles/`. One question, asked sixty times: *you are winning — find a move that
-keeps it.*
+`/puzzles/`. One question, asked sixty times: *you are winning — win it.*
 
-**No solver runs in the browser**, and no network loads. A search deep enough to
-settle thirteen empty squares is seconds of work in Python and an open question in
-TypeScript; precomputing every answer defers that question until there is a
-feature that needs it. A verdict is a table lookup, so it is instant and it is
-certain.
+You are handed an ending you are ahead in and you **play it out to the last
+square** against an opponent that cannot be improved on. Solved means won.
 
-**Only the first move is graded.** Playing the whole ending out would need either
-that in-browser solver or a stored tree that grows past anything worth shipping —
-and the first move is where the reported mistakes happen. After an answer, the
-stored line of perfect play can be stepped out to the end, so the win is shown
-rather than asserted. It replays from the puzzle's own position rather than from
-the move that was played, because the stored line opens with *a* best move, which
-need not be the one chosen.
+The first version of this page graded one move and stopped, and it was the wrong
+shape. Being told "+6" asks a player to trust a number; watching the position
+resolve into a win they can count on the board shows them one. Worse, a single
+wrong move ended the exercise with a verdict and no lesson — which is the exact
+complaint the whole feature exists to answer.
 
-**Every legal move's exact result is one click away.** Telling somebody their move
-was wrong is worth little; telling them it loses by 2 where the best move wins by
-6 is a lesson.
+**The page says nothing about the position while the ending is in progress.** The
+exact value of every move is milliseconds away, and putting it on screen would
+make the page playable by watching a number instead of by calculating. The whole
+account arrives at the end, in a dialog that names the move that threw the win
+away — which is the only place it can be said, and what makes the silence
+affordable.
+
+**That needs an exact search in the browser**, which is a third implementation of
+the same idea and the one genuinely uncertain piece of engineering here. It was
+measured before it was written: the single search a reply needs costs about forty
+milliseconds at thirteen empty squares, against roughly two seconds for the same
+question in Python, because tight integer bit-twiddling is what JavaScript does
+far better than CPython. Every later move is cheaper, since the board only fills
+up. It runs in a worker, so a burst of integer work cannot freeze a tab.
+
+Precomputing the continuations instead was never viable. The opponent's replies
+are forced, but the player's are not, so a stored tree branches on every move
+they make — roughly fifteen thousand positions per puzzle at the deepest stage,
+times sixty.
+
+**Afterwards**, the stored line of perfect play can be stepped out to the end, and
+every opening move's exact result is one click away. Both only after the ending is
+over: shown during it, the ranking would be the answer key.
 
 **Nothing is locked.** A gate would be the obvious reading of a staged
 progression and the wrong call for a page strangers land on: hiding stage 4 behind
@@ -360,9 +390,10 @@ without having been tested.
 **It does not solve arbitrary positions.** Sixteen empty squares is the limit, set
 from the measured curve rather than from the algorithm.
 
-**It does not grade a whole ending.** The page checks one move. Marking every
-blunder in a played game wants either an in-browser solver or stored subtrees, and
-both are follow-ups rather than parts of this.
+**It does not mark up a game you played elsewhere.** The page solves the ending
+you are in, not one from your own history against the agent. That wants stored
+games and a way to get them here, and is the most personal version of this
+feature rather than a part of it.
 
 ---
 
@@ -376,5 +407,7 @@ both are follow-ups rather than parts of this.
 | the command | `reversi puzzles` |
 | the shipped file | `web/src/games/reversi/engine/__fixtures__/puzzles.json` |
 | the Edax cross-check | `docs/puzzles/endgame.obf` |
+| the browser's search | `web/src/games/reversi/engine/endgame.ts` |
+| its generated expectations | `web/src/games/reversi/engine/__fixtures__/endgame.json` |
 | the page | `web/src/games/reversi/puzzles/` |
-| tests | `tests/unit/test_endgame_solver.py`, `tests/unit/test_endgame_puzzles.py`, `web/tests/puzzles.test.ts` |
+| tests | `tests/unit/test_endgame_solver.py`, `tests/unit/test_endgame_puzzles.py`, `web/tests/endgame.test.ts`, `web/tests/puzzles.test.ts` |
