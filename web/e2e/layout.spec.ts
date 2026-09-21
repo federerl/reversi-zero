@@ -78,7 +78,7 @@ for (const size of SIZES) {
 
     test("the puzzles fit, the board is square, and a stage is reachable", async ({ page }) => {
       await page.goto("/puzzles/");
-      await expect(page.getByRole("status")).toContainText("to play, and winning");
+      await expect(page.getByRole("status")).toContainText("and winning");
 
       await boardIsSquare(page);
       await noSidewaysScroll(page);

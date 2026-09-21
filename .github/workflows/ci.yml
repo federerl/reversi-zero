@@ -80,8 +80,10 @@ jobs:
       # regenerate them here and fail on any difference.
       #
       # The network fixture is skipped: it needs a trained model, which is not
-      # in the repository. The rules, encoding, search and game fixtures are the
-      # ones that guard the port.
+      # in the repository. The rules, encoding, search, game and endgame fixtures
+      # are the ones that guard the port -- every one of them is produced from the
+      # frozen engine with a fixed seed and no torch, so any machine regenerates
+      # the same bytes.
       #
       # puzzles.json is deliberately not in this loop and should not be added.
       # It is not an expectation a port reproduces -- it is mined content, and
@@ -94,7 +96,7 @@ jobs:
       - name: Fixtures still describe the engine
         run: |
           uv run reversi export-fixtures /tmp/fixtures
-          for name in rules encoding search games; do
+          for name in rules encoding search games endgame; do
             if ! diff -q "/tmp/fixtures/$name.json" "web/src/games/reversi/engine/__fixtures__/$name.json"; then
               echo "::error::$name.json is out of date. Regenerate with:"
               echo "::error::  uv run reversi export-fixtures web/src/games/reversi/engine/__fixtures__"

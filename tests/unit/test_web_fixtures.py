@@ -238,7 +238,11 @@ def test_every_fixture_file_stays_small_enough_to_commit(tmp_path: Path) -> None
     """
     sizes = write_fixtures(tmp_path, seed=SEED)
 
-    assert set(sizes) == {"rules", "encoding", "search", "games"}
+    # An explicit inventory rather than "whatever was written", so adding a
+    # fixture is a decision somebody makes here rather than one that happens.
+    # `puzzles` is deliberately absent: it is mined, not generated, and is
+    # written by `reversi puzzles` instead.
+    assert set(sizes) == {"rules", "encoding", "search", "games", "endgame"}
     for name, size in sizes.items():
         assert size < 500_000, f"{name}.json is {size:,} bytes, too large to commit"
 
