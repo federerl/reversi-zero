@@ -107,9 +107,13 @@ same rule. The rule is the claim; the particular set is a sample.
 a proxy for temptation, and the derived score says so by weighting it below the
 one term that is exact — how narrow the win is.
 
-**It does not grade the rest of the ending.** A puzzle asks for one move. Whether
-the player could then convert it is a different question, and answering it would
-need a solver in the browser.
+**It selects on the first move, while the page asks for the whole ending.** The
+rule here decides which *positions* are worth setting, and it reasons about the
+move played from them -- that is what the network's policy and the disc-grabbing
+test both speak to. The page then asks the player to win the ending, which is a
+larger task than the rule measures. Difficulty is therefore a property of the
+position as set, not a prediction of how hard the rest will be to convert, and
+the ordering inside a stage should be read that way.
 
 **It does not change how the agent plays.** The rule and the solver are analysis;
 the ladder, the difficulty calibration and the published ratings are untouched.

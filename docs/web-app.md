@@ -277,10 +277,15 @@ nothing in the Reversi directory changes. Separate pages also keep Cloudflare's
 `/puzzles/` is a second way into Othello rather than a second game, so it is a
 field on the Reversi entry instead of an entry of its own -- it has no ladder and
 no rating, and giving it one would be inventing a number. It loads no network and
-runs no search: the exact result of every move in every puzzle was solved before
-the build and ships as `engine/__fixtures__/puzzles.json`, so a verdict is a table
-lookup rather than a search. `reversi puzzles` produces that file, from the solver
-in `src/reversi/endgame/`.
+no model: the positions were mined and solved before the build and ship as
+`engine/__fixtures__/puzzles.json`, which `reversi puzzles` produces from the
+solver in `src/reversi/endgame/`.
+
+It does run a search, though not a neural one. Endings are played out against an
+exact alpha-beta search in `engine/endgame.ts`, in a worker, so the opponent's
+replies cannot be improved on and the promised score really appears on the board.
+That search is checked against the Python solver by a generated fixture the same
+way `rules.ts` is checked against the Python rules.
 
 ### The search runs in a worker
 
