@@ -1,35 +1,39 @@
 /**
- * The puzzle page: the curriculum it ships, the verdict it gives, and the
- * progress it remembers.
+ * The puzzle page: the curriculum it ships, the ending it plays out, and the
+ * account it gives at the end.
  *
  * The meta-tests over the shipped file are the valuable half. Everything a
- * player is told on that page comes out of `puzzles.json`, and that file is
- * mined rather than regenerated in CI -- so unlike the five engine fixtures, no
- * diff is watching it. These assert the properties that make it a *curriculum*
- * rather than sixty positions: every one winnable, every one with a way to go
- * wrong, every one inside its stage's band, and the whole thing already in the
- * order the page reads it in.
+ * player meets on that page comes out of `puzzles.json`, and that file is mined
+ * rather than regenerated in CI -- so unlike the engine fixtures, no diff is
+ * watching it. These assert the properties that make it a *curriculum* rather
+ * than sixty positions: every one winnable, every one with a way to go wrong,
+ * every one inside its stage's band, and the whole thing already in the order
+ * the page reads it in.
  *
  * The Python side re-solves every board and checks the stored answers are true.
- * This side checks they are usable.
+ * This side checks they are usable, and that an ending played against them ends
+ * where they say it will.
  */
 
 import { describe, expect, it } from "vitest";
 
 import puzzlesFixture from "../src/games/reversi/engine/__fixtures__/puzzles.json";
-import { PUZZLES, STAGES, puzzlesInStage, stageOf } from "../src/games/reversi/puzzles/data";
+import { PUZZLES, STAGES, puzzlesInStage, stageOf, type Puzzle } from "../src/games/reversi/puzzles/data";
 import { PROGRESS_KEY, readSolved, writeSolved } from "../src/games/reversi/puzzles/progress";
+import { bestMove, solveExact, solveRoot } from "../src/games/reversi/engine/endgame";
 import {
   accepting,
   boardOf,
   currentPuzzle,
-  grade,
+  describeOutcome,
   newSession,
   playableSquares,
+  playerColour,
   reduce,
-  solved,
   solvedInStage,
+  type Outcome,
   type Session,
+  type SessionAction,
 } from "../src/games/reversi/state/puzzle";
 import {
   apply,
@@ -37,6 +41,8 @@ import {
   isTerminal,
   legalActions,
   passAction,
+  type Action,
+  type State,
 } from "../src/games/reversi/engine/rules";
 
 class FakeStorage {
@@ -64,8 +70,20 @@ function sessionIn(stage: number): Session {
   return newSession(stage);
 }
 
-function step(session: Session, action: Parameters<typeof reduce>[1]): Session {
+function step(session: Session, action: SessionAction): Session {
   return reduce(session, action, puzzlesInStage(session.stage));
+}
+
+function outcomeStub(won: boolean): Outcome {
+  return {
+    discs: { mine: won ? 40 : 20, theirs: won ? 20 : 40 },
+    margin: won ? 20 : -20,
+    won,
+    openingMove: 0,
+    openingMargin: won ? 20 : -20,
+    best: 20,
+    lostItAt: null,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -85,9 +103,7 @@ describe("the curriculum that ships", () => {
     for (const puzzle of PUZZLES) {
       expect(puzzle.best).toBeGreaterThan(0);
       expect(puzzle.winningMoves.length).toBeGreaterThan(0);
-      // Two legal moves or it is not a choice, and the table has to cover every
-      // square the board will let somebody click.
-      const playable = playableSquares(puzzle);
+      const playable = playableSquares(puzzle.state);
       expect(playable.length).toBeGreaterThanOrEqual(2);
       expect([...puzzle.margins.keys()].sort()).toEqual([...playable].sort());
     }
@@ -107,8 +123,7 @@ describe("the curriculum that ships", () => {
 
   it("keeps every puzzle inside its stage's band of empty squares", () => {
     for (const puzzle of PUZZLES) {
-      const stage = stageOf(puzzle.stage);
-      const [low, high] = stage.empties;
+      const [low, high] = stageOf(puzzle.stage).empties;
       expect(puzzle.empties).toBeGreaterThanOrEqual(low);
       expect(puzzle.empties).toBeLessThanOrEqual(high);
     }
@@ -131,15 +146,12 @@ describe("the curriculum that ships", () => {
     expect(stages).toEqual([...stages].sort((a, b) => a - b));
 
     for (const stage of STAGES) {
-      const difficulties = puzzlesInStage(stage.number).map((puzzle) => puzzle.difficulty);
+      const difficulties = puzzlesInStage(stage.number).map((p) => p.difficulty);
       expect(difficulties).toEqual([...difficulties].sort((a, b) => a - b));
     }
   });
 
   it("gives each puzzle a line of play that reaches the promised score", () => {
-    // The replay shown after an answer is evidence, not decoration. If a stored
-    // line stopped short or ended on a different score, the page would be
-    // asserting a win it cannot show.
     for (const puzzle of PUZZLES) {
       let state = puzzle.state;
       for (const action of puzzle.principalVariation) {
@@ -158,8 +170,8 @@ describe("the curriculum that ships", () => {
     expect(puzzlesFixture.fixture).toBe("puzzles");
     expect(puzzlesFixture.pass_action).toBe(passAction(puzzlesFixture.board_size));
     for (const puzzle of PUZZLES) {
-      // A 64-bit board is not exact as a JavaScript number. The id is built
-      // from the hex strings, so a puzzle whose board arrived as a number would
+      // A 64-bit board is not exact as a JavaScript number. The id is built from
+      // the hex strings, so a puzzle whose board arrived as a number would
       // collide with another rather than merely render wrong.
       expect(puzzle.id).toMatch(/^[0-9a-f]+:[0-9a-f]+:[01]$/);
     }
@@ -168,111 +180,98 @@ describe("the curriculum that ships", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Grading
+// Playing the ending out
 // ---------------------------------------------------------------------------
 
-describe("grading an answer", () => {
-  const puzzle = PUZZLES[0]!;
-
-  it("calls a winning move a win, and names the margin", () => {
-    const move = puzzle.bestMoves[0]!;
-    const verdict = grade(puzzle, move);
-    expect(verdict.outcome).toBe("wins");
-    expect(verdict.optimal).toBe(true);
-    expect(verdict.margin).toBe(puzzle.best);
-    expect(solved(verdict)).toBe(true);
+describe("playing a puzzle out", () => {
+  it("starts with the puzzle position and the player on move", () => {
+    const puzzle = puzzlesInStage(firstStage)[0]!;
+    const session = sessionIn(firstStage);
+    expect(boardOf(session, puzzle)).toEqual(puzzle.state);
+    expect(playerColour(puzzle)).toBe(puzzle.state.toMove);
+    expect(accepting(session, puzzle)).toBe(true);
+    expect(currentPuzzle(session, puzzlesInStage(firstStage))).toBe(puzzle);
   });
 
-  it("treats a drawing move as a failure, because the position was won", () => {
-    // Not pedantry. Every mined position has a win in it, so a move that only
-    // draws has thrown the win away -- which is the exact mistake the page
-    // exists to catch, and marking it "solved" would teach the opposite.
-    const drawn = PUZZLES.flatMap((p) =>
-      [...p.margins].filter(([, margin]) => margin === 0).map(([move]) => ({ p, move })),
-    )[0];
-    if (drawn === undefined) return; // No drawn move in this curriculum.
-    const verdict = grade(drawn.p, drawn.move);
-    expect(verdict.outcome).toBe("draws");
-    expect(solved(verdict)).toBe(false);
+  it("takes a move, then refuses clicks until the reply arrives", () => {
+    const puzzle = puzzlesInStage(firstStage)[0]!;
+    const move = playableSquares(puzzle.state)[0]!;
+
+    let session = step(sessionIn(firstStage), { type: "play", action: move });
+    expect(session.history).toHaveLength(2);
+    expect(session.history[1]!.mine).toBe(true);
+
+    // It is the opponent's turn now, and it must keep refusing while the search
+    // is outstanding, or a fast player could queue a move into a position that
+    // no longer exists.
+    expect(accepting(session, puzzle)).toBe(false);
+    session = step(session, { type: "thinking" });
+    expect(accepting(session, puzzle)).toBe(false);
   });
 
-  it("distinguishes a win that is not the best from the best", () => {
-    const suboptimal = PUZZLES.flatMap((p) =>
-      [...p.margins]
-        .filter(([, margin]) => margin > 0 && margin < p.best)
-        .map(([move]) => ({ p, move })),
-    )[0];
-    if (suboptimal === undefined) return;
-    const verdict = grade(suboptimal.p, suboptimal.move);
-    expect(verdict.outcome).toBe("wins");
-    expect(verdict.optimal).toBe(false);
-    expect(solved(verdict)).toBe(true);
-    expect(verdict.best).toBeGreaterThan(verdict.margin);
+  it("refuses a move that is not legal in the position on screen", () => {
+    const puzzle = puzzlesInStage(firstStage)[0]!;
+    const illegal = [...Array(64).keys()].find((sq) => !puzzle.margins.has(sq))!;
+    const session = step(sessionIn(firstStage), { type: "play", action: illegal });
+    expect(session.history).toHaveLength(0);
   });
 
-  it("refuses a move it has no exact answer for", () => {
-    // Unreachable through the board, which only offers legal squares. It throws
-    // rather than inventing a margin, because a puzzle that grades a move it
-    // cannot see is worse than one that refuses to.
-    const illegal = [...Array(64).keys()].find((square) => !puzzle.margins.has(square))!;
-    expect(() => grade(puzzle, illegal)).toThrow(/no exact result/);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// The session
-// ---------------------------------------------------------------------------
-
-describe("working through a stage", () => {
-  it("accepts one answer, then stops taking clicks", () => {
-    const inStage = puzzlesInStage(firstStage);
-    const puzzle = inStage[0]!;
+  it("plays a whole ending against perfect replies and reaches a finish", () => {
+    const puzzle = puzzlesInStage(firstStage)[0]!;
     let session = sessionIn(firstStage);
-    expect(accepting(session)).toBe(true);
 
-    session = step(session, { type: "play", action: puzzle.bestMoves[0]! });
-    expect(accepting(session)).toBe(false);
-
-    // A second click changes nothing: the verdict on screen must stay the one
-    // that was earned.
-    const after = step(session, { type: "play", action: puzzle.winningMoves[0]! });
-    expect(after).toBe(session);
-  });
-
-  it("records a solve and keeps it after a wrong answer on the same puzzle", () => {
-    const inStage = puzzlesInStage(firstStage);
-    const puzzle = inStage[0]!;
-    const losing = [...puzzle.margins].find(([, margin]) => margin <= 0)?.[0];
-
-    let session = step(sessionIn(firstStage), { type: "play", action: puzzle.bestMoves[0]! });
-    expect(session.solvedIds.has(puzzle.id)).toBe(true);
-    expect(solvedInStage(session, inStage)).toBe(1);
-
-    if (losing !== undefined) {
-      session = step(session, { type: "retry" });
-      session = step(session, { type: "play", action: losing });
-      // Still solved. This is a record of what somebody worked out, not a score
-      // that a later mistake takes back.
-      expect(session.solvedIds.has(puzzle.id)).toBe(true);
+    for (let guard = 0; guard < 80; guard += 1) {
+      const state = boardOf(session, puzzle);
+      if (isTerminal(state)) break;
+      if (state.toMove === playerColour(puzzle)) {
+        const options = playableSquares(state);
+        const move = options.length > 0 ? options[0]! : passAction(state.size);
+        session = step(session, { type: "play", action: move });
+      } else {
+        session = step(session, { type: "opponentPlayed", action: bestMove(state) });
+      }
     }
+
+    expect(isTerminal(boardOf(session, puzzle))).toBe(true);
   });
 
-  it("shows the stored line from the puzzle, not from the move that was played", () => {
-    const inStage = puzzlesInStage(firstStage);
-    const puzzle = inStage[0]!;
-    let session = step(sessionIn(firstStage), { type: "play", action: puzzle.bestMoves[0]! });
+  it("counts a puzzle solved only when the ending is actually won", () => {
+    // The decision this page turns on. Finding the right first move and then
+    // losing the ending is not solving it.
+    const puzzle = puzzlesInStage(firstStage)[0]!;
+    const session = sessionIn(firstStage);
+
+    expect(step(session, { type: "finished", outcome: outcomeStub(false) }).solvedIds.has(puzzle.id)).toBe(false);
+    expect(step(session, { type: "finished", outcome: outcomeStub(true) }).solvedIds.has(puzzle.id)).toBe(true);
+  });
+
+  it("starts again from the puzzle, keeping what was already won", () => {
+    const puzzle = puzzlesInStage(firstStage)[0]!;
+    let session = step(sessionIn(firstStage), { type: "finished", outcome: outcomeStub(true) });
+    session = step(session, { type: "play", action: playableSquares(puzzle.state)[0]! });
+
+    session = step(session, { type: "retry" });
+    expect(session.history).toHaveLength(1);
+    expect(session.outcome).toBeNull();
+    expect(boardOf(session, puzzle)).toEqual(puzzle.state);
+    expect(session.solvedIds.has(puzzle.id)).toBe(true);
+    expect(solvedInStage(session, puzzlesInStage(firstStage))).toBe(1);
+  });
+
+  it("shows the stored line from the puzzle, not from the moves played", () => {
+    const puzzle = puzzlesInStage(firstStage)[0]!;
+    let session = step(sessionIn(firstStage), {
+      type: "play",
+      action: playableSquares(puzzle.state)[0]!,
+    });
 
     session = step(session, { type: "showLine" });
-    expect(session.played).toBeNull();
     expect(boardOf(session, puzzle)).toEqual(puzzle.state);
+    expect(accepting(session, puzzle)).toBe(false);
 
     session = step(session, { type: "stepLine" });
     expect(boardOf(session, puzzle)).toEqual(apply(puzzle.state, puzzle.principalVariation[0]!));
-  });
 
-  it("never steps the line past its end", () => {
-    const puzzle = puzzlesInStage(firstStage)[0]!;
-    let session = step(sessionIn(firstStage), { type: "showLine" });
     for (let i = 0; i < puzzle.principalVariation.length + 5; i += 1) {
       session = step(session, { type: "stepLine" });
     }
@@ -288,24 +287,98 @@ describe("working through a stage", () => {
     expect(session.stage).toBe(firstStage);
   });
 
-  it("carries solved puzzles across a change of stage", () => {
+  it("carries won puzzles across a change of stage", () => {
     const puzzle = puzzlesInStage(firstStage)[0]!;
-    let session = step(sessionIn(firstStage), { type: "play", action: puzzle.bestMoves[0]! });
+    let session = step(sessionIn(firstStage), { type: "finished", outcome: outcomeStub(true) });
     const other = STAGES[STAGES.length - 1]!.number;
 
     session = step(session, { type: "pickStage", stage: other });
     expect(session.stage).toBe(other);
     expect(session.index).toBe(0);
-    expect(session.played).toBeNull();
+    expect(session.outcome).toBeNull();
     expect(session.solvedIds.has(puzzle.id)).toBe(true);
-    expect(currentPuzzle(session, puzzlesInStage(other))!.stage).toBe(other);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The account given at the end
+// ---------------------------------------------------------------------------
+
+describe("explaining how it ended", () => {
+  function playOut(puzzle: Puzzle, choose: (state: State, ply: number) => Action): Session {
+    const inStage = puzzlesInStage(puzzle.stage);
+    let session = newSession(puzzle.stage);
+    session = { ...session, index: inStage.indexOf(puzzle) };
+
+    for (let ply = 0; ply < 80; ply += 1) {
+      const state = boardOf(session, puzzle);
+      if (isTerminal(state)) break;
+      if (state.toMove === playerColour(puzzle)) {
+        const options = playableSquares(state);
+        const move = options.length === 0 ? passAction(state.size) : choose(state, ply);
+        session = reduce(session, { type: "play", action: move }, inStage);
+      } else {
+        session = reduce(session, { type: "opponentPlayed", action: bestMove(state) }, inStage);
+      }
+    }
+    return session;
+  }
+
+  function account(puzzle: Puzzle, session: Session): Outcome {
+    return describeOutcome(
+      session,
+      puzzle,
+      session.history.map((turn) => solveExact(turn.state)),
+    );
+  }
+
+  it("reports a win when the player held it, and blames no move", () => {
+    // Perfect play on both sides: the promised score has to appear on the board.
+    // If it did not, the page would be promising something it cannot produce.
+    const puzzle = PUZZLES[0]!;
+    const outcome = account(puzzle, playOut(puzzle, (state) => bestMove(state)));
+
+    expect(outcome.won).toBe(true);
+    expect(outcome.margin).toBe(puzzle.best);
+    expect(outcome.discs.mine - outcome.discs.theirs).toBe(puzzle.best);
+    expect(outcome.lostItAt).toBeNull();
   });
 
-  it("clamps a puzzle chosen out of range rather than showing nothing", () => {
-    const inStage = puzzlesInStage(firstStage);
-    const session = step(sessionIn(firstStage), { type: "pickPuzzle", index: 999 });
-    expect(session.index).toBe(inStage.length - 1);
-    expect(currentPuzzle(session, inStage)).not.toBeNull();
+  it("blames the opening move when the opening move was the mistake", () => {
+    const puzzle = PUZZLES[0]!;
+    const losing = [...puzzle.margins].find(([, margin]) => margin <= 0)![0];
+    const outcome = account(puzzle, playOut(puzzle, (state, ply) => (ply === 0 ? losing : bestMove(state))));
+
+    expect(outcome.openingMove).toBe(losing);
+    expect(outcome.openingMargin).toBeLessThanOrEqual(0);
+    expect(outcome.won).toBe(false);
+    // Nothing later can be blamed: the win was gone before the second move.
+    expect(outcome.lostItAt?.from ?? 0).toBe(0);
+  });
+
+  it("names the later move that threw a won game away", () => {
+    // Open correctly, then play the worst move available at the next turn. The
+    // account has to point at *that* move, not at the opening -- which is the
+    // whole reason the exact value of every position along the line is computed.
+    const puzzle = PUZZLES.find((p) => p.empties >= 6) ?? PUZZLES[0]!;
+    let blundered = false;
+
+    const session = playOut(puzzle, (state, ply) => {
+      if (ply > 0 && !blundered && playableSquares(state).length > 1) {
+        blundered = true;
+        return [...solveRoot(state)].sort((a, b) => a[1] - b[1])[0]![0];
+      }
+      return bestMove(state);
+    });
+
+    const outcome = account(puzzle, session);
+    expect(outcome.openingMargin).toBeGreaterThan(0);
+    expect(blundered).toBe(true);
+    if (!outcome.won) {
+      expect(outcome.lostItAt).not.toBeNull();
+      expect(outcome.lostItAt!.from).toBeGreaterThan(0);
+      expect(outcome.lostItAt!.wasWorth).toBeGreaterThan(0);
+    }
   });
 });
 
@@ -331,8 +404,8 @@ describe("remembering which puzzles are solved", () => {
 
   it("survives a corrupt or hostile value", () => {
     // A private window, a half-written value, or somebody who edited the key by
-    // hand. Every one of these has to read as "nothing solved" rather than
-    // throwing on the way to the first render.
+    // hand. Every one has to read as "nothing solved" rather than throwing on
+    // the way to the first render.
     const storage = new FakeStorage();
     for (const value of ["", "{", "null", '"solved"', "42", '{"a":1}']) {
       storage.data.set(PROGRESS_KEY, value);
