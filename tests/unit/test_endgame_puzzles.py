@@ -22,6 +22,8 @@ notice that the file had been touched.
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 from itertools import pairwise
 from pathlib import Path
 
@@ -394,3 +396,27 @@ def test_square_names_round_trip_through_the_problem_format() -> None:
     """``19`` is D3 both ways, or every score in the file is against a wrong move."""
     for action in range(64):
         assert square_index(square_name(action)) == action
+
+
+# ---------------------------------------------------------------------------
+# Layering
+# ---------------------------------------------------------------------------
+
+
+def test_importing_the_endgame_package_does_not_pull_in_torch() -> None:
+    """Mining needs the network; solving and reading a puzzle do not.
+
+    The expensive import is deferred into the one function that plays games, so
+    the solver, the curriculum and every test over them stay runnable on a
+    machine with no torch build -- the same property `reversi.game` and
+    `reversi.search` already hold, and the same one convenient import would
+    break.
+    """
+    code = "import reversi.endgame.puzzles, sys; print('torch' in sys.modules)"
+    finished = subprocess.run(
+        [sys.executable, "-c", code],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert finished.stdout.strip() == "False", "reversi.endgame must not import torch"

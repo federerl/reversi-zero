@@ -88,6 +88,41 @@ something nobody ships. See `docs/web-app.md`.
       ONNX Runtime has to start — and the interface says it is loading rather
       than appearing broken.
 
+## Endgame puzzles, at `/puzzles/`
+
+This page makes a stronger claim than any other screen: its answers have no error
+bar. What to check is therefore mostly that the claim is kept.
+
+- [ ] It opens with a position and a question -- whose turn it is, that they are
+      winning, and how many squares are left -- without waiting for anything to
+      load. No model loads on this page; if it pauses on arrival, something is
+      wrong.
+- [ ] Play a move and the opponent answers **at once**, even in stage 5. Its
+      reply is a full exact search, so a pause of more than a moment is the thing
+      to notice.
+- [ ] The ending runs to the last square. Play it out and a dialog appears saying
+      "Won it." or "Lost it." with the score. A result that only changes text in
+      the panel is the failure this page was rebuilt to fix.
+- [ ] **Lose one on purpose** and read the explanation. It names the move that
+      threw the win away, or says the opening was already the mistake. "You lost"
+      on its own is not good enough.
+- [ ] Win one and the stage count goes up. Losing one you had already won does
+      not take it back.
+- [ ] Nothing about the position is said *during* play -- no running score, no
+      "still winning". If the page is telling you where you stand mid-ending, it
+      has become a cheat sheet.
+- [ ] "Show the winning line" closes the dialog and steps perfect play out from
+      the **puzzle's** position, ending on the score the page promised.
+- [ ] "Every opening move, and where it leads" appears only once the ending is
+      over, and lists every legal move with its exact result, best first.
+- [ ] All five stages are selectable from the start. Nothing is locked, and stage
+      5 is worth opening in front of an audience -- thirteen empty squares is a
+      position no one can read at a glance.
+- [ ] Win one, reload the page, and the stage still shows it won.
+- [ ] At 390 px the question is **above** the board, not below it. A visitor
+      should not have to scroll past the position to find out what is being asked.
+- [ ] The front page offers "Endgame puzzles" beside "Play Othello".
+
 ## Before showing it to anyone
 
 - [ ] Load the page fresh, with an empty cache, and time it. The first load is
@@ -96,3 +131,5 @@ something nobody ships. See `docs/web-app.md`.
       terminal path is a surprise.
 - [ ] Open `/bench/` once — it measures the visitor's own machine, and it is the
       answer to "how fast is it really".
+- [ ] Win one stage 1 ending and lose one stage 5 ending, so both halves of the
+      feedback have been seen before anyone else sees them.

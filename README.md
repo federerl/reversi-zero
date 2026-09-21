@@ -348,6 +348,7 @@ See `docs/how-the-engine-works.md`.
 * `docs/web-app.md` — **running the site, deploying it, and what "there is no server" means**
 * `docs/configuration.md` — every setting, what it does, and what breaks if you change it
 * `docs/how-the-engine-works.md` — bitboards, passing, perspective, and the eight board rotations
+* `docs/endgame.md` — **solving the last few moves exactly, and the puzzles built from it**
 * `docs/training.md` — running a job, stopping one, resuming, and what a run leaves behind
 * `docs/experiments.md` — one entry per run: hypothesis, config delta, outcome, decision
 * `docs/roadmap-1.0.md` — what 1.0 adds, which experiments run and what they predict, and what gets cut first

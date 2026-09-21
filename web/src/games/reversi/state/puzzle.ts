@@ -1,79 +1,106 @@
 /**
- * A puzzle session: which one is on screen, what was tried, and what happened.
+ * A puzzle session: the ending as it is being played out.
  *
- * Deliberately not an extension of `game.ts`. That reducer is coupled to
- * engine play in ways that are wrong here -- it requires a `humanColor`, a
- * `levelId` and a `modelId`, its `undo` rewinds *past the agent's reply*
- * because a game has two players, and its status line can say "the agent wins".
- * A puzzle has no agent, no level and no opponent to take a move back from.
- * Threading a mode flag through all of that would make both harder to read than
- * repeating the sixty lines that matter.
+ * The first version of this graded one move and stopped. It was not a game and
+ * it did not teach: being told "+6" asks you to trust a number, where watching
+ * the position resolve into a win you can count on the board shows you one. So a
+ * puzzle is now played to the last square, against an opponent that cannot be
+ * improved on, and **solved means won**.
  *
- * **Grading is a table lookup, not a search.** The exact result of every legal
- * move was computed before the file shipped, so a verdict is instant and
- * certain. That is the whole reason the interface can say "this loses by 2 where
- * the best move wins by 6" instead of "wrong" -- and it is why nothing here is
- * allowed to guess. If a move is somehow absent from the table, that is a broken
- * curriculum and it says so rather than inventing a margin.
+ * Deliberately not an extension of `game.ts`. That reducer requires a
+ * `humanColor`, a `levelId` and a `modelId`, its `undo` rewinds *past the
+ * agent's reply*, and its status line can say "the agent wins". Threading a mode
+ * flag through all of that would leave both harder to read than the hundred
+ * lines that actually differ.
  *
- * The board on screen is *derived* from the session rather than stored beside
- * it. Two positions that can disagree is the bug this avoids: the verdict and
- * the board would be describing different moves.
+ * **Nothing is said about the position while the ending is in progress.** The
+ * exact value is available after every move — it is a few milliseconds away —
+ * and showing it would turn the page into a cheat sheet you could play by
+ * watching rather than by calculating. The whole account is given at the end
+ * instead, where it can name the move that lost the game.
+ *
+ * The opponent's replies arrive asynchronously, because the search runs in a
+ * worker. That makes `thinking` a real state rather than a decoration: the board
+ * must stop taking clicks while an answer is outstanding, or a fast player could
+ * queue a move into a position that no longer exists.
  */
 
-import { apply, legalActions, passAction, type Action, type State } from "../engine/rules";
+import {
+  BLACK,
+  apply,
+  discCounts,
+  isTerminal,
+  legalActions,
+  mustPass,
+  passAction,
+  type Action,
+  type Player,
+  type State,
+} from "../engine/rules";
 import type { Puzzle } from "../puzzles/data";
 
-export interface Verdict {
-  readonly move: Action;
-  /** Exact final disc difference after this move, for the player. */
-  readonly margin: number;
-  /** The best difference available in this position. Always positive. */
-  readonly best: number;
-  readonly outcome: "wins" | "draws" | "loses";
-  /** True when no move does better. Several moves can be optimal. */
-  readonly optimal: boolean;
-}
-
-/** Did this answer keep the win? A draw did not: the position was winnable. */
-export function solved(verdict: Verdict): boolean {
-  return verdict.outcome === "wins";
-}
-
-export function grade(puzzle: Puzzle, move: Action): Verdict {
-  const margin = puzzle.margins.get(move);
-  if (margin === undefined) {
-    // Unreachable through the board, which only offers legal squares. Loud
-    // rather than a made-up verdict: a puzzle that grades a move it has no
-    // answer for is worse than a puzzle that refuses to.
-    throw new Error(`no exact result stored for move ${move} in puzzle ${puzzle.id}`);
-  }
-  return {
-    move,
-    margin,
-    best: puzzle.best,
-    outcome: margin > 0 ? "wins" : margin < 0 ? "loses" : "draws",
-    optimal: margin === puzzle.best,
-  };
+export interface Turn {
+  readonly state: State;
+  /** The move that produced this position, or null for the puzzle itself. */
+  readonly move: Action | null;
+  /** True when the player made it; false for the opponent. */
+  readonly mine: boolean;
 }
 
 export interface Session {
   readonly stage: number;
   /** Index into the puzzles of `stage`, in the order the file lists them. */
   readonly index: number;
-  /** The move the player tried, or null before they have answered. */
-  readonly played: Action | null;
+  /** Every position from the puzzle onwards. Never empty. */
+  readonly history: readonly Turn[];
+  /** True while the opponent's reply is being searched for. */
+  readonly thinking: boolean;
+  /** Set once the ending is over and the account has been worked out. */
+  readonly outcome: Outcome | null;
   /**
-   * How many moves of the stored winning line are on the board, or null when
-   * the line is not being shown. Zero means the line is open at its start.
+   * True once the result dialog has been closed, by any route.
+   *
+   * Separate from `outcome` because the outcome is still wanted after the
+   * dialog is gone -- it drives the move table and the stage count. Without
+   * this, dismissing the dialog and then stepping through the winning line
+   * would reopen it on the way back.
    */
+  readonly dismissed: boolean;
+  /** How many moves of the stored perfect line are shown, or null when not shown. */
   readonly line: number | null;
-  /** Ids of puzzles answered with a winning move, this visit or a previous one. */
+  /** Ids of puzzles whose ending the player has actually won. */
   readonly solvedIds: ReadonlySet<string>;
+  readonly error: string | null;
+}
+
+export interface Outcome {
+  readonly discs: { readonly mine: number; readonly theirs: number };
+  readonly margin: number;
+  readonly won: boolean;
+  /** The exact result of the player's opening move, from the shipped table. */
+  readonly openingMove: Action;
+  readonly openingMargin: number;
+  readonly best: number;
+  /**
+   * The player's move that turned a win into something else, if there was one.
+   * Null when they never had it, or never lost it.
+   */
+  readonly lostItAt: {
+    /** Index of the position the move was played from. */
+    readonly from: number;
+    readonly move: Action;
+    /** What the position was worth before it. Always positive. */
+    readonly wasWorth: number;
+  } | null;
 }
 
 export type SessionAction =
   | { type: "play"; action: Action }
+  | { type: "thinking" }
+  | { type: "opponentPlayed"; action: Action }
+  | { type: "finished"; outcome: Outcome }
+  | { type: "failed"; message: string }
+  | { type: "dismiss" }
   | { type: "retry" }
   | { type: "showLine" }
   | { type: "stepLine" }
@@ -83,7 +110,17 @@ export type SessionAction =
   | { type: "next" };
 
 export function newSession(stage: number, solvedIds: ReadonlySet<string> = new Set()): Session {
-  return { stage, index: 0, played: null, line: null, solvedIds };
+  return {
+    stage,
+    index: 0,
+    history: [],
+    thinking: false,
+    outcome: null,
+    dismissed: false,
+    line: null,
+    solvedIds,
+    error: null,
+  };
 }
 
 /** The puzzle a session is pointing at, or null when its stage has none. */
@@ -91,13 +128,11 @@ export function currentPuzzle(session: Session, inStage: readonly Puzzle[]): Puz
   return inStage[Math.min(session.index, inStage.length - 1)] ?? null;
 }
 
-/**
- * The position to draw.
- *
- * Three cases, in the order they take precedence: the stored winning line is
- * being stepped through, the player has answered, or neither and the puzzle sits
- * as it was mined.
- */
+function start(puzzle: Puzzle): Turn[] {
+  return [{ state: puzzle.state, move: null, mine: true }];
+}
+
+/** The position on screen. */
 export function boardOf(session: Session, puzzle: Puzzle): State {
   if (session.line !== null) {
     let state = puzzle.state;
@@ -106,19 +141,35 @@ export function boardOf(session: Session, puzzle: Puzzle): State {
     }
     return state;
   }
-  if (session.played !== null) return apply(puzzle.state, session.played);
-  return puzzle.state;
+  return (session.history[session.history.length - 1] ?? { state: puzzle.state }).state;
 }
 
-/** True while the player may still click a square. */
-export function accepting(session: Session): boolean {
-  return session.played === null && session.line === null;
+/** Whose colour the player is: whoever was to move when the puzzle was set. */
+export function playerColour(puzzle: Puzzle): Player {
+  return puzzle.state.toMove;
 }
 
-/** The squares a player may click: the legal placements, pass excluded. */
-export function playableSquares(puzzle: Puzzle): readonly Action[] {
-  const skip = passAction(puzzle.state.size);
-  return legalActions(puzzle.state).filter((action) => action !== skip);
+/** True while the player may click a square. */
+export function accepting(session: Session, puzzle: Puzzle): boolean {
+  if (session.thinking || session.outcome !== null || session.line !== null) return false;
+  const state = boardOf(session, puzzle);
+  return !isTerminal(state) && state.toMove === playerColour(puzzle);
+}
+
+/**
+ * The player's moves so far, each with the index of the position it was played
+ * *from*.
+ *
+ * `from`, not the index of the turn the move produced. Those differ by one, and
+ * reading one as the other is the difference between blaming the move that lost
+ * a game and blaming the one after it.
+ */
+export function playerMoves(session: Session): Array<{ from: number; move: Action }> {
+  const out: Array<{ from: number; move: Action }> = [];
+  session.history.forEach((turn, index) => {
+    if (turn.move !== null && turn.mine) out.push({ from: index - 1, move: turn.move });
+  });
+  return out;
 }
 
 export function reduce(
@@ -126,36 +177,79 @@ export function reduce(
   action: SessionAction,
   inStage: readonly Puzzle[],
 ): Session {
+  const puzzle = currentPuzzle(session, inStage);
+  const fresh = (next: Partial<Session>): Session => ({
+    ...session,
+    history: puzzle === null ? [] : start(puzzle),
+    thinking: false,
+    outcome: null,
+    dismissed: false,
+    line: null,
+    error: null,
+    ...next,
+  });
+
   switch (action.type) {
     case "play": {
-      if (!accepting(session)) return session;
-      const puzzle = currentPuzzle(session, inStage);
-      if (puzzle === null) return session;
-
-      const verdict = grade(puzzle, action.action);
-      // A puzzle counts as solved the moment it is answered with a winning
-      // move, and stays solved. Getting the next one wrong does not take it
-      // back, and neither does trying again -- this is a record of what somebody
-      // has worked out, not a score.
-      const solvedIds = solved(verdict)
-        ? new Set([...session.solvedIds, puzzle.id])
-        : session.solvedIds;
-      return { ...session, played: action.action, line: null, solvedIds };
+      if (puzzle === null || !accepting(session, puzzle)) return session;
+      const state = boardOf(session, puzzle);
+      if (!legalActions(state).includes(action.action)) return session;
+      // Seeds the history on the first move rather than relying on something
+      // else to have done it, so a session is playable the moment it exists.
+      const base = session.history.length > 0 ? session.history : start(puzzle);
+      return {
+        ...session,
+        history: [...base, { state: apply(state, action.action), move: action.action, mine: true }],
+        error: null,
+      };
     }
 
+    case "thinking":
+      return { ...session, thinking: true };
+
+    case "opponentPlayed": {
+      if (puzzle === null) return session;
+      const state = boardOf(session, puzzle);
+      if (!legalActions(state).includes(action.action)) {
+        // Unreachable unless a reply arrived for a position the page has moved
+        // on from. Refusing beats corrupting the history.
+        return { ...session, thinking: false };
+      }
+      return {
+        ...session,
+        history: [
+          ...session.history,
+          { state: apply(state, action.action), move: action.action, mine: false },
+        ],
+        thinking: false,
+      };
+    }
+
+    case "finished": {
+      const solvedIds = action.outcome.won
+        ? new Set([...session.solvedIds, puzzle?.id ?? ""])
+        : session.solvedIds;
+      return { ...session, thinking: false, outcome: action.outcome, solvedIds };
+    }
+
+    case "failed":
+      return { ...session, thinking: false, error: action.message };
+
     case "retry":
-      return { ...session, played: null, line: null };
+      return fresh({});
+
+    case "dismiss":
+      return { ...session, dismissed: true };
 
     case "showLine":
-      // From the puzzle's own position, not from the move that was played. The
-      // stored line is perfect play from *here*, and it opens with a best move
-      // which need not be the one the player chose.
-      return { ...session, played: null, line: 0 };
+      // From the puzzle's own position. The stored line is perfect play from
+      // there and opens with *a* best move, which need not be the one played.
+      // Dismisses the dialog on the way: the point of watching the line is to
+      // see the board, and a modal over it defeats that.
+      return { ...session, line: 0, dismissed: true };
 
     case "stepLine": {
-      if (session.line === null) return session;
-      const puzzle = currentPuzzle(session, inStage);
-      if (puzzle === null) return session;
+      if (session.line === null || puzzle === null) return session;
       return { ...session, line: Math.min(session.line + 1, puzzle.principalVariation.length) };
     }
 
@@ -163,28 +257,107 @@ export function reduce(
       return { ...session, line: null };
 
     case "pickStage":
-      return { ...session, stage: action.stage, index: 0, played: null, line: null };
+      return { ...newSession(action.stage, session.solvedIds), index: 0 };
 
-    case "pickPuzzle":
+    case "pickPuzzle": {
+      const index = Math.max(0, Math.min(action.index, inStage.length - 1));
+      const target = inStage[index];
       return {
         ...session,
-        index: Math.max(0, Math.min(action.index, inStage.length - 1)),
-        played: null,
+        index,
+        history: target === undefined ? [] : start(target),
+        thinking: false,
+        outcome: null,
+        dismissed: false,
         line: null,
+        error: null,
       };
+    }
 
     case "next": {
-      // Stops at the end of a stage rather than rolling into the next one. The
+      const last = inStage.length - 1;
+      // Stops at the end of a stage rather than rolling into the next. The
       // stages are a progression, and being moved into deeper positions without
       // asking is not the same as choosing to go there.
-      const last = inStage.length - 1;
-      if (session.index >= last) return { ...session, played: null, line: null };
-      return { ...session, index: session.index + 1, played: null, line: null };
+      const index = Math.min(session.index + 1, last);
+      const target = inStage[index];
+      return {
+        ...session,
+        index,
+        history: target === undefined ? [] : start(target),
+        thinking: false,
+        outcome: null,
+        dismissed: false,
+        line: null,
+        error: null,
+      };
     }
   }
 }
 
-/** How many of a stage's puzzles have been answered correctly. */
+/**
+ * Turn a finished ending into the account the player is shown.
+ *
+ * `values[i]` is the exact value of `history[i]`, from the point of view of
+ * whoever is to move there — which is what the solver returns. To read the
+ * position from the *player's* side it has to be negated on the opponent's
+ * turns, and getting that backwards would blame the wrong move.
+ */
+export function describeOutcome(
+  session: Session,
+  puzzle: Puzzle,
+  values: readonly number[],
+): Outcome {
+  const colour = playerColour(puzzle);
+  const final = session.history[session.history.length - 1]!.state;
+  const counts = discCounts(final);
+  const myDiscs = colour === BLACK ? counts.black : counts.white;
+  const theirDiscs = colour === BLACK ? counts.white : counts.black;
+
+  const fromPlayer = (index: number): number => {
+    const value = values[index];
+    const turn = session.history[index];
+    if (value === undefined || turn === undefined) return 0;
+    // The solver answers from the point of view of whoever is to move. Reading
+    // it from the player's side means negating it on the opponent's turns, and
+    // getting that backwards would blame the wrong move.
+    return turn.state.toMove === colour ? value : -value;
+  };
+
+  let lostItAt: Outcome["lostItAt"] = null;
+  for (const { from, move } of playerMoves(session)) {
+    if (from < 0) continue;
+    const before = fromPlayer(from);
+    const after = fromPlayer(from + 1);
+    if (before > 0 && after <= 0) {
+      lostItAt = { from, move, wasWorth: before };
+      break;
+    }
+  }
+
+  const opening = session.history[1];
+  const openingMove = opening?.move ?? -1;
+
+  return {
+    discs: { mine: myDiscs, theirs: theirDiscs },
+    margin: myDiscs - theirDiscs,
+    won: myDiscs > theirDiscs,
+    openingMove,
+    openingMargin: puzzle.margins.get(openingMove) ?? 0,
+    best: puzzle.best,
+    lostItAt,
+  };
+}
+
+/** How many of a stage's endings the player has won. */
 export function solvedInStage(session: Session, inStage: readonly Puzzle[]): number {
   return inStage.filter((puzzle) => session.solvedIds.has(puzzle.id)).length;
 }
+
+/** The squares a player may click at a position. */
+export function playableSquares(state: State): readonly Action[] {
+  const skip = passAction(state.size);
+  return legalActions(state).filter((action) => action !== skip);
+}
+
+export { mustPass };
