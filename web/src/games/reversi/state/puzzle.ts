@@ -71,6 +71,16 @@ export interface Session {
   /** Ids of puzzles whose ending the player has actually won. */
   readonly solvedIds: ReadonlySet<string>;
   readonly error: string | null;
+  /**
+   * Which attempt this is. Incremented whenever the board is reset.
+   *
+   * The page keys an outstanding search on the position it asked about, and two
+   * runs of the same puzzle reach the same positions -- so the position alone
+   * cannot tell a fresh question from one asked before the restart. Without
+   * this, replaying a puzzle either reuses the previous run's answer or never
+   * asks for one, and the board sits waiting on a move that will not come.
+   */
+  readonly run: number;
 }
 
 export interface Outcome {
@@ -120,6 +130,7 @@ export function newSession(stage: number, solvedIds: ReadonlySet<string> = new S
     line: null,
     solvedIds,
     error: null,
+    run: 0,
   };
 }
 
@@ -186,6 +197,7 @@ export function reduce(
     dismissed: false,
     line: null,
     error: null,
+    run: session.run + 1,
     ...next,
   });
 
@@ -210,9 +222,15 @@ export function reduce(
     case "opponentPlayed": {
       if (puzzle === null) return session;
       const state = boardOf(session, puzzle);
+      // Whose turn it is, before whether the move is legal. A search started
+      // before a restart can come back after it, and a reply that is legal from
+      // the puzzle position would otherwise be applied there -- as the
+      // opponent's move, on the player's turn. That flips the side to move, and
+      // the player finds themselves playing the colour the puzzle told them
+      // they were not. Legality alone does not catch it, because the same move
+      // is often legal for both sides.
+      if (state.toMove === playerColour(puzzle)) return { ...session, thinking: false };
       if (!legalActions(state).includes(action.action)) {
-        // Unreachable unless a reply arrived for a position the page has moved
-        // on from. Refusing beats corrupting the history.
         return { ...session, thinking: false };
       }
       return {
@@ -257,7 +275,7 @@ export function reduce(
       return { ...session, line: null };
 
     case "pickStage":
-      return { ...newSession(action.stage, session.solvedIds), index: 0 };
+      return { ...newSession(action.stage, session.solvedIds), index: 0, run: session.run + 1 };
 
     case "pickPuzzle": {
       const index = Math.max(0, Math.min(action.index, inStage.length - 1));
@@ -271,6 +289,7 @@ export function reduce(
         dismissed: false,
         line: null,
         error: null,
+        run: session.run + 1,
       };
     }
 
@@ -290,6 +309,7 @@ export function reduce(
         dismissed: false,
         line: null,
         error: null,
+        run: session.run + 1,
       };
     }
   }

@@ -149,6 +149,42 @@ test("every opening move's exact result is available once it is over", async ({ 
   await expect(rows.filter({ hasText: "best" }).first()).toBeVisible();
 });
 
+test("a restarted puzzle still gets answered, and on the same colour", async ({ page }) => {
+  // Two halves of one bug, both about a restart.
+  //
+  // The page keys an outstanding search on the position it asked about. Replaying
+  // a puzzle reaches the same positions again, so a key built from the board
+  // alone could not tell this attempt's question from the last one's -- and the
+  // second time round the opponent was never asked, leaving the board waiting on
+  // a move that was not coming. That half is what this test catches: it hangs
+  // without the fix.
+  //
+  // The other half was worse and is pinned by a unit test rather than here: a
+  // reply still in flight when the restart happened was applied to the restarted
+  // board, as the opponent's move on the player's turn, which flipped the side to
+  // move and left the player on the colour the puzzle said they were not. The
+  // race needs the reply to land after the restart, and the browser will not
+  // reliably lose it -- the search runs in a worker, which CPU throttling does not
+  // slow -- so `puzzles.test.ts` drives the reducer straight at that sequence.
+  const status = page.getByRole("status");
+  const colour = ((await status.innerText()).match(/You are (black|white)/) ?? [])[1];
+  expect(colour).toBeDefined();
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const offered = await playableSquares(page);
+    expect(offered.length).toBeGreaterThan(0);
+    await page.locator(`[data-square="${offered[0]}"]`).click();
+
+    // The opponent has to answer on every attempt, not just the first.
+    await expect
+      .poll(async () => (await playableSquares(page)).length, { timeout: 15_000 })
+      .toBeGreaterThan(0);
+
+    await page.getByRole("button", { name: "Start again" }).click();
+    await expect(status).toContainText(`You are ${colour}`);
+  }
+});
+
 test("a stage can be chosen, and every stage has an ending to play", async ({ page }) => {
   const stages = page.getByRole("navigation", { name: "Stages" }).getByRole("button");
   const count = await stages.count();

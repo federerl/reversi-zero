@@ -81,8 +81,13 @@ export function PuzzlesScreen() {
   // The opponent would cancel itself on every move and sit there forever. This
   // project has shipped that bug once already, in the game page's own effect.
   const asked = useRef<string | null>(null);
-  const positionKey = (state: State): string =>
-    `${state.black.lo}:${state.black.hi}:${state.white.lo}:${state.white.hi}:${state.toMove}`;
+  // The run is part of the key, not just the position. Restarting a puzzle
+  // reaches the same positions again, so a key built from the board alone
+  // cannot tell this attempt's question from the last one's -- which left the
+  // page either reusing a stale answer or never asking, with the board waiting
+  // on a move that was never coming.
+  const positionKey = (state: State, run: number): string =>
+    `${run}:${state.black.lo}:${state.black.hi}:${state.white.lo}:${state.white.hi}:${state.toMove}`;
 
   // The opponent answers, in a worker, whenever it is its turn. Also where a
   // forced pass is taken -- for either side -- so the board never sits waiting
@@ -96,7 +101,7 @@ export function PuzzlesScreen() {
       return;
     }
 
-    const key = positionKey(board);
+    const key = positionKey(board, session.run);
     if (asked.current === key) return;
     asked.current = key;
     dispatch({ type: "thinking" });
@@ -111,7 +116,7 @@ export function PuzzlesScreen() {
       .catch((error: Error) => {
         if (asked.current === key) dispatch({ type: "failed", message: error.message });
       });
-  }, [puzzle, board, myTurn, over, reviewing, session.outcome]);
+  }, [puzzle, board, myTurn, over, reviewing, session.outcome, session.run]);
 
   // Once the ending is over, work out the account: the exact value of every
   // position along the line, which is what lets the dialog name the move that
@@ -120,7 +125,9 @@ export function PuzzlesScreen() {
   useEffect(() => {
     if (puzzle === null || board === null || !over || session.outcome !== null || reviewing) return;
 
-    const key = `${puzzle.id}@${session.history.length}`;
+    // Also keyed on the run: replaying a puzzle reaches the same length again,
+    // and without it the second ending would finish with no result at all.
+    const key = `${puzzle.id}@${session.run}@${session.history.length}`;
     if (scored.current === key) return;
     scored.current = key;
 

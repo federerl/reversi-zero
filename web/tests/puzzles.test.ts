@@ -279,6 +279,50 @@ describe("playing a puzzle out", () => {
     expect(isTerminal(boardOf(session, puzzle))).toBe(true);
   });
 
+  it("refuses a reply that arrives after the puzzle was restarted", () => {
+    // The bug this exists to stop, and it changed the colour you played as.
+    //
+    // Start a move, hit "Start again" before the search comes back, and the
+    // reply lands on the restarted board. It was only checked for legality, so
+    // if it happened to be legal from the puzzle position too it was applied --
+    // as the *opponent's* move, from a position where it was the player's turn.
+    // That flipped the side to move, and from then on the player was playing the
+    // other colour in a puzzle that had told them which one they were.
+    const puzzle = puzzlesInStage(firstStage)[0]!;
+    const mine = playerColour(puzzle);
+
+    let session = step(sessionIn(firstStage), {
+      type: "play",
+      action: playableSquares(puzzle.state)[0]!,
+    });
+    session = step(session, { type: "thinking" });
+    session = step(session, { type: "retry" });
+
+    // A move that is legal at the puzzle position, arriving as the opponent's.
+    const stale = playableSquares(puzzle.state)[0]!;
+    const after = step(session, { type: "opponentPlayed", action: stale });
+
+    expect(after.history).toHaveLength(1);
+    expect(boardOf(after, puzzle)).toEqual(puzzle.state);
+    expect(boardOf(after, puzzle).toMove).toBe(mine);
+    expect(accepting(after, puzzle)).toBe(true);
+  });
+
+  it("gives every restart its own run, so a stale search cannot be mistaken for a fresh one", () => {
+    // The page keys an outstanding search on the position it asked about. Two
+    // runs of the same puzzle reach the same positions, so the position alone
+    // cannot tell them apart -- without this counter, replaying a puzzle either
+    // reuses an answer from the previous run or never asks for one at all.
+    const first = sessionIn(firstStage);
+    const second = step(first, { type: "retry" });
+    const third = step(second, { type: "next" });
+    const fourth = step(third, { type: "pickStage", stage: firstStage });
+
+    expect(second.run).toBeGreaterThan(first.run);
+    expect(third.run).toBeGreaterThan(second.run);
+    expect(fourth.run).toBeGreaterThan(third.run);
+  });
+
   it("stops at the end of a stage instead of rolling into the next one", () => {
     const inStage = puzzlesInStage(firstStage);
     let session = sessionIn(firstStage);
