@@ -62,6 +62,15 @@ give the checkpoint it plays, its rating and the 95% interval.](docs/figures/dem
 time still carries a measured rating and its interval, one click away rather than in the way. The
 whole search runs locally, so nothing about the game leaves the page.*
 
+## Research and Independent Study
+
+The trained Reversi-Zero agent is also the starting point for a faculty-supervised study of opponent-specific weaknesses and generalization. The original Greedy-versus-Minimax anomaly is a **research question**, not yet evidence of a self-play causal mechanism.
+
+- [Research overview](research/README.md)
+- [Working research plan and papers](research/research-plan.md)
+- [Literature reviews](research/lit-reviews/README.md)
+- [Existing experimental evidence](docs/experiments.md)
+
 ## Quickstart
 
 ```bash
