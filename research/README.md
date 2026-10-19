@@ -4,6 +4,7 @@
 
 **Status:** Faculty-supervised independent-study literature review and experiment planning (October 2026).
 
+- **[Experiment design proposal for Dr. Boutell (October 2026)](experiment-design-proposal-2026-10.md)** — research questions, evidence, protocol, stages, and meeting decisions
 - [Research plan and reading list](research-plan.md)
 - [Literature reviews](lit-reviews/README.md)
 - [Existing experimental evidence and hypotheses](../docs/experiments.md)
