@@ -9,4 +9,6 @@ Short, discussion-oriented paper reviews for the Reversi-Zero independent study.
 
 | Czarnecki et al. (2020), *Real World Games Look Like Spinning Tops* | [Paper 3](paper-3-czarnecki-2020.md) | https://arxiv.org/abs/2004.09468 |
 
+| McGrath et al. (2022), *Acquisition of Chess Knowledge in AlphaZero* | [Paper 4](paper-4-mcgrath-2022.md) | https://arxiv.org/abs/2111.09259 |
+
 These are short working reviews intended to support discussion with Dr. Boutell, not final publication-ready literature reviews. Text follows the uploaded Word reviews with Markdown formatting.
