@@ -1,8 +1,10 @@
 # Reversi-Zero Independent Study — Research Plan
 
-**Updated:** 2026-10-12  
+**Updated:** 2026-10-18  
 **Supervisor:** Dr. Matt Boutell (approved)  
-**Status:** Literature review; research question remains provisional
+**Status:** Four core literature reviews drafted; controlled evaluation proposal ready for advisor discussion (not yet approved)
+
+**Next:** [Research Design Discussion Draft — October 2026](experiment-design-proposal-2026-10.md) (specific first experiment, stop/go decisions, and meeting questions)
 
 ## Working Topic
 
