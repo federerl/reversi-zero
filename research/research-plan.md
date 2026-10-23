@@ -1,10 +1,10 @@
 # Reversi-Zero Independent Study — Research Plan
 
-**Updated:** 2026-10-18  
+**Updated:** 2026-10-22  
 **Supervisor:** Dr. Matt Boutell (approved)  
-**Status:** Four core literature reviews drafted; controlled evaluation proposal ready for advisor discussion (not yet approved)
+**Status:** Advisor reviewed the initial experiment direction and considered it feasible; follow-up questions concern generalization to unseen opponents, Edax training feasibility, and the definition of Edax levels.
 
-**Next:** [Research Design Discussion Draft — October 2026](experiment-design-proposal-2026-10.md) (specific first experiment, stop/go decisions, and meeting questions)
+**Next:** [Updated Research Design and Advisor Feedback — October 22](experiment-design-proposal-2026-10.md) (initial anomaly evaluation, proposed held-out generalization intervention, Edax 4.6 level semantics, and feasibility checks)
 
 ## Working Topic
 
@@ -15,7 +15,8 @@ The project examines whether AlphaZero-style self-play-trained Reversi agents ex
 ### Candidate questions
 1. Under controlled evaluation, do opponent-specific weaknesses persist across openings, colors, seeds, and search budgets?
 2. Are failures associated with network value/policy estimates, MCTS decisions, or particular game states?
-3. If the pattern is reproducible, does increasing training-opponent diversity improve performance against *held-out* opponents without sacrificing general playing strength?
+3. **Advisor follow-up:** If trained with Greedy and Minimax, will the agent improve against *held-out* opponents? Compare compute-matched self-play, heuristic-mixed training, and (if feasible) Edax-mixed training; distinguish performance on seen opponents from genuine transfer.
+4. Can Edax 4.6 be integrated into training, and how do its level-specific depth/selectivity settings affect training cost and the interpretation of experiments?
 
 ## Milestones
 
@@ -23,13 +24,15 @@ The project examines whether AlphaZero-style self-play-trained Reversi agents ex
 - Complete targeted literature reviews and discuss the refined question with Dr. Boutell.
 - Audit evaluation protocol: opponent versions, MCTS budgets, openings, side swaps, seeds, game counts, and confidence intervals.
 - Re-evaluate existing checkpoints against Greedy, minimax, Edax, and selected controls.
-- Analyze failures through game logs and network predictions; consider a modest intervention only if evidence and time permit.
+- Analyze failures through game logs and network predictions; define held-out opponent policies before training experiments.
+- Audit Edax 4.6's levels and smoke-test using its moves in training episodes. Treat Edax level variants as a *related engine family*, not independent strategies.
+- Consider a modest, compute-accounted heuristic-opponent training comparison if evidence, runtime and advisor scope permit.
 - Deliver a reproducible evaluation setup and a research report describing positive *or null* findings, limitations, and future directions.
 - **Tentative goal:** mid-November 2026 (not yet confirmed as an advisor deadline).
 
 ### Phase 2 — Publication-oriented extension (if initial findings support it)
 - Independent training seeds and more model checkpoints.
-- Controlled opponent-mixing or population-training ablations with comparable training compute.
+- Controlled opponent-mixing or population-training ablations with comparable training compute, including self-play vs Greedy+Minimax and (if feasible) an Edax-opponent group.
 - Hold-out opponents, out-of-distribution openings, and cross-checkpoint/compute-budget evaluation.
 - Value calibration and targeted representation analysis (t-SNE for exploration only, not causal proof).
 - Consider another environment for generality if warranted; evaluate workshop/conference suitability with advisor.
