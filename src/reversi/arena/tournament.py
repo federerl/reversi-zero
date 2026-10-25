@@ -20,6 +20,7 @@ Minimax-d4" means something.
 from __future__ import annotations
 
 import logging
+import os
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -351,6 +352,17 @@ def round_robin_parallel(
             matches.append(_play_pairing(job))
             _log_match(matches[-1])
     else:
+        # One BLAS thread per worker too. `torch.set_num_threads(1)` in the
+        # worker covers torch, but numpy's OpenBLAS sizes its thread pool when
+        # numpy is imported, from these variables, and reserves working memory
+        # for every thread it might use: on a 20-core laptop that is a pool of
+        # 24 threads in each of six workers, which ran a 16 GB machine out of
+        # memory before the first game ("Memory allocation still failed after
+        # 10 retries"). The variables are read by the spawned children, so they
+        # have to be set here, before the pool starts. `setdefault` leaves a
+        # value the caller chose alone.
+        for variable in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
+            os.environ.setdefault(variable, "1")
         # `spawn` everywhere: it is the only start method Windows has, and using
         # it on every platform means the code is exercised the same way wherever
         # it runs.
