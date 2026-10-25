@@ -119,10 +119,10 @@ With 2 checkpoints × 2 core opponents × 200 games, the **core pilot is 800 gam
 
 The *proportions* of self-play vs external-opponent games, learning targets, rollout budgets, and train/test partitions must be agreed upon before running. A smaller A-vs-B pilot is preferred if three full training runs exceed the available budget. No fixed fraction is claimed here.
 
-**Held-out evaluation is essential:** Construct the opponent roster **before training** and never use the designated test policies for training or hyperparameter selection. Suggested categories:
+**Held-out evaluation is essential:** Construct the opponent roster **before training** and never use the designated test policies for training or hyperparameter selection. The proposed roster, the rule for admitting an opponent to it, and the scorecard are in [held-out-opponents.md](held-out-opponents.md); the categories first considered were:
 
-- **Different heuristics:** corner-priority, mobility-based, and a noisy-Greedy policy (to be implemented and validated; these are *proposals*, not existing benchmarks).
-- **Search-based controls:** Minimax with a depth not used in training, subject to enough meaningful behavioral difference.
+- **Different heuristics:** corner-priority, mobility-based, and a noisy-Greedy policy. Each is a single ingredient of the Minimax-d4 evaluation or of Greedy, so these are expected to count as *seen-family* controls rather than held-out opponents; the similarity check in the roster document decides.
+- **Search-based controls:** Minimax with a depth not used in training. Same evaluation table as the training opponent, so the same caveat applies.
 - **External engine:** Edax levels not used during training, with a crucial limitation: Edax L3/L5/L7 share the same underlying evaluator, so L7 is a *held-out search configuration*, **not an independent opponent family**.
 - **Sanity checks and strength retention:** Random, seen opponents, other Reversi-Zero checkpoints, and selected stronger engines/levels.
 

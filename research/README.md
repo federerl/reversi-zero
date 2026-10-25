@@ -5,6 +5,7 @@
 **Status:** Advisor-supported experiment planning, updated after October 22 discussion on unseen-opponent generalization and Edax training.
 
 - **[Updated experiment design and October 22 advisor feedback](experiment-design-proposal-2026-10.md)** — controlled anomaly replication, held-out opponent generalization, Edax integration and level semantics
+- [Held-out opponent roster for the opponent-diversity experiment](held-out-opponents.md) — which opponents count as unseen, and the rule that decides
 - [Research plan and reading list](research-plan.md)
 - [Literature reviews](lit-reviews/README.md)
 - [Existing experimental evidence and hypotheses](../docs/experiments.md)
