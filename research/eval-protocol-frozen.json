@@ -2,6 +2,12 @@
   "protocol_version": 1,
   "frozen_on": "2026-10-25",
   "purpose": "Step 1 of research/experiment-design-proposal-2026-10.md: the controlled reproduction of the Greedy result. Step 1 runs exactly this and changes nothing.",
+  "executed": {
+    "on": "2026-10-25",
+    "report": "research/results/pilot-2026-10.json",
+    "results": "research/step1-pilot-results.md",
+    "code_change_since_freeze": "c26093d caps numpy's BLAS at one thread per worker so six workers fit in memory; moves and search values verified identical with and without it"
+  },
   "checkpoints": {
     "gen60": {
       "file": "models/reversi-8x8-gen60.pt",

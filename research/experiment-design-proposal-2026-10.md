@@ -95,6 +95,8 @@ With 3 checkpoints × 2 core opponents × 200 games, the **core pilot is 1,200 g
 
 **Gate A:** If the pattern disappears, document which protocol change explains it and report a reproducibility result. If the pattern persists with acceptable precision, proceed to targeted failure analysis.
 
+> **Outcome (October 25, 2026): the pattern persists.** Generation 60 scores 64.5% [57.7%, 70.8%] against Greedy and 95.8% against Minimax-d4 on 200 games each, and 177 of the three networks' 179 losses to Greedy are early wipeouts. See [step1-pilot-results.md](step1-pilot-results.md). Step 2 proceeds.
+
 ### Step 2 — Failure analysis (conditional on Gate A)
 
 1. Select representative winning and losing games using **predefined**, matched criteria (same opening/phase/color when possible), not only striking anecdotes.
