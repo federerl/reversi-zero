@@ -18,7 +18,7 @@ Dr. Boutell was generally supportive of the research direction. He raised three 
 
 ## 1. Motivation and preliminary evidence
 
-Reversi-Zero is an AlphaZero-style Othello agent trained by self-play, with a policy-value network and PUCT MCTS. Its prior evaluations suggest an unusual opponent-dependent pattern: improvement against a stronger-looking search baseline did not correspond to equally good performance against a simple Greedy policy.
+Reversi-Zero is an AlphaZero-style Othello agent trained by self-play. It has two parts. A neural network looks at a board and outputs a *policy* (how promising each legal move looks) and a *value* (its estimate of who will win from here). A tree search, MCTS (Monte Carlo tree search), then uses those outputs to look ahead: it plays out a few hundred imagined continuations, spending more of them on moves the policy likes and on moves whose continuations keep turning out well (the PUCT rule balances these two pulls), and picks the move it explored most. Its prior evaluations suggest an unusual opponent-dependent pattern: improvement against a stronger-looking search baseline did not correspond to equally good performance against a simple Greedy policy.
 
 An early evaluation of **Run 1, generation 60** recorded the following (see [existing experiment log](../docs/experiments.md), Run 1):
 
@@ -130,6 +130,10 @@ The *proportions* of self-play vs external-opponent games, learning targets, rol
 
 **Confounders:** Distinguish improvement from simply spending additional compute. Fixed game count alone does not guarantee equal compute when Edax search is expensive. Log games, moves, training updates, Edax search depth/selectivity, nodes (when available), elapsed compute, and random seeds. The Edax-mixed group is a different strength/strategy distribution from the heuristic-mixed group, so a gain alone would not isolate a pure *diversity* effect. More independent seeds and a single-opponent ablation would be needed for stronger causal claims.
 
+**Match training examples, not games.** In self-play, the agent plays both sides, so every move in a game becomes a training example. Against Greedy, Minimax, or Edax, only the agent's own moves have MCTS policy targets, so a game yields roughly half as many examples. Two groups with equal game counts would then train on different amounts of data, and a difference in strength could come from that alone. Groups should be matched on the number of training examples and gradient updates; game counts are reported but not used as the matching unit.
+
+**Value targets from weak opponents.** The network's value output is trained toward the final result of the game each position came from. Against Greedy, the agent wins most games almost regardless of the position, so those positions are labelled "winning" more often than the same positions would be in self-play. Mixed into training, this can teach the value output to be overconfident, which would hurt play against stronger opponents and make Group B look worse for a reason unrelated to opponent diversity. Before mixed training, decide between (a) using external-opponent games for both policy and value targets and checking afterwards whether value estimates still match actual outcomes on self-play and held-out games, or (b) using external-opponent games for policy targets only. Record which was chosen.
+
 **Gate C:** Advance only if the added training is technically feasible and either (a) yields clear held-out improvement without unacceptable regressions or (b) yields an informative controlled negative result. Do not claim robustness against adaptive adversaries based on these fixed opponents.
 
 ### Step 3a — Edax-as-training feasibility and level definition (before Group C)
@@ -138,24 +142,22 @@ The current project has **evaluated** agents against Edax 4.6, using opening boo
 
 1. Inspect the existing Edax evaluation adapter and training self-play data flow. Confirm that an external opponent can supply moves under identical game rules, including passes and draws.
 2. Run a few complete Edax L3/L5 games in both colors; verify legal moves, deterministic settings, result signs, board perspective, and that the Reversi-Zero player's own MCTS visits are recorded correctly.
-3. Explicitly specify how the external-opponent plies contribute to learning data. Do **not** pretend Edax provides MCTS visit-count policy targets from Reversi-Zero. A simple pilot can store the network agent's own search targets, plus final game outcomes, and document whether opponent moves are used only to advance the state.
+3. Explicitly specify how the external-opponent plies contribute to learning data. In self-play, each recorded position comes with a *policy target*: the share of MCTS explorations each move received, which the network is trained to imitate. Edax runs a different search and produces no such numbers, so Edax's moves cannot supply policy targets. A simple pilot can store the network agent's own search targets, plus final game outcomes, and document whether opponent moves are used only to advance the state.
 4. Benchmark total wall time and search-node usage for L3/L5 against ordinary self-play before selecting mixture probabilities.
 5. Freeze the Edax executable/version, evaluator files, opening book setting, threads, flags, and randomization policy.
 
-**Verified Edax 4.6 level semantics (from [`src/search.c`](https://github.com/abulmo/edax-reversi/blob/v4.6/src/search.c), `search_global_init()` and `search_set_level()`):** A level is a rule assigning **search depth and search selectivity based on the number of empty squares**, not an Elo rating, distinct trained network, or uniform per-move thinking-time allowance. For **levels 1–10**, `selectivity = 5` (no selectivity), and
+**Verified Edax 4.6 level semantics (from [`src/search.c`](https://github.com/abulmo/edax-reversi/blob/v4.6/src/search.c), `search_global_init()` and `search_set_level()`):** A level is a rule assigning **search depth and search selectivity based on the number of empty squares**, not an Elo rating, distinct trained network, or uniform per-move thinking-time allowance. *Selectivity* controls how aggressively Edax skips moves that a quick shallow check says are hopeless; it runs from 0 (skips the most) to 5, and 5 means it skips nothing and searches every move. For **levels 1–10**, `selectivity = 5`, and
 
 ```text
-depth = min(level, n_empties)        if n_empties <= 2 * level
+depth = n_empties                    if n_empties <= 2 * level
 depth = level                        otherwise
 ```
 
-The key subtlety is that the search depth **jumps from the fixed level to the number of remaining empties as soon as `n_empties <= 2 * level`**; it is **not** simply `min(level, n_empties)`. **Endgame interpretation:** when at most `2 * level` empty squares remain, the configured depth reaches all remaining empties (subject to search implementation and Othello passes). Examples: L3 searches 3 plies in the early game and has full remaining-empties depth by 6 empties; L5 similarly at 10 empties; L7 at 14; L8 at 16. **Higher levels** use more complex depth/selectivity schedules with selective search; do not extrapolate the L1–L10 rule to all levels. Edax's search uses a specialized evaluator and Principal Variation Search, so “Edax L5” is not equivalent to an ordinary Minimax-d5 opponent.
+The key subtlety is that the search depth **jumps from the fixed level to the number of remaining empties as soon as `n_empties <= 2 * level`**; it is **not** simply `min(level, n_empties)`. **Endgame interpretation:** when at most `2 * level` empty squares remain, the configured depth reaches all remaining empties (subject to search implementation and Othello passes). Examples: L3 searches 3 plies (single moves by either player) in the early game and searches to the end of the game once 6 or fewer squares are empty; L5 does so at 10 empties; L7 at 14; L8 at 16. In practice this means even a low level plays the last few moves perfectly, which Minimax-d4 does not: it stops at depth 4 even with 5 squares left. **Higher levels** use more complex depth/selectivity schedules with selective search; do not extrapolate the L1–L10 rule to all levels. Edax also uses a position evaluation learned from a large game database and Principal Variation Search, an alpha-beta variant that searches the expected best move fully and the others only enough to confirm they are worse, so “Edax L5” is not equivalent to an ordinary Minimax-d5 opponent.
 
 **Crucial limitation:** Edax levels vary mainly in search settings and are **correlated variants of one engine**, not independently developed styles. They are useful for controlled strength and search comparisons, but evaluation must also include opponents outside the Edax family.
 
 **Gate D:** Only include Edax training in Step 3 if the adapter produces valid training records and runtime is practical.
-
-### Step 4 — Optional interpretability (not necessary for Phase 1)
 
 ### Step 4 — Optional interpretability (not necessary for Phase 1)
 
