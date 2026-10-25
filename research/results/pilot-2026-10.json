@@ -1,0 +1,284 @@
+{
+  "agent_specs": {
+    "control120": {
+      "checkpoint": "reversi-8x8-control-gen120.pt",
+      "generation": 120,
+      "kind": "alphazero",
+      "run_id": "control",
+      "simulations": 50
+    },
+    "gen120": {
+      "checkpoint": "reversi-8x8-gen120.pt",
+      "generation": 120,
+      "kind": "alphazero",
+      "run_id": "e2-ownership",
+      "simulations": 50
+    },
+    "gen60": {
+      "checkpoint": "reversi-8x8-gen60.pt",
+      "generation": 60,
+      "kind": "alphazero",
+      "run_id": "20260827-030939-full8x8-60cfdda-s1337",
+      "simulations": 50
+    },
+    "greedy": {
+      "kind": "greedy"
+    },
+    "minimax-d4": {
+      "depth": 4,
+      "kind": "minimax",
+      "weights": "3f542dbba6a9cc03"
+    },
+    "random": {
+      "kind": "random"
+    }
+  },
+  "board_size": 8,
+  "kind": "round_robin",
+  "matchups": [
+    {
+      "a": "random",
+      "b": "greedy",
+      "ci_high": 0.4463958134995685,
+      "ci_low": 0.3132212914628618,
+      "decisive": true,
+      "games": 200,
+      "record": "72W 121L 7D",
+      "score_a": 0.3775,
+      "score_as_black": 0.39,
+      "score_as_white": 0.365
+    },
+    {
+      "a": "random",
+      "b": "minimax-d4",
+      "ci_high": 0.0357217617161768,
+      "ci_low": 0.0027466581335444384,
+      "decisive": true,
+      "games": 200,
+      "record": "2W 198L 0D",
+      "score_a": 0.01,
+      "score_as_black": 0.0,
+      "score_as_white": 0.02
+    },
+    {
+      "a": "random",
+      "b": "gen60",
+      "ci_high": 0.0357217617161768,
+      "ci_low": 0.0027466581335444384,
+      "decisive": true,
+      "games": 200,
+      "record": "2W 198L 0D",
+      "score_a": 0.01,
+      "score_as_black": 0.0,
+      "score_as_white": 0.02
+    },
+    {
+      "a": "random",
+      "b": "control120",
+      "ci_high": 0.04316572879269026,
+      "ci_low": 0.00511423779325831,
+      "decisive": true,
+      "games": 200,
+      "record": "3W 197L 0D",
+      "score_a": 0.015,
+      "score_as_black": 0.02,
+      "score_as_white": 0.01
+    },
+    {
+      "a": "random",
+      "b": "gen120",
+      "ci_high": 0.0357217617161768,
+      "ci_low": 0.0027466581335444384,
+      "decisive": true,
+      "games": 200,
+      "record": "2W 198L 0D",
+      "score_a": 0.01,
+      "score_as_black": 0.0,
+      "score_as_white": 0.02
+    },
+    {
+      "a": "greedy",
+      "b": "minimax-d4",
+      "ci_high": 0.04675972681736004,
+      "ci_low": 0.00642601313670221,
+      "decisive": true,
+      "games": 200,
+      "record": "3W 196L 1D",
+      "score_a": 0.0175,
+      "score_as_black": 0.005,
+      "score_as_white": 0.03
+    },
+    {
+      "a": "greedy",
+      "b": "gen60",
+      "ci_high": 0.42347886924509565,
+      "ci_low": 0.2919862754043116,
+      "decisive": true,
+      "games": 200,
+      "record": "71W 129L 0D",
+      "score_a": 0.355,
+      "score_as_black": 0.36,
+      "score_as_white": 0.35
+    },
+    {
+      "a": "greedy",
+      "b": "control120",
+      "ci_high": 0.42858471833996925,
+      "ci_low": 0.2966919730456654,
+      "decisive": true,
+      "games": 200,
+      "record": "72W 128L 0D",
+      "score_a": 0.36,
+      "score_as_black": 0.41,
+      "score_as_white": 0.31
+    },
+    {
+      "a": "greedy",
+      "b": "gen120",
+      "ci_high": 0.23911475028724882,
+      "ci_low": 0.13294625859420173,
+      "decisive": true,
+      "games": 200,
+      "record": "36W 164L 0D",
+      "score_a": 0.18,
+      "score_as_black": 0.18,
+      "score_as_white": 0.18
+    },
+    {
+      "a": "minimax-d4",
+      "b": "gen60",
+      "ci_high": 0.08012555287716033,
+      "ci_low": 0.022117920758038572,
+      "decisive": true,
+      "games": 200,
+      "record": "8W 191L 1D",
+      "score_a": 0.0425,
+      "score_as_black": 0.05,
+      "score_as_white": 0.035
+    },
+    {
+      "a": "minimax-d4",
+      "b": "control120",
+      "ci_high": 0.07047061152229073,
+      "ci_low": 0.017055542008567192,
+      "decisive": true,
+      "games": 200,
+      "record": "7W 193L 0D",
+      "score_a": 0.035,
+      "score_as_black": 0.04,
+      "score_as_white": 0.03
+    },
+    {
+      "a": "minimax-d4",
+      "b": "gen120",
+      "ci_high": 0.0357217617161768,
+      "ci_low": 0.0027466581335444384,
+      "decisive": true,
+      "games": 200,
+      "record": "2W 198L 0D",
+      "score_a": 0.01,
+      "score_as_black": 0.01,
+      "score_as_white": 0.01
+    },
+    {
+      "a": "gen60",
+      "b": "control120",
+      "ci_high": 0.4183653566395992,
+      "ci_low": 0.28728824127358077,
+      "decisive": true,
+      "games": 200,
+      "record": "64W 124L 12D",
+      "score_a": 0.35,
+      "score_as_black": 0.345,
+      "score_as_white": 0.355
+    },
+    {
+      "a": "gen60",
+      "b": "gen120",
+      "ci_high": 0.37198552097978366,
+      "ci_low": 0.2453641563073503,
+      "decisive": true,
+      "games": 200,
+      "record": "57W 135L 8D",
+      "score_a": 0.305,
+      "score_as_black": 0.26,
+      "score_as_white": 0.35
+    },
+    {
+      "a": "control120",
+      "b": "gen120",
+      "ci_high": 0.4183653566395992,
+      "ci_low": 0.28728824127358077,
+      "decisive": true,
+      "games": 200,
+      "record": "66W 126L 8D",
+      "score_a": 0.35,
+      "score_as_black": 0.345,
+      "score_as_white": 0.355
+    }
+  ],
+  "notes": "Step 1 pilot, research/eval-protocol-frozen.json",
+  "protocol": {
+    "anchor": "random",
+    "games_per_pair": 200,
+    "opening_plies": 4,
+    "seconds": 2842.760248900013,
+    "seed": 20261025
+  },
+  "provenance": {
+    "git": {
+      "available": true,
+      "branch": "research/step1-pilot-2026-10",
+      "commit": "c26093dec6b658788059f87bc7ddaf1a4a99ec65",
+      "commit_short": "c26093d",
+      "diff": null,
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dirty": false
+    }
+  },
+  "ratings": [
+    {
+      "ci_high": 731.8071850304543,
+      "ci_low": 643.5882846696596,
+      "elo": 685.2113471179996,
+      "games": 1000,
+      "name": "gen120"
+    },
+    {
+      "ci_high": 627.1117147259866,
+      "ci_low": 544.9265491762685,
+      "elo": 584.0719259231412,
+      "games": 1000,
+      "name": "control120"
+    },
+    {
+      "ci_high": 568.5322352327553,
+      "ci_low": 489.3068306502651,
+      "elo": 527.1251862714576,
+      "games": 1000,
+      "name": "gen60"
+    },
+    {
+      "ci_high": 369.8206171288491,
+      "ci_low": 303.71151243231714,
+      "elo": 335.00679517584183,
+      "games": 1000,
+      "name": "minimax-d4"
+    },
+    {
+      "ci_high": 290.70346468572654,
+      "ci_low": 202.4198917640141,
+      "elo": 243.86547554476766,
+      "games": 1000,
+      "name": "greedy"
+    },
+    {
+      "ci_high": 0.0,
+      "ci_low": 0.0,
+      "elo": 0.0,
+      "games": 1000,
+      "name": "random"
+    }
+  ],
+  "report_version": 1
+}
