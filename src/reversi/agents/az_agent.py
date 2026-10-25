@@ -24,7 +24,7 @@ import numpy as np
 from reversi.game.state import State
 from reversi.search.config import SearchConfig
 from reversi.search.evaluator import Evaluator
-from reversi.search.mcts import MCTS
+from reversi.search.mcts import MCTS, SearchResult
 from reversi.types import Action
 
 __all__ = ["AZAgent"]
@@ -43,6 +43,7 @@ class AZAgent:
         config.assert_no_noise(f"the agent {name!r}")
         self.mcts = MCTS(evaluator, config)
         self._name = name
+        self._last_search: SearchResult | None = None
 
     @classmethod
     def from_checkpoint(
@@ -82,8 +83,18 @@ class AZAgent:
     def name(self) -> str:
         return self._name
 
+    @property
+    def last_search(self) -> SearchResult | None:
+        """What the most recent ``select`` found, for match records.
+
+        Kept so a recorded game can say what the agent thought at each move
+        without the search having to be run twice. ``None`` before the first move.
+        """
+        return self._last_search
+
     def select(self, state: State, rng: np.random.Generator) -> Action:
         # rng is unused: with no exploration noise and no temperature this agent
         # is deterministic, which is what makes a tournament reproducible.
         _ = rng
-        return self.mcts.run(state).best_action()
+        self._last_search = self.mcts.run(state)
+        return self._last_search.best_action()

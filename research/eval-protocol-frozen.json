@@ -1,0 +1,60 @@
+{
+  "protocol_version": 1,
+  "frozen_on": "2026-10-25",
+  "purpose": "Step 1 of research/experiment-design-proposal-2026-10.md: the controlled reproduction of the Greedy result. Step 1 runs exactly this and changes nothing.",
+  "checkpoints": {
+    "gen60": {
+      "file": "models/reversi-8x8-gen60.pt",
+      "sha256": "89dd1736ee69412ed78d8418f361643f1223ec38e24bb8f923dac2904291f930",
+      "source_run": "20260827-030939-full8x8-60cfdda-s1337",
+      "source_checkpoint_sha256": "7fb9014e1a6cd38f2f86bf348706356cc38196fe1e8c9abb37885318e077fcff"
+    },
+    "control120": {
+      "file": "models/reversi-8x8-control-gen120.pt",
+      "sha256": "beb11e34386eb3bfedf516cb9136fd05b0309dc7f2e65abc3dcb78b5b18fb7bf",
+      "source_run": "control",
+      "source_checkpoint": "runs/control/checkpoints/gen_00120.pt",
+      "source_checkpoint_sha256": "72c39047b30d6587170d323af69dbaf99025ad72904c595e226059042c13984c",
+      "why": "Run 1's recipe trained to generation 120. gen60 vs control120 isolates the extra training; control120 vs gen120 isolates the ownership head."
+    },
+    "gen120": {
+      "file": "models/reversi-8x8-gen120.pt",
+      "sha256": "fb39b11358f6a65e196fa58fb4a55cf5445f029c5417e103625a74509b8a59e9",
+      "source_run": "e2-ownership",
+      "source_checkpoint_sha256": "e32fbd58d0acda072e0c28de99e1c7c58e2bed56dc24427376aa9aed7bfd5573"
+    }
+  },
+  "opponents": {
+    "core": ["greedy", "minimax-d4"],
+    "sanity": ["random"],
+    "reference_evaluator_for_step_2_only": "edax-l5 and above, Edax 4.6, opening book off, one thread"
+  },
+  "search": {
+    "simulations_per_move": 50,
+    "why": "Every historical number (Run 1 crossgen, the 1000-game matches) was measured at 50. Budget sensitivity (64 / 256 / 800) is a Step 2 question on selected positions.",
+    "exploration_noise": false,
+    "temperature_moves": 0
+  },
+  "games": {
+    "opening_plies": 4,
+    "opening_pairs_per_pairing": 100,
+    "games_per_pairing": 200,
+    "pairings": 15,
+    "games_total": 3000,
+    "colour_balanced": true,
+    "seed": 20261025
+  },
+  "recording": {
+    "record_games": true,
+    "report_committed_to": "research/results/pilot-2026-10.json",
+    "games_kept_under": "runs/research/pilot-2026-10-games/ (not committed)"
+  },
+  "command": "reversi arena --suite custom -e random -e greedy -e minimax-d4 -e gen60=models/reversi-8x8-gen60.pt -e control120=models/reversi-8x8-control-gen120.pt -e gen120=models/reversi-8x8-gen120.pt --games 200 --simulations 50 --opening-plies 4 --seed 20261025 --workers 6 --record-games --out runs/research/pilot-2026-10.json --notes \"Step 1 pilot, research/eval-protocol-frozen.json\"",
+  "analysis_rules": [
+    "Score = (wins + 0.5 * draws) / games, with a Wilson 95% interval per pairing and a bootstrap interval per rating, as the report already computes.",
+    "Report every pairing split by colour.",
+    "Opening pairs are the unit of resampling for any uncertainty on a colour difference: the two games of a pair share a position and are not independent.",
+    "Count wipeouts (one side ends with zero discs) per pairing and per colour; it is a predefined descriptor, not a post-hoc one.",
+    "The three checkpoints are read as two comparisons, each changing one thing: gen60 to control120 (same recipe, 60 more generations) and control120 to gen120 (same generation, ownership head added). A difference between gen60 and gen120 alone is not attributed to either."
+  ]
+}

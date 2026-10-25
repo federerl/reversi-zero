@@ -175,3 +175,26 @@ def test_the_parallel_round_robin_gives_the_same_result_however_it_is_split() ->
     across_processes = play(2)
     assert len(in_process) == 3
     assert in_process == across_processes
+
+
+def test_the_parallel_round_robin_writes_one_games_file_per_pairing(tmp_path: Path) -> None:
+    from reversi.arena.tournament import games_path
+
+    field = baseline_entrants(("random", "greedy", "minimax-d1"))
+    games_dir = tmp_path / "games"
+    result = round_robin_parallel(
+        field,
+        games_per_pair=4,
+        board_size=4,
+        seed=20260904,
+        workers=1,
+        opening_plies=0,
+        bootstrap=0,
+        games_dir=games_dir,
+    )
+
+    for match in result.matches:
+        saved = json.loads(games_path(games_dir, match.agent_a, match.agent_b).read_text())
+        assert saved["agents"] == {"a": match.agent_a, "b": match.agent_b}
+        assert len(saved["games"]) == match.games
+        assert saved["protocol"]["seed"] == match.seed

@@ -74,6 +74,16 @@ distribution at the same time.
 There is a supporting signal: against Greedy the colour split is 90% as black
 against 50% as white, an asymmetry that appears against no other opponent.
 
+> **Correction (2026-10-25).** The colour split above is withdrawn. The report
+> this section cites, `docs/crossgen.json`, has generation 60 scoring 60% as
+> black (9 of 15) and 67% as white (10 of 15) against Greedy, and no other
+> record of that pairing exists. The remaining numbers in this section were
+> checked against the report and hold; see `scripts/audit_run1_claims.py`.
+> Two further facts about this tournament matter for anyone building on it:
+> every network entrant searched **50 simulations per move**, not the 200 used
+> in training, and no per-game record was kept, so the games themselves cannot
+> be examined. Both are addressed in `research/step0-audit.md`.
+
 **Not yet established.** Whether this is specifically about Greedy's strategy or a
 general fragility against unfamiliar play. Testing it needs an opponent that is
 bad in a *different* way — a "random with occasional good moves" agent would

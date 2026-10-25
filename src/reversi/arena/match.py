@@ -27,6 +27,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from reversi.agents.base import Agent
+from reversi.arena.games import GameRecord, PlyRecord
 from reversi.arena.openings import apply_opening, random_openings
 from reversi.errors import ArenaError
 from reversi.game import rules, scoring
@@ -94,8 +95,13 @@ def play_match(
     seed: int,
     opening_plies: int = 0,
     max_plies: int | None = None,
+    record: list[GameRecord] | None = None,
 ) -> MatchResult:
     """Play ``games`` games, half with each agent as black.
+
+    With ``record`` given, one ``GameRecord`` per game is appended to it: the
+    moves, and the search's numbers for any agent that reports them. See
+    ``games.py``. Recording never changes which moves are played.
 
     With ``opening_plies > 0``, ``games // 2`` random opening positions are drawn
     from ``seed`` and each is played twice with the colours swapped. That is the
@@ -140,12 +146,15 @@ def play_match(
             apply_opening(board_size, book[index // 2]) if book else rules.initial_state(board_size)
         )
         plies = 0
+        moves: list[PlyRecord] = []
         while not rules.is_terminal(state):
             if plies > ceiling:
                 msg = f"a game ran past {ceiling} plies; the rules engine is misbehaving"
                 raise ArenaError(msg)
             mover = black_agent if state.to_move is Player.BLACK else white_agent
             action = mover.select(state, rng)
+            if record is not None:
+                moves.append(PlyRecord.from_move(mover, action, by_a=mover is agent_a))
             # apply() re-checks legality, so an agent returning a move it is not
             # allowed to play fails here with the position attached rather than
             # corrupting the game (contract C5).
@@ -154,6 +163,19 @@ def play_match(
 
         total_plies += plies
         outcome = scoring.result_for(state, Player.BLACK if a_is_black else Player.WHITE)
+        if record is not None:
+            black_discs, white_discs = scoring.disc_counts(state)
+            record.append(
+                GameRecord(
+                    index=index,
+                    opening=book[index // 2] if book else (),
+                    a_is_black=a_is_black,
+                    plies=tuple(moves),
+                    black_discs=black_discs,
+                    white_discs=white_discs,
+                    outcome_for_a=int(outcome),
+                )
+            )
 
         if outcome > 0:
             wins += 1

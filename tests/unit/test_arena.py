@@ -164,9 +164,13 @@ def test_the_book_makes_deterministic_agents_play_different_games() -> None:
 
 
 def test_a_match_is_reproducible_including_its_book() -> None:
-    args = {"games": 10, "board_size": BOARD, "seed": 9, "opening_plies": 4}
-    first = play_match(GreedyAgent(), RandomAgent(), **args)
-    again = play_match(GreedyAgent(), RandomAgent(), **args)
+    def play():
+        return play_match(
+            GreedyAgent(), RandomAgent(), games=10, board_size=BOARD, seed=9, opening_plies=4
+        )
+
+    first = play()
+    again = play()
 
     assert (first.wins, first.losses, first.draws) == (again.wins, again.losses, again.draws)
     assert first.mean_plies == again.mean_plies
@@ -290,3 +294,150 @@ def test_the_report_names_which_baseline_weights_were_used(tmp_path: Path) -> No
     payload = write_report(tmp_path / "r.json", report)
 
     assert payload["agent_specs"]["a"]["weights"] == weights_fingerprint(BOARD)
+
+
+# ===========================================================================
+# Recording the games themselves
+# ===========================================================================
+
+
+class Opinionated:
+    """A fixed-move agent that reports a search result, the way the network does."""
+
+    def __init__(self, inner, *, value: float) -> None:
+        self.inner = inner
+        self.value = value
+        self.last_search = None
+
+    @property
+    def name(self) -> str:
+        return f"op-{self.inner.name}"
+
+    def select(self, state, rng):
+        from reversi.search.mcts import SearchResult
+
+        action = self.inner.select(state, rng)
+        legal = rules.legal_actions(state)
+        self.last_search = SearchResult(
+            actions=tuple(legal),
+            visits=tuple(10 if a == action else 1 for a in legal),
+            q_values=tuple(self.value for _ in legal),
+            root_value=self.value,
+            board_size=state.size,
+        )
+        return action
+
+
+def test_a_recorded_game_replays_to_its_own_final_position() -> None:
+    """The record is only useful if the moves in it are the moves that were played."""
+    record = []
+    result = play_match(
+        GreedyAgent("a"),
+        RandomAgent("b"),
+        games=6,
+        board_size=BOARD,
+        seed=3,
+        opening_plies=4,
+        record=record,
+    )
+
+    assert len(record) == result.games
+    for game in record:
+        state = apply_opening(BOARD, game.opening)
+        for ply in game.plies:
+            state = rules.apply(state, ply.action)
+        assert rules.is_terminal(state)
+        black, white = popcount(state.black), popcount(state.white)
+        assert (black, white) == (game.black_discs, game.white_discs)
+
+    # Games 2k and 2k+1 share an opening and swap colours.
+    assert [g.a_is_black for g in record] == [True, False] * 3
+    assert record[0].opening == record[1].opening
+    assert record[0].opening != record[2].opening
+    outcomes = [g.outcome_for_a for g in record]
+    assert outcomes.count(1) == result.wins
+    assert outcomes.count(-1) == result.losses
+
+
+def test_recording_does_not_change_the_match() -> None:
+    def play(record):
+        return play_match(
+            GreedyAgent(),
+            RandomAgent(),
+            games=10,
+            board_size=BOARD,
+            seed=11,
+            opening_plies=4,
+            record=record,
+        )
+
+    plain = play(None)
+    recorded = play([])
+
+    assert (plain.wins, plain.losses, plain.draws) == (
+        recorded.wins,
+        recorded.losses,
+        recorded.draws,
+    )
+    assert plain.mean_plies == recorded.mean_plies
+
+
+def test_a_record_carries_the_search_numbers_only_for_agents_that_have_them() -> None:
+    record = []
+    play_match(
+        Opinionated(GreedyAgent(), value=0.25),
+        MinimaxAgent(1),
+        games=2,
+        board_size=BOARD,
+        seed=4,
+        opening_plies=2,
+        record=record,
+    )
+
+    for game in record:
+        for ply in game.plies:
+            if ply.by_a:
+                assert ply.net_value == 0.25
+                assert ply.search_value == pytest.approx(0.25)
+                assert ply.visits is not None
+                assert max(ply.visits, key=lambda pair: pair[1])[0] == ply.action
+            else:
+                assert ply.net_value is None
+                assert ply.search_value is None
+                assert ply.visits is None
+
+
+def test_games_are_written_so_they_can_be_read_back_without_the_report(tmp_path: Path) -> None:
+    from reversi.arena import write_games
+
+    record = []
+    play_match(
+        Opinionated(GreedyAgent(), value=-0.5),
+        RandomAgent(),
+        games=4,
+        board_size=BOARD,
+        seed=6,
+        opening_plies=4,
+        record=record,
+    )
+    path = tmp_path / "games.json"
+    write_games(
+        path,
+        record,
+        agent_a="op-greedy",
+        agent_b="random",
+        seed=6,
+        opening_plies=4,
+        board_size=BOARD,
+    )
+
+    saved = json.loads(path.read_text())
+    assert saved["agents"] == {"a": "op-greedy", "b": "random"}
+    assert saved["protocol"] == {"seed": 6, "opening_plies": 4}
+    assert len(saved["games"]) == 4
+    first = saved["games"][0]
+    assert first["opening"] == list(record[0].opening)
+    assert len(first["plies"]) == len(record[0].plies)
+    with_numbers = [p for p in first["plies"] if "visits" in p]
+    assert with_numbers and all(p["by_a"] for p in with_numbers)
+    assert all(p["net_value"] == -0.5 for p in with_numbers)
