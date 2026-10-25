@@ -36,10 +36,20 @@ The colour-split claim is not in the report that the surrounding paragraph cites
 |---|---|---|---|---|---|
 | gen60 | `models/reversi-8x8-gen60.pt` | `20260827-030939-full8x8-60cfdda-s1337` (Run 1, laptop) | `7fb9014e1a6c…` (verified against the run directory) | 6 blocks × 64 channels, policy + value | `cf51284` |
 | gen120 | `models/reversi-8x8-gen120.pt` | `e2-ownership` (Run 5, CSSE Slurm cluster) | `e32fbd58d0ac…` (verified against the run directory) | 6 × 64, policy + value + **ownership head** | `67411db` |
+| control120 | `models/reversi-8x8-control-gen120.pt` | `control` (Run 3, CSSE Slurm cluster) | `72c39047b30d…` (exported from the run directory on October 25) | 6 × 64, policy + value | `543de27` |
 
-The proposal called the second checkpoint "the 120-generation control checkpoint". It is not: `runs/control` and `runs/e2-ownership` are two different runs. Their configs differ only in the ownership head and its loss weight, so gen120 is "the control recipe plus an ownership head", and it is the network the 1.0 release ships. The proposal now names it correctly. Adding `control` gen120 as a third checkpoint is optional and cheap.
+The proposal called the second checkpoint "the 120-generation control checkpoint". It is not: `runs/control` and `runs/e2-ownership` are two different runs. Their configs differ only in the ownership head and its loss weight, so gen120 is "the control recipe plus an ownership head", and it is the network the 1.0 release ships. The proposal now names it correctly.
 
-`runs/e2-ownership` has no `git.json` (it was produced on the cluster); the commit comes from the export sidecar.
+**Why a third checkpoint.** gen60 and gen120 differ in two ways at once: sixty more generations of training, and the ownership head. Any difference between them against Greedy could be either. `control` gen120 is Run 1's exact recipe (`full8x8.yaml`, no ownership head) trained to generation 120 on the cluster, so it sits between the other two and separates the two explanations:
+
+| Comparison | Same | Differs | Answers |
+|---|---|---|---|
+| gen60 vs control120 | recipe | 60 more generations | does more self-play, on its own, change the result against Greedy? |
+| control120 vs gen120 | generation | ownership head | does the ownership head change it? |
+
+The published export was made with `reversi export` from `runs/control/checkpoints/gen_00120.pt`; the sidecar `models/reversi-8x8-control-gen120.json` records the source checkpoint's hash and the training commit. `models/` is not in git, so anyone reproducing the pilot re-exports from the run directory and checks the hashes in the frozen protocol.
+
+Neither cluster run has a `git.json` in its run directory; their commits come from the export sidecars.
 
 ## 3. Determinism and cost, measured
 
@@ -49,10 +59,11 @@ Four games of each checkpoint against Greedy, played twice from the same seed wi
 |---|---|---|---|---|
 | gen60 | yes | yes | yes | 1.7 s |
 | gen120 | yes | yes | yes | 3.3 s |
+| control120 | yes | yes | yes | 3.1 s |
 
 So the arena is reproducible from its seed down to the search's own numbers, as its design intends: no exploration noise, no temperature, one derived seed per game. Any difference between two runs of the frozen protocol is a difference in code, weights, or opponent, not in luck.
 
-**Pilot cost estimate.** A five-entrant round robin (gen60, gen120, Greedy, Minimax-d4, Random) at 200 games per pairing is 2,000 games. The network pairings dominate at roughly 2–5 s per game; Minimax-d4's own search adds to its pairings. On the laptop with six worker processes this is about an hour. The CSSE cluster's CPU nodes would be faster; a GPU is not useful here, since the search asks about one position at a time.
+**Pilot cost estimate.** A six-entrant round robin (gen60, control120, gen120, Greedy, Minimax-d4, Random) has 15 pairings; at 200 games per pairing that is 3,000 games. The network pairings dominate at roughly 2–5 s per game, more when both sides search; Minimax-d4's own search adds to its pairings. On the laptop with six worker processes this is about an hour and a half. The CSSE cluster's CPU nodes would be faster; a GPU is not useful here, since the search asks about one position at a time.
 
 ## 4. A first look at how gen60 loses to Greedy
 
@@ -72,7 +83,7 @@ Verification: `ruff check`, `ruff format --check`, `pyright` (0 errors), `pytest
 
 [`eval-protocol-frozen.json`](eval-protocol-frozen.json) fixes, for Step 1:
 
-- the two checkpoints by file and SHA-256;
+- the three checkpoints by file and SHA-256;
 - the opponents: Greedy, Minimax-d4 (its evaluation weights are fingerprinted in every report), Random as a sanity check; Edax 4.6 is a reference evaluator for Step 2, not a Step 1 opponent;
 - 50 simulations per move, so results sit on the same scale as every historical number;
 - 4-ply seeded openings, 100 opening pairs = 200 games per pairing, seed 20261025;
@@ -82,5 +93,4 @@ The command is in the file. Step 1 runs it and reads nothing else.
 
 ## 7. Open items
 
-- Whether to add `control` gen120 as a third checkpoint (same recipe as Run 1, different hardware; separates "Run 1's network" from "this recipe's network").
 - Whether the cluster's CPU nodes are available for the pilot; the laptop suffices if not.

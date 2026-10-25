@@ -69,7 +69,7 @@ Subquestions, in order:
 
 | Variable | Proposed setting |
 |---|---|
-| Checkpoints | Run 1 generation 60, and generation 120 of the `e2-ownership` run (the network 1.0 ships; identities and hashes in [step0-audit.md](step0-audit.md)) |
+| Checkpoints | Three: Run 1 generation 60; generation 120 of the `control` run (Run 1's recipe, trained longer); generation 120 of the `e2-ownership` run (the network 1.0 ships). The middle one separates "more training" from "the ownership head"; identities and hashes in [step0-audit.md](step0-audit.md) |
 | Core opponents | Greedy and Minimax-d4; add Random as a sanity check |
 | Search budget | 50 simulations per move, the budget every historical number was measured at; see [eval-protocol-frozen.json](eval-protocol-frozen.json) |
 | Opening design | Same seeded openings for each matchup; every opening played in both colors |
@@ -78,7 +78,7 @@ Subquestions, in order:
 | Primary metrics | Score = (wins + 0.5 × draws)/games; 95% uncertainty intervals; black/white split and opening-paired differences |
 | Secondary metrics | Move logs, game length, phase at first large evaluation change, corner control, mobility |
 
-With 2 checkpoints × 2 core opponents × 200 games, the **core pilot is 800 games**, excluding the optional Random sanity checks. This is a *planning estimate*, not a pre-approved sample-size justification. Compute expected runtime and desired confidence-interval width before locking N. Games sharing openings or random seeds may be correlated, so uncertainty analysis should preserve pairing (e.g., opening-pair bootstrap), not automatically assume independent games.
+With 3 checkpoints × 2 core opponents × 200 games, the **core pilot is 1,200 games**; the full round robin, including the Random sanity checks and the checkpoints against each other, is 3,000. This is a *planning estimate*, not a pre-approved sample-size justification. Compute expected runtime and desired confidence-interval width before locking N. Games sharing openings or random seeds may be correlated, so uncertainty analysis should preserve pairing (e.g., opening-pair bootstrap), not automatically assume independent games.
 
 **Interpretation:** Comparing raw win rates against two opponents of different intrinsic strength does not, by itself, prove a blind spot. Look for persistent and especially color-dependent interactions, and compare with the opponents' own head-to-head results.
 
