@@ -32,6 +32,7 @@ import numpy as np
 from reversi.agents.base import Agent
 from reversi.arena.elo import RatingTable, fit_bradley_terry
 from reversi.arena.entrants import EntrantSpec, build_agent
+from reversi.arena.games import GameRecord, write_games
 from reversi.arena.match import MatchResult, play_match
 from reversi.arena.report import check_fairness
 from reversi.arena.stats import wilson_interval
@@ -43,6 +44,7 @@ from reversi.seeding import derive_seed
 __all__ = [
     "Entrant",
     "TournamentResult",
+    "games_path",
     "round_robin",
     "round_robin_parallel",
     "write_tournament",
@@ -232,10 +234,22 @@ class _PairJob:
     seed: int
     opening_plies: int
     device: str
+    games_dir: Path | None = None
+    """Where to write this pairing's games, move by move. ``None`` keeps only
+    the result."""
+
+
+def games_path(games_dir: Path, agent_a: str, agent_b: str) -> Path:
+    """The file one pairing's games go in: ``<dir>/<a>-vs-<b>.json``."""
+    return games_dir / f"{agent_a}-vs-{agent_b}.json"
 
 
 def _play_pairing(job: _PairJob) -> MatchResult:
-    """Play one pairing. Runs in its own process and loads its own networks."""
+    """Play one pairing. Runs in its own process and loads its own networks.
+
+    The games file, when asked for, is written here rather than handed back:
+    a pairing's record can run to a few megabytes, and the worker already has it.
+    """
     if job.a.needs_network or job.b.needs_network:
         import torch
 
@@ -245,14 +259,27 @@ def _play_pairing(job: _PairJob) -> MatchResult:
         # time contending rather than searching.
         torch.set_num_threads(1)
 
-    return play_match(
+    record: list[GameRecord] | None = [] if job.games_dir is not None else None
+    match = play_match(
         build_agent(job.a, device=job.device),
         build_agent(job.b, device=job.device),
         games=job.games,
         board_size=job.board_size,
         seed=job.seed,
         opening_plies=job.opening_plies,
+        record=record,
     )
+    if job.games_dir is not None and record is not None:
+        write_games(
+            games_path(job.games_dir, job.a.name, job.b.name),
+            record,
+            agent_a=job.a.name,
+            agent_b=job.b.name,
+            seed=job.seed,
+            opening_plies=job.opening_plies,
+            board_size=job.board_size,
+        )
+    return match
 
 
 def round_robin_parallel(
@@ -267,6 +294,7 @@ def round_robin_parallel(
     bootstrap: int = 500,
     device: str = "cpu",
     scope: str = "arena",
+    games_dir: Path | None = None,
 ) -> TournamentResult:
     """``round_robin`` over specs instead of live agents, with the pairings spread out.
 
@@ -274,6 +302,9 @@ def round_robin_parallel(
     ``scope`` and the two names, so a result does not depend on how many processes
     happened to run it, and adding an entrant does not renumber everyone else's
     games. ``workers=1`` plays in this process, which is what tests use.
+
+    With ``games_dir``, every pairing also writes its games move by move to
+    ``<games_dir>/<a>-vs-<b>.json`` (see ``games.py``).
     """
     from concurrent.futures import ProcessPoolExecutor
     from multiprocessing import get_context
@@ -289,6 +320,9 @@ def round_robin_parallel(
         msg = f"the anchor {anchor!r} must be one of the entrants: {names}"
         raise ArenaError(msg)
 
+    if games_dir is not None:
+        games_dir.mkdir(parents=True, exist_ok=True)
+
     started = time.perf_counter()
     jobs = [
         _PairJob(
@@ -299,6 +333,7 @@ def round_robin_parallel(
             seed=derive_seed(seed, scope, a.name, b.name),
             opening_plies=opening_plies,
             device=device,
+            games_dir=games_dir,
         )
         for a, b in combinations(entrants, 2)
     ]

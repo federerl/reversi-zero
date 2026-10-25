@@ -342,6 +342,14 @@ def arena(
         typer.Option("--device", help="'cpu' or 'cuda'. CPU is usually faster here."),
     ] = "cpu",
     notes: Annotated[str, typer.Option("--notes", help="Recorded in the report.")] = "",
+    record_games: Annotated[
+        bool,
+        typer.Option(
+            "--record-games",
+            help="Also write every game move by move, with the network's search values, "
+            "to <report>-games/<a>-vs-<b>.json. Needed to study how games were lost.",
+        ),
+    ] = False,
 ) -> None:
     """Play a tournament and report ratings with confidence intervals.
 
@@ -420,17 +428,29 @@ def arena(
         if suite == "custom" and len(entrants) < 2:
             msg = "the custom suite needs at least two --entrant"
             raise ConfigError(msg)
+    except ReversiError as error:
+        typer.secho(str(error), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2) from error
 
-        names = [e.name for e in entrants]
-        anchor = "random" if "random" in names else names[0]
-        if anchor != "random":
-            typer.secho(
-                f"random is not in this field, so ratings are anchored at {anchor} = 0 and are "
-                "not comparable to tables anchored at random.",
-                fg=typer.colors.YELLOW,
-                err=True,
-            )
-        typer.echo(f"{len(entrants)} entrants, {n_games} games per pairing, {sims} simulations")
+    names = [e.name for e in entrants]
+    anchor = "random" if "random" in names else names[0]
+    if anchor != "random":
+        typer.secho(
+            f"random is not in this field, so ratings are anchored at {anchor} = 0 and are "
+            "not comparable to tables anchored at random.",
+            fg=typer.colors.YELLOW,
+            err=True,
+        )
+    if out is not None:
+        destination = out
+    elif run_dir is not None:
+        destination = run_dir / "arena" / f"{label}.json"
+    else:
+        destination = Path(resolved.run_root) / "arena" / f"{label}.json"
+    games_dir = destination.with_name(f"{destination.stem}-games") if record_games else None
+
+    typer.echo(f"{len(entrants)} entrants, {n_games} games per pairing, {sims} simulations")
+    try:
         result = round_robin_parallel(
             entrants,
             games_per_pair=n_games,
@@ -441,6 +461,7 @@ def arena(
             anchor=anchor,
             bootstrap=resamples,
             device=device,
+            games_dir=games_dir,
         )
     except ReversiError as error:
         typer.secho(str(error), fg=typer.colors.RED, err=True)
@@ -449,12 +470,6 @@ def arena(
     typer.echo("")
     typer.echo(result.describe())
 
-    if out is not None:
-        destination = out
-    elif run_dir is not None:
-        destination = run_dir / "arena" / f"{label}.json"
-    else:
-        destination = Path(resolved.run_root) / "arena" / f"{label}.json"
     write_tournament(
         destination,
         result,
@@ -463,6 +478,8 @@ def arena(
     )
     typer.echo("")
     typer.echo(f"report: {destination}  ({result.seconds / 60:.1f} min)")
+    if games_dir is not None:
+        typer.echo(f"games:  {games_dir}/")
 
 
 @app.command()

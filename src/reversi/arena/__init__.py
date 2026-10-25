@@ -24,6 +24,7 @@ from __future__ import annotations
 
 from reversi.arena.elo import Rating, RatingTable, fit_bradley_terry
 from reversi.arena.entrants import EntrantSpec, build_agent, describe_entrant, parse_entrant
+from reversi.arena.games import GameRecord, PlyRecord, write_games
 from reversi.arena.match import MatchResult, play_match
 from reversi.arena.openings import Opening, apply_opening, random_openings
 from reversi.arena.report import MatchReport, check_fairness, write_report
@@ -39,10 +40,12 @@ from reversi.arena.tournament import (
 __all__ = [
     "Entrant",
     "EntrantSpec",
+    "GameRecord",
     "Interval",
     "MatchReport",
     "MatchResult",
     "Opening",
+    "PlyRecord",
     "Rating",
     "RatingTable",
     "TournamentResult",
@@ -58,6 +61,7 @@ __all__ = [
     "round_robin",
     "round_robin_parallel",
     "wilson_interval",
+    "write_games",
     "write_report",
     "write_tournament",
 ]
