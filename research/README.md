@@ -8,6 +8,7 @@
 - [Research plan and reading list](research-plan.md)
 - [Literature reviews](lit-reviews/README.md)
 - [Existing experimental evidence and hypotheses](../docs/experiments.md)
+- [Step 0 audit](step0-audit.md) and the [frozen evaluation protocol](eval-protocol-frozen.json) — what the historical numbers rest on, and exactly what Step 1 runs
 
 ## Research framing
 

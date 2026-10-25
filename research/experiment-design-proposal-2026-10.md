@@ -15,8 +15,8 @@ An early evaluation of **Run 1, generation 60** recorded the following (see [exi
 |---|---:|---|
 | Minimax depth-4 | 100% | Small original pairing; not a general guarantee |
 | Greedy | 63% | Reported 95% CI: **46%–78%** |
-| Greedy, agent as black | ~90% | Historical color-split observation |
-| Greedy, agent as white | ~50% | Historical color-split observation |
+| Greedy, agent as black | 60% (9 of 15) | From the report; the 90%/50% split once quoted here is withdrawn, see [step0-audit.md](step0-audit.md) |
+| Greedy, agent as white | 67% (10 of 15) | From the report |
 
 In that tournament, Minimax-d4 reportedly beat Greedy 97%. These point estimates are surprising relative to a simple one-dimensional ordering of agents, **but do not establish a statistically reliable non-transitive cycle**. The 63% estimate has a wide interval that includes 50%; even with a reproducible matchup pattern, strategy interactions could have several causes.
 
@@ -49,7 +49,7 @@ Subquestions, in order:
 **Working hypotheses, not findings:**
 
 - H1: At least one checkpoint shows a stable performance difference between Greedy and other opponents after opening/color balancing.
-- H2: A meaningful portion of the effect could be associated with color or recurring game-state features and/or network/search evaluation errors.
+- H2: A meaningful portion of the effect could be associated with recurring game-state features (a first look suggests early wipeouts, see [step0-audit.md](step0-audit.md) §4), with color, and/or with network/search evaluation errors. No color asymmetry is established; the historical one was withdrawn.
 - H3 (optional): Opponent diversity could improve held-out generalization, but an effect specific to training opponents would not suffice.
 
 ## 4. Experimental plan (sequenced, with stop/go decisions)
@@ -69,9 +69,9 @@ Subquestions, in order:
 
 | Variable | Proposed setting |
 |---|---|
-| Checkpoints | Original Run 1 Gen 60 and later 120-generation control checkpoint (verify identities/availability first) |
+| Checkpoints | Run 1 generation 60, and generation 120 of the `e2-ownership` run (the network 1.0 ships; identities and hashes in [step0-audit.md](step0-audit.md)) |
 | Core opponents | Greedy and Minimax-d4; add Random as a sanity check |
-| Search budget | Fix the agent's MCTS simulations at one documented value for all core matchups (candidate: 256; first check historical comparability) |
+| Search budget | 50 simulations per move, the budget every historical number was measured at; see [eval-protocol-frozen.json](eval-protocol-frozen.json) |
 | Opening design | Same seeded openings for each matchup; every opening played in both colors |
 | Pilot size | 100 opening pairs **per matchup** = 200 games per checkpoint–opponent pairing; revise after runtime and precision estimate |
 | Additional evaluation | Expand targeted, ambiguous pairings rather than running everything at the maximum sample size |
