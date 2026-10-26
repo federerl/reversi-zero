@@ -107,7 +107,7 @@ With 3 checkpoints × 2 core opponents × 200 games, the **core pilot is 1,200 g
 
 **Gate B:** Identify at least one repeatable, descriptively meaningful failure pattern or establish a credible null result. Avoid causal language until there is a controlled intervention.
 
-> **Outcome (October 25, 2026): a repeatable pattern with a supported mechanism.** The network values a position where it holds one disc at about +0.99 and loses by being wiped out one move later, in games where a safe move existed and was within the search's view. In Run 1's self-play data such positions occur about once per hundred games and the side holding few discs usually wins. Five times the search budget removes a third to a half of the losses and changes nothing about the remainder. See [step2-failure-analysis.md](step2-failure-analysis.md). No intervention has been run, so no causal claim is made.
+> **Outcome (October 25, 2026): a repeatable pattern with a supported mechanism.** The network values a position where it holds one disc at about +0.99 and loses by being wiped out one move later, in games where a safe move existed and was within the search's view. In Run 1's self-play data such positions occur about once per hundred games and the side holding few discs usually wins. Raising the search budget from 50 to 256 and then to 800 simulations removes a third to a half of the losses at each step and changes nothing about the remainder. See [step2-failure-analysis.md](step2-failure-analysis.md). No intervention has been run, so no causal claim is made.
 
 ### Step 3 — Advisor-requested opponent-diversity intervention (conditional, separate approval)
 

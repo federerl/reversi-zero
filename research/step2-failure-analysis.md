@@ -2,7 +2,7 @@
 
 **Applies to:** Step 2 of the [experiment design proposal](experiment-design-proposal-2026-10.md), following the [Step 1 pilot](step1-pilot-results.md)
 **Date:** October 25, 2026
-**Data:** the pilot's recorded games (`runs/research/pilot-2026-10-games/`, not committed), Run 1's self-play replay window (`runs/20260827-030939-full8x8-60cfdda-s1337/replay/`, not committed), and three replays of the Greedy pairings at higher search budgets (reports under [`results/step2/`](results/step2/))
+**Data:** the pilot's recorded games (`runs/research/pilot-2026-10-games/`, not committed), Run 1's self-play replay window (`runs/20260827-030939-full8x8-60cfdda-s1337/replay/`, not committed), and replays of the three Greedy pairings at 256 and 800 simulations per move (reports under [`results/step2/`](results/step2/))
 **Scripts:** [`analyze_wipeouts.py`](../scripts/analyze_wipeouts.py), [`scan_replay_disc_counts.py`](../scripts/scan_replay_disc_counts.py)
 
 **Gate B: a repeatable failure pattern with a supported mechanism.** The network is wiped out by Greedy because it rates a position where it holds one or two discs as a near-certain win, the search mostly agrees, and both are doing what the training data taught: in self-play, holding very few discs after the opening is rare and, when it happens, the side holding them usually wins. More search reduces the losses but does not change their character.
@@ -67,10 +67,11 @@ The three Greedy pairings were replayed with the same openings, the same per-gam
 |---:|---|---|---|
 | 50 (pilot) | 64.5% [57.7, 70.8], 70 | 64.0% [57.1, 70.3], 72 | 82.0% [76.1, 86.7], 35 |
 | 256 | 76.5% [70.2, 81.8], 46 | 84.5% [78.8, 88.9], 31 | 93.0% [88.6, 95.8], 14 |
+| 800 | 88.5% [83.3, 92.2], 23 | 95.5% [91.7, 97.6], 9 | 97.0% [93.6, 98.6], 6 |
 
-A replay at 800 simulations was started and stopped before any game finished, because the laptop ran short of memory; it has not been run. It would show whether the trend continues to zero or flattens, and belongs on a machine with more headroom.
+The 256-simulation replays ran on the laptop (about 47 minutes per pairing); the 800-simulation replays ran on the CSSE cluster's CPU partition, one core per pairing, about two hours each.
 
-Five times the search removes a third to a half of the wipeouts. Every loss that remains is still a wipeout, still with the searched value above +0.9 at the last move (gen120 excepted, where it is split), still avoidable at the second-to-last move in every case, and still with the safe move among the visited ones. Search compensates for the value estimate in proportion to how much of the tree it can cover; it does not correct the estimate.
+Each step up in search budget removes a third to a half of the wipeouts that were left: 70, 46, 23 for gen60; 72, 31, 9 for control120; 35, 14, 6 for gen120. Sixteen times the pilot's budget still leaves gen60 losing more than one game in ten to Greedy. Every loss that remains, at either budget, is still a wipeout, still avoidable at the second-to-last move in every case, and, in all but two of the 29 games at 800 simulations where a safe last move existed, the search had visited a safe move. The searched value at gen60's last move stays above +0.9 at both budgets. gen120 at 800 simulations is the one place the search catches the loss: in four of its six wipeouts the searched value turned negative at the last move, but in none did it turn negative a move earlier, when every one of them was still avoidable. Search compensates for the value estimate in proportion to how much of the tree it can cover; it does not correct the estimate.
 
 ## 5. What this does and does not establish
 
