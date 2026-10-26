@@ -1,0 +1,102 @@
+{
+  "agent_specs": {
+    "greedy": {
+      "kind": "greedy"
+    },
+    "minimax-d4": {
+      "depth": 4,
+      "kind": "minimax",
+      "weights": "3f542dbba6a9cc03"
+    },
+    "seed2": {
+      "checkpoint": "gen_00120.pt",
+      "generation": 120,
+      "kind": "alphazero",
+      "run_id": "e2-ownership-seed2",
+      "simulations": 50
+    }
+  },
+  "board_size": 8,
+  "kind": "round_robin",
+  "matchups": [
+    {
+      "a": "greedy",
+      "b": "minimax-d4",
+      "ci_high": 0.04675972681736004,
+      "ci_low": 0.00642601313670221,
+      "decisive": true,
+      "games": 200,
+      "record": "3W 196L 1D",
+      "score_a": 0.0175,
+      "score_as_black": 0.005,
+      "score_as_white": 0.03
+    },
+    {
+      "a": "greedy",
+      "b": "seed2",
+      "ci_high": 0.29841368882762537,
+      "ci_low": 0.18157433415232588,
+      "decisive": true,
+      "games": 200,
+      "record": "47W 153L 0D",
+      "score_a": 0.235,
+      "score_as_black": 0.17,
+      "score_as_white": 0.3
+    },
+    {
+      "a": "minimax-d4",
+      "b": "seed2",
+      "ci_high": 0.06389429245451925,
+      "ci_low": 0.013820314340111346,
+      "decisive": true,
+      "games": 200,
+      "record": "6W 194L 0D",
+      "score_a": 0.03,
+      "score_as_black": 0.05,
+      "score_as_white": 0.01
+    }
+  ],
+  "notes": "Step 2 section 5: second seed of the ownership recipe (e2-ownership-seed2, gen 120) under the Step 1 pilot protocol",
+  "protocol": {
+    "anchor": "greedy",
+    "games_per_pair": 200,
+    "opening_plies": 4,
+    "seconds": 878.0930517558008,
+    "seed": 20261025
+  },
+  "provenance": {
+    "git": {
+      "available": true,
+      "branch": "main",
+      "commit": "58156c4314d210198ff411da38c7542d1be75ed5",
+      "commit_short": "58156c4",
+      "diff": null,
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dirty": true
+    }
+  },
+  "ratings": [
+    {
+      "ci_high": 572.0842789029037,
+      "ci_low": 416.4866334101508,
+      "elo": 481.81925408704916,
+      "games": 400,
+      "name": "seed2"
+    },
+    {
+      "ci_high": 298.9529937833123,
+      "ci_low": 209.78328476417886,
+      "elo": 247.70161742442556,
+      "games": 400,
+      "name": "minimax-d4"
+    },
+    {
+      "ci_high": 0.0,
+      "ci_low": 0.0,
+      "elo": 0.0,
+      "games": 400,
+      "name": "greedy"
+    }
+  ],
+  "report_version": 1
+}

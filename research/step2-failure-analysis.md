@@ -2,7 +2,7 @@
 
 **Applies to:** Step 2 of the [experiment design proposal](experiment-design-proposal-2026-10.md), following the [Step 1 pilot](step1-pilot-results.md)
 **Date:** October 25, 2026
-**Data:** the pilot's recorded games (`runs/research/pilot-2026-10-games/`, not committed), Run 1's self-play replay window (`runs/20260827-030939-full8x8-60cfdda-s1337/replay/`, not committed), and replays of the three Greedy pairings at 256 and 800 simulations per move (reports under [`results/step2/`](results/step2/))
+**Data:** the pilot's recorded games (`runs/research/pilot-2026-10-games/`, not committed), Run 1's self-play replay window (`runs/20260827-030939-full8x8-60cfdda-s1337/replay/`, not committed), replays of the three Greedy pairings at 256 and 800 simulations per move, and the pilot protocol played by a second seed of the ownership recipe (reports under [`results/step2/`](results/step2/))
 **Scripts:** [`analyze_wipeouts.py`](../scripts/analyze_wipeouts.py), [`scan_replay_disc_counts.py`](../scripts/scan_replay_disc_counts.py)
 
 **Gate B: a repeatable failure pattern with a supported mechanism.** The network is wiped out by Greedy because it rates a position where it holds one or two discs as a near-certain win, the search mostly agrees, and both are doing what the training data taught: in self-play, holding very few discs after the opening is rare and, when it happens, the side holding them usually wins. More search reduces the losses but does not change their character.
@@ -73,7 +73,21 @@ The 256-simulation replays ran on the laptop (about 47 minutes per pairing); the
 
 Each step up in search budget removes a third to a half of the wipeouts that were left: 70, 46, 23 for gen60; 72, 31, 9 for control120; 35, 14, 6 for gen120. Sixteen times the pilot's budget still leaves gen60 losing more than one game in ten to Greedy. Every loss that remains, at either budget, is still a wipeout, still avoidable at the second-to-last move in every case, and, in all but two of the 29 games at 800 simulations where a safe last move existed, the search had visited a safe move. The searched value at gen60's last move stays above +0.9 at both budgets. gen120 at 800 simulations is the one place the search catches the loss: in four of its six wipeouts the searched value turned negative at the last move, but in none did it turn negative a move earlier, when every one of them was still avoidable. Search compensates for the value estimate in proportion to how much of the tree it can cover; it does not correct the estimate.
 
-## 5. What this does and does not establish
+## 5. The ownership head's effect holds on a second seed
+
+Step 1 found that at generation 120 the network trained with the ownership head (gen120) is wiped out half as often as the one trained without it (control120), with one training run per recipe. A second training run of the ownership recipe with a different random seed (`e2-ownership-seed2`, Run 7 in [experiments.md](../docs/experiments.md)) was played under the pilot protocol: 200 games against each of Greedy and Minimax-d4, 50 simulations, 4-ply openings, tournament seed 20261025 (report: [`results/step2/pilot-seed2.json`](results/step2/pilot-seed2.json)).
+
+| checkpoint | score vs Greedy [95%] | wipeouts | score vs Minimax-d4 [95%] |
+|---|---|---:|---|
+| control120 (no ownership head) | 64.0% [57.1, 70.3] | 72 | 96.5% [93.0, 98.3] |
+| gen120 (ownership head, seed 1) | 82.0% [76.1, 86.7] | 35 | 99.0% [96.4, 99.7] |
+| seed2 (ownership head, seed 2) | 76.5% [70.2, 81.8] | 47 | 97.0% [93.6, 98.6] |
+
+The second seed lands between the two: better than the control, below the first ownership seed. The direction holds, the size varies by seed, so "the ownership head halves the wipeouts" is one seed's number and "the ownership head cuts them by a third to a half" is what two seeds support. The per-pairing openings are derived from the tournament seed and the entrant names, so seed2 saw a different set of 200 openings than gen120 did; the comparison is between two independent samples, each with its own interval.
+
+What the second seed loses looks exactly like Sections 1 and 2: 47 losses, all wipeouts, searched value +0.90 at the last move and still positive in 46 of the 47, avoidable at the second-to-last move in every case, with a safe move the runner-up in 32 of the 41 games where one existed at the last move. In one game the opening left the network with a single disc and Greedy moved first, so the network never moved; the tables that need an estimate leave that game out.
+
+## 6. What this does and does not establish
 
 Established, each by a different piece of evidence:
 
@@ -82,13 +96,14 @@ Established, each by a different piece of evidence:
 - An escape existed and was within the search's view in nearly every case (Section 2).
 - Self-play produced such positions about once in a hundred games and labelled them as winning (Section 3).
 - Raising the search budget reduces but does not remove the losses, and leaves their character unchanged (Section 4).
+- The ownership head reduces the wipeouts by a third to a half on two training seeds, and what remains has the same character (Section 5).
 
 Not established:
 
-- That changing the training distribution would fix it. Section 3 is a description of the data, not an intervention. The Step 1 result that the ownership head halves the wipeouts at the same generation is the closest thing to one, and it rests on a single training run per recipe; the ownership recipe's second seed (`e2-ownership-seed2`) would need to be fetched from the cluster to check it.
+- That changing the training distribution would fix it. Section 3 is a description of the data, not an intervention. The ownership head's effect (Section 5) is the closest thing to one: it holds on two seeds of that recipe, but the control recipe still has one seed, and the head changes the learning target, not the opponents, so it says nothing about opponent diversity.
 - Which of the two components matters more: the value head's +0.99 or the policy head's prior for the opponent's wiping reply. The recorded games hold root visit counts but not the prior over the opponent's replies, so separating them needs a targeted probe of a few dozen positions, which is cheap and is the natural next analysis.
 - That the same thing happens against other disc-hungry opponents. The held-out roster for Step 3 should include one.
 
-## 6. For the report
+## 7. For the report
 
 The one-paragraph version: an AlphaZero-style Othello agent trained only by self-play loses a third of its games to a one-ply greedy opponent, every one of them by being wiped out early, while beating a depth-4 minimax search 96% of the time. The agent values a position where it holds one disc at +0.99 because, in a million self-play positions, holding one or two discs after the opening happened about once per hundred games and the side holding them won three quarters of the time. The rule it learned is correct for the games it saw; the opponent it was never shown is the one that makes the rule fatal.

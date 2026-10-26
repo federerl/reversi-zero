@@ -153,7 +153,9 @@ def first_persistent_negative(trace: Trace) -> int | None:
     ``None`` if the searched value was still positive at the network's last move.
     """
     ordered = sorted(trace.moves, key=lambda m: m.moves_before_end)  # last move first
-    if ordered[0].search_value >= 0:
+    # A game can end before the network moves at all: when the opening leaves
+    # it with one disc and Greedy moves first. There is no estimate to inspect.
+    if not ordered or ordered[0].search_value >= 0:
         return None
     k = 0
     for m in ordered:
@@ -213,12 +215,12 @@ def main() -> int:
     print("## When the searched value first turned negative for good")
     print()
     print(
-        "| network | wipeouts | never (positive at the last move) | only at the last move "
-        "| 2 to 3 moves before | 4 or more before |"
+        "| network | wipeouts in which the network moved | never (positive at the last move) "
+        "| only at the last move | 2 to 3 moves before | 4 or more before |"
     )
     print("|---|---:|---:|---:|---:|---:|")
     for net, traces in results.items():
-        wiped = [t for t in traces if t.wipeout and not t.net_won]
+        wiped = [t for t in traces if t.wipeout and not t.net_won and t.moves]
         firsts = [first_persistent_negative(t) for t in wiped]
         never = sum(f is None for f in firsts)
         last = sum(f == 1 for f in firsts)
