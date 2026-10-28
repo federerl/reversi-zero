@@ -101,6 +101,9 @@ def main(report_path: Path, games_dir: Path) -> int:
     protocol = report["protocol"]
     rng = np.random.default_rng(protocol["seed"])
     networks = [n for n, s in report["agent_specs"].items() if s.get("kind") == "alphazero"]
+    fixed = [
+        n for n, s in report["agent_specs"].items() if s.get("kind") not in {"alphazero", "random"}
+    ]
     matchups = {(m["a"], m["b"]): m for m in report["matchups"]}
     games = {(a, b): load_games(games_dir / f"{a}-vs-{b}.json") for a, b in matchups}
 
@@ -131,14 +134,14 @@ def main(report_path: Path, games_dir: Path) -> int:
         )
     print()
 
-    print("## How the networks lose to Greedy and to Minimax-d4")
+    print("## How the networks lose to each fixed opponent")
     print()
     print(
         "| network | opponent | losses | of which wipeouts "
         f"| moves after the opening at each wipeout | losses of {LONG_GAME_MOVES}+ moves |"
     )
     print("|---|---|---:|---:|---|---:|")
-    for opponent in ("greedy", "minimax-d4"):
+    for opponent in fixed:
         for net in networks:
             key, net_first = pairing(net, opponent)
             lost = 0.0 if net_first else 1.0
@@ -166,23 +169,25 @@ def main(report_path: Path, games_dir: Path) -> int:
         print(f"| {a} vs {b} | {a_black} | {a_white} | {b_black} | {b_white} |")
     print()
 
-    print("## The two one-variable comparisons")
+    print("## The checkpoints side by side")
     print()
     ratings = {r["name"]: r for r in report["ratings"]}
-    print("| checkpoint | rating [95%] | vs Greedy | vs Minimax-d4 | wipeouts suffered vs Greedy |")
-    print("|---|---|---:|---:|---:|")
+    columns = " | ".join(f"vs {o} (wiped out)" for o in fixed)
+    print(f"| checkpoint | rating [95%] | {columns} |")
+    print("|---|---|" + "---:|" * len(fixed))
     for net in networks:
         r = ratings[net]
-        scores = {}
-        for opponent in ("greedy", "minimax-d4"):
+        cells = []
+        for opponent in fixed:
             key, net_first = pairing(net, opponent)
             score = matchups[key]["score_a"]
-            scores[opponent] = score if net_first else 1 - score
-        key, net_first = pairing(net, "greedy")
-        wiped = sum(g.a_wiped_out == net_first and g.wipeout for g in games[key])
+            score = score if net_first else 1 - score
+            wiped = sum(g.a_wiped_out == net_first and g.wipeout for g in games[key])
+            cells.append(f"{pct(score)} ({wiped})")
         print(
-            f"| {net} | {r['elo']:+.0f} [{r['ci_low']:+.0f}, {r['ci_high']:+.0f}] "
-            f"| {pct(scores['greedy'])} | {pct(scores['minimax-d4'])} | {wiped} |"
+            f"| {net} | {r['elo']:+.0f} [{r['ci_low']:+.0f}, {r['ci_high']:+.0f}] | "
+            + " | ".join(cells)
+            + " |"
         )
     return 0
 
