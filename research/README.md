@@ -10,7 +10,8 @@
 - [Literature reviews](lit-reviews/README.md)
 - [Existing experimental evidence and hypotheses](../docs/experiments.md)
 - [Step 0 audit](step0-audit.md) and the [frozen evaluation protocol](eval-protocol-frozen.json) — what the historical numbers rest on, and exactly what Step 1 runs
-- **[Step 1 pilot results](step1-pilot-results.md)** — the pattern reproduces on 3,000 games, and every loss to Greedy is an early wipeout
+- [Step 1 pilot results](step1-pilot-results.md) — the pattern reproduces on 3,000 games, and every loss to Greedy is an early wipeout
+- **[Step 2 failure analysis](step2-failure-analysis.md)** — the network rates one disc as a near-certain win, because self-play taught it so
 
 ## Research framing
 

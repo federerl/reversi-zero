@@ -1,0 +1,64 @@
+{
+  "agent_specs": {
+    "control120": {
+      "checkpoint": "reversi-8x8-control-gen120.pt",
+      "kind": "alphazero",
+      "simulations": 800
+    },
+    "greedy": {
+      "kind": "greedy"
+    }
+  },
+  "board_size": 8,
+  "kind": "round_robin",
+  "matchups": [
+    {
+      "a": "greedy",
+      "b": "control120",
+      "ci_high": 0.0832967040018196,
+      "ci_low": 0.023852543001492997,
+      "decisive": true,
+      "games": 200,
+      "record": "9W 191L 0D",
+      "score_a": 0.045,
+      "score_as_black": 0.04,
+      "score_as_white": 0.05
+    }
+  ],
+  "notes": "Step 2 question 3: the pilot's Greedy pairing replayed at 800 simulations",
+  "protocol": {
+    "anchor": "greedy",
+    "games_per_pair": 200,
+    "opening_plies": 4,
+    "seconds": 7424.765430766158,
+    "seed": 20261025
+  },
+  "provenance": {
+    "git": {
+      "available": true,
+      "branch": "main",
+      "commit": "58156c4314d210198ff411da38c7542d1be75ed5",
+      "commit_short": "58156c4",
+      "diff": null,
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dirty": true
+    }
+  },
+  "ratings": [
+    {
+      "ci_high": 675.9060602949259,
+      "ci_low": 436.4007300588826,
+      "elo": 530.654610419039,
+      "games": 200,
+      "name": "control120"
+    },
+    {
+      "ci_high": 0.0,
+      "ci_low": 0.0,
+      "elo": 0.0,
+      "games": 200,
+      "name": "greedy"
+    }
+  ],
+  "report_version": 1
+}
