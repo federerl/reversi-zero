@@ -12,6 +12,7 @@
 - [Step 0 audit](step0-audit.md) and the [frozen evaluation protocol](eval-protocol-frozen.json) — what the historical numbers rest on, and exactly what Step 1 runs
 - [Step 1 pilot results](step1-pilot-results.md) — the pattern reproduces on 3,000 games, and every loss to Greedy is an early wipeout
 - **[Step 2 failure analysis](step2-failure-analysis.md)** — the network rates one disc as a near-certain win, because self-play taught it so
+- [Agenda for the late-October advisor meeting](meetings/2026-10-advisor-meeting-agenda.html) — answers to the October 22 questions, the Step 0 to 2 results, and the Step 3 decisions
 
 ## Research framing
 

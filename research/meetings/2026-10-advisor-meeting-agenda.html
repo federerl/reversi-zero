@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reversi Zero Advisor Meeting</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Layout: one reading column, three numbered parts because the meeting runs in that order; tables for numbers. */
+:root {
+  --bg: #f7f6f2;
+  --fg: #1b1f1c;
+  --muted: #5d655f;
+  --rule: #d9d7cf;
+  --panel: #ecebe4;
+  --accent: #2d6a4f;
+  --brass: #a87c2a;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1412; --fg: #e8e6df; --muted: #a3aaa4; --rule: #2a332d; --panel: #171e1a;
+    --accent: #6fbf95; --brass: #d4a24c; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1412; --fg: #e8e6df; --muted: #a3aaa4; --rule: #2a332d; --panel: #171e1a;
+  --accent: #6fbf95; --brass: #d4a24c; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 17px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 2rem 4rem; }
+main { max-width: 46rem; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; line-height: 1.1; text-wrap: balance; margin: 0; }
+h1 { font-size: 2.6rem; letter-spacing: 0.01em; }
+h2 { font-size: 1.9rem; margin-top: 3rem; padding-top: 1rem; border-top: 2px solid var(--accent); }
+h3 { font-size: 1.35rem; margin-top: 1.75rem; color: var(--accent); }
+.meta { color: var(--muted); margin-top: 0.4rem; }
+.eyebrow { font-family: var(--display); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.85rem; color: var(--brass); }
+p { margin: 0.75rem 0; max-width: 65ch; }
+ul, ol { margin: 0.5rem 0 0.75rem; padding-left: 1.4rem; max-width: 65ch; }
+li { margin: 0.3rem 0; }
+li::marker { color: var(--muted); }
+strong { font-weight: 600; }
+code { font-family: ui-monospace, Consolas, monospace; font-size: 0.9em; background: var(--panel); padding: 0.05em 0.3em; border-radius: 3px; }
+.plan { display: grid; grid-template-columns: auto 1fr auto; gap: 0.4rem 1.25rem; margin: 1.25rem 0 0; padding: 1rem 1.25rem; background: var(--panel); border-left: 3px solid var(--brass); }
+.plan > span { font-variant-numeric: tabular-nums; }
+.plan .t { color: var(--muted); text-align: right; }
+.plan .n { font-family: var(--display); font-weight: 600; font-size: 1.15rem; }
+.tablewrap { overflow-x: auto; margin: 1rem 0; }
+table { border-collapse: collapse; font-size: 0.95rem; font-variant-numeric: tabular-nums; min-width: 100%; }
+th, td { text-align: left; padding: 0.4rem 0.75rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-family: var(--display); font-weight: 600; font-size: 1rem; letter-spacing: 0.02em; color: var(--muted); }
+td.num, th.num { text-align: right; white-space: nowrap; }
+.ask { border: 1px solid var(--rule); border-left: 3px solid var(--accent); padding: 0.75rem 1.1rem; margin: 1rem 0; background: var(--panel); }
+.ask .eyebrow { color: var(--accent); }
+.ask ul { margin-bottom: 0.25rem; }
+figure { margin: 1.25rem 0; }
+figure img { width: 100%; height: auto; border: 1px solid var(--rule); background: #fff; }
+figcaption { font-size: 0.9rem; color: var(--muted); margin-top: 0.4rem; max-width: 65ch; }
+a { color: var(--accent); }
+.small { font-size: 0.92rem; color: var(--muted); }
+@media (max-width: 480px) { body { font-size: 16px; } h1 { font-size: 2.1rem; } .plan { grid-template-columns: auto 1fr; } .plan .t { grid-column: 2; text-align: left; } }
+</style>
+
+</head>
+<body>
+<main>
+<div class="eyebrow">Independent study · Investigating opponent-specific weaknesses in AlphaZero-style Othello agents</div>
+<h1>Meeting with Dr. Boutell</h1>
+<p class="meta">Week of October 26, 2026 · Lifei Liu · follow-up to the October 22 discussion</p>
+
+<div class="plan">
+  <span class="n">1</span><span>Answers to the three questions from October 22</span><span class="t">~15 min</span>
+  <span class="n">2</span><span>Results: Steps 0 to 2 are done, Gates A and B passed</span><span class="t">~20 min</span>
+  <span class="n">3</span><span>Next steps and the decisions needed</span><span class="t">~15 min</span>
+</div>
+
+<h2>1. The three questions from October 22</h2>
+
+<h3>Q1. If the agent trains against Greedy and Minimax, does it get better against other agents? Which families make a meaningful unseen test set?</h3>
+<p>The short answer is that we do not know yet, and the experiment is only worth running if the test set is genuinely unseen. The held-out roster and the admission rule were written before any training, in <code>research/held-out-opponents.md</code>.</p>
+<ul>
+  <li><strong>"Different" means a different source of knowledge.</strong> Search depth, added randomness, and playing strength do not make an opponent different. Greedy and Minimax-d4 both judge positions with hand-written rules (flip count; a corner, trap-square and mobility table). So corner-only or mobility-only heuristics, noisy Greedy, and Minimax at another depth are parts of the training opponents, and they stay in a <em>seen-family control</em> group rather than the held-out set.</li>
+  <li><strong>Proposed roster, one opponent per source:</strong> (1) Edax 4.6 at a level not used in training, candidate L7, whose evaluation is learned from a game database; (2) MCTS with random rollouts and no network or table, no knowledge at all; (3) a checkpoint from a different training run, as a strength-retention check; and if obtainable in time, (4) Egaroucid, an independent engine, and (5) a human-imitation policy trained on the WTHOR tournament database.</li>
+  <li><strong>A measured admission rule, run before training.</strong> On 500 saved mid-game positions, record each opponent's move. The agreement between Greedy and Minimax-d4 themselves is the baseline for "clearly different". A candidate that agrees with any training opponent more than that is not held out.</li>
+  <li><strong>Scorecard:</strong> one row per held-out opponent with its own interval, seen opponents reported separately, and a retention row. No single aggregate, because an average can hide a regression against one opponent behind a gain against another.</li>
+</ul>
+<div class="ask"><div class="eyebrow">To check</div>
+<ul>
+  <li>Is "one opponent per source of knowledge" the right bar, and is random-rollout MCTS acceptable as a held-out opponent?</li>
+  <li>Are Egaroucid and the WTHOR policy worth the build time for Phase 1, or should the required three be enough?</li>
+</ul></div>
+
+<h3>Q2. Can Edax be used as a training opponent, not only for evaluation?</h3>
+<p>Technically yes, with three things that have to be designed rather than assumed. The adapter used for evaluation (<code>src/reversi/agents/edax.py</code>, Edax 4.6 built from source on the cluster) already plays complete games move by move; what has not been verified is the training data path.</p>
+<ul>
+  <li><strong>Edax's moves cannot supply policy targets.</strong> In self-play, each position is stored with the share of search visits every move received, and the network learns to imitate that. Edax runs a different search and gives no such numbers. So Edax plies can only advance the game; only the agent's own moves yield training examples, roughly half as many per game as self-play. Groups must be matched on training examples and gradient updates, not on game counts.</li>
+  <li><strong>Value targets from a weak opponent bias the value head.</strong> Positions from games the agent almost always wins get labelled "winning" more often than in self-play. The Step 2 result below shows the value head is already overconfident in exactly this way, so this is a real risk and not a hypothetical one. The choice is between using external games for policy targets only, or for both and checking calibration afterwards. It has to be recorded before training.</li>
+  <li><strong>Cost accounting.</strong> Edax search time per move depends on level; equal game counts do not mean equal compute. The plan logs games, moves, updates, Edax depth and elapsed time per group.</li>
+  <li><strong>Status:</strong> the smoke test in the proposal (a few L3/L5 games in both colours, legality, pass handling, result signs, wall time) has not been run yet. It is a day of work and it is worth doing only if Group C is in scope.</li>
+</ul>
+
+<h3>Q3. What does an Edax level actually mean?</h3>
+<p>Verified from the Edax 4.6 source (<code>src/search.c</code>). A level is a rule that sets search depth and selectivity from the number of empty squares. It is not an Elo rating, not a separate trained network, and not a thinking-time budget.</p>
+<ul>
+  <li>For levels 1 to 10, selectivity is 5, meaning no move is pruned, and <code>depth = level</code> until <code>empties &le; 2 &times; level</code>, at which point <code>depth = empties</code> and Edax searches to the end of the game. L3 solves the last 6 empties, L5 the last 10, L7 the last 14.</li>
+  <li>So even a low level plays a perfect endgame, which Minimax-d4 does not. And every level shares one evaluation function learned from a game database plus the same search code. L3, L5 and L7 are correlated settings of one engine, not independent styles.</li>
+  <li><strong>Consequence for the design:</strong> a held-out Edax level is a held-out <em>search configuration</em>. It is still useful, because its knowledge source differs from Greedy and Minimax, but the roster needs opponents outside the Edax family too. For reference, the ownership-head network at 256 simulations beats L5 decisively and sits between L6 and L7.</li>
+</ul>
+
+<h2>2. Results</h2>
+
+<h3>Step 0: protocol audit (merged, PR #52)</h3>
+<p>The historical "63% against Greedy" for Run 1 generation 60 rested on 30 games, interval 46% to 78%. The audit froze one evaluation protocol for everything that follows: 200 games per pairing, 50 simulations per move, four random opening plies with colours swapped on the same opening, Wilson intervals, Bradley-Terry ratings. It also added a third checkpoint so that each comparison changes one thing: <strong>gen60</strong> (Run 1), <strong>control120</strong> (same recipe trained to generation 120), <strong>gen120</strong> (the ownership-head recipe at generation 120).</p>
+
+<h3>Step 1: the pattern reproduces, and every loss to Greedy is a wipeout (merged, PR #53)</h3>
+<p>3,000 games, six entrants. Gate A passed.</p>
+<div class="tablewrap"><table>
+<tr><th>checkpoint</th><th class="num">vs Greedy [95%]</th><th class="num">wipeouts</th><th class="num">vs Minimax-d4</th><th class="num">rating (Random = 0)</th></tr>
+<tr><td>gen60</td><td class="num">64.5% [57.7, 70.8]</td><td class="num">70</td><td class="num">95.8%</td><td class="num">+527</td></tr>
+<tr><td>control120</td><td class="num">64.0% [57.1, 70.3]</td><td class="num">72</td><td class="num">96.5%</td><td class="num">+584</td></tr>
+<tr><td>gen120 (ownership head)</td><td class="num">82.0% [76.1, 86.7]</td><td class="num">35</td><td class="num">99.0%</td><td class="num">+685</td></tr>
+<tr><td>Minimax-d4 vs Greedy</td><td class="num">98.2%</td><td class="num"></td><td class="num"></td><td class="num">+335 vs +244</td></tr>
+</table></div>
+<ul>
+  <li>177 of the 179 network losses to Greedy are <strong>wipeouts</strong>: the network ends the game with zero discs, half of them within 13 to 15 moves of the opening and the earliest at move 5. No loss lasted 50 moves; the losses to Minimax-d4 almost all went the full distance. Greedy wiped Random 9 times and Minimax-d4 twice.</li>
+  <li>No colour effect. The 90%/50% black-white split quoted earlier is withdrawn (Step 0).</li>
+  <li>Twice the training (gen60 to control120) gains 57 rating points and changes nothing against Greedy. The ownership head halves the wipeouts at the same generation.</li>
+</ul>
+
+<h3>Step 2: why (PR #54, open)</h3>
+<p>Gate B passed: a repeatable failure pattern with a supported mechanism, and no causal claim. Five pieces of evidence, each from a different source.</p>
+<ol>
+  <li><strong>The network rates one disc as a near-certain win.</strong> In 172 of 177 wipeouts the searched value was still positive at the network's last move, median +0.91 to +0.95; the raw value before search is +0.99. It never turned negative more than one move before the end. Games the network won get the same estimate at the same stage: to the network they are the same situation.</li>
+  <li><strong>The losses were avoidable and the search saw the escape.</strong> A move surviving every reply Greedy might choose existed at the second-to-last move in every game and at the last move in 169 of 177. Those safe moves got a quarter to a half of the search's visits and were the runner-up in two thirds of the games. The search compared the safe move with the fatal one and chose the fatal one.</li>
+  <li><strong>The training data said this was fine.</strong> In Run 1's replay window (1,040,129 positions, about 18,000 self-play games, first eight plies excluded) a side holding one or two discs occurs about once per hundred games, and that side wins 74% to 81% of the time. In self-play nobody flips every disc it can, so a low disc count is never punished; it correlates with mobility and with winning, as it does in strong play. The network learned a rule that is true for the games it saw and never saw the boundary of it.</li>
+  <li><strong>More search helps and does not change what goes wrong.</strong> Same openings and seeds, more simulations per move:</li>
+</ol>
+<div class="tablewrap"><table>
+<tr><th class="num">simulations</th><th class="num">gen60: score, wipeouts</th><th class="num">control120</th><th class="num">gen120</th></tr>
+<tr><td class="num">50</td><td class="num">64.5%, 70</td><td class="num">64.0%, 72</td><td class="num">82.0%, 35</td></tr>
+<tr><td class="num">256</td><td class="num">76.5%, 46</td><td class="num">84.5%, 31</td><td class="num">93.0%, 14</td></tr>
+<tr><td class="num">800</td><td class="num">88.5%, 23</td><td class="num">95.5%, 9</td><td class="num">97.0%, 6</td></tr>
+</table></div>
+<p>Each step removes a third to a half of the remaining wipeouts. Every remaining loss is still a wipeout, still avoidable one move earlier. Search compensates for the value estimate in proportion to how much of the tree it covers; it does not correct the estimate.</p>
+<ol start="5">
+  <li><strong>The ownership head's effect holds on a second seed.</strong> A second training run of that recipe scores 76.5% [70.2, 81.8] against Greedy with 47 wipeouts, between the control (64.0%, 72) and the first seed (82.0%, 35). Direction holds, size varies by seed: "a third to a half", not "half".</li>
+</ol>
+<figure>
+<img src="../figures/wipeout-values.png" alt="Six panels: for each of the three checkpoints, the searched value over the network's last ten moves in every wipeout rises toward +1 while the disc count falls to one.">
+<figcaption>Every wipeout, lined up by the network's distance from its last move. Top: the searched value climbs toward +1. Bottom: the disc count falls to one. The network reads a low count as good.</figcaption>
+</figure>
+<p><strong>What this does not establish.</strong> That changing the training distribution would fix it: Section 3 of the analysis describes the data, it is not an intervention. The ownership head is the closest thing to one, and it changes the learning target, not the opponents, so it says nothing about opponent diversity. Also not separated yet: how much is the value head's +0.99 versus the policy head's prior for Greedy's wiping reply.</p>
+<div class="ask"><div class="eyebrow">To discuss</div>
+<ul>
+  <li>Is this chain of evidence a satisfactory Phase 1 result as it stands, or should the value-head versus policy-head probe come before the report?</li>
+  <li>Does this settle the "opponent-specific weakness versus opponent strength" question from October 22? The weakness is specific to an opponent that flips every disc it can, and Minimax-d4, which is far stronger, never triggers it.</li>
+  <li>The literature framing: this is the Wang et al. pattern (strong overall, exploitable by one simple policy) without a trained adversary. Is that the right way to present it?</li>
+</ul></div>
+
+<h2>3. Next steps and decisions</h2>
+
+<h3>Cheap follow-ups inside Step 2 (days, cluster CPU)</h3>
+<ul>
+  <li><strong>Separate the two heads.</strong> On a few dozen recorded pre-wipeout positions, read the policy prior the network assigns to Greedy's wiping reply and the value it assigns to the position after it. Says whether the fix is in the value target, the policy target, or both.</li>
+  <li><strong>A second disc-hungry opponent</strong> (for example Greedy with a corner preference, or Greedy at two plies). Says whether the weakness belongs to Greedy or to the family. Also feeds the similarity check.</li>
+  <li><strong>Run the similarity check</strong> on the roster candidates so the held-out set is frozen before any training.</li>
+</ul>
+
+<h3>Step 3 options (separate approval; GPU time on Gus or Gebru)</h3>
+<div class="tablewrap"><table>
+<tr><th>option</th><th>what it tests</th><th>cost</th></tr>
+<tr><td><strong>A/B fine-tune from control120</strong>: continue self-play (A) versus self-play with a small share of games against Greedy and Minimax-d4 (B), matched on training examples, two seeds each</td><td>Does opponent exposure remove the wipeouts, and does it transfer to the held-out roster?</td><td>About 20 generations per run, a few GPU-hours each; four runs</td></tr>
+<tr><td><strong>Add Group C</strong> (Edax L3/L5 in the mix)</td><td>Is a mature engine a better training opponent than hand-written ones?</td><td>Smoke test first (one day), then the same as above plus Edax time</td></tr>
+<tr><td><strong>Mechanism-targeted intervention</strong>: value target only, no new opponents, for example an auxiliary disc-count target or relabelling few-disc positions</td><td>Is the value head the whole story?</td><td>Cheapest; the least aligned with the opponent-diversity question</td></tr>
+</table></div>
+<p>Recommendation: the A/B fine-tune with two seeds, Group C only if the smoke test is cheap. The full 120-generation runs from scratch are not needed to answer the question, and seeds matter more than generations here (two seeds of one recipe differed by 48 rating points earlier in the project).</p>
+
+<h3>Decisions needed</h3>
+<ol>
+  <li>Approve the held-out roster and the admission rule, or change them.</li>
+  <li>Is Step 3 in scope for Phase 1, and which option? Value targets from external games: policy only, or both?</li>
+  <li>What is the minimum convincing Phase 1 report? My proposal: Steps 0 to 2 plus the two-head probe, with Step 3 as the pre-registered next experiment, written up by mid-November.</li>
+  <li>Whether the three pull requests (#52, #53 merged; #54 open) or only the report draft should be reviewed.</li>
+</ol>
+
+<p class="small">All numbers in this agenda come from <code>research/step1-pilot-results.md</code>, <code>research/step2-failure-analysis.md</code> and the reports under <code>research/results/</code> in the repository; every table can be regenerated with the scripts named there.</p>
+</main>
+
+</body>
+</html>
