@@ -1,0 +1,361 @@
+{
+  "agent_specs": {
+    "control120": {
+      "checkpoint": "reversi-8x8-control-gen120.pt",
+      "kind": "alphazero",
+      "simulations": 50
+    },
+    "gen120": {
+      "checkpoint": "reversi-8x8-gen120.pt",
+      "kind": "alphazero",
+      "simulations": 50
+    },
+    "gen60": {
+      "checkpoint": "reversi-8x8-gen60.pt",
+      "kind": "alphazero",
+      "simulations": 50
+    },
+    "greedy": {
+      "kind": "greedy"
+    },
+    "greedy-corner": {
+      "heuristic": "greedy-corner",
+      "kind": "heuristic"
+    },
+    "greedy-d2": {
+      "depth": 2,
+      "heuristic": "greedy-d2",
+      "kind": "heuristic"
+    },
+    "random": {
+      "kind": "random"
+    }
+  },
+  "board_size": 8,
+  "kind": "round_robin",
+  "matchups": [
+    {
+      "a": "random",
+      "b": "greedy",
+      "ci_high": 0.4463958134995685,
+      "ci_low": 0.3132212914628618,
+      "decisive": true,
+      "games": 200,
+      "record": "72W 121L 7D",
+      "score_a": 0.3775,
+      "score_as_black": 0.39,
+      "score_as_white": 0.365
+    },
+    {
+      "a": "random",
+      "b": "greedy-corner",
+      "ci_high": 0.2445706276115175,
+      "ci_low": 0.13730192800616042,
+      "decisive": true,
+      "games": 200,
+      "record": "34W 160L 6D",
+      "score_a": 0.185,
+      "score_as_black": 0.215,
+      "score_as_white": 0.155
+    },
+    {
+      "a": "random",
+      "b": "greedy-d2",
+      "ci_high": 0.28506606005772644,
+      "ci_low": 0.1703930960816565,
+      "decisive": true,
+      "games": 200,
+      "record": "42W 153L 5D",
+      "score_a": 0.2225,
+      "score_as_black": 0.18,
+      "score_as_white": 0.265
+    },
+    {
+      "a": "random",
+      "b": "gen60",
+      "ci_high": 0.0357217617161768,
+      "ci_low": 0.0027466581335444384,
+      "decisive": true,
+      "games": 200,
+      "record": "2W 198L 0D",
+      "score_a": 0.01,
+      "score_as_black": 0.0,
+      "score_as_white": 0.02
+    },
+    {
+      "a": "random",
+      "b": "control120",
+      "ci_high": 0.04316572879269026,
+      "ci_low": 0.00511423779325831,
+      "decisive": true,
+      "games": 200,
+      "record": "3W 197L 0D",
+      "score_a": 0.015,
+      "score_as_black": 0.02,
+      "score_as_white": 0.01
+    },
+    {
+      "a": "random",
+      "b": "gen120",
+      "ci_high": 0.0357217617161768,
+      "ci_low": 0.0027466581335444384,
+      "decisive": true,
+      "games": 200,
+      "record": "2W 198L 0D",
+      "score_a": 0.01,
+      "score_as_black": 0.0,
+      "score_as_white": 0.02
+    },
+    {
+      "a": "greedy",
+      "b": "greedy-corner",
+      "ci_high": 0.2797070154286584,
+      "ci_low": 0.1659405939744972,
+      "decisive": true,
+      "games": 200,
+      "record": "41W 154L 5D",
+      "score_a": 0.2175,
+      "score_as_black": 0.2,
+      "score_as_white": 0.235
+    },
+    {
+      "a": "greedy",
+      "b": "greedy-d2",
+      "ci_high": 0.37717177566258037,
+      "ci_low": 0.2499894483607809,
+      "decisive": true,
+      "games": 200,
+      "record": "58W 134L 8D",
+      "score_a": 0.31,
+      "score_as_black": 0.295,
+      "score_as_white": 0.325
+    },
+    {
+      "a": "greedy",
+      "b": "gen60",
+      "ci_high": 0.42347886924509565,
+      "ci_low": 0.2919862754043116,
+      "decisive": true,
+      "games": 200,
+      "record": "71W 129L 0D",
+      "score_a": 0.355,
+      "score_as_black": 0.36,
+      "score_as_white": 0.35
+    },
+    {
+      "a": "greedy",
+      "b": "control120",
+      "ci_high": 0.42858471833996925,
+      "ci_low": 0.2966919730456654,
+      "decisive": true,
+      "games": 200,
+      "record": "72W 128L 0D",
+      "score_a": 0.36,
+      "score_as_black": 0.41,
+      "score_as_white": 0.31
+    },
+    {
+      "a": "greedy",
+      "b": "gen120",
+      "ci_high": 0.23911475028724882,
+      "ci_low": 0.13294625859420173,
+      "decisive": true,
+      "games": 200,
+      "record": "36W 164L 0D",
+      "score_a": 0.18,
+      "score_as_black": 0.18,
+      "score_as_white": 0.18
+    },
+    {
+      "a": "greedy-corner",
+      "b": "greedy-d2",
+      "ci_high": 0.588208336216767,
+      "ci_low": 0.4510378507281424,
+      "decisive": false,
+      "games": 200,
+      "record": "99W 91L 10D",
+      "score_a": 0.52,
+      "score_as_black": 0.49,
+      "score_as_white": 0.55
+    },
+    {
+      "a": "greedy-corner",
+      "b": "gen60",
+      "ci_high": 0.34068339357669647,
+      "ci_low": 0.21779700329307355,
+      "decisive": true,
+      "games": 200,
+      "record": "55W 145L 0D",
+      "score_a": 0.275,
+      "score_as_black": 0.29,
+      "score_as_white": 0.26
+    },
+    {
+      "a": "greedy-corner",
+      "b": "control120",
+      "ci_high": 0.4081150447316374,
+      "ci_low": 0.27791545970908793,
+      "decisive": true,
+      "games": 200,
+      "record": "68W 132L 0D",
+      "score_a": 0.34,
+      "score_as_black": 0.36,
+      "score_as_white": 0.32
+    },
+    {
+      "a": "greedy-corner",
+      "b": "gen120",
+      "ci_high": 0.28238799918293667,
+      "ci_low": 0.16816538358833258,
+      "decisive": true,
+      "games": 200,
+      "record": "44W 156L 0D",
+      "score_a": 0.22,
+      "score_as_black": 0.22,
+      "score_as_white": 0.22
+    },
+    {
+      "a": "greedy-d2",
+      "b": "gen60",
+      "ci_high": 0.5092832466534134,
+      "ci_low": 0.37297819251185865,
+      "decisive": false,
+      "games": 200,
+      "record": "88W 112L 0D",
+      "score_a": 0.44,
+      "score_as_black": 0.43,
+      "score_as_white": 0.45
+    },
+    {
+      "a": "greedy-d2",
+      "b": "control120",
+      "ci_high": 0.4387737007594981,
+      "ci_low": 0.30612608409859116,
+      "decisive": true,
+      "games": 200,
+      "record": "74W 126L 0D",
+      "score_a": 0.37,
+      "score_as_black": 0.39,
+      "score_as_white": 0.35
+    },
+    {
+      "a": "greedy-d2",
+      "b": "gen120",
+      "ci_high": 0.2554404437461275,
+      "ci_low": 0.1460552053440051,
+      "decisive": true,
+      "games": 200,
+      "record": "39W 161L 0D",
+      "score_a": 0.195,
+      "score_as_black": 0.21,
+      "score_as_white": 0.18
+    },
+    {
+      "a": "gen60",
+      "b": "control120",
+      "ci_high": 0.4183653566395992,
+      "ci_low": 0.28728824127358077,
+      "decisive": true,
+      "games": 200,
+      "record": "64W 124L 12D",
+      "score_a": 0.35,
+      "score_as_black": 0.345,
+      "score_as_white": 0.355
+    },
+    {
+      "a": "gen60",
+      "b": "gen120",
+      "ci_high": 0.37198552097978366,
+      "ci_low": 0.2453641563073503,
+      "decisive": true,
+      "games": 200,
+      "record": "57W 135L 8D",
+      "score_a": 0.305,
+      "score_as_black": 0.26,
+      "score_as_white": 0.35
+    },
+    {
+      "a": "control120",
+      "b": "gen120",
+      "ci_high": 0.4183653566395992,
+      "ci_low": 0.28728824127358077,
+      "decisive": true,
+      "games": 200,
+      "record": "66W 126L 8D",
+      "score_a": 0.35,
+      "score_as_black": 0.345,
+      "score_as_white": 0.355
+    }
+  ],
+  "notes": "Step 2 follow-up: a second disc-hungry opponent, same protocol as research/eval-protocol-frozen.json",
+  "protocol": {
+    "anchor": "random",
+    "games_per_pair": 200,
+    "opening_plies": 4,
+    "seconds": 1964.3527280520648,
+    "seed": 20261025
+  },
+  "provenance": {
+    "git": {
+      "available": true,
+      "branch": "research/step2-failure-analysis",
+      "commit": "5855991fb19aa999a3429a404d225e3bc680e3c0",
+      "commit_short": "5855991",
+      "diff": "diff --git a/scripts/analyze_pilot.py b/scripts/analyze_pilot.py\nindex 22d4149..49442ff 100644\n--- a/scripts/analyze_pilot.py\n+++ b/scripts/analyze_pilot.py\n@@ -101,6 +101,9 @@ def main(report_path: Path, games_dir: Path) -> int:\n     protocol = report[\"protocol\"]\n     rng = np.random.default_rng(protocol[\"seed\"])\n     networks = [n for n, s in report[\"agent_specs\"].items() if s.get(\"kind\") == \"alphazero\"]\n+    fixed = [\n+        n for n, s in report[\"agent_specs\"].items() if s.get(\"kind\") not in {\"alphazero\", \"random\"}\n+    ]\n     matchups = {(m[\"a\"], m[\"b\"]): m for m in report[\"matchups\"]}\n     games = {(a, b): load_games(games_dir / f\"{a}-vs-{b}.json\") for a, b in matchups}\n \n@@ -131,14 +134,14 @@ def main(report_path: Path, games_dir: Path) -> int:\n         )\n     print()\n \n-    print(\"## How the networks lose to Greedy and to Minimax-d4\")\n+    print(\"## How the networks lose to each fixed opponent\")\n     print()\n     print(\n         \"| network | opponent | losses | of which wipeouts \"\n         f\"| moves after the opening at each wipeout | losses of {LONG_GAME_MOVES}+ moves |\"\n     )\n     print(\"|---|---|---:|---:|---|---:|\")\n-    for opponent in (\"greedy\", \"minimax-d4\"):\n+    for opponent in fixed:\n         for net in networks:\n             key, net_first = pairing(net, opponent)\n             lost = 0.0 if net_first else 1.0\n@@ -166,23 +169,25 @@ def main(report_path: Path, games_dir: Path) -> int:\n         print(f\"| {a} vs {b} | {a_black} | {a_white} | {b_black} | {b_white} |\")\n     print()\n \n-    print(\"## The two one-variable comparisons\")\n+    print(\"## The checkpoints side by side\")\n     print()\n     ratings = {r[\"name\"]: r for r in report[\"ratings\"]}\n-    print(\"| checkpoint | rating [95%] | vs Greedy | vs Minimax-d4 | wipeouts suffered vs Greedy |\")\n-    print(\"|---|---|---:|---:|---:|\")\n+    columns = \" | \".join(f\"vs {o} (wiped out)\" for o in fixed)\n+    print(f\"| checkpoint | rating [95%] | {columns} |\")\n+    print(\"|---|---|\" + \"---:|\" * len(fixed))\n     for net in networks:\n         r = ratings[net]\n-        scores = {}\n-        for opponent in (\"greedy\", \"minimax-d4\"):\n+        cells = []\n+        for opponent in fixed:\n             key, net_first = pairing(net, opponent)\n             score = matchups[key][\"score_a\"]\n-            scores[opponent] = score if net_first else 1 - score\n-        key, net_first = pairing(net, \"greedy\")\n-        wiped = sum(g.a_wiped_out == net_first and g.wipeout for g in games[key])\n+            score = score if net_first else 1 - score\n+            wiped = sum(g.a_wiped_out == net_first and g.wipeout for g in games[key])\n+            cells.append(f\"{pct(score)} ({wiped})\")\n         print(\n-            f\"| {net} | {r['elo']:+.0f} [{r['ci_low']:+.0f}, {r['ci_high']:+.0f}] \"\n-            f\"| {pct(scores['greedy'])} | {pct(scores['minimax-d4'])} | {wiped} |\"\n+            f\"| {net} | {r['elo']:+.0f} [{r['ci_low']:+.0f}, {r['ci_high']:+.0f}] | \"\n+            + \" | \".join(cells)\n+            + \" |\"\n         )\n     return 0\n \ndiff --git a/scripts/analyze_wipeouts.py b/scripts/analyze_wipeouts.py\nindex 864500b..dd3c854 100644\n--- a/scripts/analyze_wipeouts.py\n+++ b/scripts/analyze_wipeouts.py\n@@ -12,10 +12,14 @@ network still held at each of those moves.\n Usage::\n \n     python scripts/analyze_wipeouts.py runs/research/pilot-2026-10-games \\\n-        [--figure research/figures/wipeout-values.png]\n-\n-The games are replayed with the rules module to recover disc counts, which the\n-records do not store per move.\n+        [--opponent greedy] [--figure research/figures/wipeout-values.png]\n+\n+``--opponent`` names the fixed opponent whose games to read (the\n+``<opponent>-vs-*.json`` files). It must be one that reports its tie set\n+through ``choices``, as Greedy and its variants do, because the \"was it\n+avoidable\" analysis has to consider every reply the opponent might have\n+chosen. The games are replayed with the rules module to recover disc counts,\n+which the records do not store per move.\n \"\"\"\n \n from __future__ import annotations\n@@ -27,13 +31,29 @@ from pathlib import Path\n \n import numpy as np\n \n-from reversi.game.rules import apply, flips, is_terminal, legal_actions, must_pass\n+from reversi.arena.entrants import build_agent, parse_entrant\n+from reversi.game.rules import apply, is_terminal, legal_actions, must_pass\n from reversi.game.scoring import disc_counts\n from reversi.game.state import State, initial_state\n \n LOOKBACK = 10\n \"\"\"How many of the network's own moves before the end to look at.\"\"\"\n \n+OPPONENT = \"greedy\"\n+\"\"\"The fixed opponent being analysed; ``set_opponent`` changes it.\"\"\"\n+_replies = None\n+\n+\n+def set_opponent(name: str) -> None:\n+    \"\"\"Choose the fixed opponent. Its ``choices`` method supplies the reply sets.\"\"\"\n+    global OPPONENT, _replies\n+    agent = build_agent(parse_entrant(name, default_simulations=1))\n+    choices = getattr(agent, \"choices\", None)\n+    if choices is None:\n+        msg = f\"{name} does not report its tie set (no choices method); cannot enumerate replies\"\n+        raise SystemExit(msg)\n+    OPPONENT, _replies = name, choices\n+\n \n @dataclass(frozen=True)\n class NetMove:\n@@ -62,21 +82,21 @@ def net_discs(state: State, net_black: bool) -> int:\n     return black if net_black else white\n \n \n-def greedy_replies(state: State) -> list[int]:\n-    \"\"\"Every move Greedy might make here: the ones that flip the most discs.\"\"\"\n-    actions = legal_actions(state)\n-    gains = [bin(flips(state, a)).count(\"1\") for a in actions]\n-    best = max(gains)\n-    return [a for a, g in zip(actions, gains, strict=True) if g == best]\n+def opponent_replies(state: State) -> list[int]:\n+    \"\"\"Every move the opponent might make here: for Greedy, the ones flipping the most discs.\"\"\"\n+    if _replies is None:\n+        set_opponent(OPPONENT)\n+    assert _replies is not None\n+    return list(_replies(state))\n \n \n def survives(state: State, net_black: bool, moves_left: int) -> bool:\n     \"\"\"Can the network keep at least one disc through its next ``moves_left`` moves?\n \n-    The network may choose any legal move; Greedy may play any of its\n-    maximum-flip moves (it breaks ties at random, so every tie must be safe).\n+    The network may choose any legal move; the opponent may play any move in\n+    its tie set (Greedy breaks ties at random, so every tie must be safe).\n     Passes are forced and cost nothing. ``True`` means a line exists in which\n-    the network is never wiped out, whatever Greedy's tie-breaks.\n+    the network is never wiped out, whatever the opponent's tie-breaks.\n     \"\"\"\n     pass_action = state.size**2\n     if is_terminal(state):\n@@ -90,7 +110,7 @@ def survives(state: State, net_black: bool, moves_left: int) -> bool:\n         return any(\n             survives(apply(state, a), net_black, moves_left - 1) for a in legal_actions(state)\n         )\n-    for reply in greedy_replies(state):\n+    for reply in opponent_replies(state):\n         after = apply(state, reply)\n         if net_discs(after, net_black) == 0 or not survives(after, net_black, moves_left):\n             return False\n@@ -134,7 +154,7 @@ def replay(game: dict, net_is_a: bool, board_size: int) -> Trace:\n def load(path: Path) -> tuple[str, list[Trace]]:\n     payload = json.loads(path.read_text())\n     a, b = payload[\"agents\"][\"a\"], payload[\"agents\"][\"b\"]\n-    net = b if a == \"greedy\" else a\n+    net = b if a == OPPONENT else a\n     net_is_a = net == a\n     traces = [replay(g, net_is_a, payload[\"board_size\"]) for g in payload[\"games\"]]\n     return net, traces\n@@ -175,15 +195,17 @@ def main() -> int:\n         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter\n     )\n     parser.add_argument(\"games_dir\", type=Path)\n+    parser.add_argument(\"--opponent\", default=\"greedy\")\n     parser.add_argument(\"--figure\", type=Path, default=None)\n     args = parser.parse_args()\n+    set_opponent(args.opponent)\n \n     results: dict[str, list[Trace]] = {}\n-    for path in sorted(args.games_dir.glob(\"greedy-vs-*.json\")):\n+    for path in sorted(args.games_dir.glob(f\"{OPPONENT}-vs-*.json\")):\n         net, traces = load(path)\n         results[net] = traces\n     if not results:\n-        raise SystemExit(f\"no greedy-vs-*.json under {args.games_dir}\")\n+        raise SystemExit(f\"no {OPPONENT}-vs-*.json under {args.games_dir}\")\n \n     print(\"## The network's estimates in the moves before a wipeout\")\n     print()\n@@ -233,7 +255,7 @@ def main() -> int:\n     print()\n     print(\n         \"From the position at the network's k-th last move: does any line of play keep at least \"\n-        \"one network disc through those k moves, against every maximum-flip reply Greedy \"\n+        f\"one network disc through those k moves, against every reply {OPPONENT} \"\n         \"might choose?\"\n     )\n     print()\n@@ -283,7 +305,7 @@ def main() -> int:\n         print(f\"| {net} | {n} | {median(shares):.0%} | {unvisited} | {runner_up} |\")\n     print()\n \n-    print(\"## For comparison: the same moves in games the network won against Greedy\")\n+    print(f\"## For comparison: the same moves in games the network won against {OPPONENT}\")\n     print()\n     print(\n         \"Median searched value at the network's n-th move after the opening, \"\n@@ -333,7 +355,7 @@ def main() -> int:\n             top.plot(xs, np.nanmedian(values, axis=0), color=\"black\", linewidth=2, label=\"median\")\n             bottom.plot(xs, np.nanmedian(discs, axis=0), color=\"black\", linewidth=2)\n             top.axhline(0, color=\"0.3\", linewidth=0.8, linestyle=\"--\")\n-            top.set_title(f\"{net}: {len(wiped)} wipeouts by Greedy\")\n+            top.set_title(f\"{net}: {len(wiped)} wipeouts by {OPPONENT}\")\n             bottom.set_xlabel(\"network's moves before the wipeout\")\n             if col == 0:\n                 top.set_ylabel(\"searched value (+1 = network wins)\")\ndiff --git a/src/reversi/agents/__init__.py b/src/reversi/agents/__init__.py\nindex 361e650..f221817 100644\n--- a/src/reversi/agents/__init__.py\n+++ b/src/reversi/agents/__init__.py\n@@ -14,8 +14,20 @@ Only playing somebody tells you that.\n from __future__ import annotations\n \n from reversi.agents.base import Agent\n-from reversi.agents.greedy import GreedyAgent\n+from reversi.agents.greedy import GreedyAgent, MaterialAgent, NoisyGreedyAgent\n+from reversi.agents.heuristics import CornerAgent, MobilityAgent\n from reversi.agents.minimax import MinimaxAgent\n from reversi.agents.random_agent import RandomAgent\n+from reversi.agents.rollout import RolloutAgent\n \n-__all__ = [\"Agent\", \"GreedyAgent\", \"MinimaxAgent\", \"RandomAgent\"]\n+__all__ = [\n+    \"Agent\",\n+    \"CornerAgent\",\n+    \"GreedyAgent\",\n+    \"MaterialAgent\",\n+    \"MinimaxAgent\",\n+    \"MobilityAgent\",\n+    \"NoisyGreedyAgent\",\n+    \"RandomAgent\",\n+    \"RolloutAgent\",\n+]\ndiff --git a/src/reversi/agents/greedy.py b/src/reversi/agents/greedy.py\nindex afdfbce..f81d6cb 100644\n--- a/src/reversi/agents/greedy.py\n+++ b/src/reversi/agents/greedy.py\n@@ -15,6 +15,15 @@ So an agent that beats Greedy has learned something real: that the disc count on\n move twenty does not predict the disc count on move sixty. That is not obvious\n from the rules, and nothing in the training signal states it. It has to be\n discovered from games.\n+\n+**The variants further down exist for one question.** The trained network\n+loses to Greedy by being wiped out early (see ``research/``), and the question\n+is whether that is a weakness against Greedy in particular or against any\n+opponent that goes after discs. ``GreedyAgent(corner_first=True)`` is Greedy\n+that will take a corner when one is on offer; ``MaterialAgent`` is Greedy that\n+looks a few moves ahead, still counting nothing but discs; ``NoisyGreedyAgent``\n+is Greedy that sometimes plays at random. Each flips as many discs as it can\n+most of the time, and none is quite Greedy. They are not meant to be good.\n \"\"\"\n \n from __future__ import annotations\n@@ -26,32 +35,138 @@ from reversi.game.bitboard import popcount\n from reversi.game.state import State\n from reversi.types import Action, pass_action\n \n-__all__ = [\"GreedyAgent\"]\n+__all__ = [\"GreedyAgent\", \"MaterialAgent\", \"NoisyGreedyAgent\", \"corners\"]\n+\n+\n+def corners(board_size: int) -> tuple[Action, ...]:\n+    \"\"\"The four corner squares, as action indices.\"\"\"\n+    last = board_size - 1\n+    return (0, last, last * board_size, last * board_size + last)\n+\n+\n+def _pick(choices: list[Action], rng: np.random.Generator) -> Action:\n+    \"\"\"Break a tie uniformly at random.\n+\n+    Ties are common and must not be broken by board order: always taking the\n+    lowest-numbered square would make an agent prefer the top-left corner of the\n+    board, which is a positional bias rather than the strategy it claims to\n+    follow, and it would quietly flatter any opponent that learns to exploit it.\n+    \"\"\"\n+    return choices[int(rng.integers(0, len(choices)))]\n \n \n class GreedyAgent:\n-    \"\"\"Maximises discs flipped this move; ties broken uniformly at random.\"\"\"\n+    \"\"\"Maximises discs flipped this move; ties broken uniformly at random.\n+\n+    With ``corner_first``, a corner is taken whenever one is available, and\n+    flips decide only among the rest. That is the one piece of Othello knowledge\n+    everybody has, grafted onto an agent that otherwise has none.\n+    \"\"\"\n \n-    def __init__(self, name: str = \"greedy\") -> None:\n+    def __init__(self, name: str | None = None, *, corner_first: bool = False) -> None:\n+        self.corner_first = corner_first\n+        if name is None:\n+            name = \"greedy-corner\" if corner_first else \"greedy\"\n         self._name = name\n \n     @property\n     def name(self) -> str:\n         return self._name\n \n-    def select(self, state: State, rng: np.random.Generator) -> Action:\n+    def choices(self, state: State) -> list[Action]:\n+        \"\"\"Every move this agent might play here: the tied best ones.\n+\n+        Exposed so an analysis can know the whole tie set rather than sampling\n+        it, and so a test can check the tie-breaking is doing what it claims.\n+        \"\"\"\n         actions = rules.legal_actions(state)\n         if not actions:\n             msg = f\"asked for a move in a finished position:\\n{state}\"\n             raise ValueError(msg)\n         if actions == [pass_action(state.size)]:\n-            return actions[0]\n+            return actions\n+\n+        if self.corner_first:\n+            available = [a for a in actions if a in corners(state.size)]\n+            if available:\n+                return available\n \n         gains = [popcount(rules.flips(state, action)) for action in actions]\n         best = max(gains)\n-        # Ties are common and must not be broken by board order: always taking\n-        # the lowest-numbered square would make Greedy prefer the top-left corner\n-        # of the board, which is a positional bias rather than a greedy one, and\n-        # it would quietly flatter any agent that learns to exploit it.\n-        tied = [action for action, gain in zip(actions, gains, strict=True) if gain == best]\n-        return tied[int(rng.integers(0, len(tied)))]\n+        return [action for action, gain in zip(actions, gains, strict=True) if gain == best]\n+\n+    def select(self, state: State, rng: np.random.Generator) -> Action:\n+        return _pick(self.choices(state), rng)\n+\n+\n+class MaterialAgent:\n+    \"\"\"Greedy that looks ``depth`` plies ahead, still counting only discs.\n+\n+    A full-width minimax search whose only idea of a good position is \"more of\n+    my discs than yours\". At depth 1 it orders moves exactly as Greedy does\n+    (a move that flips ``f`` discs changes the difference by ``2f + 1``), so\n+    ``MaterialAgent(1)`` is Greedy with extra steps; at depth 2 it is Greedy\n+    that sees the opponent's greedy reply coming. Root ties are broken at\n+    random, as Greedy's are, for the same reason.\n+    \"\"\"\n+\n+    def __init__(self, depth: int = 2, name: str | None = None) -> None:\n+        if depth < 1:\n+            msg = f\"depth must be at least 1, got {depth}\"\n+            raise ValueError(msg)\n+        self.depth = depth\n+        self._name = name if name is not None else f\"greedy-d{depth}\"\n+\n+    @property\n+    def name(self) -> str:\n+        return self._name\n+\n+    def choices(self, state: State) -> list[Action]:\n+        \"\"\"The moves tied for the best disc difference ``depth`` plies out.\"\"\"\n+        actions = rules.legal_actions(state)\n+        if not actions:\n+            msg = f\"asked for a move in a finished position:\\n{state}\"\n+            raise ValueError(msg)\n+        if len(actions) == 1:\n+            return actions\n+        scores = [-self._search(rules.apply(state, a), self.depth - 1) for a in actions]\n+        best = max(scores)\n+        return [a for a, s in zip(actions, scores, strict=True) if s == best]\n+\n+    def select(self, state: State, rng: np.random.Generator) -> Action:\n+        return _pick(self.choices(state), rng)\n+\n+    def _search(self, state: State, depth: int) -> int:\n+        \"\"\"Disc difference for the player to move, ``depth`` plies further on.\"\"\"\n+        if depth <= 0 or rules.is_terminal(state):\n+            return popcount(state.mine) - popcount(state.theirs)\n+        return max(\n+            -self._search(rules.apply(state, a), depth - 1) for a in rules.legal_actions(state)\n+        )\n+\n+\n+class NoisyGreedyAgent:\n+    \"\"\"Greedy that plays a uniformly random legal move a fraction of the time.\n+\n+    The random moves are the point: the question this helps answer is whether\n+    an opponent that *usually* goes after discs is as dangerous to the network\n+    as one that always does.\n+    \"\"\"\n+\n+    def __init__(self, epsilon: float = 0.25, name: str | None = None) -> None:\n+        if not 0.0 <= epsilon <= 1.0:\n+            msg = f\"epsilon must be between 0 and 1, got {epsilon}\"\n+            raise ValueError(msg)\n+        self.epsilon = epsilon\n+        self._greedy = GreedyAgent()\n+        self._name = name if name is not None else \"noisy-greedy\"\n+\n+    @property\n+    def name(self) -> str:\n+        return self._name\n+\n+    def select(self, state: State, rng: np.random.Generator) -> Action:\n+        greedy = self._greedy.choices(state)\n+        if rng.random() < self.epsilon:\n+            return _pick(rules.legal_actions(state), rng)\n+        return _pick(greedy, rng)\ndiff --git a/src/reversi/arena/entrants.py b/src/reversi/arena/entrants.py\nindex b7d6045..665847e 100644\n--- a/src/reversi/arena/entrants.py\n+++ b/src/reversi/arena/entrants.py\n@@ -14,6 +14,11 @@ Kinds:\n * ``random``, ``greedy`` -- the two baselines with no settings.\n * ``minimax`` -- alpha-beta search to ``depth`` plies with the frozen weights.\n * ``edax`` -- the external Edax engine at level ``depth`` (its own scale, 1..60).\n+* ``rollout`` -- a tree search with random playouts in place of a network,\n+  ``simulations`` playouts per move. No knowledge of the game beyond its rules.\n+* ``heuristic`` -- the one-idea opponents used as controls in the research\n+  experiments: ``greedy-corner``, ``greedy-dN`` (disc-counting search to depth\n+  ``depth``), ``noisy-greedy``, ``corner`` and ``mobility``. Identified by name.\n * ``checkpoint`` -- a saved network from a run, searching ``simulations`` per move\n   with no exploration noise. Either a training checkpoint or an exported model.\n * ``level`` -- one rung of the difficulty ladder on top of a saved network.\n@@ -23,6 +28,7 @@ from __future__ import annotations\n \n import json\n import re\n+from collections.abc import Callable\n from dataclasses import dataclass\n from pathlib import Path\n from typing import Any, Literal\n@@ -33,13 +39,18 @@ from reversi.search.evaluator import Evaluator\n \n __all__ = [\"EntrantSpec\", \"build_agent\", \"describe_entrant\", \"parse_entrant\"]\n \n-Kind = Literal[\"random\", \"greedy\", \"minimax\", \"edax\", \"checkpoint\", \"level\"]\n+Kind = Literal[\"random\", \"greedy\", \"minimax\", \"edax\", \"rollout\", \"heuristic\", \"checkpoint\", \"level\"]\n \n _BASELINE_PATTERNS: tuple[tuple[re.Pattern[str], Kind], ...] = (\n     (re.compile(r\"^minimax-?d?(\\d+)$\"), \"minimax\"),\n     (re.compile(r\"^edax-?l?(\\d+)$\"), \"edax\"),\n )\n \n+_HEURISTICS: frozenset[str] = frozenset({\"greedy-corner\", \"noisy-greedy\", \"corner\", \"mobility\"})\n+\"\"\"The heuristic entrants with no settings; ``greedy-dN`` is matched separately.\"\"\"\n+_MATERIAL = re.compile(r\"^greedy-d(\\d+)$\")\n+_ROLLOUT = re.compile(r\"^rollout-?r?(\\d+)$\")\n+\n \n @dataclass(frozen=True, slots=True)\n class EntrantSpec:\n@@ -70,6 +81,8 @@ def parse_entrant(text: str, *, default_simulations: int) -> EntrantSpec:\n \n         random                      greedy\n         minimax-d4   (or minimax4)  edax-l5  (or edax5)\n+        rollout-r1000               random-playout search, 1000 playouts a move\n+        greedy-corner  greedy-d2  noisy-greedy  corner  mobility\n         NAME=PATH                   a network, searching ``default_simulations``\n         NAME=PATH@200               the same, at 200 simulations\n         PATH                        name taken from the file's stem\n@@ -97,6 +110,20 @@ def parse_entrant(text: str, *, default_simulations: int) -> EntrantSpec:\n             letter = \"d\" if kind == \"minimax\" else \"l\"\n             return EntrantSpec(name=f\"{kind}-{letter}{number}\", kind=kind, depth=number)\n \n+    if text in _HEURISTICS:\n+        return EntrantSpec(name=text, kind=\"heuristic\")\n+    found = _MATERIAL.match(text)\n+    if found:\n+        depth = int(found.group(1))\n+        return EntrantSpec(name=f\"greedy-d{depth}\", kind=\"heuristic\", depth=depth)\n+    found = _ROLLOUT.match(text)\n+    if found:\n+        rollouts = int(found.group(1))\n+        if rollouts < 1:\n+            msg = f\"a rollout entrant needs at least one playout per move, got {text!r}\"\n+            raise ConfigError(msg)\n+        return EntrantSpec(name=f\"rollout-r{rollouts}\", kind=\"rollout\", simulations=rollouts)\n+\n     if text.startswith(\"level:\"):\n         body = text.removeprefix(\"level:\")\n         if \"=\" not in body:\n@@ -194,6 +221,12 @@ def build_agent(spec: EntrantSpec, *, device: str = \"cpu\") -> Agent:\n         from reversi.agents.edax import EdaxAgent\n \n         return EdaxAgent(_required(spec.depth, spec, \"depth\"), name=spec.name)\n+    if spec.kind == \"rollout\":\n+        from reversi.agents.rollout import RolloutAgent\n+\n+        return RolloutAgent(_required(spec.simulations, spec, \"simulations\"), name=spec.name)\n+    if spec.kind == \"heuristic\":\n+        return _build_heuristic(spec)\n \n     path = Path(_required(spec.path, spec, \"path\"))\n     evaluator = _load_evaluator(path, device)\n@@ -220,6 +253,24 @@ def build_agent(spec: EntrantSpec, *, device: str = \"cpu\") -> Agent:\n     )\n \n \n+def _build_heuristic(spec: EntrantSpec) -> Agent:\n+    from reversi.agents.greedy import GreedyAgent, MaterialAgent, NoisyGreedyAgent\n+    from reversi.agents.heuristics import CornerAgent, MobilityAgent\n+\n+    if spec.depth is not None:\n+        return MaterialAgent(spec.depth, name=spec.name)\n+    builders: dict[str, Callable[[], Agent]] = {\n+        \"greedy-corner\": lambda: GreedyAgent(spec.name, corner_first=True),\n+        \"noisy-greedy\": lambda: NoisyGreedyAgent(name=spec.name),\n+        \"corner\": lambda: CornerAgent(spec.name),\n+        \"mobility\": lambda: MobilityAgent(spec.name),\n+    }\n+    if spec.name not in builders:\n+        msg = f\"unknown heuristic entrant {spec.name!r}; one of {sorted(builders)} or greedy-dN\"\n+        raise ConfigError(msg)\n+    return builders[spec.name]()\n+\n+\n def describe_entrant(spec: EntrantSpec, *, board_size: int = 8) -> dict[str, Any]:\n     \"\"\"What goes into the report under ``agent_specs``: enough to reproduce the entrant.\"\"\"\n     if spec.kind in {\"random\", \"greedy\"}:\n@@ -230,6 +281,17 @@ def describe_entrant(spec: EntrantSpec, *, board_size: int = 8) -> dict[str, Any\n         return {\"kind\": \"minimax\", \"depth\": spec.depth, \"weights\": weights_fingerprint(board_size)}\n     if spec.kind == \"edax\":\n         return {\"kind\": \"edax\", \"level\": spec.depth}\n+    if spec.kind == \"rollout\":\n+        return {\"kind\": \"rollout\", \"playouts_per_move\": spec.simulations}\n+    if spec.kind == \"heuristic\":\n+        out: dict[str, Any] = {\"kind\": \"heuristic\", \"heuristic\": spec.name}\n+        if spec.depth is not None:\n+            out[\"depth\"] = spec.depth\n+        if spec.name == \"corner\":\n+            from reversi.agents.minimax import weights_fingerprint\n+\n+            out[\"weights\"] = weights_fingerprint(board_size)\n+        return out\n \n     path = Path(spec.path or \"\")\n     out: dict[str, Any] = {\"checkpoint\": path.name}",
+      "diff_sha256": "e4350c6b514896042b6995f007baf4d2e8d33e512d974b43b201a31a13ffd5e4",
+      "dirty": true
+    }
+  },
+  "ratings": [
+    {
+      "ci_high": 552.2301137345406,
+      "ci_low": 479.9160412651558,
+      "elo": 513.9193348101098,
+      "games": 1200,
+      "name": "gen120"
+    },
+    {
+      "ci_high": 440.60570127202067,
+      "ci_low": 374.88593244654425,
+      "elo": 405.0641288233562,
+      "games": 1200,
+      "name": "control120"
+    },
+    {
+      "ci_high": 396.34093394234935,
+      "ci_low": 334.18012213782464,
+      "elo": 364.3815505349617,
+      "games": 1200,
+      "name": "gen60"
+    },
+    {
+      "ci_high": 323.79991167368433,
+      "ci_low": 259.43833905618646,
+      "elo": 291.88452081788853,
+      "games": 1200,
+      "name": "greedy-corner"
+    },
+    {
+      "ci_high": 326.18965905732114,
+      "ci_low": 258.68440816601225,
+      "elo": 291.88452081788853,
+      "games": 1200,
+      "name": "greedy-d2"
+    },
+    {
+      "ci_high": 213.5317774225648,
+      "ci_low": 148.2466071107618,
+      "elo": 182.89905102120449,
+      "games": 1200,
+      "name": "greedy"
+    },
+    {
+      "ci_high": 0.0,
+      "ci_low": 0.0,
+      "elo": 0.0,
+      "games": 1200,
+      "name": "random"
+    }
+  ],
+  "report_version": 1
+}
