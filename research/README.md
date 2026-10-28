@@ -5,13 +5,14 @@
 **Status:** Advisor-supported experiment planning, updated after October 22 discussion on unseen-opponent generalization and Edax training.
 
 - **[Updated experiment design and October 22 advisor feedback](experiment-design-proposal-2026-10.md)** — controlled anomaly replication, held-out opponent generalization, Edax integration and level semantics
-- [Held-out opponent roster for the opponent-diversity experiment](held-out-opponents.md) — which opponents count as unseen, and the rule that decides
+- [Held-out opponent roster for the opponent-diversity experiment](held-out-opponents.md) — which opponents count as unseen, the similarity check as run, and the frozen roster
 - [Research plan and reading list](research-plan.md)
 - [Literature reviews](lit-reviews/README.md)
 - [Existing experimental evidence and hypotheses](../docs/experiments.md)
 - [Step 0 audit](step0-audit.md) and the [frozen evaluation protocol](eval-protocol-frozen.json) — what the historical numbers rest on, and exactly what Step 1 runs
 - [Step 1 pilot results](step1-pilot-results.md) — the pattern reproduces on 3,000 games, and every loss to Greedy is an early wipeout
-- **[Step 2 failure analysis](step2-failure-analysis.md)** — the network rates one disc as a near-certain win, because self-play taught it so
+- **[Step 2 failure analysis](step2-failure-analysis.md)** — the network rates one disc as a near-certain win, because self-play taught it so; which head lets the wipeout through; the same loss against any disc-hungry opponent
+- **[Step 3 design](step3-design.md)** — the pre-registered opponent-diversity experiment: groups, mixing rule, scorecard, predictions, how to launch
 
 ## Research framing
 
