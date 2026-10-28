@@ -95,6 +95,38 @@
       "seconds": 13493.105355499312,
       "seed": 670794106,
       "wins": 47
+    },
+    {
+      "ci_high": 0.6057800106955886,
+      "ci_low": 0.4134801193402717,
+      "draws": 0,
+      "games": 100,
+      "losses": 49,
+      "mean_plies": 57.08,
+      "opponent": "minimax-d4",
+      "rollouts": 8000,
+      "score": 0.51,
+      "score_as_black": 0.4,
+      "score_as_white": 0.62,
+      "seconds": 30390.367399685085,
+      "seed": 3793028376,
+      "wins": 51
+    },
+    {
+      "ci_high": 1.0,
+      "ci_low": 0.9630065017930143,
+      "draws": 0,
+      "games": 100,
+      "losses": 0,
+      "mean_plies": 58.54,
+      "opponent": "greedy",
+      "rollouts": 8000,
+      "score": 1.0,
+      "score_as_black": 1.0,
+      "score_as_white": 1.0,
+      "seconds": 34704.33876171615,
+      "seed": 3480588157,
+      "wins": 100
     }
   ],
   "protocol": {
