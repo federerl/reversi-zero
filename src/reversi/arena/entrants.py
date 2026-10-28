@@ -14,6 +14,11 @@ Kinds:
 * ``random``, ``greedy`` -- the two baselines with no settings.
 * ``minimax`` -- alpha-beta search to ``depth`` plies with the frozen weights.
 * ``edax`` -- the external Edax engine at level ``depth`` (its own scale, 1..60).
+* ``rollout`` -- a tree search with random playouts in place of a network,
+  ``simulations`` playouts per move. No knowledge of the game beyond its rules.
+* ``heuristic`` -- the one-idea opponents used as controls in the research
+  experiments: ``greedy-corner``, ``greedy-dN`` (disc-counting search to depth
+  ``depth``), ``noisy-greedy``, ``corner`` and ``mobility``. Identified by name.
 * ``checkpoint`` -- a saved network from a run, searching ``simulations`` per move
   with no exploration noise. Either a training checkpoint or an exported model.
 * ``level`` -- one rung of the difficulty ladder on top of a saved network.
@@ -23,6 +28,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
@@ -33,12 +39,17 @@ from reversi.search.evaluator import Evaluator
 
 __all__ = ["EntrantSpec", "build_agent", "describe_entrant", "parse_entrant"]
 
-Kind = Literal["random", "greedy", "minimax", "edax", "checkpoint", "level"]
+Kind = Literal["random", "greedy", "minimax", "edax", "rollout", "heuristic", "checkpoint", "level"]
 
 _BASELINE_PATTERNS: tuple[tuple[re.Pattern[str], Kind], ...] = (
     (re.compile(r"^minimax-?d?(\d+)$"), "minimax"),
     (re.compile(r"^edax-?l?(\d+)$"), "edax"),
 )
+
+_HEURISTICS: frozenset[str] = frozenset({"greedy-corner", "noisy-greedy", "corner", "mobility"})
+"""The heuristic entrants with no settings; ``greedy-dN`` is matched separately."""
+_MATERIAL = re.compile(r"^greedy-d(\d+)$")
+_ROLLOUT = re.compile(r"^rollout-?r?(\d+)$")
 
 
 @dataclass(frozen=True, slots=True)
@@ -70,6 +81,8 @@ def parse_entrant(text: str, *, default_simulations: int) -> EntrantSpec:
 
         random                      greedy
         minimax-d4   (or minimax4)  edax-l5  (or edax5)
+        rollout-r1000               random-playout search, 1000 playouts a move
+        greedy-corner  greedy-d2  noisy-greedy  corner  mobility
         NAME=PATH                   a network, searching ``default_simulations``
         NAME=PATH@200               the same, at 200 simulations
         PATH                        name taken from the file's stem
@@ -96,6 +109,20 @@ def parse_entrant(text: str, *, default_simulations: int) -> EntrantSpec:
             number = int(found.group(1))
             letter = "d" if kind == "minimax" else "l"
             return EntrantSpec(name=f"{kind}-{letter}{number}", kind=kind, depth=number)
+
+    if text in _HEURISTICS:
+        return EntrantSpec(name=text, kind="heuristic")
+    found = _MATERIAL.match(text)
+    if found:
+        depth = int(found.group(1))
+        return EntrantSpec(name=f"greedy-d{depth}", kind="heuristic", depth=depth)
+    found = _ROLLOUT.match(text)
+    if found:
+        rollouts = int(found.group(1))
+        if rollouts < 1:
+            msg = f"a rollout entrant needs at least one playout per move, got {text!r}"
+            raise ConfigError(msg)
+        return EntrantSpec(name=f"rollout-r{rollouts}", kind="rollout", simulations=rollouts)
 
     if text.startswith("level:"):
         body = text.removeprefix("level:")
@@ -194,6 +221,12 @@ def build_agent(spec: EntrantSpec, *, device: str = "cpu") -> Agent:
         from reversi.agents.edax import EdaxAgent
 
         return EdaxAgent(_required(spec.depth, spec, "depth"), name=spec.name)
+    if spec.kind == "rollout":
+        from reversi.agents.rollout import RolloutAgent
+
+        return RolloutAgent(_required(spec.simulations, spec, "simulations"), name=spec.name)
+    if spec.kind == "heuristic":
+        return _build_heuristic(spec)
 
     path = Path(_required(spec.path, spec, "path"))
     evaluator = _load_evaluator(path, device)
@@ -220,6 +253,24 @@ def build_agent(spec: EntrantSpec, *, device: str = "cpu") -> Agent:
     )
 
 
+def _build_heuristic(spec: EntrantSpec) -> Agent:
+    from reversi.agents.greedy import GreedyAgent, MaterialAgent, NoisyGreedyAgent
+    from reversi.agents.heuristics import CornerAgent, MobilityAgent
+
+    if spec.depth is not None:
+        return MaterialAgent(spec.depth, name=spec.name)
+    builders: dict[str, Callable[[], Agent]] = {
+        "greedy-corner": lambda: GreedyAgent(spec.name, corner_first=True),
+        "noisy-greedy": lambda: NoisyGreedyAgent(name=spec.name),
+        "corner": lambda: CornerAgent(spec.name),
+        "mobility": lambda: MobilityAgent(spec.name),
+    }
+    if spec.name not in builders:
+        msg = f"unknown heuristic entrant {spec.name!r}; one of {sorted(builders)} or greedy-dN"
+        raise ConfigError(msg)
+    return builders[spec.name]()
+
+
 def describe_entrant(spec: EntrantSpec, *, board_size: int = 8) -> dict[str, Any]:
     """What goes into the report under ``agent_specs``: enough to reproduce the entrant."""
     if spec.kind in {"random", "greedy"}:
@@ -230,6 +281,17 @@ def describe_entrant(spec: EntrantSpec, *, board_size: int = 8) -> dict[str, Any
         return {"kind": "minimax", "depth": spec.depth, "weights": weights_fingerprint(board_size)}
     if spec.kind == "edax":
         return {"kind": "edax", "level": spec.depth}
+    if spec.kind == "rollout":
+        return {"kind": "rollout", "playouts_per_move": spec.simulations}
+    if spec.kind == "heuristic":
+        out: dict[str, Any] = {"kind": "heuristic", "heuristic": spec.name}
+        if spec.depth is not None:
+            out["depth"] = spec.depth
+        if spec.name == "corner":
+            from reversi.agents.minimax import weights_fingerprint
+
+            out["weights"] = weights_fingerprint(board_size)
+        return out
 
     path = Path(spec.path or "")
     out: dict[str, Any] = {"checkpoint": path.name}

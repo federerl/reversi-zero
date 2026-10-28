@@ -12,10 +12,14 @@ network still held at each of those moves.
 Usage::
 
     python scripts/analyze_wipeouts.py runs/research/pilot-2026-10-games \
-        [--figure research/figures/wipeout-values.png]
+        [--opponent greedy] [--figure research/figures/wipeout-values.png]
 
-The games are replayed with the rules module to recover disc counts, which the
-records do not store per move.
+``--opponent`` names the fixed opponent whose games to read (the
+``<opponent>-vs-*.json`` files). It must be one that reports its tie set
+through ``choices``, as Greedy and its variants do, because the "was it
+avoidable" analysis has to consider every reply the opponent might have
+chosen. The games are replayed with the rules module to recover disc counts,
+which the records do not store per move.
 """
 
 from __future__ import annotations
@@ -27,12 +31,28 @@ from pathlib import Path
 
 import numpy as np
 
-from reversi.game.rules import apply, flips, is_terminal, legal_actions, must_pass
+from reversi.arena.entrants import build_agent, parse_entrant
+from reversi.game.rules import apply, is_terminal, legal_actions, must_pass
 from reversi.game.scoring import disc_counts
 from reversi.game.state import State, initial_state
 
 LOOKBACK = 10
 """How many of the network's own moves before the end to look at."""
+
+OPPONENT = "greedy"
+"""The fixed opponent being analysed; ``set_opponent`` changes it."""
+_replies = None
+
+
+def set_opponent(name: str) -> None:
+    """Choose the fixed opponent. Its ``choices`` method supplies the reply sets."""
+    global OPPONENT, _replies
+    agent = build_agent(parse_entrant(name, default_simulations=1))
+    choices = getattr(agent, "choices", None)
+    if choices is None:
+        msg = f"{name} does not report its tie set (no choices method); cannot enumerate replies"
+        raise SystemExit(msg)
+    OPPONENT, _replies = name, choices
 
 
 @dataclass(frozen=True)
@@ -62,21 +82,21 @@ def net_discs(state: State, net_black: bool) -> int:
     return black if net_black else white
 
 
-def greedy_replies(state: State) -> list[int]:
-    """Every move Greedy might make here: the ones that flip the most discs."""
-    actions = legal_actions(state)
-    gains = [bin(flips(state, a)).count("1") for a in actions]
-    best = max(gains)
-    return [a for a, g in zip(actions, gains, strict=True) if g == best]
+def opponent_replies(state: State) -> list[int]:
+    """Every move the opponent might make here: for Greedy, the ones flipping the most discs."""
+    if _replies is None:
+        set_opponent(OPPONENT)
+    assert _replies is not None
+    return list(_replies(state))
 
 
 def survives(state: State, net_black: bool, moves_left: int) -> bool:
     """Can the network keep at least one disc through its next ``moves_left`` moves?
 
-    The network may choose any legal move; Greedy may play any of its
-    maximum-flip moves (it breaks ties at random, so every tie must be safe).
+    The network may choose any legal move; the opponent may play any move in
+    its tie set (Greedy breaks ties at random, so every tie must be safe).
     Passes are forced and cost nothing. ``True`` means a line exists in which
-    the network is never wiped out, whatever Greedy's tie-breaks.
+    the network is never wiped out, whatever the opponent's tie-breaks.
     """
     pass_action = state.size**2
     if is_terminal(state):
@@ -90,7 +110,7 @@ def survives(state: State, net_black: bool, moves_left: int) -> bool:
         return any(
             survives(apply(state, a), net_black, moves_left - 1) for a in legal_actions(state)
         )
-    for reply in greedy_replies(state):
+    for reply in opponent_replies(state):
         after = apply(state, reply)
         if net_discs(after, net_black) == 0 or not survives(after, net_black, moves_left):
             return False
@@ -134,7 +154,7 @@ def replay(game: dict, net_is_a: bool, board_size: int) -> Trace:
 def load(path: Path) -> tuple[str, list[Trace]]:
     payload = json.loads(path.read_text())
     a, b = payload["agents"]["a"], payload["agents"]["b"]
-    net = b if a == "greedy" else a
+    net = b if a == OPPONENT else a
     net_is_a = net == a
     traces = [replay(g, net_is_a, payload["board_size"]) for g in payload["games"]]
     return net, traces
@@ -175,15 +195,19 @@ def main() -> int:
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("games_dir", type=Path)
+    parser.add_argument("--opponent", default="greedy")
     parser.add_argument("--figure", type=Path, default=None)
     args = parser.parse_args()
+    set_opponent(args.opponent)
 
     results: dict[str, list[Trace]] = {}
-    for path in sorted(args.games_dir.glob("greedy-vs-*.json")):
+    for path in sorted(args.games_dir.glob(f"{OPPONENT}-vs-*.json")):
         net, traces = load(path)
+        if not any(trace.moves for trace in traces):
+            continue  # the other side is a fixed opponent too; nothing was estimated
         results[net] = traces
     if not results:
-        raise SystemExit(f"no greedy-vs-*.json under {args.games_dir}")
+        raise SystemExit(f"no {OPPONENT}-vs-*.json under {args.games_dir}")
 
     print("## The network's estimates in the moves before a wipeout")
     print()
@@ -233,7 +257,7 @@ def main() -> int:
     print()
     print(
         "From the position at the network's k-th last move: does any line of play keep at least "
-        "one network disc through those k moves, against every maximum-flip reply Greedy "
+        f"one network disc through those k moves, against every reply {OPPONENT} "
         "might choose?"
     )
     print()
@@ -283,7 +307,7 @@ def main() -> int:
         print(f"| {net} | {n} | {median(shares):.0%} | {unvisited} | {runner_up} |")
     print()
 
-    print("## For comparison: the same moves in games the network won against Greedy")
+    print(f"## For comparison: the same moves in games the network won against {OPPONENT}")
     print()
     print(
         "Median searched value at the network's n-th move after the opening, "
@@ -333,7 +357,7 @@ def main() -> int:
             top.plot(xs, np.nanmedian(values, axis=0), color="black", linewidth=2, label="median")
             bottom.plot(xs, np.nanmedian(discs, axis=0), color="black", linewidth=2)
             top.axhline(0, color="0.3", linewidth=0.8, linestyle="--")
-            top.set_title(f"{net}: {len(wiped)} wipeouts by Greedy")
+            top.set_title(f"{net}: {len(wiped)} wipeouts by {OPPONENT}")
             bottom.set_xlabel("network's moves before the wipeout")
             if col == 0:
                 top.set_ylabel("searched value (+1 = network wins)")

@@ -1,0 +1,3508 @@
+{
+  "positions": [
+    {
+      "black": "0x0000000000002020",
+      "empties": 36,
+      "source": "greedy-vs-gen120:45:20",
+      "to_move": "black",
+      "white": "0x080c3c3c3efc1c10"
+    },
+    {
+      "black": "0x000000000000281c",
+      "empties": 37,
+      "source": "greedy-vs-minimax-d4:73:19",
+      "to_move": "white",
+      "white": "0x02043cfc3e7c0000"
+    },
+    {
+      "black": "0x0000000000040201",
+      "empties": 38,
+      "source": "random-vs-greedy:8:18",
+      "to_move": "black",
+      "white": "0x00001c3c7f68fc00"
+    },
+    {
+      "black": "0x00000000000e343e",
+      "empties": 35,
+      "source": "gen60-vs-gen120:125:21",
+      "to_move": "white",
+      "white": "0x0000703e7e700800"
+    },
+    {
+      "black": "0x0000000000102000",
+      "empties": 36,
+      "source": "greedy-vs-gen60:49:20",
+      "to_move": "black",
+      "white": "0x0048387efeec1810"
+    },
+    {
+      "black": "0x000000000107057f",
+      "empties": 30,
+      "source": "random-vs-gen60:151:26",
+      "to_move": "black",
+      "white": "0x00101e1d3e383a00"
+    },
+    {
+      "black": "0x00000000040e1008",
+      "empties": 31,
+      "source": "greedy-vs-control120:91:25",
+      "to_move": "white",
+      "white": "0x083c3c7f7b700810"
+    },
+    {
+      "black": "0x00000000071f3fff",
+      "empties": 21,
+      "source": "random-vs-minimax-d4:77:36",
+      "to_move": "black",
+      "white": "0x081c1e3f3860c000"
+    },
+    {
+      "black": "0x000000000804000d",
+      "empties": 26,
+      "source": "greedy-vs-gen60:147:30",
+      "to_move": "black",
+      "white": "0x3078fc7c36fa3f00"
+    },
+    {
+      "black": "0x00000000100e0400",
+      "empties": 43,
+      "source": "greedy-vs-minimax-d4:125:13",
+      "to_move": "white",
+      "white": "0x00003cfc2e300000"
+    },
+    {
+      "black": "0x0000000010200000",
+      "empties": 40,
+      "source": "greedy-vs-minimax-d4:11:16",
+      "to_move": "black",
+      "white": "0x40303c3f2f5c0000"
+    },
+    {
+      "black": "0x00000000103844fe",
+      "empties": 33,
+      "source": "greedy-vs-gen60:145:23",
+      "to_move": "white",
+      "white": "0x0008307c68473800"
+    },
+    {
+      "black": "0x00000000203e341c",
+      "empties": 39,
+      "source": "control120-vs-gen120:5:17",
+      "to_move": "white",
+      "white": "0x00203c3c1c000800"
+    },
+    {
+      "black": "0x000000002e220020",
+      "empties": 42,
+      "source": "minimax-d4-vs-gen120:3:14",
+      "to_move": "black",
+      "white": "0x0000003c101c1e1c"
+    },
+    {
+      "black": "0x000000003f000804",
+      "empties": 25,
+      "source": "greedy-vs-gen120:105:31",
+      "to_move": "white",
+      "white": "0x021d3efec07f3070"
+    },
+    {
+      "black": "0x0000000070303e14",
+      "empties": 30,
+      "source": "minimax-d4-vs-control120:188:26",
+      "to_move": "black",
+      "white": "0x000079fd0f0f0101"
+    },
+    {
+      "black": "0x000000007c380000",
+      "empties": 44,
+      "source": "control120-vs-gen120:152:12",
+      "to_move": "black",
+      "white": "0x20183c7c00000000"
+    },
+    {
+      "black": "0x000000007c7c1c38",
+      "empties": 35,
+      "source": "gen60-vs-control120:53:21",
+      "to_move": "white",
+      "white": "0x00002c3f03030000"
+    },
+    {
+      "black": "0x00000000800020fe",
+      "empties": 24,
+      "source": "greedy-vs-minimax-d4:173:32",
+      "to_move": "black",
+      "white": "0x884b3e3e7c5cde00"
+    },
+    {
+      "black": "0x0000000080c0c080",
+      "empties": 25,
+      "source": "greedy-vs-gen60:139:32",
+      "to_move": "black",
+      "white": "0x00383c7e7e3e3a7c"
+    },
+    {
+      "black": "0x0000000080c0f880",
+      "empties": 23,
+      "source": "greedy-vs-gen60:139:34",
+      "to_move": "black",
+      "white": "0x00383c7e7e3e067e"
+    },
+    {
+      "black": "0x0000000098e890f8",
+      "empties": 27,
+      "source": "greedy-vs-gen60:113:30",
+      "to_move": "black",
+      "white": "0x0010387e66166e04"
+    },
+    {
+      "black": "0x000000010307091f",
+      "empties": 30,
+      "source": "random-vs-gen60:17:28",
+      "to_move": "black",
+      "white": "0x00403d3e3c581600"
+    },
+    {
+      "black": "0x00000001030f1f3f",
+      "empties": 26,
+      "source": "random-vs-minimax-d4:185:32",
+      "to_move": "black",
+      "white": "0x20303e3e3c302000"
+    },
+    {
+      "black": "0x000000041c040000",
+      "empties": 42,
+      "source": "random-vs-gen60:27:14",
+      "to_move": "black",
+      "white": "0x24183f3a20080800"
+    },
+    {
+      "black": "0x0000000606323000",
+      "empties": 44,
+      "source": "minimax-d4-vs-control120:78:12",
+      "to_move": "black",
+      "white": "0x00001c38180c0800"
+    },
+    {
+      "black": "0x0000000800060000",
+      "empties": 42,
+      "source": "random-vs-gen60:73:14",
+      "to_move": "black",
+      "white": "0x000c3e171e181800"
+    },
+    {
+      "black": "0x0000000c1c20100e",
+      "empties": 43,
+      "source": "minimax-d4-vs-gen120:135:13",
+      "to_move": "white",
+      "white": "0x00003830201c0c00"
+    },
+    {
+      "black": "0x00000010080c00ff",
+      "empties": 23,
+      "source": "random-vs-gen120:25:34",
+      "to_move": "black",
+      "white": "0x04187c6c76f27f00"
+    },
+    {
+      "black": "0x0000001010000420",
+      "empties": 38,
+      "source": "random-vs-control120:153:18",
+      "to_move": "black",
+      "white": "0x00081c686c7e7808"
+    },
+    {
+      "black": "0x0000001020700000",
+      "empties": 40,
+      "source": "random-vs-control120:173:16",
+      "to_move": "black",
+      "white": "0x40383c6c5c080808"
+    },
+    {
+      "black": "0x00000012380c82ff",
+      "empties": 25,
+      "source": "greedy-vs-gen120:127:33",
+      "to_move": "white",
+      "white": "0x00383c6846f07c00"
+    },
+    {
+      "black": "0x0000001810000000",
+      "empties": 40,
+      "source": "random-vs-gen120:137:16",
+      "to_move": "black",
+      "white": "0x00043ce46e3e2800"
+    },
+    {
+      "black": "0x0000001878783804",
+      "empties": 40,
+      "source": "control120-vs-gen120:122:16",
+      "to_move": "black",
+      "white": "0x00103ce080800000"
+    },
+    {
+      "black": "0x0000002030380000",
+      "empties": 39,
+      "source": "greedy-vs-gen120:59:17",
+      "to_move": "white",
+      "white": "0x003c1c1e0c071404"
+    },
+    {
+      "black": "0x00000020305080fc",
+      "empties": 33,
+      "source": "random-vs-control120:109:23",
+      "to_move": "white",
+      "white": "0x0000f85848ac3e00"
+    },
+    {
+      "black": "0x0000002040fc0000",
+      "empties": 41,
+      "source": "greedy-vs-gen120:37:15",
+      "to_move": "white",
+      "white": "0x2020381c3e003000"
+    },
+    {
+      "black": "0x0000003810127450",
+      "empties": 43,
+      "source": "random-vs-gen120:142:13",
+      "to_move": "white",
+      "white": "0x000000042e2c0800"
+    },
+    {
+      "black": "0x0000003838180804",
+      "empties": 44,
+      "source": "control120-vs-gen120:86:12",
+      "to_move": "black",
+      "white": "0x0000b8c040203000"
+    },
+    {
+      "black": "0x0000003c14000000",
+      "empties": 43,
+      "source": "random-vs-gen60:129:13",
+      "to_move": "white",
+      "white": "0x00407840687c1000"
+    },
+    {
+      "black": "0x0000004c0c300000",
+      "empties": 44,
+      "source": "gen60-vs-gen120:67:12",
+      "to_move": "black",
+      "white": "0x00003030700c3c00"
+    },
+    {
+      "black": "0x0000005e1e000000",
+      "empties": 33,
+      "source": "random-vs-gen120:197:23",
+      "to_move": "white",
+      "white": "0x083e7e20203c3c00"
+    },
+    {
+      "black": "0x0000006060e02020",
+      "empties": 42,
+      "source": "gen60-vs-gen120:37:14",
+      "to_move": "black",
+      "white": "0x000014181e181804"
+    },
+    {
+      "black": "0x0000006070262e10",
+      "empties": 39,
+      "source": "minimax-d4-vs-control120:188:17",
+      "to_move": "white",
+      "white": "0x0000781c0e180000"
+    },
+    {
+      "black": "0x0000007e7e7c0800",
+      "empties": 33,
+      "source": "gen60-vs-control120:24:23",
+      "to_move": "white",
+      "white": "0x103c7f0000020000"
+    },
+    {
+      "black": "0x000000a030100800",
+      "empties": 41,
+      "source": "random-vs-gen120:117:15",
+      "to_move": "white",
+      "white": "0x005058584c6e4000"
+    },
+    {
+      "black": "0x000000acdce8c400",
+      "empties": 34,
+      "source": "minimax-d4-vs-gen60:26:22",
+      "to_move": "black",
+      "white": "0x0030f85020103020"
+    },
+    {
+      "black": "0x00000101010101e1",
+      "empties": 22,
+      "source": "random-vs-control120:141:34",
+      "to_move": "black",
+      "white": "0x0048fe3e7efe7c10"
+    },
+    {
+      "black": "0x00000102262a3c3e",
+      "empties": 34,
+      "source": "control120-vs-gen120:19:22",
+      "to_move": "black",
+      "white": "0x00007c3c18140000"
+    },
+    {
+      "black": "0x0000010305040201",
+      "empties": 32,
+      "source": "random-vs-control120:3:24",
+      "to_move": "black",
+      "white": "0x00003e7c3a3b1c28"
+    },
+    {
+      "black": "0x000001030d092103",
+      "empties": 27,
+      "source": "random-vs-gen120:109:30",
+      "to_move": "black",
+      "white": "0x20103e7c32761e04"
+    },
+    {
+      "black": "0x0000020000200000",
+      "empties": 38,
+      "source": "greedy-vs-gen120:111:18",
+      "to_move": "black",
+      "white": "0x040c1c7efc1c1c00"
+    },
+    {
+      "black": "0x0000021caeb4f800",
+      "empties": 29,
+      "source": "random-vs-minimax-d4:196:28",
+      "to_move": "black",
+      "white": "0x00004020110b07ef"
+    },
+    {
+      "black": "0x0000027f2a323f08",
+      "empties": 37,
+      "source": "random-vs-gen60:120:19",
+      "to_move": "white",
+      "white": "0x00000000140c0005"
+    },
+    {
+      "black": "0x0000040c54e81020",
+      "empties": 43,
+      "source": "gen60-vs-control120:84:13",
+      "to_move": "white",
+      "white": "0x0000783028100000"
+    },
+    {
+      "black": "0x00000424341c1000",
+      "empties": 43,
+      "source": "minimax-d4-vs-control120:5:13",
+      "to_move": "white",
+      "white": "0x0004181808220c08"
+    },
+    {
+      "black": "0x0000043c0e2c1000",
+      "empties": 32,
+      "source": "minimax-d4-vs-gen120:79:24",
+      "to_move": "black",
+      "white": "0x0018b840f0502c78"
+    },
+    {
+      "black": "0x00000523252d1101",
+      "empties": 30,
+      "source": "minimax-d4-vs-gen60:185:26",
+      "to_move": "black",
+      "white": "0x0004181c1a122e78"
+    },
+    {
+      "black": "0x000007804c7a342c",
+      "empties": 31,
+      "source": "gen60-vs-control120:90:25",
+      "to_move": "white",
+      "white": "0x0000383e33040810"
+    },
+    {
+      "black": "0x0000080e1c1e4c18",
+      "empties": 27,
+      "source": "minimax-d4-vs-gen120:119:29",
+      "to_move": "white",
+      "white": "0x00b0f0f0e0603026"
+    },
+    {
+      "black": "0x0000081c181c0000",
+      "empties": 40,
+      "source": "minimax-d4-vs-gen120:89:16",
+      "to_move": "black",
+      "white": "0x1c1e370201000800"
+    },
+    {
+      "black": "0x000008dc003e381e",
+      "empties": 30,
+      "source": "random-vs-greedy:143:26",
+      "to_move": "black",
+      "white": "0x081830237f400000"
+    },
+    {
+      "black": "0x00000c0038181800",
+      "empties": 41,
+      "source": "random-vs-control120:197:15",
+      "to_move": "white",
+      "white": "0x0010323e46060000"
+    },
+    {
+      "black": "0x00000c1c08182000",
+      "empties": 30,
+      "source": "random-vs-gen120:33:26",
+      "to_move": "black",
+      "white": "0x0c0c732276245e0c"
+    },
+    {
+      "black": "0x00000f0b1d3b4000",
+      "empties": 20,
+      "source": "gen60-vs-gen120:183:36",
+      "to_move": "black",
+      "white": "0x243cf0f4e2443c30"
+    },
+    {
+      "black": "0x00001000064c1800",
+      "empties": 42,
+      "source": "minimax-d4-vs-gen120:11:14",
+      "to_move": "black",
+      "white": "0x0000063c38306020"
+    },
+    {
+      "black": "0x00001010103c387c",
+      "empties": 33,
+      "source": "random-vs-gen120:51:23",
+      "to_move": "white",
+      "white": "0x00102e6e2e408000"
+    },
+    {
+      "black": "0x0000101c00000000",
+      "empties": 38,
+      "source": "random-vs-gen60:67:18",
+      "to_move": "black",
+      "white": "0x383e2f227c120000"
+    },
+    {
+      "black": "0x00001020373a0000",
+      "empties": 41,
+      "source": "minimax-d4-vs-control120:85:15",
+      "to_move": "white",
+      "white": "0x0000081d08041c0c"
+    },
+    {
+      "black": "0x0000103030100000",
+      "empties": 40,
+      "source": "random-vs-gen60:125:16",
+      "to_move": "black",
+      "white": "0x0000084c4e6c7818"
+    },
+    {
+      "black": "0x0000103804030000",
+      "empties": 35,
+      "source": "greedy-vs-control120:97:21",
+      "to_move": "white",
+      "white": "0x08786e063a1c2a00"
+    },
+    {
+      "black": "0x0000103864a0523c",
+      "empties": 34,
+      "source": "random-vs-minimax-d4:108:22",
+      "to_move": "black",
+      "white": "0x080c0800181e2c80"
+    },
+    {
+      "black": "0x000010a040000000",
+      "empties": 32,
+      "source": "greedy-vs-gen60:87:24",
+      "to_move": "black",
+      "white": "0x187868583f7e7800"
+    },
+    {
+      "black": "0x0000142428342000",
+      "empties": 31,
+      "source": "minimax-d4-vs-gen120:165:25",
+      "to_move": "white",
+      "white": "0x287868da170a1900"
+    },
+    {
+      "black": "0x000014ec54f83000",
+      "empties": 42,
+      "source": "greedy-vs-minimax-d4:198:14",
+      "to_move": "black",
+      "white": "0x0000081028040000"
+    },
+    {
+      "black": "0x0000180010205090",
+      "empties": 31,
+      "source": "random-vs-gen120:199:25",
+      "to_move": "white",
+      "white": "0x303c24fe2c5c2804"
+    },
+    {
+      "black": "0x0000180404380000",
+      "empties": 35,
+      "source": "random-vs-gen120:55:21",
+      "to_move": "white",
+      "white": "0x0006463a3a071e18"
+    },
+    {
+      "black": "0x0000181020200020",
+      "empties": 43,
+      "source": "random-vs-greedy:54:13",
+      "to_move": "white",
+      "white": "0x0040220c1e142444"
+    },
+    {
+      "black": "0x0000181c1c100000",
+      "empties": 43,
+      "source": "random-vs-gen60:1:13",
+      "to_move": "white",
+      "white": "0x00000460602c1e00"
+    },
+    {
+      "black": "0x0000183e5efa2040",
+      "empties": 35,
+      "source": "greedy-vs-gen120:0:21",
+      "to_move": "white",
+      "white": "0x000000c020041838"
+    },
+    {
+      "black": "0x00001c00143830fe",
+      "empties": 28,
+      "source": "minimax-d4-vs-control120:184:28",
+      "to_move": "black",
+      "white": "0x0000203f2b070f01"
+    },
+    {
+      "black": "0x00001c0e06020600",
+      "empties": 28,
+      "source": "minimax-d4-vs-control120:93:28",
+      "to_move": "black",
+      "white": "0x30312331393d3818"
+    },
+    {
+      "black": "0x00001c3800000000",
+      "empties": 38,
+      "source": "random-vs-gen60:111:18",
+      "to_move": "black",
+      "white": "0x085622071f1e1000"
+    },
+    {
+      "black": "0x00001c7c203e1c10",
+      "empties": 35,
+      "source": "control120-vs-gen120:6:21",
+      "to_move": "white",
+      "white": "0x000060005e402044"
+    },
+    {
+      "black": "0x00001e7cc0c33e04",
+      "empties": 32,
+      "source": "random-vs-gen120:62:24",
+      "to_move": "black",
+      "white": "0x000000013e3c0001"
+    },
+    {
+      "black": "0x0000200000000804",
+      "empties": 42,
+      "source": "random-vs-greedy:18:14",
+      "to_move": "black",
+      "white": "0x000202fe1f183020"
+    },
+    {
+      "black": "0x0000200404281000",
+      "empties": 44,
+      "source": "control120-vs-gen120:110:12",
+      "to_move": "black",
+      "white": "0x00105c3878500000"
+    },
+    {
+      "black": "0x0000201040001c08",
+      "empties": 43,
+      "source": "control120-vs-gen120:190:13",
+      "to_move": "white",
+      "white": "0x0000000c3cfc2020"
+    },
+    {
+      "black": "0x0000202a0e0e1404",
+      "empties": 41,
+      "source": "minimax-d4-vs-control120:102:15",
+      "to_move": "white",
+      "white": "0x00001e1430100800"
+    },
+    {
+      "black": "0x00002030503c0201",
+      "empties": 26,
+      "source": "minimax-d4-vs-gen120:57:30",
+      "to_move": "black",
+      "white": "0x783cdcccaec28100"
+    },
+    {
+      "black": "0x00002043062e0000",
+      "empties": 20,
+      "source": "control120-vs-gen120:77:36",
+      "to_move": "black",
+      "white": "0x7cbcdebcf8511c18"
+    },
+    {
+      "black": "0x0000207f2e260a00",
+      "empties": 35,
+      "source": "random-vs-gen120:46:22",
+      "to_move": "black",
+      "white": "0x000000001019151f"
+    },
+    {
+      "black": "0x0000223838204000",
+      "empties": 42,
+      "source": "minimax-d4-vs-gen120:64:14",
+      "to_move": "black",
+      "white": "0x00000404045c1c28"
+    },
+    {
+      "black": "0x000024040c3c0000",
+      "empties": 39,
+      "source": "minimax-d4-vs-gen120:21:17",
+      "to_move": "white",
+      "white": "0x0008187872030c08"
+    },
+    {
+      "black": "0x0000280808080800",
+      "empties": 44,
+      "source": "random-vs-greedy:22:12",
+      "to_move": "black",
+      "white": "0x1c14141410304080"
+    },
+    {
+      "black": "0x00002838f8c89c00",
+      "empties": 33,
+      "source": "minimax-d4-vs-control120:42:23",
+      "to_move": "white",
+      "white": "0x00000404043460fc"
+    },
+    {
+      "black": "0x000029183c002020",
+      "empties": 34,
+      "source": "minimax-d4-vs-gen60:149:22",
+      "to_move": "black",
+      "white": "0x00000206037f1d0e"
+    },
+    {
+      "black": "0x00002c1e1e7e1400",
+      "empties": 32,
+      "source": "greedy-vs-gen120:124:26",
+      "to_move": "black",
+      "white": "0x0f1f030101000000"
+    },
+    {
+      "black": "0x0000300038181810",
+      "empties": 38,
+      "source": "random-vs-gen120:93:18",
+      "to_move": "black",
+      "white": "0x00120c7e04640420"
+    },
+    {
+      "black": "0x000030f62f1e3c0c",
+      "empties": 36,
+      "source": "greedy-vs-gen60:144:20",
+      "to_move": "black",
+      "white": "0x0000040810204000"
+    },
+    {
+      "black": "0x000030f862070000",
+      "empties": 38,
+      "source": "minimax-d4-vs-control120:8:18",
+      "to_move": "black",
+      "white": "0x00000f061c780000"
+    },
+    {
+      "black": "0x0000381009652f0c",
+      "empties": 34,
+      "source": "minimax-d4-vs-control120:160:22",
+      "to_move": "black",
+      "white": "0x0000042e161a1020"
+    },
+    {
+      "black": "0x0000381400080000",
+      "empties": 34,
+      "source": "random-vs-gen120:173:22",
+      "to_move": "black",
+      "white": "0x0026076a7c367c00"
+    },
+    {
+      "black": "0x000038f0b0e88478",
+      "empties": 35,
+      "source": "gen60-vs-control120:30:21",
+      "to_move": "white",
+      "white": "0x000004084c143000"
+    },
+    {
+      "black": "0x00003a2028302000",
+      "empties": 34,
+      "source": "minimax-d4-vs-gen60:165:22",
+      "to_move": "black",
+      "white": "0x143c041f160e1800"
+    },
+    {
+      "black": "0x00003c181c1c2040",
+      "empties": 36,
+      "source": "greedy-vs-minimax-d4:20:21",
+      "to_move": "white",
+      "white": "0x0000000001031f3f"
+    },
+    {
+      "black": "0x00003e7cf0022100",
+      "empties": 38,
+      "source": "random-vs-minimax-d4:144:18",
+      "to_move": "black",
+      "white": "0x000000020f1c1000"
+    },
+    {
+      "black": "0x0000400010204090",
+      "empties": 27,
+      "source": "greedy-vs-gen120:163:29",
+      "to_move": "white",
+      "white": "0x2438be7cec5f3c00"
+    },
+    {
+      "black": "0x000040c100000000",
+      "empties": 42,
+      "source": "greedy-vs-minimax-d4:89:14",
+      "to_move": "black",
+      "white": "0x00f0083c1a1d0c00"
+    },
+    {
+      "black": "0x000042050a1e3c30",
+      "empties": 26,
+      "source": "gen60-vs-control120:98:30",
+      "to_move": "black",
+      "white": "0xa0a0b8f8f4e04000"
+    },
+    {
+      "black": "0x0000484a62630000",
+      "empties": 20,
+      "source": "gen60-vs-gen120:145:36",
+      "to_move": "black",
+      "white": "0xa47d37341c1c3c3e"
+    },
+    {
+      "black": "0x00004cd000020000",
+      "empties": 30,
+      "source": "gen60-vs-gen120:147:26",
+      "to_move": "black",
+      "white": "0x7c38302c7efc0c00"
+    },
+    {
+      "black": "0x0000507c5c0e3c00",
+      "empties": 30,
+      "source": "random-vs-minimax-d4:160:27",
+      "to_move": "white",
+      "white": "0x00008080a0f0c0fc"
+    },
+    {
+      "black": "0x000058f8ccae0000",
+      "empties": 38,
+      "source": "gen60-vs-control120:65:18",
+      "to_move": "black",
+      "white": "0x0020240432101000"
+    },
+    {
+      "black": "0x00005e62f37f3810",
+      "empties": 21,
+      "source": "gen60-vs-control120:124:35",
+      "to_move": "white",
+      "white": "0x7c7c201c0c000404"
+    },
+    {
+      "black": "0x000062272c002000",
+      "empties": 24,
+      "source": "minimax-d4-vs-gen120:25:32",
+      "to_move": "black",
+      "white": "0x3c3c1cd853ff1800"
+    },
+    {
+      "black": "0x00006434242c5c00",
+      "empties": 40,
+      "source": "random-vs-minimax-d4:192:16",
+      "to_move": "black",
+      "white": "0x0000080818102070"
+    },
+    {
+      "black": "0x0000701038340000",
+      "empties": 42,
+      "source": "minimax-d4-vs-gen60:43:14",
+      "to_move": "black",
+      "white": "0x209888e840400000"
+    },
+    {
+      "black": "0x000070f8fe7c3878",
+      "empties": 29,
+      "source": "control120-vs-gen120:121:27",
+      "to_move": "white",
+      "white": "0x00080c0601020400"
+    },
+    {
+      "black": "0x0000743c171e1100",
+      "empties": 39,
+      "source": "random-vs-greedy:111:17",
+      "to_move": "white",
+      "white": "0x0000000008000e15"
+    },
+    {
+      "black": "0x0000743c5c783c00",
+      "empties": 37,
+      "source": "greedy-vs-minimax-d4:184:19",
+      "to_move": "white",
+      "white": "0x008080c0a0800000"
+    },
+    {
+      "black": "0x0000747c7c782400",
+      "empties": 39,
+      "source": "greedy-vs-minimax-d4:184:17",
+      "to_move": "white",
+      "white": "0x0080808080800000"
+    },
+    {
+      "black": "0x0000760604000000",
+      "empties": 38,
+      "source": "minimax-d4-vs-gen60:71:18",
+      "to_move": "black",
+      "white": "0x383c08f838180000"
+    },
+    {
+      "black": "0x000076201c782800",
+      "empties": 43,
+      "source": "random-vs-control120:140:13",
+      "to_move": "white",
+      "white": "0x0008081c20000000"
+    },
+    {
+      "black": "0x0000782010203000",
+      "empties": 42,
+      "source": "control120-vs-gen120:103:14",
+      "to_move": "black",
+      "white": "0x0000045c6c1c0800"
+    },
+    {
+      "black": "0x0000783818180800",
+      "empties": 42,
+      "source": "control120-vs-gen120:67:14",
+      "to_move": "black",
+      "white": "0x0004044464240400"
+    },
+    {
+      "black": "0x00007c3c7f606000",
+      "empties": 38,
+      "source": "greedy-vs-gen60:112:18",
+      "to_move": "black",
+      "white": "0x00000000001c1820"
+    },
+    {
+      "black": "0x000080103c7c0000",
+      "empties": 34,
+      "source": "gen60-vs-gen120:106:22",
+      "to_move": "black",
+      "white": "0x003c3f6fc0800000"
+    },
+    {
+      "black": "0x0000844470701000",
+      "empties": 34,
+      "source": "gen60-vs-control120:87:22",
+      "to_move": "black",
+      "white": "0x000038380c0e2c3e"
+    },
+    {
+      "black": "0x00009c5e3c786441",
+      "empties": 32,
+      "source": "random-vs-minimax-d4:184:24",
+      "to_move": "black",
+      "white": "0x0000000002071a1c"
+    },
+    {
+      "black": "0x0000a0440c1c0800",
+      "empties": 42,
+      "source": "gen60-vs-control120:109:14",
+      "to_move": "black",
+      "white": "0x00001038f0603000"
+    },
+    {
+      "black": "0x0000a0d0f8301000",
+      "empties": 29,
+      "source": "random-vs-control120:55:27",
+      "to_move": "white",
+      "white": "0x2078582c064ee820"
+    },
+    {
+      "black": "0x0000c07824002000",
+      "empties": 38,
+      "source": "minimax-d4-vs-gen120:133:18",
+      "to_move": "black",
+      "white": "0x00001e04d8fcc000"
+    },
+    {
+      "black": "0x0000c0b0b0eefcbe",
+      "empties": 24,
+      "source": "gen60-vs-control120:42:32",
+      "to_move": "black",
+      "white": "0x20282c4c4c100040"
+    },
+    {
+      "black": "0x0000e06020000000",
+      "empties": 44,
+      "source": "random-vs-gen120:155:12",
+      "to_move": "black",
+      "white": "0x0010189c58306000"
+    },
+    {
+      "black": "0x0000e06062030f7c",
+      "empties": 27,
+      "source": "minimax-d4-vs-gen60:108:29",
+      "to_move": "white",
+      "white": "0x0010181e1c7c3001"
+    },
+    {
+      "black": "0x0000f8d870e0c084",
+      "empties": 24,
+      "source": "random-vs-gen60:19:32",
+      "to_move": "black",
+      "white": "0x40bc04268e183c10"
+    },
+    {
+      "black": "0x0001000400000000",
+      "empties": 40,
+      "source": "greedy-vs-minimax-d4:95:16",
+      "to_move": "black",
+      "white": "0x00001f1b1f7c0c04"
+    },
+    {
+      "black": "0x000101058d01357f",
+      "empties": 22,
+      "source": "random-vs-gen60:151:36",
+      "to_move": "black",
+      "white": "0x00121e1a32fe8a00"
+    },
+    {
+      "black": "0x0001020408100c76",
+      "empties": 29,
+      "source": "random-vs-greedy:160:27",
+      "to_move": "white",
+      "white": "0x2028383a366cf200"
+    },
+    {
+      "black": "0x0001030503010100",
+      "empties": 28,
+      "source": "greedy-vs-control120:185:28",
+      "to_move": "black",
+      "white": "0x00381c7afc7e1c04"
+    },
+    {
+      "black": "0x00010707733c0404",
+      "empties": 23,
+      "source": "gen60-vs-gen120:11:33",
+      "to_move": "white",
+      "white": "0x3e3c38780c021920"
+    },
+    {
+      "black": "0x00010f1f2a000000",
+      "empties": 40,
+      "source": "minimax-d4-vs-control120:148:16",
+      "to_move": "black",
+      "white": "0x0014502014360000"
+    },
+    {
+      "black": "0x0001171315030100",
+      "empties": 38,
+      "source": "gen60-vs-control120:78:18",
+      "to_move": "black",
+      "white": "0x081c080c0a0c0800"
+    },
+    {
+      "black": "0x000139397b360c04",
+      "empties": 36,
+      "source": "greedy-vs-gen60:12:20",
+      "to_move": "black",
+      "white": "0x0004040604080000"
+    },
+    {
+      "black": "0x000141c9c7060400",
+      "empties": 32,
+      "source": "minimax-d4-vs-gen60:64:24",
+      "to_move": "black",
+      "white": "0x20383e3618180000"
+    },
+    {
+      "black": "0x0001c181c2ca7100",
+      "empties": 20,
+      "source": "minimax-d4-vs-control120:142:36",
+      "to_move": "black",
+      "white": "0x00183c7e3c340cfc"
+    },
+    {
+      "black": "0x00020e3e32711010",
+      "empties": 41,
+      "source": "random-vs-control120:54:15",
+      "to_move": "white",
+      "white": "0x000000000c0c0400"
+    },
+    {
+      "black": "0x000240eaf0080000",
+      "empties": 35,
+      "source": "random-vs-greedy:74:21",
+      "to_move": "white",
+      "white": "0x10141c140cf40404"
+    },
+    {
+      "black": "0x0004005068509810",
+      "empties": 38,
+      "source": "minimax-d4-vs-control120:100:18",
+      "to_move": "black",
+      "white": "0x0000fc28142c0400"
+    },
+    {
+      "black": "0x000403342d063c38",
+      "empties": 24,
+      "source": "gen60-vs-control120:75:32",
+      "to_move": "black",
+      "white": "0x0018fccb52f80000"
+    },
+    {
+      "black": "0x0004040404040800",
+      "empties": 36,
+      "source": "random-vs-greedy:166:20",
+      "to_move": "black",
+      "white": "0x00101838fb7a8302"
+    },
+    {
+      "black": "0x0004060404140201",
+      "empties": 35,
+      "source": "minimax-d4-vs-gen60:183:21",
+      "to_move": "white",
+      "white": "0x0008183b7b0b0c04"
+    },
+    {
+      "black": "0x0004080828440800",
+      "empties": 38,
+      "source": "minimax-d4-vs-gen60:156:18",
+      "to_move": "black",
+      "white": "0x8080f0f0d0b03000"
+    },
+    {
+      "black": "0x0004081000000000",
+      "empties": 38,
+      "source": "greedy-vs-gen120:143:18",
+      "to_move": "black",
+      "white": "0x1038766e7e1c0000"
+    },
+    {
+      "black": "0x0004081838740800",
+      "empties": 39,
+      "source": "minimax-d4-vs-gen60:156:17",
+      "to_move": "white",
+      "white": "0x8080f0e0c0802000"
+    },
+    {
+      "black": "0x0004141e1f3e3c48",
+      "empties": 39,
+      "source": "greedy-vs-gen60:134:17",
+      "to_move": "white",
+      "white": "0x0000010020000000"
+    },
+    {
+      "black": "0x0004183010000000",
+      "empties": 42,
+      "source": "random-vs-gen120:9:14",
+      "to_move": "black",
+      "white": "0x0838240c0c3c2800"
+    },
+    {
+      "black": "0x0004183030101020",
+      "empties": 39,
+      "source": "gen60-vs-control120:165:17",
+      "to_move": "white",
+      "white": "0x0000000e0f0f0c0c"
+    },
+    {
+      "black": "0x0004202018040c1e",
+      "empties": 30,
+      "source": "minimax-d4-vs-control120:197:26",
+      "to_move": "black",
+      "white": "0x00081f1f277b1000"
+    },
+    {
+      "black": "0x00042c10002e0000",
+      "empties": 42,
+      "source": "control120-vs-gen120:188:14",
+      "to_move": "black",
+      "white": "0x0000100e3e110c00"
+    },
+    {
+      "black": "0x00043f1004000800",
+      "empties": 40,
+      "source": "control120-vs-gen120:88:16",
+      "to_move": "black",
+      "white": "0x0000002f1a3e0400"
+    },
+    {
+      "black": "0x0004645e3e380800",
+      "empties": 40,
+      "source": "random-vs-control120:96:16",
+      "to_move": "black",
+      "white": "0x0018182040000000"
+    },
+    {
+      "black": "0x000478787e7c2800",
+      "empties": 39,
+      "source": "greedy-vs-gen60:126:17",
+      "to_move": "white",
+      "white": "0x0000000000808080"
+    },
+    {
+      "black": "0x000506067a5c0000",
+      "empties": 29,
+      "source": "gen60-vs-gen120:8:27",
+      "to_move": "white",
+      "white": "0x243878f905030100"
+    },
+    {
+      "black": "0x00066e3e3e5e9e26",
+      "empties": 25,
+      "source": "greedy-vs-minimax-d4:32:32",
+      "to_move": "black",
+      "white": "0x0109010101010101"
+    },
+    {
+      "black": "0x00080804203c3c18",
+      "empties": 36,
+      "source": "gen60-vs-gen120:85:20",
+      "to_move": "black",
+      "white": "0x0010543a1f020000"
+    },
+    {
+      "black": "0x00080c0814080000",
+      "empties": 42,
+      "source": "random-vs-gen60:171:14",
+      "to_move": "black",
+      "white": "0x0010123668342200"
+    },
+    {
+      "black": "0x00080c0e0e090000",
+      "empties": 38,
+      "source": "minimax-d4-vs-gen60:83:18",
+      "to_move": "black",
+      "white": "0x3815331110300000"
+    },
+    {
+      "black": "0x0008101f1111037f",
+      "empties": 20,
+      "source": "greedy-vs-minimax-d4:17:37",
+      "to_move": "white",
+      "white": "0x3e342c602e2a3c00"
+    },
+    {
+      "black": "0x00081808341e0c0c",
+      "empties": 43,
+      "source": "random-vs-greedy:151:13",
+      "to_move": "white",
+      "white": "0x0000203408000200"
+    },
+    {
+      "black": "0x00082808086c0800",
+      "empties": 44,
+      "source": "random-vs-minimax-d4:128:12",
+      "to_move": "black",
+      "white": "0x000010f0f0100000"
+    },
+    {
+      "black": "0x00082848080c3814",
+      "empties": 25,
+      "source": "gen60-vs-gen120:76:31",
+      "to_move": "white",
+      "white": "0x0084d4b4f7f38420"
+    },
+    {
+      "black": "0x0008383e00000000",
+      "empties": 44,
+      "source": "minimax-d4-vs-gen60:198:12",
+      "to_move": "black",
+      "white": "0x000406011e1c0000"
+    },
+    {
+      "black": "0x000850f0d1a01000",
+      "empties": 22,
+      "source": "gen60-vs-gen120:5:34",
+      "to_move": "black",
+      "white": "0x7c342f0f2e1f0c00"
+    },
+    {
+      "black": "0x00085e2a00200000",
+      "empties": 30,
+      "source": "gen60-vs-control120:50:26",
+      "to_move": "black",
+      "white": "0x00300014ff1e3c3c"
+    },
+    {
+      "black": "0x00086818cc740c00",
+      "empties": 42,
+      "source": "random-vs-control120:6:14",
+      "to_move": "black",
+      "white": "0x000080e030000000"
+    },
+    {
+      "black": "0x0008702000000000",
+      "empties": 39,
+      "source": "greedy-vs-control120:113:17",
+      "to_move": "white",
+      "white": "0x00240e5efe140400"
+    },
+    {
+      "black": "0x0008702020030e7c",
+      "empties": 31,
+      "source": "minimax-d4-vs-gen120:164:25",
+      "to_move": "white",
+      "white": "0x0000009c5e7c3001"
+    },
+    {
+      "black": "0x00087060fad40c3e",
+      "empties": 26,
+      "source": "gen60-vs-gen120:196:30",
+      "to_move": "black",
+      "white": "0x0e04081e04287000"
+    },
+    {
+      "black": "0x000878606c0e0000",
+      "empties": 44,
+      "source": "random-vs-gen120:54:12",
+      "to_move": "black",
+      "white": "0x0000001c10300000"
+    },
+    {
+      "black": "0x0008b8fabe9e8c04",
+      "empties": 27,
+      "source": "random-vs-gen60:102:29",
+      "to_move": "white",
+      "white": "0x00000000406070f8"
+    },
+    {
+      "black": "0x00091e3eb7d8bc1a",
+      "empties": 27,
+      "source": "minimax-d4-vs-control120:116:29",
+      "to_move": "white",
+      "white": "0x0000a04048240020"
+    },
+    {
+      "black": "0x000c0277363c0c00",
+      "empties": 32,
+      "source": "random-vs-gen60:6:24",
+      "to_move": "black",
+      "white": "0xa070fc0808000000"
+    },
+    {
+      "black": "0x000c3c0c0c080400",
+      "empties": 30,
+      "source": "minimax-d4-vs-gen60:177:26",
+      "to_move": "black",
+      "white": "0x000103333337381c"
+    },
+    {
+      "black": "0x000c7e1c0c6e3c38",
+      "empties": 26,
+      "source": "random-vs-gen120:158:31",
+      "to_move": "white",
+      "white": "0x000080e0f0908084"
+    },
+    {
+      "black": "0x000c8440383c0200",
+      "empties": 21,
+      "source": "random-vs-gen60:14:40",
+      "to_move": "black",
+      "white": "0xff733b3f07030100"
+    },
+    {
+      "black": "0x000e123a3b3b0000",
+      "empties": 34,
+      "source": "greedy-vs-gen120:108:22",
+      "to_move": "black",
+      "white": "0x3c100c0404040400"
+    },
+    {
+      "black": "0x001000006c000800",
+      "empties": 42,
+      "source": "random-vs-greedy:92:14",
+      "to_move": "black",
+      "white": "0x00083c1e107c8000"
+    },
+    {
+      "black": "0x001004101014143c",
+      "empties": 28,
+      "source": "gen60-vs-gen120:59:28",
+      "to_move": "black",
+      "white": "0x0020f8eeece8a800"
+    },
+    {
+      "black": "0x00100e0f0b070800",
+      "empties": 30,
+      "source": "gen60-vs-gen120:135:26",
+      "to_move": "black",
+      "white": "0x7c2c307034181000"
+    },
+    {
+      "black": "0x0010103038182800",
+      "empties": 39,
+      "source": "control120-vs-gen120:47:17",
+      "to_move": "white",
+      "white": "0x00006e0e07070000"
+    },
+    {
+      "black": "0x0010106060000000",
+      "empties": 40,
+      "source": "random-vs-control120:133:16",
+      "to_move": "black",
+      "white": "0x00646c1c1e704000"
+    },
+    {
+      "black": "0x0010120c743c4400",
+      "empties": 44,
+      "source": "greedy-vs-gen120:66:12",
+      "to_move": "black",
+      "white": "0x0000207008000000"
+    },
+    {
+      "black": "0x0010141000000000",
+      "empties": 24,
+      "source": "greedy-vs-control120:195:32",
+      "to_move": "black",
+      "white": "0x0e0e6befff7f1a00"
+    },
+    {
+      "black": "0x0010181000500000",
+      "empties": 42,
+      "source": "random-vs-control120:55:14",
+      "to_move": "black",
+      "white": "0x0020202c3e286820"
+    },
+    {
+      "black": "0x001018141e3e381e",
+      "empties": 35,
+      "source": "random-vs-greedy:143:21",
+      "to_move": "white",
+      "white": "0x0808002b20400000"
+    },
+    {
+      "black": "0x0010181c1c000000",
+      "empties": 42,
+      "source": "gen60-vs-gen120:0:14",
+      "to_move": "black",
+      "white": "0x0000e0e0607c0000"
+    },
+    {
+      "black": "0x00101c3e7c14a240",
+      "empties": 27,
+      "source": "greedy-vs-minimax-d4:178:30",
+      "to_move": "black",
+      "white": "0xf0e0e0c080e00010"
+    },
+    {
+      "black": "0x00102c4444240000",
+      "empties": 26,
+      "source": "minimax-d4-vs-gen60:59:30",
+      "to_move": "black",
+      "white": "0x78a8d0b8b8d8bc02"
+    },
+    {
+      "black": "0x0010327a00102000",
+      "empties": 34,
+      "source": "control120-vs-gen120:147:22",
+      "to_move": "black",
+      "white": "0x00040c04fe6c1824"
+    },
+    {
+      "black": "0x001038373b3e0e00",
+      "empties": 23,
+      "source": "minimax-d4-vs-gen60:192:33",
+      "to_move": "white",
+      "white": "0x000006884440f0ff"
+    },
+    {
+      "black": "0x0010383e44ea1000",
+      "empties": 27,
+      "source": "minimax-d4-vs-gen60:65:29",
+      "to_move": "white",
+      "white": "0x080c06013a142c7c"
+    },
+    {
+      "black": "0x0010384c76701804",
+      "empties": 32,
+      "source": "minimax-d4-vs-gen60:45:24",
+      "to_move": "black",
+      "white": "0x008480b0888e0600"
+    },
+    {
+      "black": "0x00103a0f03070000",
+      "empties": 38,
+      "source": "gen60-vs-gen120:135:18",
+      "to_move": "black",
+      "white": "0x000c04703c180000"
+    },
+    {
+      "black": "0x00103c0127270400",
+      "empties": 32,
+      "source": "minimax-d4-vs-gen120:121:24",
+      "to_move": "black",
+      "white": "0x006042fe58980000"
+    },
+    {
+      "black": "0x0010503010080000",
+      "empties": 35,
+      "source": "greedy-vs-gen120:121:21",
+      "to_move": "white",
+      "white": "0x00002e4f6c741c14"
+    },
+    {
+      "black": "0x001058d8ccca0000",
+      "empties": 34,
+      "source": "gen60-vs-control120:65:22",
+      "to_move": "black",
+      "white": "0x0020242432343800"
+    },
+    {
+      "black": "0x00105f6a564a3100",
+      "empties": 26,
+      "source": "random-vs-control120:162:30",
+      "to_move": "black",
+      "white": "0x8060201428340c3c"
+    },
+    {
+      "black": "0x0010787c5e341805",
+      "empties": 28,
+      "source": "minimax-d4-vs-gen60:45:28",
+      "to_move": "black",
+      "white": "0x00848080a0ca8602"
+    },
+    {
+      "black": "0x00107e76742c3c20",
+      "empties": 37,
+      "source": "random-vs-gen120:136:19",
+      "to_move": "white",
+      "white": "0x0000000808100000"
+    },
+    {
+      "black": "0x0011fd574c301000",
+      "empties": 20,
+      "source": "gen60-vs-gen120:134:36",
+      "to_move": "black",
+      "white": "0x7f2e0228334f0400"
+    },
+    {
+      "black": "0x00120c1418080000",
+      "empties": 42,
+      "source": "minimax-d4-vs-control120:98:14",
+      "to_move": "black",
+      "white": "0x7e28302804000000"
+    },
+    {
+      "black": "0x0013ff474e040000",
+      "empties": 23,
+      "source": "gen60-vs-gen120:134:33",
+      "to_move": "white",
+      "white": "0x7f2c003831790000"
+    },
+    {
+      "black": "0x00141e1e2e323100",
+      "empties": 38,
+      "source": "random-vs-gen120:70:18",
+      "to_move": "black",
+      "white": "0x00000000100c0c08"
+    },
+    {
+      "black": "0x001420742c7c0400",
+      "empties": 41,
+      "source": "greedy-vs-minimax-d4:26:15",
+      "to_move": "white",
+      "white": "0x0808080810000201"
+    },
+    {
+      "black": "0x0016143c7e7c0800",
+      "empties": 41,
+      "source": "greedy-vs-control120:142:15",
+      "to_move": "white",
+      "white": "0x0008080000000000"
+    },
+    {
+      "black": "0x00180c162e68343e",
+      "empties": 24,
+      "source": "gen60-vs-gen120:167:32",
+      "to_move": "black",
+      "white": "0x7c24702850160800"
+    },
+    {
+      "black": "0x001818183e0c343e",
+      "empties": 32,
+      "source": "gen60-vs-control120:16:24",
+      "to_move": "black",
+      "white": "0x0000246440f00800"
+    },
+    {
+      "black": "0x00181f38757cbe10",
+      "empties": 30,
+      "source": "greedy-vs-control120:58:26",
+      "to_move": "black",
+      "white": "0x000000070a000024"
+    },
+    {
+      "black": "0x00182f331d1d1a01",
+      "empties": 23,
+      "source": "minimax-d4-vs-gen60:133:33",
+      "to_move": "white",
+      "white": "0x7c24100c0202047c"
+    },
+    {
+      "black": "0x00186c0000020000",
+      "empties": 36,
+      "source": "gen60-vs-gen120:147:20",
+      "to_move": "black",
+      "white": "0x7c20103c3e1c0c00"
+    },
+    {
+      "black": "0x0019232579110804",
+      "empties": 25,
+      "source": "gen60-vs-control120:150:31",
+      "to_move": "white",
+      "white": "0x7e241c1a064c2010"
+    },
+    {
+      "black": "0x001b909cb83c2040",
+      "empties": 24,
+      "source": "greedy-vs-minimax-d4:6:35",
+      "to_move": "white",
+      "white": "0x0a04020342035a3f"
+    },
+    {
+      "black": "0x001c1e0004000400",
+      "empties": 36,
+      "source": "minimax-d4-vs-control120:168:20",
+      "to_move": "black",
+      "white": "0x0000213f3b3f0000"
+    },
+    {
+      "black": "0x001e14aeecaa0100",
+      "empties": 24,
+      "source": "random-vs-minimax-d4:134:34",
+      "to_move": "black",
+      "white": "0xfee0e85010101000"
+    },
+    {
+      "black": "0x001e5e3a763f1c0a",
+      "empties": 33,
+      "source": "greedy-vs-control120:128:23",
+      "to_move": "white",
+      "white": "0x0000000408000000"
+    },
+    {
+      "black": "0x002004f8dc6e0000",
+      "empties": 27,
+      "source": "minimax-d4-vs-gen60:123:29",
+      "to_move": "white",
+      "white": "0x101f3a0722103804"
+    },
+    {
+      "black": "0x00200a0e523b3020",
+      "empties": 20,
+      "source": "control120-vs-gen120:159:36",
+      "to_move": "black",
+      "white": "0x241cf4f0acc48e18"
+    },
+    {
+      "black": "0x0020100804020000",
+      "empties": 37,
+      "source": "greedy-vs-gen60:195:19",
+      "to_move": "white",
+      "white": "0x00102f36fb7c0000"
+    },
+    {
+      "black": "0x0020100804030000",
+      "empties": 37,
+      "source": "greedy-vs-control120:97:19",
+      "to_move": "white",
+      "white": "0x08186e163a1c2a00"
+    },
+    {
+      "black": "0x0020202030381c0e",
+      "empties": 37,
+      "source": "gen60-vs-gen120:62:19",
+      "to_move": "white",
+      "white": "0x00185c1e0e000000"
+    },
+    {
+      "black": "0x002020284c4e7c02",
+      "empties": 42,
+      "source": "random-vs-control120:26:14",
+      "to_move": "black",
+      "white": "0x0000101030100000"
+    },
+    {
+      "black": "0x002020783c780800",
+      "empties": 42,
+      "source": "greedy-vs-control120:78:14",
+      "to_move": "black",
+      "white": "0x0000000503050400"
+    },
+    {
+      "black": "0x0020227cfe103a00",
+      "empties": 21,
+      "source": "greedy-vs-control120:78:39",
+      "to_move": "white",
+      "white": "0x0000010301efc5ff"
+    },
+    {
+      "black": "0x0020303002f00000",
+      "empties": 32,
+      "source": "gen60-vs-gen120:165:24",
+      "to_move": "black",
+      "white": "0x381ccccefc040000"
+    },
+    {
+      "black": "0x0020307c48080000",
+      "empties": 38,
+      "source": "minimax-d4-vs-gen120:19:18",
+      "to_move": "black",
+      "white": "0x081c8c80b0b08000"
+    },
+    {
+      "black": "0x00203274fc1c3800",
+      "empties": 41,
+      "source": "random-vs-gen60:92:15",
+      "to_move": "white",
+      "white": "0x0000080800200000"
+    },
+    {
+      "black": "0x0020343e3f200000",
+      "empties": 35,
+      "source": "control120-vs-gen120:176:21",
+      "to_move": "white",
+      "white": "0x00100801001e3c24"
+    },
+    {
+      "black": "0x0020383060400000",
+      "empties": 41,
+      "source": "random-vs-gen60:29:15",
+      "to_move": "white",
+      "white": "0x0000444e1c3c0200"
+    },
+    {
+      "black": "0x00203c2820000000",
+      "empties": 32,
+      "source": "random-vs-gen120:163:24",
+      "to_move": "black",
+      "white": "0x004902171e7f5e00"
+    },
+    {
+      "black": "0x00203c3f30180800",
+      "empties": 44,
+      "source": "greedy-vs-control120:66:12",
+      "to_move": "black",
+      "white": "0x000000000e040000"
+    },
+    {
+      "black": "0x00203c7c3e3c2400",
+      "empties": 41,
+      "source": "random-vs-gen120:170:15",
+      "to_move": "white",
+      "white": "0x0000000040001000"
+    },
+    {
+      "black": "0x00203efe7e665200",
+      "empties": 23,
+      "source": "greedy-vs-control120:138:37",
+      "to_move": "white",
+      "white": "0x0000000001192d7f"
+    },
+    {
+      "black": "0x002040d860202020",
+      "empties": 32,
+      "source": "control120-vs-gen120:98:24",
+      "to_move": "black",
+      "white": "0x1c1c3c241c1c1810"
+    },
+    {
+      "black": "0x00206040d0280400",
+      "empties": 41,
+      "source": "random-vs-greedy:140:15",
+      "to_move": "white",
+      "white": "0x000008b80e141201"
+    },
+    {
+      "black": "0x00207a7e48586040",
+      "empties": 23,
+      "source": "control120-vs-gen120:58:33",
+      "to_move": "white",
+      "white": "0x00008080b7a69cbc"
+    },
+    {
+      "black": "0x00208080a0b0f8f8",
+      "empties": 26,
+      "source": "random-vs-control120:77:32",
+      "to_move": "black",
+      "white": "0x005078785c4c0604"
+    },
+    {
+      "black": "0x00209098bcf0f83c",
+      "empties": 32,
+      "source": "control120-vs-gen120:178:24",
+      "to_move": "black",
+      "white": "0x0010606040080400"
+    },
+    {
+      "black": "0x0020f0dafff08000",
+      "empties": 33,
+      "source": "minimax-d4-vs-control120:170:23",
+      "to_move": "white",
+      "white": "0x00080c24000c2000"
+    },
+    {
+      "black": "0x00212337cbe40004",
+      "empties": 24,
+      "source": "gen60-vs-gen120:194:32",
+      "to_move": "black",
+      "white": "0x0000dc48341a3d28"
+    },
+    {
+      "black": "0x0021330f0f1a1000",
+      "empties": 26,
+      "source": "control120-vs-gen120:199:30",
+      "to_move": "black",
+      "white": "0x381c8c7070640c00"
+    },
+    {
+      "black": "0x0021332f2f1a2000",
+      "empties": 24,
+      "source": "control120-vs-gen120:199:32",
+      "to_move": "black",
+      "white": "0x381c8c5050641c08"
+    },
+    {
+      "black": "0x002201ce443c1400",
+      "empties": 38,
+      "source": "random-vs-control120:68:18",
+      "to_move": "black",
+      "white": "0x00043c3038000000"
+    },
+    {
+      "black": "0x00243032771c1c04",
+      "empties": 36,
+      "source": "random-vs-control120:114:20",
+      "to_move": "black",
+      "white": "0x00080e0c08002000"
+    },
+    {
+      "black": "0x0028282e267a2100",
+      "empties": 36,
+      "source": "greedy-vs-minimax-d4:98:20",
+      "to_move": "black",
+      "white": "0x1010101018041201"
+    },
+    {
+      "black": "0x00283c1a187a1000",
+      "empties": 26,
+      "source": "greedy-vs-gen120:124:32",
+      "to_move": "black",
+      "white": "0x3f17030507050404"
+    },
+    {
+      "black": "0x00287e4e0a127d00",
+      "empties": 23,
+      "source": "random-vs-gen120:178:33",
+      "to_move": "white",
+      "white": "0x808080b0f4ec8090"
+    },
+    {
+      "black": "0x002c1c1a141c1c1c",
+      "empties": 24,
+      "source": "control120-vs-gen120:70:32",
+      "to_move": "black",
+      "white": "0x000163652b632120"
+    },
+    {
+      "black": "0x002c262430380800",
+      "empties": 42,
+      "source": "random-vs-gen120:56:14",
+      "to_move": "black",
+      "white": "0x001018180c040000"
+    },
+    {
+      "black": "0x0030181c2c7c0c00",
+      "empties": 21,
+      "source": "minimax-d4-vs-control120:177:35",
+      "to_move": "white",
+      "white": "0x788fe7e3d3020000"
+    },
+    {
+      "black": "0x0030203240e00000",
+      "empties": 25,
+      "source": "minimax-d4-vs-gen60:188:31",
+      "to_move": "white",
+      "white": "0xffccdcccbc180800"
+    },
+    {
+      "black": "0x00327a3a1e020200",
+      "empties": 27,
+      "source": "random-vs-minimax-d4:148:31",
+      "to_move": "white",
+      "white": "0x3f0d050501010107"
+    },
+    {
+      "black": "0x0038081804000000",
+      "empties": 42,
+      "source": "random-vs-gen60:25:14",
+      "to_move": "black",
+      "white": "0x0404746678200000"
+    },
+    {
+      "black": "0x0038232f0c283020",
+      "empties": 27,
+      "source": "control120-vs-gen120:138:29",
+      "to_move": "white",
+      "white": "0x1e041c1073160810"
+    },
+    {
+      "black": "0x0038385c3c302040",
+      "empties": 43,
+      "source": "greedy-vs-gen120:104:13",
+      "to_move": "white",
+      "white": "0x0000402000080000"
+    },
+    {
+      "black": "0x003c1c760c0c0400",
+      "empties": 27,
+      "source": "random-vs-control120:150:31",
+      "to_move": "white",
+      "white": "0x00000008f0f0f8fc"
+    },
+    {
+      "black": "0x003c3e20607d0000",
+      "empties": 24,
+      "source": "minimax-d4-vs-gen120:67:32",
+      "to_move": "black",
+      "white": "0x1e00001f1f027c48"
+    },
+    {
+      "black": "0x003c4a59787c0000",
+      "empties": 27,
+      "source": "random-vs-gen60:18:29",
+      "to_move": "white",
+      "white": "0xffc0b0a080800000"
+    },
+    {
+      "black": "0x003c54fd5e0e7848",
+      "empties": 30,
+      "source": "random-vs-gen60:194:26",
+      "to_move": "black",
+      "white": "0x0000280020700000"
+    },
+    {
+      "black": "0x003e72627e3e3c02",
+      "empties": 20,
+      "source": "greedy-vs-gen120:22:37",
+      "to_move": "white",
+      "white": "0x3f010d1d01010000"
+    },
+    {
+      "black": "0x00401c587c00c804",
+      "empties": 36,
+      "source": "random-vs-greedy:33:20",
+      "to_move": "black",
+      "white": "0x0020e0a080503010"
+    },
+    {
+      "black": "0x0040383f36263c34",
+      "empties": 37,
+      "source": "random-vs-gen120:112:19",
+      "to_move": "white",
+      "white": "0x0000000008180000"
+    },
+    {
+      "black": "0x004072544c143000",
+      "empties": 41,
+      "source": "random-vs-minimax-d4:110:15",
+      "to_move": "white",
+      "white": "0x0000002830480402"
+    },
+    {
+      "black": "0x00407a5c7c407f7f",
+      "empties": 22,
+      "source": "random-vs-minimax-d4:110:34",
+      "to_move": "black",
+      "white": "0x000080a080be8080"
+    },
+    {
+      "black": "0x00443b38181e0c04",
+      "empties": 36,
+      "source": "random-vs-minimax-d4:78:20",
+      "to_move": "black",
+      "white": "0x1018040706000000"
+    },
+    {
+      "black": "0x00462c3e3c080000",
+      "empties": 37,
+      "source": "random-vs-minimax-d4:178:19",
+      "to_move": "white",
+      "white": "0x7e18d00000000000"
+    },
+    {
+      "black": "0x004808587c6c6220",
+      "empties": 34,
+      "source": "greedy-vs-gen60:34:22",
+      "to_move": "black",
+      "white": "0x0000f0a080901008"
+    },
+    {
+      "black": "0x004a0f4803240400",
+      "empties": 34,
+      "source": "random-vs-minimax-d4:164:22",
+      "to_move": "black",
+      "white": "0x008060371c183010"
+    },
+    {
+      "black": "0x004a3e1e7e333442",
+      "empties": 33,
+      "source": "greedy-vs-gen120:28:23",
+      "to_move": "white",
+      "white": "0x00000000000c0808"
+    },
+    {
+      "black": "0x00503f420a080808",
+      "empties": 34,
+      "source": "random-vs-control120:162:22",
+      "to_move": "black",
+      "white": "0x0000003c74361420"
+    },
+    {
+      "black": "0x0050585c5f520100",
+      "empties": 34,
+      "source": "random-vs-greedy:7:22",
+      "to_move": "black",
+      "white": "0x2020242020282820"
+    },
+    {
+      "black": "0x00507c544c2c5c78",
+      "empties": 26,
+      "source": "random-vs-gen60:78:31",
+      "to_move": "white",
+      "white": "0x008080a8b0d0a080"
+    },
+    {
+      "black": "0x00507e5e7f7e7e24",
+      "empties": 27,
+      "source": "random-vs-gen60:174:29",
+      "to_move": "white",
+      "white": "0x0000002080000008"
+    },
+    {
+      "black": "0x0060242420000000",
+      "empties": 42,
+      "source": "random-vs-greedy:120:14",
+      "to_move": "black",
+      "white": "0x001050181c324884"
+    },
+    {
+      "black": "0x006030183c100000",
+      "empties": 42,
+      "source": "minimax-d4-vs-gen60:82:14",
+      "to_move": "black",
+      "white": "0x00000ce4c0e00000"
+    },
+    {
+      "black": "0x006060de3c700000",
+      "empties": 42,
+      "source": "greedy-vs-minimax-d4:104:14",
+      "to_move": "black",
+      "white": "0x0000102040840000"
+    },
+    {
+      "black": "0x0064404064020000",
+      "empties": 34,
+      "source": "random-vs-greedy:158:22",
+      "to_move": "black",
+      "white": "0x00003c3f984c3c08"
+    },
+    {
+      "black": "0x006838387c3e2000",
+      "empties": 43,
+      "source": "greedy-vs-control120:118:13",
+      "to_move": "white",
+      "white": "0x0000400000000000"
+    },
+    {
+      "black": "0x007030181c020100",
+      "empties": 22,
+      "source": "random-vs-gen60:26:37",
+      "to_move": "white",
+      "white": "0x0080c0e0e0fcfeff"
+    },
+    {
+      "black": "0x00703c0c7c000000",
+      "empties": 42,
+      "source": "greedy-vs-minimax-d4:130:15",
+      "to_move": "white",
+      "white": "0x0080c0f080000000"
+    },
+    {
+      "black": "0x0070783c3e5c0000",
+      "empties": 41,
+      "source": "greedy-vs-minimax-d4:14:15",
+      "to_move": "white",
+      "white": "0xe000000000000000"
+    },
+    {
+      "black": "0x0070f07023160810",
+      "empties": 24,
+      "source": "control120-vs-gen120:40:32",
+      "to_move": "black",
+      "white": "0x3e080c8edc681020"
+    },
+    {
+      "black": "0x00804e7cf8604000",
+      "empties": 33,
+      "source": "minimax-d4-vs-control120:52:23",
+      "to_move": "white",
+      "white": "0x04383000041c3020"
+    },
+    {
+      "black": "0x0080c0a0b0b884fe",
+      "empties": 25,
+      "source": "greedy-vs-gen60:103:33",
+      "to_move": "white",
+      "white": "0x201038584e447800"
+    },
+    {
+      "black": "0x0080c0c090883c38",
+      "empties": 32,
+      "source": "gen60-vs-control120:154:24",
+      "to_move": "black",
+      "white": "0x0000303c6c770000"
+    },
+    {
+      "black": "0x0080c0c87c180c00",
+      "empties": 37,
+      "source": "gen60-vs-control120:98:19",
+      "to_move": "white",
+      "white": "0x2020383000e03000"
+    },
+    {
+      "black": "0x0080c0e090c00c7c",
+      "empties": 30,
+      "source": "gen60-vs-control120:136:26",
+      "to_move": "black",
+      "white": "0x00003c186c3e3000"
+    },
+    {
+      "black": "0x0080dbb2b6cc8800",
+      "empties": 27,
+      "source": "control120-vs-gen120:66:29",
+      "to_move": "white",
+      "white": "0x083c244c48302000"
+    },
+    {
+      "black": "0x0080fc7c3c180800",
+      "empties": 31,
+      "source": "greedy-vs-gen60:88:29",
+      "to_move": "white",
+      "white": "0x00000000c0e0f0f8"
+    },
+    {
+      "black": "0x00845e7464562404",
+      "empties": 30,
+      "source": "random-vs-gen120:182:26",
+      "to_move": "black",
+      "white": "0x0000008898a89888"
+    },
+    {
+      "black": "0x0090b8fcfe6f5600",
+      "empties": 25,
+      "source": "greedy-vs-minimax-d4:112:31",
+      "to_move": "white",
+      "white": "0x000000000110287e"
+    },
+    {
+      "black": "0x00a0e0a40f000000",
+      "empties": 41,
+      "source": "random-vs-minimax-d4:105:15",
+      "to_move": "white",
+      "white": "0x00000c58301e0000"
+    },
+    {
+      "black": "0x00c0080403030404",
+      "empties": 22,
+      "source": "random-vs-greedy:116:34",
+      "to_move": "black",
+      "white": "0xf038f77a7cb42221"
+    },
+    {
+      "black": "0x00c07ccc5c7e7800",
+      "empties": 35,
+      "source": "random-vs-gen60:172:21",
+      "to_move": "white",
+      "white": "0x0000003020800000"
+    },
+    {
+      "black": "0x00d070103c7e3810",
+      "empties": 39,
+      "source": "random-vs-control120:38:17",
+      "to_move": "white",
+      "white": "0x0000002c40000000"
+    },
+    {
+      "black": "0x00ea64f8fd1c2200",
+      "empties": 28,
+      "source": "random-vs-gen60:154:28",
+      "to_move": "black",
+      "white": "0x3c101a0602000000"
+    },
+    {
+      "black": "0x00ee7cf8f91a2300",
+      "empties": 24,
+      "source": "random-vs-gen60:154:32",
+      "to_move": "black",
+      "white": "0x3c10020606040400"
+    },
+    {
+      "black": "0x00fc4e467d706000",
+      "empties": 27,
+      "source": "greedy-vs-gen60:172:29",
+      "to_move": "white",
+      "white": "0xb800b0b880800000"
+    },
+    {
+      "black": "0x0100040e040e0400",
+      "empties": 40,
+      "source": "random-vs-gen60:195:16",
+      "to_move": "black",
+      "white": "0x020e1a1038100a00"
+    },
+    {
+      "black": "0x01001c0800000000",
+      "empties": 40,
+      "source": "random-vs-minimax-d4:107:16",
+      "to_move": "black",
+      "white": "0x123f62363a000000"
+    },
+    {
+      "black": "0x0101010105000000",
+      "empties": 28,
+      "source": "greedy-vs-control120:3:28",
+      "to_move": "black",
+      "white": "0x143c3e3e7a1e7a00"
+    },
+    {
+      "black": "0x0101030408100000",
+      "empties": 31,
+      "source": "greedy-vs-control120:31:25",
+      "to_move": "white",
+      "white": "0x0c3c3cfa360e0e00"
+    },
+    {
+      "black": "0x0101157814020000",
+      "empties": 31,
+      "source": "random-vs-gen120:49:25",
+      "to_move": "white",
+      "white": "0x0e3c2a062a3c3000"
+    },
+    {
+      "black": "0x01011d4931040000",
+      "empties": 26,
+      "source": "random-vs-control120:175:30",
+      "to_move": "black",
+      "white": "0x20bce2b6ce782000"
+    },
+    {
+      "black": "0x0102040801244404",
+      "empties": 38,
+      "source": "random-vs-greedy:46:18",
+      "to_move": "black",
+      "white": "0x040400771c580201"
+    },
+    {
+      "black": "0x0106041800000000",
+      "empties": 35,
+      "source": "random-vs-gen60:75:21",
+      "to_move": "white",
+      "white": "0x08183b263e3e0404"
+    },
+    {
+      "black": "0x011f3f3f7a040000",
+      "empties": 29,
+      "source": "minimax-d4-vs-gen120:177:27",
+      "to_move": "white",
+      "white": "0x00000000047a1e04"
+    },
+    {
+      "black": "0x011f3f3f7b370000",
+      "empties": 25,
+      "source": "minimax-d4-vs-gen120:177:31",
+      "to_move": "white",
+      "white": "0x0000000004483e14"
+    },
+    {
+      "black": "0x013e466232180000",
+      "empties": 22,
+      "source": "greedy-vs-minimax-d4:46:36",
+      "to_move": "black",
+      "white": "0xfc41391d0d070301"
+    },
+    {
+      "black": "0x01c727771f0f0500",
+      "empties": 23,
+      "source": "greedy-vs-minimax-d4:34:33",
+      "to_move": "white",
+      "white": "0xfc38180800000808"
+    },
+    {
+      "black": "0x02046f5f1f1f0040",
+      "empties": 20,
+      "source": "random-vs-greedy:101:36",
+      "to_move": "black",
+      "white": "0x50f890a0e0a02220"
+    },
+    {
+      "black": "0x0206462170c00048",
+      "empties": 24,
+      "source": "random-vs-greedy:94:32",
+      "to_move": "black",
+      "white": "0x8050385c883ffa10"
+    },
+    {
+      "black": "0x020c201008040200",
+      "empties": 44,
+      "source": "minimax-d4-vs-gen120:14:12",
+      "to_move": "black",
+      "white": "0x0010182c74180000"
+    },
+    {
+      "black": "0x020c3e22e0c00000",
+      "empties": 21,
+      "source": "minimax-d4-vs-gen120:86:35",
+      "to_move": "white",
+      "white": "0xf8f0c1dd1f390800"
+    },
+    {
+      "black": "0x022c28f0662e0000",
+      "empties": 36,
+      "source": "random-vs-greedy:101:20",
+      "to_move": "black",
+      "white": "0x0000000f99102000"
+    },
+    {
+      "black": "0x040078dcc8eee0f8",
+      "empties": 22,
+      "source": "minimax-d4-vs-gen60:117:34",
+      "to_move": "black",
+      "white": "0x3038042030101e04"
+    },
+    {
+      "black": "0x0404012234383c1c",
+      "empties": 29,
+      "source": "gen60-vs-control120:69:27",
+      "to_move": "white",
+      "white": "0x30183e1c0a070000"
+    },
+    {
+      "black": "0x0404040404040400",
+      "empties": 25,
+      "source": "random-vs-greedy:190:31",
+      "to_move": "white",
+      "white": "0x007bfa7b3b03031f"
+    },
+    {
+      "black": "0x0404042001000000",
+      "empties": 30,
+      "source": "random-vs-greedy:26:26",
+      "to_move": "black",
+      "white": "0x885a3a1e1e2c7e88"
+    },
+    {
+      "black": "0x0404070e063f1800",
+      "empties": 30,
+      "source": "gen60-vs-control120:128:26",
+      "to_move": "black",
+      "white": "0x1038187078c00400"
+    },
+    {
+      "black": "0x0404150d11204020",
+      "empties": 34,
+      "source": "random-vs-greedy:38:22",
+      "to_move": "black",
+      "white": "0x000002320e5e3e00"
+    },
+    {
+      "black": "0x0408004048480000",
+      "empties": 42,
+      "source": "random-vs-greedy:146:14",
+      "to_move": "black",
+      "white": "0x08201c1836120900"
+    },
+    {
+      "black": "0x040c303018040c10",
+      "empties": 39,
+      "source": "gen60-vs-control120:183:17",
+      "to_move": "white",
+      "white": "0x0000080c263b1000"
+    },
+    {
+      "black": "0x0410383c30301000",
+      "empties": 34,
+      "source": "minimax-d4-vs-gen60:161:22",
+      "to_move": "black",
+      "white": "0x700807030f0e0000"
+    },
+    {
+      "black": "0x0418307050802000",
+      "empties": 39,
+      "source": "gen60-vs-control120:139:17",
+      "to_move": "white",
+      "white": "0x00040c0c2c7c0000"
+    },
+    {
+      "black": "0x04183e3090c09000",
+      "empties": 27,
+      "source": "gen60-vs-gen120:126:29",
+      "to_move": "white",
+      "white": "0x0004804c6c3c2c7c"
+    },
+    {
+      "black": "0x0418ef870b060200",
+      "empties": 20,
+      "source": "control120-vs-gen120:16:36",
+      "to_move": "black",
+      "white": "0x70201078f4783c24"
+    },
+    {
+      "black": "0x041b1a1210001010",
+      "empties": 20,
+      "source": "random-vs-greedy:176:36",
+      "to_move": "black",
+      "white": "0xf9e4e4edaf352000"
+    },
+    {
+      "black": "0x041c3e3677000000",
+      "empties": 34,
+      "source": "random-vs-greedy:87:22",
+      "to_move": "black",
+      "white": "0x0a2000c8082c0800"
+    },
+    {
+      "black": "0x043c90b8e8f22004",
+      "empties": 24,
+      "source": "gen60-vs-control120:47:32",
+      "to_move": "black",
+      "white": "0x00006f46160c1c10"
+    },
+    {
+      "black": "0x04485c7e7c7c0000",
+      "empties": 36,
+      "source": "greedy-vs-control120:132:20",
+      "to_move": "black",
+      "white": "0x2830200000000000"
+    },
+    {
+      "black": "0x04f9fe6f6ffc2c34",
+      "empties": 23,
+      "source": "greedy-vs-gen120:14:33",
+      "to_move": "white",
+      "white": "0x0000001010001000"
+    },
+    {
+      "black": "0x060e1a3a3a380a00",
+      "empties": 30,
+      "source": "greedy-vs-minimax-d4:194:26",
+      "to_move": "black",
+      "white": "0x1101050505070400"
+    },
+    {
+      "black": "0x08040301070f343e",
+      "empties": 27,
+      "source": "control120-vs-gen120:57:29",
+      "to_move": "white",
+      "white": "0x00003c3e38f00800"
+    },
+    {
+      "black": "0x080608e8d0f80000",
+      "empties": 23,
+      "source": "minimax-d4-vs-control120:49:33",
+      "to_move": "white",
+      "white": "0x1018f7172f078300"
+    },
+    {
+      "black": "0x080a0c0810000008",
+      "empties": 43,
+      "source": "random-vs-greedy:36:13",
+      "to_move": "white",
+      "white": "0x000400140c0e1f00"
+    },
+    {
+      "black": "0x080c08086c6c1c00",
+      "empties": 21,
+      "source": "minimax-d4-vs-gen120:92:35",
+      "to_move": "white",
+      "white": "0x0080f6f79090e0fc"
+    },
+    {
+      "black": "0x080ce2efe0e06080",
+      "empties": 22,
+      "source": "gen60-vs-gen120:128:34",
+      "to_move": "black",
+      "white": "0x00101c101f1e1c18"
+    },
+    {
+      "black": "0x08180284c8703878",
+      "empties": 30,
+      "source": "minimax-d4-vs-gen60:40:26",
+      "to_move": "black",
+      "white": "0x0000f078340c0402"
+    },
+    {
+      "black": "0x0818341a7d1c1c00",
+      "empties": 41,
+      "source": "greedy-vs-gen120:148:15",
+      "to_move": "white",
+      "white": "0x0000080400000000"
+    },
+    {
+      "black": "0x081c8e97a2dfbc2a",
+      "empties": 21,
+      "source": "minimax-d4-vs-gen60:174:35",
+      "to_move": "white",
+      "white": "0x002030685d200000"
+    },
+    {
+      "black": "0x081d1b3b72040000",
+      "empties": 31,
+      "source": "minimax-d4-vs-control120:154:25",
+      "to_move": "white",
+      "white": "0x000004040c3b2c0c"
+    },
+    {
+      "black": "0x083c383440013010",
+      "empties": 20,
+      "source": "gen60-vs-control120:46:36",
+      "to_move": "black",
+      "white": "0x0000c7cbbffe8c08"
+    },
+    {
+      "black": "0x083c3e1cde47243c",
+      "empties": 27,
+      "source": "random-vs-control120:94:29",
+      "to_move": "white",
+      "white": "0x0000402020381800"
+    },
+    {
+      "black": "0x086cfc7ef8e04000",
+      "empties": 27,
+      "source": "minimax-d4-vs-control120:20:29",
+      "to_move": "white",
+      "white": "0x00000080071e3020"
+    },
+    {
+      "black": "0x0878283000000000",
+      "empties": 42,
+      "source": "minimax-d4-vs-gen120:134:14",
+      "to_move": "black",
+      "white": "0x0000864c3c2c0000"
+    },
+    {
+      "black": "0x087f3b3f3a390000",
+      "empties": 33,
+      "source": "greedy-vs-control120:150:23",
+      "to_move": "white",
+      "white": "0x2100040004000000"
+    },
+    {
+      "black": "0x09010f0101000000",
+      "empties": 41,
+      "source": "greedy-vs-minimax-d4:115:15",
+      "to_move": "white",
+      "white": "0x0404001e1e1e0000"
+    },
+    {
+      "black": "0x0907070901000000",
+      "empties": 33,
+      "source": "greedy-vs-minimax-d4:49:23",
+      "to_move": "white",
+      "white": "0x001078343c3c3c00"
+    },
+    {
+      "black": "0x0a3c1e0f17130000",
+      "empties": 20,
+      "source": "minimax-d4-vs-gen60:176:36",
+      "to_move": "black",
+      "white": "0x80406030282c3f3f"
+    },
+    {
+      "black": "0x0c0c1c0c04040000",
+      "empties": 29,
+      "source": "random-vs-gen60:121:27",
+      "to_move": "white",
+      "white": "0x003122323b7a1c0e"
+    },
+    {
+      "black": "0x0cb522c42c742201",
+      "empties": 30,
+      "source": "random-vs-greedy:73:26",
+      "to_move": "black",
+      "white": "0xa0421c3810001000"
+    },
+    {
+      "black": "0x0e0000287c000000",
+      "empties": 38,
+      "source": "minimax-d4-vs-control120:28:18",
+      "to_move": "black",
+      "white": "0x907cfc5400000000"
+    },
+    {
+      "black": "0x0e04df0020408404",
+      "empties": 29,
+      "source": "random-vs-greedy:196:27",
+      "to_move": "white",
+      "white": "0x2051201c1a1c3850"
+    },
+    {
+      "black": "0x0f0f0f0f090d0101",
+      "empties": 22,
+      "source": "random-vs-control120:177:38",
+      "to_move": "black",
+      "white": "0x4030303036321e02"
+    },
+    {
+      "black": "0x1008110000000020",
+      "empties": 26,
+      "source": "random-vs-greedy:48:30",
+      "to_move": "black",
+      "white": "0x80462e1f3e3f7f14"
+    },
+    {
+      "black": "0x1010000000000000",
+      "empties": 40,
+      "source": "greedy-vs-gen60:169:16",
+      "to_move": "black",
+      "white": "0x4e2c3e3e3c040000"
+    },
+    {
+      "black": "0x1010101034001000",
+      "empties": 22,
+      "source": "greedy-vs-gen120:193:34",
+      "to_move": "black",
+      "white": "0x202c2eeecafe6e78"
+    },
+    {
+      "black": "0x10101080d0f0d0f8",
+      "empties": 28,
+      "source": "random-vs-gen120:53:32",
+      "to_move": "black",
+      "white": "0x0000a25c2e0e2c00"
+    },
+    {
+      "black": "0x101011070f102000",
+      "empties": 35,
+      "source": "minimax-d4-vs-gen120:15:21",
+      "to_move": "white",
+      "white": "0x280e0e7830080800"
+    },
+    {
+      "black": "0x1010200000000000",
+      "empties": 42,
+      "source": "greedy-vs-gen60:183:14",
+      "to_move": "black",
+      "white": "0x00045c5c5f1e0000"
+    },
+    {
+      "black": "0x1010385e3c381010",
+      "empties": 41,
+      "source": "random-vs-greedy:197:15",
+      "to_move": "white",
+      "white": "0x0000000001060400"
+    },
+    {
+      "black": "0x10103a6420202000",
+      "empties": 30,
+      "source": "minimax-d4-vs-gen120:101:26",
+      "to_move": "black",
+      "white": "0x446c041a1e1f1410"
+    },
+    {
+      "black": "0x10107342341e0000",
+      "empties": 43,
+      "source": "random-vs-control120:82:13",
+      "to_move": "white",
+      "white": "0x0000081c08000000"
+    },
+    {
+      "black": "0x1012746080000000",
+      "empties": 41,
+      "source": "minimax-d4-vs-control120:68:15",
+      "to_move": "white",
+      "white": "0x0000881c3e380000"
+    },
+    {
+      "black": "0x101810183c303070",
+      "empties": 36,
+      "source": "minimax-d4-vs-gen60:90:20",
+      "to_move": "black",
+      "white": "0x00002c24004c0c08"
+    },
+    {
+      "black": "0x10183a367a3f1400",
+      "empties": 37,
+      "source": "random-vs-gen60:62:19",
+      "to_move": "white",
+      "white": "0x0000040804000000"
+    },
+    {
+      "black": "0x10191d593d1d1e2c",
+      "empties": 23,
+      "source": "random-vs-greedy:69:33",
+      "to_move": "white",
+      "white": "0x0206422602422040"
+    },
+    {
+      "black": "0x10193f31fe242020",
+      "empties": 29,
+      "source": "control120-vs-gen120:51:27",
+      "to_move": "white",
+      "white": "0x0020000e001b0c08"
+    },
+    {
+      "black": "0x101c0f0700010000",
+      "empties": 39,
+      "source": "gen60-vs-control120:104:17",
+      "to_move": "white",
+      "white": "0x042030383e020000"
+    },
+    {
+      "black": "0x10302000b0380000",
+      "empties": 44,
+      "source": "minimax-d4-vs-gen60:116:12",
+      "to_move": "black",
+      "white": "0x000058f80c000000"
+    },
+    {
+      "black": "0x1030b89cbe5a0800",
+      "empties": 32,
+      "source": "minimax-d4-vs-control120:182:24",
+      "to_move": "black",
+      "white": "0x8048446040201000"
+    },
+    {
+      "black": "0x1034100060800000",
+      "empties": 42,
+      "source": "control120-vs-gen120:163:14",
+      "to_move": "black",
+      "white": "0x00006cf818380000"
+    },
+    {
+      "black": "0x10343040e0800000",
+      "empties": 41,
+      "source": "control120-vs-gen120:163:15",
+      "to_move": "white",
+      "white": "0x00004cb818380000"
+    },
+    {
+      "black": "0x103470d8f0d23814",
+      "empties": 29,
+      "source": "control120-vs-gen120:117:27",
+      "to_move": "white",
+      "white": "0x00080e240e280000"
+    },
+    {
+      "black": "0x103a3c7c1c002808",
+      "empties": 40,
+      "source": "greedy-vs-gen120:152:16",
+      "to_move": "black",
+      "white": "0x00000000003c0000"
+    },
+    {
+      "black": "0x103cfe4720320000",
+      "empties": 27,
+      "source": "gen60-vs-control120:182:29",
+      "to_move": "white",
+      "white": "0x00c000385e483830"
+    },
+    {
+      "black": "0x10503e3e3e3e1804",
+      "empties": 28,
+      "source": "random-vs-control120:110:28",
+      "to_move": "black",
+      "white": "0x0105010101010301"
+    },
+    {
+      "black": "0x107c481e38440000",
+      "empties": 34,
+      "source": "random-vs-gen120:28:24",
+      "to_move": "black",
+      "white": "0x8080b0e0c0a01000"
+    },
+    {
+      "black": "0x10907a7e7edb4f08",
+      "empties": 25,
+      "source": "greedy-vs-gen120:76:31",
+      "to_move": "white",
+      "white": "0x2020000000243020"
+    },
+    {
+      "black": "0x10bcf8b08890207c",
+      "empties": 27,
+      "source": "gen60-vs-gen120:197:29",
+      "to_move": "white",
+      "white": "0x0000044c742c1800"
+    },
+    {
+      "black": "0x10f07cfe3f7a2552",
+      "empties": 21,
+      "source": "random-vs-greedy:113:35",
+      "to_move": "white",
+      "white": "0x0408000140805088"
+    },
+    {
+      "black": "0x1102040810200000",
+      "empties": 35,
+      "source": "greedy-vs-gen60:137:21",
+      "to_move": "white",
+      "white": "0x0e0c3a760e0e0404"
+    },
+    {
+      "black": "0x12060c1870702878",
+      "empties": 27,
+      "source": "minimax-d4-vs-gen60:110:29",
+      "to_move": "white",
+      "white": "0x0808b2a48c0c1402"
+    },
+    {
+      "black": "0x141c0e1440301800",
+      "empties": 26,
+      "source": "control120-vs-gen120:163:30",
+      "to_move": "black",
+      "white": "0x2020f0e8bccea400"
+    },
+    {
+      "black": "0x141c1e1e3f371810",
+      "empties": 23,
+      "source": "control120-vs-gen120:6:33",
+      "to_move": "white",
+      "white": "0x002060e040482446"
+    },
+    {
+      "black": "0x143c7ce8789e0800",
+      "empties": 27,
+      "source": "random-vs-control120:142:29",
+      "to_move": "white",
+      "white": "0x0303031507000000"
+    },
+    {
+      "black": "0x1838c00080402878",
+      "empties": 31,
+      "source": "minimax-d4-vs-control120:164:25",
+      "to_move": "white",
+      "white": "0x0000303c3cbc1402"
+    },
+    {
+      "black": "0x183cf0f8cc8e0c7c",
+      "empties": 25,
+      "source": "minimax-d4-vs-gen60:116:31",
+      "to_move": "white",
+      "white": "0x00000c0430303000"
+    },
+    {
+      "black": "0x18586074383c1804",
+      "empties": 21,
+      "source": "random-vs-control120:110:36",
+      "to_move": "black",
+      "white": "0x03271f0b07030301"
+    },
+    {
+      "black": "0x1858fc7e7c383000",
+      "empties": 35,
+      "source": "greedy-vs-gen60:82:21",
+      "to_move": "white",
+      "white": "0x0004000000400000"
+    },
+    {
+      "black": "0x187c7edefe1c1818",
+      "empties": 29,
+      "source": "greedy-vs-gen120:32:27",
+      "to_move": "white",
+      "white": "0x0000002000020000"
+    },
+    {
+      "black": "0x189c62f3733b3e26",
+      "empties": 20,
+      "source": "random-vs-control120:182:36",
+      "to_move": "black",
+      "white": "0x20201c0c0c040001"
+    },
+    {
+      "black": "0x19191f7c3c488041",
+      "empties": 29,
+      "source": "random-vs-greedy:83:27",
+      "to_move": "white",
+      "white": "0x0000000002152a1c"
+    },
+    {
+      "black": "0x1c090001f1000408",
+      "empties": 24,
+      "source": "random-vs-greedy:138:32",
+      "to_move": "black",
+      "white": "0x00462e1e0e1f3b45"
+    },
+    {
+      "black": "0x1c0f17e37b180800",
+      "empties": 29,
+      "source": "minimax-d4-vs-control120:94:27",
+      "to_move": "white",
+      "white": "0x0000681c04460000"
+    },
+    {
+      "black": "0x1e0486d7d0e0c000",
+      "empties": 23,
+      "source": "control120-vs-gen120:164:33",
+      "to_move": "white",
+      "white": "0x003878282c183830"
+    },
+    {
+      "black": "0x1e1cd08080a09878",
+      "empties": 22,
+      "source": "minimax-d4-vs-control120:164:34",
+      "to_move": "black",
+      "white": "0x4020207c7c5c6402"
+    },
+    {
+      "black": "0x200058e0c0800000",
+      "empties": 36,
+      "source": "random-vs-gen120:107:20",
+      "to_move": "black",
+      "white": "0x0076241c38381400"
+    },
+    {
+      "black": "0x2002061a33102004",
+      "empties": 22,
+      "source": "gen60-vs-gen120:49:34",
+      "to_move": "black",
+      "white": "0x0c1c7864cc6f1c38"
+    },
+    {
+      "black": "0x20110b05014f0000",
+      "empties": 27,
+      "source": "gen60-vs-control120:60:29",
+      "to_move": "white",
+      "white": "0x0c0c743a7e303010"
+    },
+    {
+      "black": "0x2018fc68101c0c1f",
+      "empties": 21,
+      "source": "minimax-d4-vs-control120:81:35",
+      "to_move": "white",
+      "white": "0x002002976e633300"
+    },
+    {
+      "black": "0x20201c0c00000000",
+      "empties": 44,
+      "source": "minimax-d4-vs-control120:177:12",
+      "to_move": "black",
+      "white": "0x08142070380e0000"
+    },
+    {
+      "black": "0x20212f57a3808000",
+      "empties": 27,
+      "source": "minimax-d4-vs-gen120:172:29",
+      "to_move": "white",
+      "white": "0x101c50285c3e0800"
+    },
+    {
+      "black": "0x2028ec08043e0808",
+      "empties": 33,
+      "source": "random-vs-minimax-d4:92:23",
+      "to_move": "white",
+      "white": "0x1c14107078800000"
+    },
+    {
+      "black": "0x2032061e247c0200",
+      "empties": 34,
+      "source": "random-vs-gen60:2:22",
+      "to_move": "black",
+      "white": "0x8080f86058000000"
+    },
+    {
+      "black": "0x203edc6c72312c04",
+      "empties": 24,
+      "source": "random-vs-gen120:76:32",
+      "to_move": "black",
+      "white": "0x804123130c0c1000"
+    },
+    {
+      "black": "0x20406cf67a361e04",
+      "empties": 30,
+      "source": "random-vs-gen120:122:26",
+      "to_move": "black",
+      "white": "0x1418100804080000"
+    },
+    {
+      "black": "0x207800c84c081000",
+      "empties": 40,
+      "source": "random-vs-control120:104:16",
+      "to_move": "black",
+      "white": "0x0000783030302000"
+    },
+    {
+      "black": "0x207a7e3e440c1200",
+      "empties": 24,
+      "source": "random-vs-gen60:2:32",
+      "to_move": "black",
+      "white": "0x808080c0b8f0e080"
+    },
+    {
+      "black": "0x207c2e6232222c0a",
+      "empties": 26,
+      "source": "random-vs-gen120:180:30",
+      "to_move": "black",
+      "white": "0x0000101d0d1c1221"
+    },
+    {
+      "black": "0x240c3c0c0c0c043c",
+      "empties": 29,
+      "source": "gen60-vs-control120:166:27",
+      "to_move": "white",
+      "white": "0x1830c0f070301000"
+    },
+    {
+      "black": "0x246c343e7c3c0800",
+      "empties": 35,
+      "source": "random-vs-gen120:168:21",
+      "to_move": "white",
+      "white": "0x1810084000000000"
+    },
+    {
+      "black": "0x2606091703000000",
+      "empties": 33,
+      "source": "random-vs-minimax-d4:79:23",
+      "to_move": "white",
+      "white": "0x017834283c2e0000"
+    },
+    {
+      "black": "0x30181f1800060800",
+      "empties": 33,
+      "source": "control120-vs-gen120:3:23",
+      "to_move": "white",
+      "white": "0x042420263e383000"
+    },
+    {
+      "black": "0x30287cff3c781000",
+      "empties": 37,
+      "source": "greedy-vs-gen120:80:19",
+      "to_move": "white",
+      "white": "0x0000000040000000"
+    },
+    {
+      "black": "0x3038380604000000",
+      "empties": 38,
+      "source": "minimax-d4-vs-control120:51:18",
+      "to_move": "black",
+      "white": "0x04020638383c0400"
+    },
+    {
+      "black": "0x303c2e26670e303c",
+      "empties": 24,
+      "source": "random-vs-gen120:50:32",
+      "to_move": "black",
+      "white": "0x0000101818304e81"
+    },
+    {
+      "black": "0x30bca7a6cc6c7a08",
+      "empties": 21,
+      "source": "random-vs-gen60:152:35",
+      "to_move": "white",
+      "white": "0x00001858301080f0"
+    },
+    {
+      "black": "0x38187e7f37508800",
+      "empties": 21,
+      "source": "control120-vs-gen120:114:35",
+      "to_move": "white",
+      "white": "0x00200000c82f303e"
+    },
+    {
+      "black": "0x38313e2c2c0eff00",
+      "empties": 22,
+      "source": "greedy-vs-minimax-d4:86:34",
+      "to_move": "black",
+      "white": "0x00000090503000ff"
+    },
+    {
+      "black": "0x3838ee2e00000000",
+      "empties": 33,
+      "source": "control120-vs-gen120:93:23",
+      "to_move": "white",
+      "white": "0x00001050fcfc0000"
+    },
+    {
+      "black": "0x3838eee000000000",
+      "empties": 31,
+      "source": "control120-vs-gen120:93:25",
+      "to_move": "white",
+      "white": "0x0000101ffcfc0000"
+    },
+    {
+      "black": "0x38702070160e0600",
+      "empties": 29,
+      "source": "minimax-d4-vs-gen60:86:27",
+      "to_move": "white",
+      "white": "0x030e1e0e28300800"
+    },
+    {
+      "black": "0x3878e8988c080000",
+      "empties": 37,
+      "source": "minimax-d4-vs-gen120:120:19",
+      "to_move": "white",
+      "white": "0x0000146430300000"
+    },
+    {
+      "black": "0x387a043e5e3c3820",
+      "empties": 23,
+      "source": "greedy-vs-control120:32:33",
+      "to_move": "white",
+      "white": "0x0480f8c0a0c08000"
+    },
+    {
+      "black": "0x3c1000703018247e",
+      "empties": 20,
+      "source": "gen60-vs-gen120:15:36",
+      "to_move": "black",
+      "white": "0x4068f88ccce69800"
+    },
+    {
+      "black": "0x3c3c226603030000",
+      "empties": 32,
+      "source": "control120-vs-gen120:141:24",
+      "to_move": "black",
+      "white": "0x00021c187c180400"
+    },
+    {
+      "black": "0x3e044bd0fc780000",
+      "empties": 20,
+      "source": "control120-vs-gen120:130:36",
+      "to_move": "black",
+      "white": "0x0018342f03063c38"
+    },
+    {
+      "black": "0x3e3c8850f8540e0e",
+      "empties": 25,
+      "source": "minimax-d4-vs-control120:40:31",
+      "to_move": "white",
+      "white": "0x0000342c042a1020"
+    },
+    {
+      "black": "0x3e70080400100000",
+      "empties": 32,
+      "source": "random-vs-greedy:22:24",
+      "to_move": "black",
+      "white": "0x000436393e2c4888"
+    },
+    {
+      "black": "0x3e80c1e3ffad0000",
+      "empties": 23,
+      "source": "minimax-d4-vs-gen60:160:33",
+      "to_move": "white",
+      "white": "0x003c3c1c00100804"
+    },
+    {
+      "black": "0x3f031f0f03010000",
+      "empties": 27,
+      "source": "random-vs-gen120:39:32",
+      "to_move": "black",
+      "white": "0x007c20701c3c1000"
+    },
+    {
+      "black": "0x3f070b0901000000",
+      "empties": 27,
+      "source": "greedy-vs-minimax-d4:49:30",
+      "to_move": "black",
+      "white": "0x003874343c3c3c00"
+    },
+    {
+      "black": "0x3f100c0405040000",
+      "empties": 29,
+      "source": "random-vs-minimax-d4:107:27",
+      "to_move": "white",
+      "white": "0x002f733a3a3a0000"
+    },
+    {
+      "black": "0x3f100c0c000d0101",
+      "empties": 23,
+      "source": "random-vs-control120:25:34",
+      "to_move": "black",
+      "white": "0x002e72333f321e00"
+    },
+    {
+      "black": "0x3f307c1a06030000",
+      "empties": 26,
+      "source": "minimax-d4-vs-gen60:166:30",
+      "to_move": "black",
+      "white": "0x000f0325393c0800"
+    },
+    {
+      "black": "0x3f307c1a0e070200",
+      "empties": 25,
+      "source": "minimax-d4-vs-gen60:166:31",
+      "to_move": "white",
+      "white": "0x000f032531380800"
+    },
+    {
+      "black": "0x4000103c1c0e3c00",
+      "empties": 25,
+      "source": "random-vs-minimax-d4:160:33",
+      "to_move": "white",
+      "white": "0x80e0c0c0e0f0c0fc"
+    },
+    {
+      "black": "0x400c1e0c083c0000",
+      "empties": 30,
+      "source": "control120-vs-gen120:192:26",
+      "to_move": "black",
+      "white": "0x3c30e0f0f0c08000"
+    },
+    {
+      "black": "0x403c7e7f6a7f3800",
+      "empties": 26,
+      "source": "greedy-vs-gen120:112:31",
+      "to_move": "white",
+      "white": "0x0000000095808000"
+    },
+    {
+      "black": "0x406032140c1c0000",
+      "empties": 28,
+      "source": "minimax-d4-vs-gen60:75:28",
+      "to_move": "black",
+      "white": "0x1c1ccce8f0e0a000"
+    },
+    {
+      "black": "0x40783e5c4c7e7000",
+      "empties": 27,
+      "source": "random-vs-gen60:98:29",
+      "to_move": "white",
+      "white": "0x8080c0a0b0808000"
+    },
+    {
+      "black": "0x40c041e301000000",
+      "empties": 39,
+      "source": "random-vs-minimax-d4:43:18",
+      "to_move": "black",
+      "white": "0x00040c1c1e2c0200"
+    },
+    {
+      "black": "0x48391b7501140c00",
+      "empties": 23,
+      "source": "minimax-d4-vs-gen60:158:33",
+      "to_move": "white",
+      "white": "0x0000040a7e2a323f"
+    },
+    {
+      "black": "0x687c120b4b6f1008",
+      "empties": 22,
+      "source": "random-vs-control120:22:34",
+      "to_move": "black",
+      "white": "0x0080ecf4b4100010"
+    },
+    {
+      "black": "0x700040d0101a0c08",
+      "empties": 33,
+      "source": "random-vs-minimax-d4:153:23",
+      "to_move": "white",
+      "white": "0x0038b82ce8240200"
+    },
+    {
+      "black": "0x700090d0f0703000",
+      "empties": 34,
+      "source": "gen60-vs-control120:137:22",
+      "to_move": "black",
+      "white": "0x0c386c2808080000"
+    },
+    {
+      "black": "0x7027040404000000",
+      "empties": 28,
+      "source": "random-vs-greedy:176:28",
+      "to_move": "black",
+      "white": "0x09d8f8fbb9111000"
+    },
+    {
+      "black": "0x70b8dc9eccc08000",
+      "empties": 32,
+      "source": "minimax-d4-vs-gen60:94:24",
+      "to_move": "black",
+      "white": "0x0000206030380000"
+    },
+    {
+      "black": "0x781c38ff79291c2a",
+      "empties": 27,
+      "source": "random-vs-greedy:31:29",
+      "to_move": "white",
+      "white": "0x0020010086000000"
+    },
+    {
+      "black": "0x783000000617181c",
+      "empties": 30,
+      "source": "control120-vs-gen120:8:26",
+      "to_move": "black",
+      "white": "0x000c7e3e19080000"
+    },
+    {
+      "black": "0x783c7afc3c200000",
+      "empties": 33,
+      "source": "minimax-d4-vs-gen60:0:23",
+      "to_move": "white",
+      "white": "0x00000402001e0800"
+    },
+    {
+      "black": "0x7a3e44280c0a0800",
+      "empties": 24,
+      "source": "minimax-d4-vs-gen120:138:32",
+      "to_move": "black",
+      "white": "0x80c0b8d4f0f09000"
+    },
+    {
+      "black": "0x7c0c267430000000",
+      "empties": 35,
+      "source": "control120-vs-gen120:106:21",
+      "to_move": "white",
+      "white": "0x0030180a4c3c0000"
+    },
+    {
+      "black": "0x7c10123800100000",
+      "empties": 39,
+      "source": "minimax-d4-vs-control120:33:17",
+      "to_move": "white",
+      "white": "0x000c0c063e0c0000"
+    },
+    {
+      "black": "0x7c2d173319180000",
+      "empties": 33,
+      "source": "gen60-vs-control120:122:23",
+      "to_move": "white",
+      "white": "0x0010280c06060000"
+    },
+    {
+      "black": "0x7c7c3432060c0000",
+      "empties": 22,
+      "source": "gen60-vs-control120:135:34",
+      "to_move": "black",
+      "white": "0x0002cacdf9712100"
+    },
+    {
+      "black": "0x7e1488d4e2602000",
+      "empties": 29,
+      "source": "gen60-vs-control120:137:27",
+      "to_move": "white",
+      "white": "0x0028742818181010"
+    },
+    {
+      "black": "0x7e1c18bc5c2c0201",
+      "empties": 26,
+      "source": "random-vs-greedy:127:30",
+      "to_move": "black",
+      "white": "0x0000804122102c1e"
+    },
+    {
+      "black": "0x7f0f0f1301410101",
+      "empties": 25,
+      "source": "random-vs-minimax-d4:49:32",
+      "to_move": "black",
+      "white": "0x0070302c3c2e0000"
+    },
+    {
+      "black": "0x800020d0382f07ff",
+      "empties": 20,
+      "source": "random-vs-gen60:125:38",
+      "to_move": "black",
+      "white": "0x4060582c46d0f800"
+    },
+    {
+      "black": "0x801cac0400800000",
+      "empties": 32,
+      "source": "random-vs-gen60:57:24",
+      "to_move": "black",
+      "white": "0x5860507a7c780800"
+    },
+    {
+      "black": "0x8044b83c0c800000",
+      "empties": 37,
+      "source": "random-vs-gen60:57:19",
+      "to_move": "white",
+      "white": "0x1830404070700800"
+    },
+    {
+      "black": "0x8048b8f0e0c0c0c0",
+      "empties": 20,
+      "source": "random-vs-gen60:97:37",
+      "to_move": "white",
+      "white": "0x1c34440c1c3c382e"
+    },
+    {
+      "black": "0x80502002062a1208",
+      "empties": 23,
+      "source": "random-vs-greedy:88:33",
+      "to_move": "white",
+      "white": "0x000486ddf9d4a517"
+    },
+    {
+      "black": "0x80808080c0809038",
+      "empties": 27,
+      "source": "random-vs-minimax-d4:95:30",
+      "to_move": "black",
+      "white": "0x4050787e3c7c6800"
+    },
+    {
+      "black": "0x808080c0e2a00000",
+      "empties": 34,
+      "source": "random-vs-minimax-d4:141:22",
+      "to_move": "black",
+      "white": "0x0000703c1c1c7a40"
+    },
+    {
+      "black": "0x80808faf02000000",
+      "empties": 32,
+      "source": "random-vs-gen120:69:24",
+      "to_move": "black",
+      "white": "0x046c7050784c0400"
+    },
+    {
+      "black": "0x80c0a00181050101",
+      "empties": 20,
+      "source": "random-vs-greedy:76:36",
+      "to_move": "black",
+      "white": "0x0a3c18f83e7a3a5e"
+    },
+    {
+      "black": "0x80c0a0100030387c",
+      "empties": 22,
+      "source": "random-vs-gen120:51:34",
+      "to_move": "black",
+      "white": "0x00305eeefe4c8600"
+    },
+    {
+      "black": "0x80c0a01080040001",
+      "empties": 24,
+      "source": "random-vs-greedy:76:32",
+      "to_move": "black",
+      "white": "0x0a3c08e83e7b3a5e"
+    },
+    {
+      "black": "0x90783c3c3c1c0000",
+      "empties": 35,
+      "source": "random-vs-greedy:183:21",
+      "to_move": "white",
+      "white": "0x2000804000207010"
+    },
+    {
+      "black": "0x90793e3c3c303020",
+      "empties": 31,
+      "source": "random-vs-greedy:183:25",
+      "to_move": "white",
+      "white": "0x20008040000e4010"
+    },
+    {
+      "black": "0x9c5c2c1400000000",
+      "empties": 28,
+      "source": "random-vs-gen60:77:28",
+      "to_move": "black",
+      "white": "0x0022d26a7e7e0200"
+    },
+    {
+      "black": "0xf0b890b0c0e08000",
+      "empties": 33,
+      "source": "minimax-d4-vs-gen60:20:23",
+      "to_move": "white",
+      "white": "0x00406c4c38100000"
+    },
+    {
+      "black": "0xf0e0e0f080040000",
+      "empties": 33,
+      "source": "random-vs-minimax-d4:189:23",
+      "to_move": "white",
+      "white": "0x001e1c0c3c300000"
+    },
+    {
+      "black": "0xf800080000000800",
+      "empties": 37,
+      "source": "greedy-vs-control120:99:19",
+      "to_move": "white",
+      "white": "0x003c143e1e1f0000"
+    },
+    {
+      "black": "0xf8b0a0e8d0a040e0",
+      "empties": 21,
+      "source": "greedy-vs-minimax-d4:185:39",
+      "to_move": "white",
+      "white": "0x00425f162c5c8800"
+    },
+    {
+      "black": "0xf8d8f8e0c0808080",
+      "empties": 28,
+      "source": "random-vs-gen120:21:28",
+      "to_move": "black",
+      "white": "0x0424041c3c404040"
+    },
+    {
+      "black": "0xf8f0e0c0c1800008",
+      "empties": 20,
+      "source": "random-vs-minimax-d4:179:40",
+      "to_move": "black",
+      "white": "0x000e183c3e6a9f02"
+    },
+    {
+      "black": "0xf8f8e8d8b8000000",
+      "empties": 27,
+      "source": "random-vs-minimax-d4:145:29",
+      "to_move": "white",
+      "white": "0x0000142446fe0800"
+    },
+    {
+      "black": "0xfc0434141404041c",
+      "empties": 25,
+      "source": "greedy-vs-gen60:149:31",
+      "to_move": "white",
+      "white": "0x00f84a6868383800"
+    },
+    {
+      "black": "0xfc20001000000000",
+      "empties": 25,
+      "source": "greedy-vs-control120:143:32",
+      "to_move": "black",
+      "white": "0x005efeeefcfe0000"
+    },
+    {
+      "black": "0xfcf8f8f838181010",
+      "empties": 23,
+      "source": "greedy-vs-control120:165:39",
+      "to_move": "white",
+      "white": "0x000404044464ec00"
+    },
+    {
+      "black": "0xfcfcfee4fe060000",
+      "empties": 23,
+      "source": "random-vs-minimax-d4:130:33",
+      "to_move": "white",
+      "white": "0x0101011b01010000"
+    },
+    {
+      "black": "0xfef890a080802000",
+      "empties": 27,
+      "source": "random-vs-gen120:59:30",
+      "to_move": "black",
+      "white": "0x00066c5a79484000"
+    },
+    {
+      "black": "0xff0238ba00280000",
+      "empties": 20,
+      "source": "minimax-d4-vs-control120:1:36",
+      "to_move": "black",
+      "white": "0x00fc4745ff850100"
+    },
+    {
+      "black": "0xff80a090a0400000",
+      "empties": 29,
+      "source": "random-vs-minimax-d4:71:29",
+      "to_move": "white",
+      "white": "0x007f58681c0e0000"
+    }
+  ],
+  "purpose": "research/held-out-opponents.md section 5, step 1",
+  "rule": "20 to 44 empty squares, at least two legal moves, distinct, chosen uniformly at random with the seed",
+  "sampled_from": "runs\\research\\pilot-2026-10-games",
+  "seed": 20261028
+}

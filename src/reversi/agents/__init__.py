@@ -14,8 +14,20 @@ Only playing somebody tells you that.
 from __future__ import annotations
 
 from reversi.agents.base import Agent
-from reversi.agents.greedy import GreedyAgent
+from reversi.agents.greedy import GreedyAgent, MaterialAgent, NoisyGreedyAgent
+from reversi.agents.heuristics import CornerAgent, MobilityAgent
 from reversi.agents.minimax import MinimaxAgent
 from reversi.agents.random_agent import RandomAgent
+from reversi.agents.rollout import RolloutAgent
 
-__all__ = ["Agent", "GreedyAgent", "MinimaxAgent", "RandomAgent"]
+__all__ = [
+    "Agent",
+    "CornerAgent",
+    "GreedyAgent",
+    "MaterialAgent",
+    "MinimaxAgent",
+    "MobilityAgent",
+    "NoisyGreedyAgent",
+    "RandomAgent",
+    "RolloutAgent",
+]
