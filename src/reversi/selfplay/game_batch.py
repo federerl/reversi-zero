@@ -36,11 +36,12 @@ and the drift would be invisible: both would still produce legal moves.
 from __future__ import annotations
 
 import logging
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 
 import numpy as np
 from numpy.typing import NDArray
 
+from reversi.agents.base import Agent
 from reversi.data.schema import GameRecord, Sample
 from reversi.errors import WorkerError
 from reversi.game import rules
@@ -51,7 +52,8 @@ from reversi.search.mcts import MCTS, SearchResult, select_move
 from reversi.search.node import Node
 from reversi.seeding import game_seed
 from reversi.seeding import rng as make_rng
-from reversi.types import Action, pass_action
+from reversi.selfplay.opponents import OpponentSchedule
+from reversi.types import Action, Player, pass_action
 
 __all__ = ["BatchedSelfPlay"]
 
@@ -73,6 +75,8 @@ class _Slot:
         "finished",
         "game_index",
         "mcts",
+        "network",
+        "opponent",
         "pending",
         "ply",
         "record",
@@ -96,19 +100,39 @@ class _Slot:
         self.pending: tuple[Node, list[tuple[Node, int]]] | None = None
         self.ply = 0
         self.branching: list[int] = []
+        # A fixed opponent on the other side, for the games that have one.
+        self.opponent: Agent | None = None
+        self.network = Player.BLACK
 
     # -- lifecycle ----------------------------------------------------
 
-    def start(self, game_index: int, seed: int, board_size: int) -> None:
+    def start(
+        self,
+        game_index: int,
+        seed: int,
+        board_size: int,
+        *,
+        opponent: Agent | None = None,
+        opponent_name: str | None = None,
+        network: Player = Player.BLACK,
+    ) -> None:
         self.game_index = game_index
         self.state = rules.initial_state(board_size)
-        self.record = GameRecord(samples=[], board_size=board_size, game_index=game_index)
+        self.record = GameRecord(
+            samples=[],
+            board_size=board_size,
+            game_index=game_index,
+            opponent=opponent_name if opponent is not None else None,
+            network=network if opponent is not None else None,
+        )
         self.rng = make_rng(seed)
         self.root = None
         self.sims_done = 0
         self.pending = None
         self.ply = 0
         self.branching = []
+        self.opponent = opponent
+        self.network = network
         self.finished = False
 
     def prepare(self, ceiling: int) -> State | None:
@@ -160,11 +184,16 @@ class _Slot:
     # -- the parts that need no network -------------------------------
 
     def _skip_to_a_real_decision(self, ceiling: int) -> None:
-        """Apply forced moves and finish the game, until a genuine choice appears."""
+        """Apply forced moves and the opponent's moves, until the network has a choice."""
         while True:
             if rules.is_terminal(self.state):
                 self._finish()
                 return
+            if self.opponent is not None and self.state.to_move is not self.network:
+                # The opponent's turn: its move needs no network call and is not
+                # recorded, so it is handled here with the forced moves.
+                self._apply(self.opponent.select(self.state, self.rng), ceiling)
+                continue
             actions = rules.legal_actions(self.state)
             if len(actions) > 1:
                 return
@@ -242,6 +271,9 @@ class BatchedSelfPlay:
         generation: int,
         worker_id: int = 0,
         max_plies: int | None = None,
+        schedule: OpponentSchedule | None = None,
+        opponents: Mapping[str, Agent] | None = None,
+        first_game: int = 0,
     ) -> None:
         if games_in_flight < 1:
             msg = f"games_in_flight must be at least 1, got {games_in_flight}"
@@ -255,6 +287,11 @@ class BatchedSelfPlay:
         self.generation = generation
         self.worker_id = worker_id
         self.ceiling = max_plies if max_plies is not None else 4 * board_size * board_size
+        # Games against fixed opponents, looked up by the game's index in the
+        # generation (``first_game`` + the local index). See ``opponents.py``.
+        self.schedule = schedule
+        self.opponents = opponents
+        self.first_game = first_game
 
         # Counters worth reporting: the average batch size is the number that
         # says whether the batching is actually working.
@@ -278,7 +315,7 @@ class BatchedSelfPlay:
 
         started = 0
         for slot in slots:
-            slot.start(started, self._seed(started), self.board_size)
+            self._start(slot, started)
             started += 1
 
         completed = 0
@@ -313,11 +350,33 @@ class BatchedSelfPlay:
                     if completed >= n_games:
                         break
                 if started < n_games:
-                    slot.start(started, self._seed(started), self.board_size)
+                    self._start(slot, started)
                     started += 1
 
             if not states and all(slot.finished for slot in slots) and started >= n_games:
                 break
+
+    def _start(self, slot: _Slot, game_index: int) -> None:
+        """Begin game ``game_index`` in ``slot``, against a fixed opponent if scheduled."""
+        assignment = (
+            self.schedule.assignment(self.first_game + game_index)
+            if self.schedule is not None
+            else None
+        )
+        if assignment is None:
+            slot.start(game_index, self._seed(game_index), self.board_size)
+            return
+        if self.opponents is None or assignment.opponent not in self.opponents:
+            msg = f"the schedule names opponent {assignment.opponent!r} but none was built"
+            raise WorkerError(msg)
+        slot.start(
+            game_index,
+            self._seed(game_index),
+            self.board_size,
+            opponent=self.opponents[assignment.opponent],
+            opponent_name=assignment.opponent,
+            network=assignment.network,
+        )
 
     def _seed(self, game_index: int) -> int:
         return game_seed(self.root_seed, self.generation, self.worker_id, game_index)

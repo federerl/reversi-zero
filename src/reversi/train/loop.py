@@ -56,6 +56,7 @@ from reversi.search.config import SearchConfig
 from reversi.seeding import derive_seed
 from reversi.seeding import rng as make_rng
 from reversi.selfplay.game_batch import BatchedSelfPlay
+from reversi.selfplay.opponents import build_opponents
 from reversi.selfplay.runner import merge_summaries, run_workers
 from reversi.selfplay.worker import SelfPlaySummary, play_games
 from reversi.train.evaluate import quick_evaluate
@@ -180,7 +181,7 @@ def run_training(
         # configs and for comparison.
         use_workers = (
             config.selfplay.n_workers > 1
-            and config.selfplay.games_per_generation >= config.selfplay.n_workers
+            and config.selfplay.total_games >= config.selfplay.n_workers
         )
 
         if use_workers:
@@ -355,6 +356,8 @@ def _play_in_process(
     evaluator = TorchEvaluator(model, device=device)
     board_size = config.game.board_size
     ceiling = 4 * board_size * board_size
+    schedule = config.selfplay.schedule()
+    opponents = build_opponents(schedule.opponents) if schedule is not None else None
 
     batched: BatchedSelfPlay | None = None
     if config.selfplay.games_in_flight > 1:
@@ -366,17 +369,21 @@ def _play_in_process(
             root_seed=config.seed,
             generation=generation,
             max_plies=ceiling,
+            schedule=schedule,
+            opponents=opponents,
         )
-        produced = batched.play(config.selfplay.games_per_generation)
+        produced = batched.play(config.selfplay.total_games)
     else:
         produced = play_games(
             evaluator,
             search_config,
             board_size=board_size,
-            n_games=config.selfplay.games_per_generation,
+            n_games=config.selfplay.total_games,
             root_seed=config.seed,
             generation=generation,
             max_plies=ceiling,
+            schedule=schedule,
+            opponents=opponents,
         )
 
     summary = SelfPlaySummary()

@@ -110,6 +110,7 @@ def _worker_main(
     from reversi.nn.loader import load_model
     from reversi.search.config import SearchConfig
     from reversi.selfplay.game_batch import BatchedSelfPlay
+    from reversi.selfplay.opponents import build_opponents
 
     # Tree-bound work: torch's own threads would only fight the other workers.
     torch.set_num_threads(1)
@@ -119,6 +120,7 @@ def _worker_main(
 
     model = load_model(Path(weights_path), device=device)
     evaluator = TorchEvaluator(model, device=device)
+    schedule = config.selfplay.schedule()
 
     started = time.perf_counter()
     play = BatchedSelfPlay(
@@ -130,6 +132,9 @@ def _worker_main(
         generation=generation,
         worker_id=worker_id,
         max_plies=4 * board_size * board_size,
+        schedule=schedule,
+        opponents=build_opponents(schedule.opponents) if schedule is not None else None,
+        first_game=first_game,
     )
 
     summary = SelfPlaySummary()
@@ -186,7 +191,7 @@ def run_workers(
     because a generation that is quietly short is worse than one that stops.
     """
     replay_dir.mkdir(parents=True, exist_ok=True)
-    ranges = split_games(config.selfplay.games_per_generation, n_workers)
+    ranges = split_games(config.selfplay.total_games, n_workers)
     config_json = config.model_dump_json()
 
     # `spawn` rather than `fork`: fork copies the parent's CUDA context, which is
@@ -265,6 +270,12 @@ def merge_summaries(results: list[WorkerResult]) -> SelfPlaySummary:
         merged.draws += counters["draws"]
         merged.branching_total += counters["branching_total"]
         merged.branching_count += counters["branching_count"]
+        # Absent from summaries written before fixed opponents existed.
+        merged.opponent_games += counters.get("opponent_games", 0)
+        merged.opponent_wins += counters.get("opponent_wins", 0)
+        merged.opponent_losses += counters.get("opponent_losses", 0)
+        merged.opponent_draws += counters.get("opponent_draws", 0)
+        merged.network_wipeouts += counters.get("network_wipeouts", 0)
     return merged
 
 
