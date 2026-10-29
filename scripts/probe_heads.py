@@ -32,7 +32,11 @@ Usage::
         --out research/results/step2/head-probe.json
 
 The checkpoints are read from ``research/eval-protocol-frozen.json`` so the
-network probed is the one that played the recorded games.
+network probed is the one that played the recorded games; ``--protocol`` points
+at another file of the same shape (a ``checkpoints`` map of name to ``file``)
+for a later evaluation's networks. The games are found as
+``analyze_wipeouts.py`` finds them: against Greedy, under either name, in the
+directory or one folder down.
 """
 
 from __future__ import annotations
@@ -60,6 +64,7 @@ from analyze_wipeouts import (
     NetMove,
     Trace,
     at,
+    games_files,
     load,
     net_discs,
     opponent_replies,
@@ -102,13 +107,20 @@ class OnlyPolicy:
 
 
 def load_evaluator(path: Path) -> Evaluator:
+    """The network from an exported model or a raw training checkpoint."""
     import torch
 
+    from reversi.errors import CheckpointError
     from reversi.nn.evaluator import TorchEvaluator
     from reversi.nn.export import load_export
+    from reversi.nn.loader import load_model
 
     torch.set_num_threads(1)
-    return TorchEvaluator(load_export(path).model)
+    try:
+        model = load_export(path).model
+    except CheckpointError:
+        model = load_model(path)
+    return TorchEvaluator(model)
 
 
 def prior_over(evaluator: Evaluator, state: State) -> tuple[dict[int, float], float]:
@@ -213,7 +225,7 @@ def main() -> int:
 
     checkpoints = json.loads(args.protocol.read_text(encoding="utf-8"))["checkpoints"]
     results: dict[str, Any] = {}
-    for path in sorted(args.games_dir.glob("greedy-vs-*.json")):
+    for path in games_files(args.games_dir):
         net, traces = load(path)
         if net not in checkpoints or (args.networks and net not in args.networks):
             continue  # a fixed opponent's games, or a network not asked for

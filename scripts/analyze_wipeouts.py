@@ -14,12 +14,19 @@ Usage::
     python scripts/analyze_wipeouts.py runs/research/pilot-2026-10-games \
         [--opponent greedy] [--figure research/figures/wipeout-values.png]
 
-``--opponent`` names the fixed opponent whose games to read (the
-``<opponent>-vs-*.json`` files). It must be one that reports its tie set
-through ``choices``, as Greedy and its variants do, because the "was it
-avoidable" analysis has to consider every reply the opponent might have
-chosen. The games are replayed with the rules module to recover disc counts,
-which the records do not store per move.
+``--opponent`` names the fixed opponent whose games to read: the
+``<opponent>-vs-*.json`` and ``*-vs-<opponent>.json`` files directly under
+``games_dir`` or one folder down, which covers both one tournament's games
+folder and the Step 3 layout of one folder per pairing. The "was it avoidable"
+analysis has to consider every reply the opponent might have chosen, so by
+default the opponent must report its tie set through ``choices``, as Greedy
+and its variants do. ``--replies any`` instead lets the opponent play *any*
+legal move, for opponents such as Edax or the random-playout search whose
+reply to a move the network did not make cannot be enumerated. A move that is
+safe against every legal reply is safe against them too, so with that option
+"avoidable" is a lower bound: the true count can only be higher. The games are
+replayed with the rules module to recover disc counts, which the records do
+not store per move.
 """
 
 from __future__ import annotations
@@ -44,13 +51,25 @@ OPPONENT = "greedy"
 _replies = None
 
 
-def set_opponent(name: str) -> None:
-    """Choose the fixed opponent. Its ``choices`` method supplies the reply sets."""
+def set_opponent(name: str, *, any_reply: bool = False) -> None:
+    """Choose the fixed opponent and where its possible replies come from.
+
+    By default its ``choices`` method supplies the reply sets. With
+    ``any_reply`` every legal move counts as a possible reply, which is the
+    only sound choice for an opponent that cannot say what it would have
+    played in a position that never arose.
+    """
     global OPPONENT, _replies
+    if any_reply:
+        OPPONENT, _replies = name, legal_actions
+        return
     agent = build_agent(parse_entrant(name, default_simulations=1))
     choices = getattr(agent, "choices", None)
     if choices is None:
-        msg = f"{name} does not report its tie set (no choices method); cannot enumerate replies"
+        msg = (
+            f"{name} does not report its tie set (no choices method); cannot enumerate "
+            "replies. Pass --replies any to treat every legal move as a possible reply."
+        )
         raise SystemExit(msg)
     OPPONENT, _replies = name, choices
 
@@ -151,6 +170,19 @@ def replay(game: dict, net_is_a: bool, board_size: int) -> Trace:
     )
 
 
+def games_files(games_dir: Path) -> list[Path]:
+    """Every recorded-games file against the opponent, here or one folder down.
+
+    A report file sits beside a games folder under the same name, so a file
+    only counts if it holds games rather than a rating table.
+    """
+    found: list[Path] = []
+    for pattern in (f"{OPPONENT}-vs-*.json", f"*-vs-{OPPONENT}.json"):
+        found.extend(games_dir.glob(pattern))
+        found.extend(games_dir.glob(f"*/{pattern}"))
+    return sorted(path for path in set(found) if "games" in json.loads(path.read_text()))
+
+
 def load(path: Path) -> tuple[str, list[Trace]]:
     payload = json.loads(path.read_text())
     a, b = payload["agents"]["a"], payload["agents"]["b"]
@@ -196,18 +228,24 @@ def main() -> int:
     )
     parser.add_argument("games_dir", type=Path)
     parser.add_argument("--opponent", default="greedy")
+    parser.add_argument(
+        "--replies",
+        choices=("tie-set", "any"),
+        default="tie-set",
+        help="Which replies the opponent might make: its reported tie set, or any legal move.",
+    )
     parser.add_argument("--figure", type=Path, default=None)
     args = parser.parse_args()
-    set_opponent(args.opponent)
+    set_opponent(args.opponent, any_reply=args.replies == "any")
 
     results: dict[str, list[Trace]] = {}
-    for path in sorted(args.games_dir.glob(f"{OPPONENT}-vs-*.json")):
+    for path in games_files(args.games_dir):
         net, traces = load(path)
         if not any(trace.moves for trace in traces):
             continue  # the other side is a fixed opponent too; nothing was estimated
         results[net] = traces
     if not results:
-        raise SystemExit(f"no {OPPONENT}-vs-*.json under {args.games_dir}")
+        raise SystemExit(f"no games against {OPPONENT} under {args.games_dir}")
 
     print("## The network's estimates in the moves before a wipeout")
     print()
