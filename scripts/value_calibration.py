@@ -21,7 +21,11 @@ Usage::
 
 The games are grouped by the scorecard rows of ``step3_scorecard.py``, so a
 network's calibration against the opponents it never saw can be read apart
-from its calibration against Greedy.
+from its calibration against Greedy. ``--self-play NAME=RUN_DIR`` adds a
+"self-play" row for that network: its final checkpoint is run over the
+positions of the run's last generation of training games, whose ``z`` is the
+result those games actually reached. That needs torch and the run directory,
+so it is the part that runs where the runs live.
 """
 
 from __future__ import annotations
@@ -53,6 +57,58 @@ def moves_and_outcomes(games_file: Path, network: str) -> tuple[np.ndarray, np.n
                 estimates.append(ply["net_value"])
                 outcomes.append(result)
     return np.array(estimates), np.array(outcomes, dtype=float)
+
+
+def self_play_estimates(run_dir: Path, *, limit: int) -> tuple[np.ndarray, np.ndarray]:
+    """The final checkpoint's raw value on its own last generation of positions, with ``z``.
+
+    The shards of the newest generation in the run's replay folder are read
+    directly, without the manifest's checksum, since this is inspection rather
+    than training. ``z`` is from the mover's view, as the value head's target is.
+    """
+    from reversi.data.shards import read_shard
+    from reversi.errors import CheckpointError
+    from reversi.game.state import State
+    from reversi.nn.evaluator import TorchEvaluator
+    from reversi.nn.export import load_export
+    from reversi.nn.loader import load_model
+    from reversi.types import Player
+
+    shards = sorted((run_dir / "replay").glob("gen_*_w*.npz"))
+    if not shards:
+        msg = f"no replay shards under {run_dir / 'replay'}"
+        raise SystemExit(msg)
+    generation = shards[-1].name.split("_")[1]
+    shards = [path for path in shards if path.name.startswith(f"gen_{generation}_")]
+    checkpoint = run_dir / "checkpoints" / f"gen_{generation}.pt"
+    try:
+        model = load_export(checkpoint).model
+    except CheckpointError:
+        model = load_model(checkpoint)
+    evaluator = TorchEvaluator(model)
+
+    states: list[State] = []
+    z: list[float] = []
+    for path in shards:
+        arrays = read_shard(path, board_size=8)
+        for row in range(len(arrays["black"])):
+            states.append(
+                State(
+                    black=int(arrays["black"][row]),
+                    white=int(arrays["white"][row]),
+                    to_move=Player(int(arrays["to_move"][row])),
+                    size=8,
+                )
+            )
+            z.append(float(arrays["z"][row]))
+    rng = np.random.default_rng(20261025)
+    keep = rng.permutation(len(states))[:limit]
+    states = [states[i] for i in keep]
+    values: list[float] = []
+    for start in range(0, len(states), 512):
+        _, batch_values = evaluator.evaluate(states[start : start + 512])
+        values.extend(float(v) for v in batch_values)
+    return np.array(values), np.array(z, dtype=float)[keep]
 
 
 def calibration(estimates: np.ndarray, outcomes: np.ndarray) -> dict:
@@ -95,7 +151,21 @@ def main() -> int:
     )
     parser.add_argument("eval_dir", type=Path)
     parser.add_argument("--out", type=Path, default=None)
+    parser.add_argument(
+        "--self-play",
+        action="append",
+        default=[],
+        metavar="NAME=RUN_DIR",
+        help="Also calibrate NAME's final checkpoint on RUN_DIR's last generation of games.",
+    )
+    parser.add_argument(
+        "--self-play-limit",
+        type=int,
+        default=20000,
+        help="Positions sampled from the last generation for the self-play row.",
+    )
     args = parser.parse_args()
+    self_play = dict(item.split("=", 1) for item in args.self_play)
 
     results: dict[str, dict[str, dict]] = {}
     for network in CHECKPOINTS:
@@ -112,6 +182,11 @@ def main() -> int:
                 results[network][row] = calibration(
                     np.concatenate(est_parts), np.concatenate(out_parts)
                 )
+        if network in self_play:
+            estimates, outcomes = self_play_estimates(
+                Path(self_play[network]).expanduser(), limit=args.self_play_limit
+            )
+            results[network]["self-play"] = calibration(estimates, outcomes)
 
     print("| network | games against | moves | mean estimate | mean outcome | expected gap |")
     print("|---|---|---:|---:|---:|---:|")
