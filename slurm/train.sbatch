@@ -34,6 +34,8 @@
 #     GENERATIONS  total generations the run should reach
 # Optional:
 #     WORKERS      self-play worker processes; default is the CPU count minus two
+#     EXTRA_ARGS   appended to the train command as given, e.g. "--set seed=1338"
+#                  for a second seed of the same profile
 
 source slurm/env.sh
 
@@ -43,12 +45,15 @@ source slurm/env.sh
 
 workers="${WORKERS:-$(( SLURM_CPUS_PER_TASK - 2 ))}"
 
-echo "config $CONFIG, run $RUN_ID, target $GENERATIONS generations, $workers self-play workers"
+echo "config $CONFIG, run $RUN_ID, target $GENERATIONS generations, $workers self-play workers${EXTRA_ARGS:+, extra args: $EXTRA_ARGS}"
 nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader
 
+# EXTRA_ARGS is deliberately unquoted: it is several arguments, not one.
+# shellcheck disable=SC2086
 rz_run uv run reversi train \
     -c "$CONFIG" \
     --run-id "$RUN_ID" \
     --generations "$GENERATIONS" \
     --device cuda \
-    --set "selfplay.n_workers=$workers"
+    --set "selfplay.n_workers=$workers" \
+    ${EXTRA_ARGS:-}

@@ -368,6 +368,8 @@ train:
   grad_clip: 5.0
   value_loss_weight: 1.0
   ownership_loss_weight: 0.0
+  material_target_weight: 0.0
+  material_target: current
   symmetry_aug: true
 ```
 
@@ -452,6 +454,38 @@ target existed carry no ownership and are left out of this term only.
 0.0 switches the term off, which is exactly the two-term loss above. Setting it
 above 0 without `net.ownership: true` is a configuration error, because there
 would be no head to train.
+
+### `material_target_weight: 0.0` and `material_target: current`
+
+A change to what the value head is asked to predict, not to the loss. With
+weight `w` each position's target becomes
+
+```
+target = (1 − w) × z  +  w × share
+```
+
+where `z` is the game's result from the mover's view (+1, 0, −1) and `share` is
+how the discs are split, also from the mover's view, in [−1, 1]:
+
+- `current` — the split in the position itself: (mine − theirs) / (mine + theirs),
+  read off the input planes.
+- `final` — the split when the game ended: the final margin divided by the
+  number of squares, taken from the ownership target. Positions from shards
+  written before that target existed keep `z` alone.
+
+Why it exists: self-play almost never produces a position where the mover holds
+one or two discs, and when it does the side holding them usually wins, so the
+plain `z` teaches the network that holding almost no discs is fine. Against an
+opponent that flips every disc it can, it is one move from the end. The share is
+near zero when the discs are balanced, so most targets barely move; it is close
+to −1 where the mover holds one disc against forty, so at `w = 0.5` such a
+position is labelled about 0 instead of +1. The blend is applied when a batch is
+drawn, so it covers the whole replay window from the first step, and `value_mae`
+in the training metrics is measured against the blended target.
+
+0.0 is the plain result and the default. The `current` form is the signal-only
+arm of the Step 3 research design (`configs/full8x8_step3_signal.yaml`); the
+`final` form is the conventional score target kept for comparison.
 
 ### `symmetry_aug: true`
 

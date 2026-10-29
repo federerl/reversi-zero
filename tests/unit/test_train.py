@@ -16,12 +16,14 @@ import torch
 
 from reversi.config import TrainConfig
 from reversi.data.replay import Batch
+from reversi.game.state import State
 from reversi.nn import features
 from reversi.nn.model import PolicyValueNet
 from reversi.train.loss import policy_entropy, policy_value_loss
 from reversi.train.schedule import learning_rate
+from reversi.train.targets import blend_value_target, current_share
 from reversi.train.trainer import Trainer
-from reversi.types import policy_size
+from reversi.types import Player, policy_size
 
 BOARD = 4
 WIDTH = policy_size(BOARD)
@@ -286,3 +288,71 @@ def test_the_trainer_state_includes_the_optimiser() -> None:
     assert "model" in state
     assert "optimizer" in state
     assert state["optimizer"]["state"], "optimiser state should not be empty after a step"
+
+
+# ---------------------------------------------------------------------------
+# The value target with a material term (train.material_target_weight)
+# ---------------------------------------------------------------------------
+
+
+def _planes_for(mine: int, theirs: int) -> torch.Tensor:
+    """One encoded position with ``mine`` and ``theirs`` discs, no overlap."""
+    state = State(
+        black=(1 << mine) - 1, white=((1 << theirs) - 1) << mine, to_move=Player.BLACK, size=8
+    )
+    return torch.from_numpy(features.encode(state)).unsqueeze(0)
+
+
+def test_the_current_share_is_the_disc_split_from_the_movers_view() -> None:
+    planes = torch.cat([_planes_for(1, 39), _planes_for(20, 20), _planes_for(30, 10)])
+    share = current_share(planes)
+    assert share.tolist() == pytest.approx([-38 / 40, 0.0, 0.5])
+
+
+def test_weight_zero_leaves_the_target_alone() -> None:
+    z = torch.tensor([1.0, -1.0, 0.0])
+    planes = torch.cat([_planes_for(1, 39)] * 3)
+    out = blend_value_target(z, weight=0.0, source="current", planes=planes)
+    assert torch.equal(out, z)
+
+
+def test_a_one_disc_win_is_relabelled_to_about_zero_at_half_weight() -> None:
+    """The case the setting exists for: self-play said +1, the board says one disc."""
+    z = torch.tensor([1.0])
+    out = blend_value_target(z, weight=0.5, source="current", planes=_planes_for(1, 39))
+    assert out.item() == pytest.approx(0.5 * 1.0 + 0.5 * (-38 / 40))
+    assert abs(out.item()) < 0.05
+
+
+def test_the_final_share_uses_ownership_and_respects_the_mask() -> None:
+    z = torch.tensor([1.0, 1.0])
+    own = torch.zeros((2, 64))
+    own[0, :40] = 1.0  # the mover ended with 40 discs, the rest empty
+    own[1, :10] = -1.0  # a position whose ownership is not real (masked out)
+    valid = torch.tensor([True, False])
+    planes = torch.cat([_planes_for(2, 2)] * 2)
+    out = blend_value_target(z, weight=0.5, source="final", planes=planes, own=own, own_valid=valid)
+    assert out[0].item() == pytest.approx(0.5 * 1.0 + 0.5 * (40 / 64))
+    assert out[1].item() == 1.0
+
+
+def test_final_without_an_ownership_target_is_an_error() -> None:
+    with pytest.raises(ValueError, match="ownership"):
+        blend_value_target(
+            torch.tensor([1.0]), weight=0.5, source="final", planes=_planes_for(2, 2)
+        )
+
+
+def test_the_trainer_measures_value_error_against_the_blended_target() -> None:
+    """With the material term on, a perfect ``z`` predictor is no longer perfect."""
+    batch = fixed_batch(seed=5)
+    plain, _ = small_trainer()
+    blended, _ = small_trainer(material_target_weight=0.5)
+    # Same initial weights so the two runs differ only in the target.
+    blended.model.load_state_dict(plain.model.state_dict())
+
+    plain_metrics = plain.train_on(batch)
+    blended_metrics = blended.train_on(batch)
+
+    assert math.isfinite(blended_metrics["value_loss"])
+    assert blended_metrics["value_mae"] != pytest.approx(plain_metrics["value_mae"])

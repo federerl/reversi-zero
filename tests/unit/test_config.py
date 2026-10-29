@@ -180,3 +180,14 @@ def test_yaml_round_trip() -> None:
 
     restored = Config.model_validate(yaml.safe_load(original.to_yaml()))
     assert restored.sha256 == original.sha256
+
+
+def test_the_material_target_settings_are_bounded() -> None:
+    from reversi.config import TrainConfig
+
+    assert TrainConfig.model_validate({"material_target_weight": 0.5}).material_target == "current"
+    assert TrainConfig.model_validate({"material_target": "final"}).material_target_weight == 0.0
+    with pytest.raises(ValueError, match="material_target_weight"):
+        TrainConfig.model_validate({"material_target_weight": 1.5})
+    with pytest.raises(ValueError, match="material_target"):
+        TrainConfig.model_validate({"material_target": "greedy"})

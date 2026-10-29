@@ -36,6 +36,7 @@ from reversi.data.replay import Batch
 from reversi.nn.model import PolicyValueNet
 from reversi.train.loss import policy_entropy, policy_value_loss
 from reversi.train.schedule import learning_rate
+from reversi.train.targets import blend_value_target
 
 __all__ = ["Trainer"]
 
@@ -84,6 +85,14 @@ class Trainer:
         if batch.own is not None and batch.own_valid is not None:
             own_target = torch.from_numpy(np.ascontiguousarray(batch.own)).to(self.device)
             own_valid = torch.from_numpy(np.ascontiguousarray(batch.own_valid)).to(self.device)
+        z_target = blend_value_target(
+            z_target,
+            weight=self.config.material_target_weight,
+            source=self.config.material_target,
+            planes=planes,
+            own=own_target,
+            own_valid=own_valid,
+        )
 
         lr = learning_rate(
             self.global_step,

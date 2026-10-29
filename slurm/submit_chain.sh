@@ -14,6 +14,11 @@
 # about 96 hours; at 12 to 20 minutes per generation that covers 120 generations
 # with margin.
 #
+# A second seed of the same profile, or any other override, goes through
+# EXTRA_ARGS, which every job of the chain appends to the train command:
+#
+#     EXTRA_ARGS="--set seed=1338" slurm/submit_chain.sh configs/full8x8.yaml step3-A-s2 140 1
+#
 # Check progress with `squeue -u $USER` and `tail -f slurm/logs/rz-<run id>-<job>.out`.
 # Cancel the whole chain with `scancel --name=rz-<run id>`.
 set -euo pipefail
