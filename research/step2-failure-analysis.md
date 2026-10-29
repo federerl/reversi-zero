@@ -97,7 +97,6 @@ Established, each by a different piece of evidence:
 - Self-play produced such positions about once in a hundred games and labelled them as winning (Section 3).
 - Raising the search budget reduces but does not remove the losses, and leaves their character unchanged (Section 4).
 - The ownership head reduces the wipeouts by a third to a half on two training seeds, and what remains has the same character (Section 5).
-
 - The value head has the sign wrong one ply before the wipeout, and the policy head gives the wiping reply a few percent; at fifty simulations the prior is what lets the loss through, and the value head is what makes seeing the wipeout necessary (section 7).
 - Two other disc-hungry opponents produce the same wipeouts, with the same estimates behind them, and a two-ply disc count beats the generation-60 network outright (section 8).
 
@@ -105,7 +104,7 @@ Not established:
 
 - That changing the training distribution would fix it. Section 3 is a description of the data, not an intervention. The ownership head's effect (Section 5) is the closest thing to one: it holds on two seeds of that recipe, but the control recipe still has one seed, and the head changes the learning target, not the opponents, so it says nothing about opponent diversity.
 
-Sections 7 and 8, added after the above was written, settle the first of the two open questions and answer the last one.
+Sections 7 and 8 were added after the above was written. Section 7 settles which head lets the loss through, which the first version of this document left open; section 8 confirms that the loss is not specific to Greedy.
 
 ## 7. Which head lets the wipeout through
 
