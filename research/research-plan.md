@@ -49,11 +49,11 @@ The project examines whether AlphaZero-style self-play-trained Reversi agents ex
 ### Newly suggested Othello-specific papers
 1. Li et al. (2023), **Emergent World Representations: Exploring a Sequence Model Trained on a Synthetic Task** (Othello-GPT), ICLR. https://arxiv.org/abs/2210.13382  
    **Why read:** Demonstrates how Othello can serve as a manageable testbed for studying learned internal representations. Relevant if this project pursues value-network or representation analysis; note that Othello-GPT is a sequence model, not an AlphaZero-style RL agent.
-2. van der Ree & Wiering, **Reinforcement Learning in the Game of Othello: Learning Against a Fixed Opponent and Learning from Self-Play**.  
-   **Why read:** Prior Othello-specific work comparing self-play and learning against a fixed opponent. Important to investigate novelty before claiming that opponent diversity or self-play comparisons are new. **Bibliographic details and canonical link to be verified before formal citation.**
+2. van der Ree & Wiering (2013), **Reinforcement Learning in the Game of Othello: Learning Against a Fixed Opponent and Learning from Self-Play**. IEEE ADPRL, Singapore, pp. 108–115. https://www.ai.rug.nl/~mwiering/GROUP/ARTICLES/paper-othello.pdf  
+   **Why read:** Prior Othello-specific work comparing self-play and learning against a fixed opponent. Reviewed in [Paper 5](lit-reviews/paper-5-vanderree-2013.md): each run trains on one source of games, with no search and no failure analysis, so mixed-opponent training and its transfer remain open.
 
 ### Additional related direction
-- Czempin & Gleave (2022), **Reducing Exploitability with Population Based Training**. Relevant background on exploitability and opponent populations; assess after the core papers if opponent mixing becomes the main question.
+- Czempin & Gleave (2022), **Reducing Exploitability with Population Based Training**. ICML AdvML workshop. https://arxiv.org/abs/2208.05083. Reviewed in [Paper 6](lit-reviews/paper-6-czempin-2022.md): the exploitability framing for the Greedy result, and the population defence as a Phase 2 contrast to fixed hand-written opponents.
 
 ## Scope and claims
 - Othello is substantially smaller than Go, but supports inexpensive controlled experiments, strong reference engines, and detailed failure analysis.
