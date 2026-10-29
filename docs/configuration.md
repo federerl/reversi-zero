@@ -283,6 +283,38 @@ typically buys a 10–20× speedup with no change to the algorithm.
 Stop after 15 cycles. `full8x8` sets this high and instead stops on the job's
 time limit, resuming from the last checkpoint the following night.
 
+### `opponents: []` and `opponent_games: 0`
+
+Off in every shipped config, and off is what "self-play" means: the network
+plays both sides of every game. These two settings exist for one research
+experiment (`research/step3-design.md`) that asks what changes when some
+training games are played against a fixed opponent instead.
+
+```yaml
+selfplay:
+  games_per_generation: 480   # self-play games, as before
+  opponents: [greedy, minimax-d4]
+  opponent_games: 240         # added on top, not taken out of the 480
+```
+
+With `opponent_games` above zero, each generation also plays that many games
+with the network on one side and one of the named opponents on the other. The
+network searches, records its policy targets and learns from the result exactly
+as in self-play; the opponent's moves only move the game along and are never
+training data. The opponents take turns and the network's colour alternates, so
+each opponent is met equally often as black and as white. Which games of the
+generation are external is fixed by the game's index, so a re-run or a resume
+plays the same mix.
+
+Opponents are named the way `reversi arena` names them (`greedy`, `minimax-d4`,
+`edax-l5`). A network is refused: that is a different experiment.
+
+Why the games are *added* rather than taken out of `games_per_generation`: an
+external game yields training examples only from the network's moves, about
+half as many as a self-play game. 480 self-play games plus 240 external games
+produce about as many examples as 600 self-play games, which is what makes a
+run with opponents comparable to one without.
+
 ---
 
 ## `replay` — the training data pool

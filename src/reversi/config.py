@@ -20,12 +20,15 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from reversi.errors import ConfigError
+
+if TYPE_CHECKING:
+    from reversi.selfplay.opponents import OpponentSchedule
 
 _MODEL_CONFIG = ConfigDict(extra="forbid", frozen=True, validate_default=True)
 
@@ -127,6 +130,59 @@ class SelfPlayConfig(_Base):
         "their MCTS leaves batch into a single forward pass.",
     )
     max_generations: int = Field(default=15, ge=1)
+
+    # ---- games against fixed opponents (research/step3-design.md) ------
+    #
+    # Off by default, and off in every shipped config: the 1.0 release is pure
+    # self-play. With ``opponent_games`` above zero, each generation also plays
+    # that many games with the network on one side and one of ``opponents`` on
+    # the other, spread evenly through the generation (see selfplay/opponents.py).
+    # ``games_per_generation`` keeps meaning the self-play games, so a config
+    # that adds opponents adds games rather than silently replacing some.
+    opponents: tuple[str, ...] = Field(
+        default=(),
+        description="Fixed opponents by arena entrant name: greedy, minimax-d4, edax-l5. "
+        "Networks are not allowed.",
+    )
+    opponent_games: int = Field(
+        default=0,
+        ge=0,
+        description="Games per generation against the fixed opponents, on top of "
+        "games_per_generation. Each yields about half the training examples of a "
+        "self-play game, since only the network's moves are recorded.",
+    )
+
+    @field_validator("opponents")
+    @classmethod
+    def _distinct_opponent_names(cls, names: tuple[str, ...]) -> tuple[str, ...]:
+        """Names are checked properly when the opponents are built (the arena's
+        entrant parser knows them); here only the cheap checks, because the
+        config module must stay importable without the arena or torch."""
+        cleaned = tuple(name.strip() for name in names)
+        if any(not name for name in cleaned):
+            msg = "selfplay.opponents contains an empty name"
+            raise ValueError(msg)
+        if len(set(cleaned)) != len(cleaned):
+            msg = f"selfplay.opponents names the same opponent twice: {cleaned}"
+            raise ValueError(msg)
+        return cleaned
+
+    @property
+    def total_games(self) -> int:
+        """Every game a generation plays, self-play and external together."""
+        return self.games_per_generation + self.opponent_games
+
+    def schedule(self) -> OpponentSchedule | None:
+        """Which games are external, or ``None`` when the generation is pure self-play."""
+        if self.opponent_games == 0:
+            return None
+        from reversi.selfplay.opponents import OpponentSchedule
+
+        return OpponentSchedule(
+            selfplay_games=self.games_per_generation,
+            opponent_games=self.opponent_games,
+            opponents=self.opponents,
+        )
 
 
 class ReplayConfig(_Base):
@@ -277,11 +333,18 @@ class Config(_Base):
             )
             raise ValueError(msg)
 
-        if self.selfplay.games_per_generation < self.selfplay.n_workers:
+        if self.selfplay.total_games < self.selfplay.n_workers:
             msg = (
-                f"selfplay.games_per_generation ({self.selfplay.games_per_generation}) "
+                f"selfplay.games_per_generation + opponent_games ({self.selfplay.total_games}) "
                 f"must be >= selfplay.n_workers ({self.selfplay.n_workers}); "
                 "otherwise some workers would have no games to play."
+            )
+            raise ValueError(msg)
+
+        if self.selfplay.opponent_games > 0 and not self.selfplay.opponents:
+            msg = (
+                f"selfplay.opponent_games is {self.selfplay.opponent_games} but "
+                "selfplay.opponents is empty: name at least one fixed opponent."
             )
             raise ValueError(msg)
 

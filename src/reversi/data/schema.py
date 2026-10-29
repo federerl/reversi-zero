@@ -123,6 +123,13 @@ class GameRecord:
     """Plies where only one move was legal. No search was run and no sample was
     kept: there was no decision to record, and training on "the only legal move
     had probability 1" teaches the network nothing it can use."""
+    opponent: str | None = None
+    """The fixed opponent's name when this was not a self-play game, else ``None``.
+    See ``selfplay/opponents.py``. Only the network's moves are in ``samples``."""
+    network: Player | None = None
+    """The colour the network played in a game against a fixed opponent."""
+    black_discs: int = 0
+    white_discs: int = 0
 
     def finish(self, terminal: State) -> None:
         """Fill in ``z`` for every stored position, now that the result is known.
@@ -131,9 +138,10 @@ class GameRecord:
         consecutive positions in a game alternate sign (contract C2 again, this
         time on the training target rather than in the tree).
         """
-        from reversi.game.scoring import result_for
+        from reversi.game.scoring import disc_counts, result_for
 
         self.result_for_black = result_for(terminal, Player.BLACK)
+        self.black_discs, self.white_discs = disc_counts(terminal)
         ownership = {
             Player.BLACK: ownership_for(terminal, Player.BLACK),
             Player.WHITE: ownership_for(terminal, Player.WHITE),

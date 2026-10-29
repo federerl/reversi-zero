@@ -23,16 +23,21 @@ purpose.
 There was no decision, so there is nothing to learn: a target saying "the only
 legal move had probability 1" teaches the network a fact about the rules that the
 rules already enforce, while using up a slot in the training batch.
+
+**A game may have a fixed opponent on one side.** Then the network searches and
+records only on its own turns, and the opponent's moves are applied like forced
+ones: nothing searched, nothing stored. See ``opponents.py`` for why and when.
 """
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
 import numpy as np
 
+from reversi.agents.base import Agent
 from reversi.data.schema import GameRecord, Sample
 from reversi.errors import WorkerError
 from reversi.game import rules
@@ -41,7 +46,8 @@ from reversi.search.evaluator import Evaluator
 from reversi.search.mcts import MCTS, select_move
 from reversi.seeding import game_seed
 from reversi.seeding import rng as make_rng
-from reversi.types import pass_action
+from reversi.selfplay.opponents import OpponentSchedule
+from reversi.types import Player, pass_action
 
 __all__ = ["SelfPlaySummary", "play_game", "play_games"]
 
@@ -60,6 +66,13 @@ class SelfPlaySummary:
     draws: int = 0
     branching_total: int = 0
     branching_count: int = 0
+    # Games against a fixed opponent, counted from the network's side.
+    opponent_games: int = 0
+    opponent_wins: int = 0
+    opponent_losses: int = 0
+    opponent_draws: int = 0
+    network_wipeouts: int = 0
+    """External games the network ended with no discs at all."""
 
     def observe(self, record: GameRecord, branching: list[int]) -> None:
         self.games += 1
@@ -75,6 +88,18 @@ class SelfPlaySummary:
             self.white_wins += 1
         else:
             self.draws += 1
+        if record.opponent is not None and record.network is not None:
+            self.opponent_games += 1
+            network_black = record.network is Player.BLACK
+            result = record.result_for_black if network_black else -record.result_for_black
+            if result > 0:
+                self.opponent_wins += 1
+            elif result < 0:
+                self.opponent_losses += 1
+            else:
+                self.opponent_draws += 1
+            discs = record.black_discs if network_black else record.white_discs
+            self.network_wipeouts += discs == 0
 
     def as_metrics(self) -> dict[str, Any]:
         plies = np.asarray(self.plies, dtype=np.float64) if self.plies else np.zeros(1)
@@ -95,6 +120,18 @@ class SelfPlaySummary:
             # the agent having found a strategy.
             "first_player_win_rate": self.black_wins / decisive,
             "draw_rate": self.draws / max(1, self.games),
+            # Zero in pure self-play. The score is points per game for the
+            # network against its fixed opponents; the wipeout rate is the share
+            # of those games it ended with no discs, the failure Step 2 found.
+            "opponent_games": self.opponent_games,
+            "opponent_score": (
+                (self.opponent_wins + 0.5 * self.opponent_draws) / self.opponent_games
+                if self.opponent_games
+                else 0.0
+            ),
+            "opponent_wipeout_rate": (
+                self.network_wipeouts / self.opponent_games if self.opponent_games else 0.0
+            ),
         }
 
 
@@ -106,14 +143,24 @@ def play_game(
     rng: np.random.Generator,
     max_plies: int | None = None,
     game_index: int = -1,
+    opponent: Agent | None = None,
+    opponent_name: str | None = None,
+    network: Player = Player.BLACK,
 ) -> tuple[GameRecord, list[int]]:
-    """Play one game against yourself. Returns the record and the branching seen.
+    """Play one game against yourself, or against ``opponent`` as colour ``network``.
 
-    ``rng`` drives both the exploration noise inside the search and the sampling
-    of which move to play, so one seed reproduces the whole game.
+    Returns the record and the branching seen. ``rng`` drives the exploration
+    noise inside the search, the sampling of which move to play and the
+    opponent's tie-breaks, so one seed reproduces the whole game.
     """
     mcts = MCTS(evaluator, search_config)
-    record = GameRecord(samples=[], board_size=board_size, game_index=game_index)
+    record = GameRecord(
+        samples=[],
+        board_size=board_size,
+        game_index=game_index,
+        opponent=opponent_name if opponent is not None else None,
+        network=network if opponent is not None else None,
+    )
     branching: list[int] = []
 
     state = rules.initial_state(board_size)
@@ -131,6 +178,15 @@ def play_game(
                 f"past the ceiling of {ceiling}. The rules engine is misbehaving."
             )
             raise WorkerError(msg)
+
+        if opponent is not None and state.to_move is not network:
+            # The opponent's move: no search, no sample, just the next position.
+            action = opponent.select(state, rng)
+            if action == passing:
+                record.passes += 1
+            state = rules.apply(state, action)
+            ply += 1
+            continue
 
         actions = rules.legal_actions(state)
         if len(actions) == 1:
@@ -172,6 +228,9 @@ def play_games(
     generation: int,
     worker_id: int = 0,
     max_plies: int | None = None,
+    schedule: OpponentSchedule | None = None,
+    opponents: Mapping[str, Agent] | None = None,
+    first_game: int = 0,
 ) -> Iterator[tuple[GameRecord, list[int]]]:
     """Play ``n_games``, each with its own derived seed.
 
@@ -179,9 +238,30 @@ def play_games(
     from a running counter, so game 57 of generation 3 is the same game whether it
     was played in one long run or after a resume -- and two workers can never
     accidentally play identical games.
+
+    With a ``schedule``, game ``first_game + index`` of the generation may be one
+    against a fixed opponent; ``first_game`` is this worker's offset into the
+    generation, used for that lookup only, so the seeds above are unchanged.
     """
     for index in range(n_games):
         seed = game_seed(root_seed, generation, worker_id, index)
+        assignment = schedule.assignment(first_game + index) if schedule is not None else None
+        if assignment is not None:
+            if opponents is None or assignment.opponent not in opponents:
+                msg = f"the schedule names opponent {assignment.opponent!r} but none was built"
+                raise WorkerError(msg)
+            yield play_game(
+                evaluator,
+                search_config,
+                board_size=board_size,
+                rng=make_rng(seed),
+                max_plies=max_plies,
+                game_index=index,
+                opponent=opponents[assignment.opponent],
+                opponent_name=assignment.opponent,
+                network=assignment.network,
+            )
+            continue
         yield play_game(
             evaluator,
             search_config,
