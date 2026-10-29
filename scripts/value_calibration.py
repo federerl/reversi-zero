@@ -17,6 +17,7 @@ undersold itself.
 Usage::
 
     python scripts/value_calibration.py ~/reversi-runs/step3-eval \
+        --self-play B-s1=~/reversi-runs/step3-B-s1 ... \
         --out research/results/step3/value-calibration.json
 
 The games are grouped by the scorecard rows of ``step3_scorecard.py``, so a
