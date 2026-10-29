@@ -221,6 +221,18 @@ class TrainConfig(_Base):
         description="Weight on the ownership head's loss. 0 disables the term. "
         "Needs net.ownership.",
     )
+    material_target_weight: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+        description="Share of the value target taken from the disc split instead of "
+        "the game result: target = (1 - w) * z + w * share. 0 is the plain result.",
+    )
+    material_target: Literal["current", "final"] = Field(
+        default="current",
+        description="Which disc split: 'current', the split in the position itself, "
+        "or 'final', the margin when the game ended (needs the ownership target).",
+    )
     symmetry_aug: bool = Field(
         default=True,
         description="Apply a random one of the 8 dihedral symmetries per sample "

@@ -20,7 +20,7 @@ All groups start from the same checkpoint and train for the same number of gener
 |---|---|---|
 | **A, control** | 600 self-play games | nothing: the control recipe continued |
 | **B, opponent mix** | 480 self-play games + 240 games against a fixed opponent | 20% of the training examples come from games against Greedy or Minimax-d4 |
-| **D, signal only** (if budget allows) | 600 self-play games | the value target is supplemented with a disc-count term; no external opponent |
+| **D, signal only** | 600 self-play games | half of each value target is the position's disc share instead of the game's result; no external opponent |
 
 Two training seeds per group. Earlier in the project, two seeds of one recipe differed by 48 rating points, so a single run per group would not separate the recipe from the seed.
 
@@ -30,7 +30,11 @@ Two training seeds per group. Earlier in the project, two seeds of one recipe di
 
 **Group C (Edax in the mix)** from the proposal is deferred to Phase 2. Edax does not wipe anyone out, so it has no bearing on the mechanism Step 2 found, and matching its search time against the other groups would add a confounder to a comparison that otherwise changes one thing.
 
-**Group D** is the cheapest arm and the one that speaks to the self-play premise. If a better training signal fixes the wipeouts without any external opponent, the weakness was in what the value target told the network, not in self-play as such. Its design is the ownership head's: at the same generation, the network trained with the ownership head is wiped out a third to a half less often (Step 2, section 5). D runs only if the four A/B runs fit the budget with room to spare; otherwise it is the pre-registered next experiment.
+**Group D** is the cheapest arm and the one that speaks to the self-play premise. If a better training signal fixes the wipeouts without any external opponent, the weakness was in what the value target told the network, not in self-play as such. The precedent is the ownership head: at the same generation, the network trained with it is wiped out a third to a half less often (Step 2, section 5). D asks the same question with a term aimed at the mechanism rather than at the whole board.
+
+Its target is fixed here, before the run. Each position's value target becomes half the game's result and half the position's *disc share*, (own discs − opponent's discs) / (all discs) from the mover's view: `train.material_target_weight: 0.5` with `train.material_target: current`, in `configs/full8x8_step3_signal.yaml`, which is otherwise `configs/full8x8.yaml`. The share is near zero in a balanced position, so most targets barely move; it is about −0.95 where the mover holds one disc against forty, which is exactly where Step 2 found the value head confidently wrong, so a one-disc position that self-play labelled +1 is relabelled about 0. The blend is applied when a batch is drawn, so it covers the copied replay window from the first gradient step, not only the games D plays itself. The cost to watch is retention: a value head that is half material is half Greedy's judgement, and the retention and Edax rows are where that would show. The conventional alternative, blending in the *final* margin instead, is implemented beside it (`material_target: final`) but is not an arm: it leaves the sign of a one-disc position that went on to be won unchanged, so it does not address the mechanism.
+
+D runs alongside A and B, one seed first; the measured cost on the cluster (section 6) leaves room for a second.
 
 ## 3. How the fixed opponents enter training
 
@@ -68,7 +72,7 @@ Wipeout counts are reported for every row. The held-out and seen-family rows als
    - **B improves on held-out rows and holds retention:** opponent exposure taught something general about low disc counts, not just Greedy's habits.
    - **B improves only on seen and seen-family rows:** the network learned its two training opponents. This is the Go-literature outcome, and it is a clean negative result.
    - **B improves on seen rows and loses retention:** the exposure cost general strength. Reported as such; it would argue for a smaller share or for group D's approach.
-4. If group D runs: it is predicted to cut wipeouts against Greedy without external games, by the same amount as the ownership head did. Whether it moves the held-out rows is not predicted.
+4. Group D is predicted to cut wipeouts against Greedy without external games, by about the amount the ownership head did (a third to a half). Its retention row is predicted to fall by a measurable amount, since half of the value head's target is now material; a fall larger than B's would mean the signal-only route is the costlier one. Whether it moves the held-out rows is not predicted.
 5. The head probe (`scripts/probe_heads.py`) is re-run on each group's final checkpoint, on whatever wipeouts remain. For group B the raw value at the fatal position is predicted to fall well below the +0.99 of the starting checkpoint, while the prior on Greedy's wiping reply is predicted to change little, because nothing in the design trains the policy head at the opponent's node. If the value stays at +0.99 and the wipeouts fall anyway, the mechanism is not the one Step 2 identified, and that is reported.
 
 ## 6. Cost
@@ -85,9 +89,12 @@ reversi train -c configs/full8x8.yaml --run-id step3-A-s1 --generations 140 --de
 
 cp -r runs/control runs/step3-B-s1
 reversi train -c configs/full8x8_step3_mix.yaml --run-id step3-B-s1 --generations 140 --device cuda     --set selfplay.n_workers=22
+
+cp -r runs/control runs/step3-D-s1
+reversi train -c configs/full8x8_step3_signal.yaml --run-id step3-D-s1 --generations 140 --device cuda     --set selfplay.n_workers=22
 ```
 
-The second seed of each group adds `--set seed=1338`. Copying the replay window as well as the checkpoints matters: both groups then start from the same 400,000 positions and the same weights, and diverge only through the games they play from generation 121 on. `configs/full8x8_step3_mix.yaml` is `configs/full8x8.yaml` with the `selfplay` block changed and nothing else; the two files are kept side by side so the diff is the experiment.
+The second seed of each group adds `--set seed=1338`. On the cluster the same runs go through `slurm/submit_chain.sh`, with the seed passed as `EXTRA_ARGS="--set seed=1338"`. Copying the replay window as well as the checkpoints matters: both groups then start from the same 400,000 positions and the same weights, and diverge only through the games they play from generation 121 on. `configs/full8x8_step3_mix.yaml` is `configs/full8x8.yaml` with the `selfplay` block changed and nothing else; the two files are kept side by side so the diff is the experiment.
 
 ## 8. What is logged, per group and generation
 

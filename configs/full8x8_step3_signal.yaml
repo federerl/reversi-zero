@@ -1,0 +1,56 @@
+# Step 3, group D: the control recipe with a different value target and no
+# external opponent (research/step3-design.md, section 2).
+#
+# Group B shows the network positions where holding one disc is fatal by letting
+# it play Greedy. This group asks whether the same blind spot can be closed by
+# changing what the training target says about such positions, with every game
+# still self-play. If it works, the weakness was in the signal, not in self-play.
+#
+# The one change, in `train`: half of each value target is the game's result
+# and half is the position's disc share, (mine - theirs) / (mine + theirs) from
+# the mover's view. In a balanced position the share is near zero and the target
+# barely moves. Where the mover holds one disc against forty the share is about
+# -0.95, so a position that self-play labelled +1 (because the side with one
+# disc usually went on to win) is relabelled about 0. That is the region where
+# Step 2 found the value head confidently wrong.
+#
+# The blend happens when a batch is drawn, so it applies to the copied replay
+# window from the first gradient step, not only to the games this run plays.
+#
+# Everything else is configs/full8x8.yaml: the same search, the same 600
+# self-play games, the same trainer and window. Group A is that file continued
+# from the same checkpoint; this file differs from it in the two `train` lines.
+
+name: full8x8-step3-signal
+
+net:
+  n_blocks: 6
+  channels: 64
+
+mcts:
+  n_simulations: 200
+  temp_moves: 15
+
+selfplay:
+  games_per_generation: 600
+  n_workers: 6
+  games_in_flight: 24
+  max_generations: 400
+
+replay:
+  window: 400000
+  retain_shards: 30
+
+train:
+  steps_per_generation: 800
+  batch_size: 1024
+  optimizer: sgd
+  lr: 0.02
+  momentum: 0.9
+  weight_decay: 0.0001
+  material_target_weight: 0.5   # THE CHANGE (1 of 2): half result, half disc share
+  material_target: current      # THE CHANGE (2 of 2): the share in the position itself
+
+arena:
+  every_n_generations: 5
+  games: 400
