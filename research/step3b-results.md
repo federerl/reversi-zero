@@ -2,8 +2,8 @@
 
 **Applies to:** the follow-up pre-registered in [step3b-design.md](step3b-design.md), to the [Step 3 results](step3-results.md), section 10, item 1
 **Trained:** November 1, 2026, on the cluster, one L40S and 22 self-play workers per run, the code of `configs/full8x8_step3_both.yaml` and `selfplay.record_opponent_positions` at commit `b1d96f8`
-**Evaluated:** November 1, 2026, on the cluster's CPU partition: 26 pairings of 200 games, one job each, the same frozen protocol as Step 3. The random-playout and generation-60 pairings are still running; their cells read *pending* below.
-**Reports:** [`results/step3b/head-probe.json`](results/step3b/head-probe.json), [`results/step3b/lesson-rows.json`](results/step3b/lesson-rows.json). The scorecard JSON and the calibration check follow when the last pairings finish. The arena reports and recorded games are under `~/reversi-runs/step3-eval/` on the cluster and are not committed.
+**Evaluated:** November 1, 2026, on the cluster's CPU partition: 26 pairings of 200 games, one job each, the same frozen protocol as Step 3.
+**Reports:** [`results/step3b/scorecard.json`](results/step3b/scorecard.json) (every pairing's score, interval and wipeout count, the Step 3 control and group B included), [`results/step3b/head-probe.json`](results/step3b/head-probe.json), [`results/step3b/lesson-rows.json`](results/step3b/lesson-rows.json), [`results/step3b/value-calibration.json`](results/step3b/value-calibration.json). The arena reports and recorded games are under `~/reversi-runs/step3-eval/` on the cluster and are not committed.
 **Verdict: the null the design named, and the reason behind it.** The opponent's positions were recorded and trained on, about 2,900 of them per generation. At the positions the search reads when it walks into a wipeout, the value head did not move: −0.98 and −0.99 where the exact answer is +1, against −0.98 for Step 3's group B and −0.99 for the control. The wipeouts against Greedy did not fall (61 and 69 against the control's 65). Section 5 counts the training rows and finds why: in twenty generations the trainer saw about 80 rows that carry the lesson, and more than four thousand that look the same to a value head and say the opposite. The Step 3 explanation, "the value head was never trained where the search reads it", is closed. The weakness is not a gap in the training data; it is a one-move tactic that a value target cannot carry and a 50-simulation search reading a 4% prior does not look at.
 
 ## 1. What was run
@@ -28,10 +28,10 @@ Scores are the checkpoint's wins plus half its draws over 200 games, with 95% Wi
 | **held out** | Edax L7 | 10.0% [6.6, 14.9], 9 wo | 9.8% [6.4, 14.7], 4 wo | 13.8% [9.7, 19.2], 5 wo | 14.8% [10.5, 20.3], 2 wo | 11.8% [8.0, 16.9], 6 wo |
 | **held out** | Edax L5 | 29.8% [23.8, 36.4], 0 wo | 29.5% [23.6, 36.2], 3 wo | 40.2% [33.7, 47.2], 3 wo | 26.2% [20.6, 32.8], 2 wo | 37.0% [30.6, 43.9], 1 wo |
 | **held out** | Edax L3 | 72.0% [65.4, 77.8], 0 wo | 68.5% [61.8, 74.5], 3 wo | 68.5% [61.8, 74.5], 1 wo | 68.0% [61.2, 74.1], 0 wo | 64.8% [57.9, 71.0], 1 wo |
-| **held out** | rollout-r3000 | 81.0% [75.0, 85.8], 34 wo | 88.0% [82.8, 91.8], 21 wo | 80.5% [74.5, 85.4], 39 wo | *pending* | *pending* |
-| retention | gen60 | 62.5% [55.6, 68.9], 0 wo | 57.8% [50.8, 64.4], 0 wo | 60.8% [53.8, 67.3], 0 wo | *pending* | *pending* |
+| **held out** | rollout-r3000 | 81.0% [75.0, 85.8], 34 wo | 88.0% [82.8, 91.8], 21 wo | 80.5% [74.5, 85.4], 39 wo | 80.8% [74.7, 85.6], 36 wo | 80.8% [74.7, 85.6], 37 wo |
+| retention | gen60 | 62.5% [55.6, 68.9], 0 wo | 57.8% [50.8, 64.4], 0 wo | 60.8% [53.8, 67.3], 0 wo | 61.8% [54.9, 68.2], 0 wo | 62.3% [55.4, 68.7], 0 wo |
 | seen | Greedy | 67.5% [60.7, 73.6], **65 wo** | 73.5% [67.0, 79.1], **53 wo** | 68.0% [61.2, 74.1], **64 wo** | 69.0% [62.3, 75.0], **61 wo** | 65.5% [58.7, 71.7], **69 wo** |
-| seen | Minimax-d4 | 99.0% [96.4, 99.7], 0 wo | 99.5% [97.2, 99.9], 0 wo | 98.5% [95.7, 99.5], 0 wo | 96.2% [92.6, 98.1], 0 wo | *pending* |
+| seen | Minimax-d4 | 99.0% [96.4, 99.7], 0 wo | 99.5% [97.2, 99.9], 0 wo | 98.5% [95.7, 99.5], 0 wo | 96.2% [92.6, 98.1], 0 wo | 97.5% [94.3, 98.9], 0 wo |
 | seen family | greedy-corner | 63.5% [56.6, 69.9], 72 wo | 64.5% [57.7, 70.8], 71 wo | 65.5% [58.7, 71.7], 69 wo | 60.5% [53.6, 67.0], 77 wo | 65.0% [58.2, 71.3], 70 wo |
 | seen family | greedy-d2 | 59.0% [52.1, 65.6], 82 wo | 58.0% [51.1, 64.6], 84 wo | 61.0% [54.1, 67.5], 78 wo | 58.0% [51.1, 64.6], 84 wo | 55.5% [48.6, 62.2], 89 wo |
 | seen family | noisy-greedy | 73.5% [67.0, 79.1], 52 wo | 74.0% [67.5, 79.6], 51 wo | 67.0% [60.2, 73.1], 66 wo | 78.0% [71.8, 83.2], 44 wo | 79.5% [73.4, 84.5], 41 wo |
@@ -39,7 +39,7 @@ Scores are the checkpoint's wins plus half its draws over 200 games, with 95% Wi
 | seen family | mobility | 91.5% [86.8, 94.6], 17 wo | 91.0% [86.2, 94.2], 18 wo | 94.0% [89.8, 96.5], 12 wo | 91.0% [86.2, 94.2], 18 wo | 95.0% [91.0, 97.3], 10 wo |
 | sanity | Random | 100% [98.1, 100], 0 wo | 98.5% [95.7, 99.5], 3 wo | 99.0% [96.4, 99.7], 2 wo | 99.0% [96.4, 99.7], 2 wo | 98.0% [95.0, 99.2], 4 wo |
 
-Every reported row sits where the control and group B sit, inside the seed noise Step 3 measured (10 points on one row between two control seeds). The one row that leans the same way on both seeds, noisy-greedy at 78.0% and 79.5% with 44 and 41 wipeouts against the control's 73.5% and 52, is a 5-point lean on a row where the two A seeds of Step 3 differed by 4 points and 8 wipeouts, and the Greedy row beside it does not share it.
+Every row sits where the control and group B sit, inside the seed noise Step 3 measured (10 points on one row between two control seeds). The one row that leans the same way on both seeds, noisy-greedy at 78.0% and 79.5% with 44 and 41 wipeouts against the control's 73.5% and 52, is a 5-point lean on a row where the two A seeds of Step 3 differed by 4 points and 8 wipeouts, and the Greedy row beside it does not share it. The random-playout row, the held-out opponent that attacks the same weakness Greedy does, is the control's number to within a game on both seeds: 36 and 37 wipeouts against 34.
 
 ## 3. The predictions, one by one
 
@@ -49,11 +49,11 @@ The design fixed five predictions before the runs (section 4 there).
 
 **2. "Wipeouts against Greedy fall sharply, to well under half of 53 to 65."** False: 61 and 69.
 
-**3. "The random-playout row moves."** *Pending.* With predictions 1 and 2 false, there is no mechanism left for it to move by, and the expectation is the Step 3 range (21 to 39).
+**3. "The random-playout row moves."** False: 80.8% on both seeds against the control's 81.0%, with 36 and 37 wipeouts against 34. Group B's two seeds spanned 21 to 39 wipeouts on this row; both B-both seeds land in the middle of that range.
 
 **4. "The Edax rows do not move beyond seed noise."** True: 14.8% and 11.8% against L7, 26.2% and 37.0% against L5, 68.0% and 64.8% against L3, all inside the range the control and B seeds span.
 
-**5. "Retention and calibration hold."** *Pending* for the generation-60 row and the calibration check. Nothing in the reported rows suggests a cost: the Edax and seen-family rows are flat rather than down.
+**5. "Retention and calibration hold."** Retention holds: 61.8% and 62.3% against the generation-60 checkpoint, against the control's 62.5% and group B's 57.8% and 60.8%, with no wipeouts on any of them. Calibration holds too (section 6): on every row the two B-both networks are within two points of the control's estimate and gap. Prediction 5 is the one that came true in full, and it says only that the change cost nothing.
 
 This is the third of the three readable outcomes the design listed: prediction 1 fails and the rest is flat, "the null, and closes the recording-rule explanation."
 
@@ -95,16 +95,30 @@ Three things stand out.
 
 This also settles what Step 3's group B did and did not learn. Its value at the network's own fatal position fell from +0.99 to +0.84: nine thousand rows at that state, 8% of them losses, moved the estimate by the amount the mixture implies, and the half dose of B-both moved it half as far. Neither run moved the position one ply later, because the rows there were fewer and the mixture there is the same. The value head learned exactly what the data said. The data said the position is fine.
 
-## 6. What this establishes
+## 6. Value calibration
+
+The check the Step 3 design asked for after any training change: every raw value the network produced during the evaluation games, before search, binned by its value and set against how the game ended, both on a win-probability scale. "Gap" is the count-weighted mean absolute difference between a bin's mean estimate and its mean outcome over ten bins. The self-play column is the network's own last generation of training positions, 20,000 sampled, with the result those games reached. The control and group B rows are recomputed from the same recorded games as Step 3's section 8 and agree with it to a point of rounding.
+
+| network | self-play positions | against held-out opponents | against gen60 | against Greedy and Minimax-d4 | against Random |
+|---|---|---|---|---|---|
+| control120 | est. 0.51, won 0.51, gap 0.01 | est. 0.59, won 0.50, gap 0.09 | est. 0.57, won 0.63, gap 0.08 | est. 0.89, won 0.95, gap 0.09 | est. 0.96, won 1.00, gap 0.04 |
+| B-s1 | est. 0.59, won 0.60, gap 0.02 | est. 0.60, won 0.50, gap 0.10 | est. 0.57, won 0.58, gap 0.06 | est. 0.91, won 0.96, gap 0.07 | est. 0.96, won 1.00, gap 0.04 |
+| B-s2 | est. 0.60, won 0.60, gap 0.02 | est. 0.61, won 0.53, gap 0.08 | est. 0.60, won 0.61, gap 0.06 | est. 0.91, won 0.95, gap 0.06 | est. 0.96, won 1.00, gap 0.04 |
+| B-both-s1 | est. 0.52, won 0.52, gap 0.02 | est. 0.58, won 0.49, gap 0.09 | est. 0.58, won 0.62, gap 0.06 | est. 0.89, won 0.94, gap 0.07 | est. 0.95, won 1.00, gap 0.05 |
+| B-both-s2 | est. 0.51, won 0.51, gap 0.02 | est. 0.59, won 0.50, gap 0.08 | est. 0.59, won 0.62, gap 0.06 | est. 0.90, won 0.94, gap 0.08 | est. 0.95, won 1.00, gap 0.04 |
+
+Nothing moved. The B-both networks are calibrated on their own training positions to within a point, overrate themselves against the held-out opponents by the same 8 to 10 points as the control and group B, and are within two points of the control on every other row. The one visible difference is in the self-play column's mean outcome, 0.52 against group B's 0.60, and it is a property of the data rather than of the network: group B recorded only the network's side of its external games, which it won 92% of the time, so a fifth of its training positions carried a result near +1; B-both recorded both sides, so each external game contributed a win and a loss, and the mean result of the training set went back to even. The value head's estimate followed in both cases, which is one more reading of section 5: the head learned the average of what it was shown.
+
+## 7. What this establishes
 
 - **The recording rule was not the reason for group B's null.** Recording the opponent's positions trained the value head at the position the search reads, and the value there did not change on either seed. The explanation Step 3 proposed in its section 5 is closed by the test it asked for.
 - **The wipeout is not a data-coverage problem.** It is a one-ply tactic in a state that is usually favourable. A value target of any kind reaches that state through the game result, and the game result in that state says, most of the time, that it is fine. The material target of group D moved the value there by brute force, by labelling every low-disc position as bad, and paid for it with every other position's calibration (Step 3 results, section 6).
 - **The weakness sits in the search, and the fix does too.** At 50 simulations the exact answer, a terminal position one ply below the child, is never looked at because the prior on the wiping reply is 4% and the child's value says there is nothing to see. The value-head-only search finds the escape in every probed position on every checkpoint, which means the information is already present one ply down; what is missing is a reason to expand that node. A one-ply check for terminal replies at the root's children, or a search budget that reaches them anyway, closes the hole by construction. That is an engineering change to the agent, not an experiment about opponent diversity, and it is outside the Step 3 question.
 - **Opponent exposure did produce the states.** Nine thousand low-disc positions against fifty is the one clear thing the opponent mix changed in the training data. The mix did its job at the level of the data; the lesson inside those states was too rare to learn by value regression.
 
-**What it does not establish.** It does not test a larger external share or a longer run; the count in section 5 scales with both, but so does the count of look-alike rows, and the ratio is set by the game, not by the share. It does not test weighting the lesson rows up in the loss, which would be the data-side counterpart of group D's target and would likely inherit its cost in a weaker form. It says nothing about adaptive adversaries; the opponents were fixed. The random-playout and retention rows are pending, and the calibration check with them.
+**What it does not establish.** It does not test a larger external share or a longer run; the count in section 5 scales with both, but so does the count of look-alike rows, and the ratio is set by the game, not by the share. It does not test weighting the lesson rows up in the loss, which would be the data-side counterpart of group D's target and would likely inherit its cost in a weaker form. It says nothing about adaptive adversaries; the opponents were fixed.
 
-## 7. What follows
+## 8. What follows
 
 The Step 3 series has now tested the two data-side routes to the Step 2 weakness, an opponent mix and a different target, plus the one-variable repair the first route pointed to. The mix changed nothing that transfers; the target transferred at too high a price; the repair reached the position and found nothing to learn there. The next step is the Phase 1 report ([outline](phase1-report-outline.md)), with this document as its last results section. If any further run is made before the report, it is one of these, in order of cost:
 
@@ -112,7 +126,7 @@ The Step 3 series has now tested the two data-side routes to the Step 2 weakness
 2. **A second D seed**, to put an interval on the one signal-only result.
 3. **Weighting value-only lesson rows**, only if the report needs to say whether the data-side route is closed outright; the expectation from section 5 is a smaller version of group D's trade-off.
 
-## 8. Reproduction
+## 9. Reproduction
 
 On the cluster, with the two runs under `~/reversi-runs/` and the patch of PR #64 applied in the working copy:
 
@@ -122,12 +136,13 @@ slurm/submit_chain.sh configs/full8x8_step3_both.yaml step3-Bboth-s1 140 1
 EXTRA_ARGS="--set seed=1338" slurm/submit_chain.sh configs/full8x8_step3_both.yaml step3-Bboth-s2 140 1
 
 # evaluation: one job per pairing, as in Step 3 results section 11, with Bboth-s1 and Bboth-s2 as the entrants
-python scripts/step3_scorecard.py ~/reversi-runs/step3-eval --markdown
+python scripts/step3_scorecard.py ~/reversi-runs/step3-eval --markdown --out research/results/step3b/scorecard.json
 python scripts/probe_heads.py ~/reversi-runs/step3-eval --protocol <checkpoints map> \
     --networks Bboth-s1 Bboth-s2 --out research/results/step3b/head-probe.json
 python scripts/step3b_lesson_rows.py ~/reversi-runs/step3-Bboth-s1 ~/reversi-runs/step3-Bboth-s2 \
     ~/reversi-runs/step3-B-s1 ~/reversi-runs/step3-B-s2 ~/reversi-runs/step3-A-s1 \
     --from-generation 121 --out research/results/step3b/lesson-rows.json
+python scripts/value_calibration.py ~/reversi-runs/step3-eval \n    --self-play control120=~/reversi-runs/control --self-play B-s1=~/reversi-runs/step3-B-s1 \n    --self-play B-s2=~/reversi-runs/step3-B-s2 --self-play Bboth-s1=~/reversi-runs/step3-Bboth-s1 \n    --self-play Bboth-s2=~/reversi-runs/step3-Bboth-s2 --out research/results/step3b/value-calibration.json
 ```
 
-The checkpoints map is the Step 3 one with two entries added, `Bboth-s1` and `Bboth-s2`, pointing at each run's `gen_00140.pt`.
+The checkpoints map is the Step 3 one with two entries added, `Bboth-s1` and `Bboth-s2`, pointing at each run's `gen_00140.pt`. The scorecard and calibration scripts list the Step 3 checkpoints; for these tables their `CHECKPOINTS` tuple was `control120, B-s1, B-s2, Bboth-s1, Bboth-s2`.
