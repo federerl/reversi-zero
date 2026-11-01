@@ -53,7 +53,7 @@ from reversi.search.node import Node
 from reversi.seeding import game_seed
 from reversi.seeding import rng as make_rng
 from reversi.selfplay.opponents import OpponentSchedule
-from reversi.types import Action, Player, pass_action
+from reversi.types import Action, Player, pass_action, policy_size
 
 __all__ = ["BatchedSelfPlay"]
 
@@ -80,6 +80,7 @@ class _Slot:
         "pending",
         "ply",
         "record",
+        "record_opponent",
         "rng",
         "root",
         "sims_done",
@@ -103,6 +104,7 @@ class _Slot:
         # A fixed opponent on the other side, for the games that have one.
         self.opponent: Agent | None = None
         self.network = Player.BLACK
+        self.record_opponent = False
 
     # -- lifecycle ----------------------------------------------------
 
@@ -115,6 +117,7 @@ class _Slot:
         opponent: Agent | None = None,
         opponent_name: str | None = None,
         network: Player = Player.BLACK,
+        record_opponent: bool = False,
     ) -> None:
         self.game_index = game_index
         self.state = rules.initial_state(board_size)
@@ -133,6 +136,7 @@ class _Slot:
         self.branching = []
         self.opponent = opponent
         self.network = network
+        self.record_opponent = record_opponent
         self.finished = False
 
     def prepare(self, ceiling: int) -> State | None:
@@ -190,8 +194,20 @@ class _Slot:
                 self._finish()
                 return
             if self.opponent is not None and self.state.to_move is not self.network:
-                # The opponent's turn: its move needs no network call and is not
-                # recorded, so it is handled here with the forced moves.
+                # The opponent's turn: its move needs no network call, so it is
+                # handled here with the forced moves. The position is kept as a
+                # value-only sample when asked to (see worker.play_game).
+                if self.record_opponent and len(rules.legal_actions(self.state)) > 1:
+                    self.record.samples.append(
+                        Sample(
+                            black=self.state.black,
+                            white=self.state.white,
+                            to_move=self.state.to_move,
+                            pi=np.zeros(policy_size(self.state.size), dtype=np.float32),
+                            move_no=self.ply,
+                            pi_valid=False,
+                        )
+                    )
                 self._apply(self.opponent.select(self.state, self.rng), ceiling)
                 continue
             actions = rules.legal_actions(self.state)
@@ -363,7 +379,7 @@ class BatchedSelfPlay:
             if self.schedule is not None
             else None
         )
-        if assignment is None:
+        if self.schedule is None or assignment is None:
             slot.start(game_index, self._seed(game_index), self.board_size)
             return
         if self.opponents is None or assignment.opponent not in self.opponents:
@@ -376,6 +392,7 @@ class BatchedSelfPlay:
             opponent=self.opponents[assignment.opponent],
             opponent_name=assignment.opponent,
             network=assignment.network,
+            record_opponent=self.schedule.record_opponent_positions,
         )
 
     def _seed(self, game_index: int) -> int:

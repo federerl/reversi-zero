@@ -2,11 +2,12 @@
 
 Three things have to hold for the opponent-diversity experiment to mean what
 it says. The share of external games must be exactly what the config states
-and the same on every re-run, so the groups differ in one thing. Only the
-network's own decisions may become training examples, so an external game
-teaches the network about *its* moves and nothing about the opponent's. And
-the batched scheduler must play exactly the games the one-at-a-time path
-plays, as it already must for self-play.
+and the same on every re-run, so the groups differ in one thing. Which
+positions of an external game become training examples must be exactly what
+the schedule says: the network's own decisions always, the opponent's
+positions only when asked for and then as value-only rows, so the policy head
+never learns the opponent's moves. And the batched scheduler must play exactly
+the games the one-at-a-time path plays, as it already must for self-play.
 """
 
 from __future__ import annotations
@@ -187,7 +188,7 @@ def fingerprint(records) -> dict:
             record.result_for_black,
             tuple(branching),
             tuple(
-                (s.black, s.white, int(s.to_move), s.move_no, s.z, tuple(s.pi))
+                (s.black, s.white, int(s.to_move), s.move_no, s.z, tuple(s.pi), s.pi_valid)
                 for s in record.samples
             ),
         )
@@ -347,3 +348,112 @@ def test_opponent_games_need_an_opponent() -> None:
 def test_duplicate_opponents_are_refused() -> None:
     with pytest.raises(ValueError, match="twice"):
         Config.model_validate(smoke(opponents=["greedy", "greedy"], opponent_games=2))
+
+
+# ---------------------------------------------------------------------------
+# Recording the opponent's positions as value-only examples
+# ---------------------------------------------------------------------------
+
+
+def play_recording(seed: int, network: Player = Player.WHITE):
+    return play_game(
+        StubEvaluator(),
+        SEARCH,
+        board_size=BOARD,
+        rng=make_rng(seed),
+        opponent=GreedyAgent(),
+        opponent_name="greedy",
+        network=network,
+        record_opponent=True,
+    )
+
+
+@pytest.mark.parametrize("network", [Player.BLACK, Player.WHITE])
+def test_recording_keeps_the_opponents_positions_without_a_policy_target(network: Player) -> None:
+    record, branching = play_recording(3, network)
+    theirs = [s for s in record.samples if s.to_move is not network]
+    mine = [s for s in record.samples if s.to_move is network]
+    assert theirs, "the opponent had choices too"
+    assert all(not s.pi_valid for s in theirs)
+    assert all(not s.pi.any() for s in theirs), "nothing searched there, so nothing to imitate"
+    assert all(s.pi_valid for s in mine)
+    assert len(branching) == len(mine), "the search ran only on the network's moves"
+
+
+def test_the_opponents_positions_carry_the_result_from_the_opponents_side() -> None:
+    record, _ = play_recording(5, Player.WHITE)
+    for sample in record.samples:
+        expected = (
+            record.result_for_black if sample.to_move is Player.BLACK else -record.result_for_black
+        )
+        assert sample.z == expected
+        assert sample.own is not None
+
+
+def test_recording_adds_positions_and_changes_nothing_else() -> None:
+    """The same seed plays the same game; the record only gains rows."""
+    plain, _ = play_game(
+        StubEvaluator(),
+        SEARCH,
+        board_size=BOARD,
+        rng=make_rng(3),
+        opponent=GreedyAgent(),
+        opponent_name="greedy",
+        network=Player.WHITE,
+    )
+    recorded, _ = play_recording(3, Player.WHITE)
+    assert (plain.plies, plain.result_for_black) == (recorded.plies, recorded.result_for_black)
+    assert [tuple(s.pi) for s in plain.samples] == [
+        tuple(s.pi) for s in recorded.samples if s.pi_valid
+    ]
+    assert len(recorded.samples) > len(plain.samples)
+
+
+def test_a_forced_opponent_move_is_not_recorded_either() -> None:
+    """Same rule as for the network: one legal move is no decision."""
+    record, _ = play_recording(11, Player.BLACK)
+    for sample in record.samples:
+        if not sample.pi_valid:
+            assert len(rules.legal_actions(sample.state(BOARD))) > 1
+
+
+def test_batching_records_exactly_the_same_opponent_positions() -> None:
+    schedule = OpponentSchedule(6, 4, ("greedy", "random"), record_opponent_positions=True)
+    solo = play_games(
+        StubEvaluator(),
+        SEARCH,
+        board_size=BOARD,
+        n_games=schedule.total,
+        root_seed=7,
+        generation=1,
+        schedule=schedule,
+        opponents=build_opponents(schedule.opponents),
+    )
+    batched = BatchedSelfPlay(
+        StubEvaluator(),
+        SEARCH,
+        board_size=BOARD,
+        games_in_flight=4,
+        root_seed=7,
+        generation=1,
+        schedule=schedule,
+        opponents=build_opponents(schedule.opponents),
+    )
+    a, b = fingerprint(solo), fingerprint(batched.play(schedule.total))
+    assert a == b
+    external = [game for game in a.values() if game[0] is not None]
+    assert len(external) == 4
+    for game in external:
+        samples = game[6]
+        assert any(not valid for *_, valid in samples), "an opponent position was kept"
+
+
+def test_the_config_passes_the_recording_rule_to_the_schedule() -> None:
+    off = Config.model_validate(smoke(opponents=["greedy"], opponent_games=2))
+    on = Config.model_validate(
+        smoke(opponents=["greedy"], opponent_games=2, record_opponent_positions=True)
+    )
+    assert not off.selfplay.record_opponent_positions
+    schedule_off, schedule_on = off.selfplay.schedule(), on.selfplay.schedule()
+    assert schedule_off is not None and not schedule_off.record_opponent_positions
+    assert schedule_on is not None and schedule_on.record_opponent_positions

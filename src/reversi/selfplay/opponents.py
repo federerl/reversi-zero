@@ -15,6 +15,24 @@ games are spread evenly through the index range, each one is assigned its
 opponent in turn, and the network's colour alternates per opponent. Every
 worker, every re-run and every resume gets the same answer.
 
+**Which positions of an external game are recorded.** By default only the
+network's own decisions, as in the Step 3 runs: the opponent's moves advance
+the game and leave nothing behind. With ``record_opponent_positions`` the
+positions where the opponent is to move are recorded as well, labelled with
+the game's result from the opponent's side and with no policy target
+(``schema.Sample.pi_valid`` false), so they train the value head only.
+
+Why that matters is a fact about how the search judges a move: it looks at the
+position *after* the move, with the other side to move, and asks the value
+head about it. In an external game that position is exactly the one the
+opponent is about to play from. Recording only the network's positions
+therefore never shows the value head the positions the search reads, and the
+Step 3 results (``research/step3-results.md``, section 5) show the value head
+moving at the network's positions and not one ply later. Recording the
+opponent's positions closes that gap with one change; the policy head is left
+alone because nothing searched there, and imitating the opponent's move would
+teach the network to play like its opponent.
+
 **What it does not do.** Nothing here touches the value target: a position
 from an external game is labelled with that game's result, as a self-play
 position is. Whether that is the right choice is an experimental question and
@@ -53,6 +71,10 @@ class OpponentSchedule:
     selfplay_games: int
     opponent_games: int
     opponents: tuple[str, ...]
+    record_opponent_positions: bool = False
+    """Also record the positions where the opponent is to move, as value-only
+    training examples. See the module docstring for why; off reproduces the
+    Step 3 runs exactly."""
 
     def __post_init__(self) -> None:
         if self.selfplay_games < 0 or self.opponent_games < 0:

@@ -1,0 +1,44 @@
+# Step 3 follow-up, group B-both: the opponent mix of configs/full8x8_step3_mix.yaml
+# with one change to what an external game leaves behind (research/step3b-design.md).
+#
+# In the Step 3 runs an external game recorded only the network's own moves. The
+# search, though, judges a move by the position *after* it, with the opponent to
+# move, and the Step 3 head probe found that the value head had learned nothing
+# at exactly those positions: they were never training examples. Here they are.
+# Each position the opponent moves from is recorded with the game's result from
+# the opponent's side and no policy target, so it trains the value head only.
+# The policy head is untouched: nothing searched there, and imitating the
+# opponent's move would teach the network to play like Greedy.
+#
+# The numbers:
+#   480 self-play games          every move on both sides is a training example
+#   120 games against opponents  both sides recorded, so about as many examples
+#                                as a self-play game, half of them value-only
+#   ------------------------------------------------------------------------
+#   about as many training examples per generation as the control's 600
+#   self-play games, as in group B; the external games are 120 rather than 240
+#   because each now yields twice the examples. The share of data from external
+#   games stays a fifth. Of the 120, 60 are against Greedy and 60 against
+#   Minimax-d4, 30 as black and 30 as white each.
+#
+# Everything else is configs/full8x8_step3_mix.yaml: same search budget, noise,
+# temperature, trainer and replay window.
+
+name: full8x8-step3-both
+
+net:
+  n_blocks: 6
+  channels: 64
+
+mcts:
+  n_simulations: 200
+  temp_moves: 15
+
+selfplay:
+  games_per_generation: 480   # self-play games; 600 in the control
+  opponents: [greedy, minimax-d4]
+  opponent_games: 120         # on top of the 480; 240 in group B
+  record_opponent_positions: true
+  n_workers: 6
+  games_in_flight: 24
+  max_generations: 400
