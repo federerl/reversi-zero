@@ -65,6 +65,7 @@ class Node:
         "expanded",
         "net_value",
         "prior",
+        "proven_value",
         "state",
         "terminal_value",
         "value_sum",
@@ -90,6 +91,12 @@ class Node:
         # sent to the network -- we know the answer, and a guess would only be
         # worse.
         self.terminal_value: float | None = None
+
+        # Set by the search's terminal check (``SearchConfig.terminal_check``)
+        # when the mover here can end the game with a win on the next move.
+        # The position is then as good as finished: its value is exactly +1 for
+        # the mover, and the search backs that up instead of descending further.
+        self.proven_value: float | None = None
 
     @property
     def is_terminal(self) -> bool:

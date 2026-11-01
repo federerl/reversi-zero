@@ -76,6 +76,27 @@ class SearchConfig:
     """The randomness level used during those opening plies. 1.0 means "pick in
     proportion to how often the search visited each move"."""
 
+    terminal_check: bool = False
+    """Look one move ahead for a game-ending reply before trusting the network.
+
+    When the search opens a position it normally takes the network's value for
+    it as read. With this on, it first tries every legal move from that
+    position and, if one of them ends the game, scores the position no lower
+    than that move's exact result: a side that can win on the spot is winning,
+    whatever the network thinks.
+
+    This exists because of the Step 2 weakness (``research/step2-failure-analysis.md``):
+    the network rates a position where it holds one disc as a near-certain win,
+    and gives the opponent's capturing reply a prior of a few percent, so a
+    50-simulation search never expands that reply and never finds out that the
+    game is over. The check reads the exact answer one ply down at the cost of a
+    few board operations per opened node, no network calls.
+
+    Off by default, and off in every self-play and evaluation config built from
+    a run's YAML, so that every published number is of the plain search. Turn
+    it on from the arena with ``;terminal_check`` on an entrant to measure what
+    the search misses."""
+
     def __post_init__(self) -> None:
         if self.n_simulations < 1:
             msg = f"n_simulations must be at least 1, got {self.n_simulations}"

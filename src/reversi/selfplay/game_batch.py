@@ -177,8 +177,9 @@ class _Slot:
 
         node, path = self.pending
         self.pending = None
-        self.mcts.open_node(node, logits, value)
-        self.mcts.backup(path, value)
+        # open_node's answer, not the raw network value: with the terminal
+        # check on they differ, and the plain search backs up the same thing.
+        self.mcts.backup(path, self.mcts.open_node(node, logits, value))
         self.sims_done += 1
 
     # -- the parts that need no network -------------------------------

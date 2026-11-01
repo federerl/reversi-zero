@@ -20,11 +20,14 @@ counterfactual:
 2. One ply later, from Greedy's side: the raw value (the exact answer is +1,
    Greedy wins on the spot), and the prior the network puts on the reply that
    wipes it out.
-3. The same search run three ways on the same position: as recorded (real
+3. The same search run four ways on the same position: as recorded (real
    prior and real value), with the prior flattened to uniform (so only the
-   value head is speaking), and with the value zeroed (so only the prior is
-   speaking; finished positions still score exactly). Whichever way stops
-   choosing the fatal move points at the head that let it through.
+   value head is speaking), with the value zeroed (so only the prior is
+   speaking; finished positions still score exactly), and as recorded but
+   with the one-move look-ahead for game-ending replies switched on
+   (``SearchConfig.terminal_check``, the search-side repair the Step 3b
+   results propose). Whichever way stops choosing the fatal move points at
+   the part of the agent that let it through.
 
 Usage::
 
@@ -163,12 +166,13 @@ def probe_position(evaluator: Evaluator, trace: Trace, move: NetMove, k: int) ->
     }
     for sims in BUDGETS:
         config = SearchConfig(n_simulations=sims)
-        for label, eval_ in (
-            ("real", evaluator),
-            ("value_only", OnlyValue(evaluator)),
-            ("policy_only", OnlyPolicy(evaluator)),
+        for label, eval_, cfg in (
+            ("real", evaluator, config),
+            ("value_only", OnlyValue(evaluator), config),
+            ("policy_only", OnlyPolicy(evaluator), config),
+            ("checked", evaluator, SearchConfig(n_simulations=sims, terminal_check=True)),
         ):
-            chosen = MCTS(eval_, config).run(state).best_action()
+            chosen = MCTS(eval_, cfg).run(state).best_action()
             row["searches"][f"{label}@{sims}"] = {"chosen": chosen, "safe": chosen in safe}
     return row
 
@@ -289,11 +293,11 @@ def main() -> int:
                 f"| {s['child_wiping_has_top_prior']:.0%} |"
             )
     print()
-    print("## The same search with one head switched off")
+    print("## The same search with one head switched off, or with the terminal check on")
     print()
     print("Share of positions where the search chooses a move that survives.")
     print()
-    labels = ("real", "value_only", "policy_only")
+    labels = ("real", "value_only", "policy_only", "checked")
     keys = [f"{label}@{sims}" for sims in BUDGETS for label in labels]
     print("| network | move | positions | " + " | ".join(keys) + " | real@50 replayed the record |")
     print("|---|---|---:|" + "---:|" * (len(keys) + 1))

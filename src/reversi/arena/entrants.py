@@ -68,6 +68,9 @@ class EntrantSpec:
     """The rung name, for ``level``."""
     c_puct: float = 1.5
     fpu_reduction: float = 0.25
+    terminal_check: bool = False
+    """Whether the search looks one move ahead for game-ending replies before
+    trusting the network's value (``SearchConfig.terminal_check``)."""
 
     @property
     def needs_network(self) -> bool:
@@ -88,6 +91,8 @@ def parse_entrant(text: str, *, default_simulations: int) -> EntrantSpec:
         PATH                        name taken from the file's stem
         level:casual=PATH           a difficulty rung on top of a network
         NAME=PATH@50;c_puct=2.5     search settings after a semicolon: c_puct, fpu
+        NAME=PATH@50;terminal_check the same network, with the one-move look-ahead
+                                    for game-ending replies switched on
 
     The equals sign separates the name from the file because file names on
     Windows may contain colons and drive letters, and a name never does. The
@@ -158,21 +163,33 @@ def parse_entrant(text: str, *, default_simulations: int) -> EntrantSpec:
         kind="checkpoint",
         path=path,
         simulations=simulations,
-        c_puct=options.get("c_puct", 1.5),
-        fpu_reduction=options.get("fpu_reduction", 0.25),
+        c_puct=float(options.get("c_puct", 1.5)),
+        fpu_reduction=float(options.get("fpu_reduction", 0.25)),
+        terminal_check=bool(options.get("terminal_check", False)),
     )
 
 
-def _search_options(parts: list[str], text: str) -> dict[str, float]:
-    """The ``;c_puct=2.5;fpu=0.1`` tail of an entrant, checked and named for the spec."""
+def _search_options(parts: list[str], text: str) -> dict[str, float | bool]:
+    """The ``;c_puct=2.5;fpu=0.1;terminal_check`` tail of an entrant, checked and named.
+
+    ``terminal_check`` is a switch: on its own it means on, and ``=0`` / ``=1``
+    (or ``false`` / ``true``) spell it out.
+    """
     names = {"c_puct": "c_puct", "fpu": "fpu_reduction", "fpu_reduction": "fpu_reduction"}
-    options: dict[str, float] = {}
+    options: dict[str, float | bool] = {}
     for part in parts:
         key, sep, value = part.partition("=")
+        if key == "terminal_check":
+            flags = {"": True, "1": True, "true": True, "0": False, "false": False}
+            if value.lower() not in flags:
+                msg = f"terminal_check takes 0 or 1, got {value!r} in {text!r}"
+                raise ConfigError(msg)
+            options["terminal_check"] = flags[value.lower()]
+            continue
         if not sep or key not in names:
             msg = (
                 f"unknown search option {part!r} in {text!r}; after the semicolon use "
-                "c_puct=<number> or fpu=<number>"
+                "c_puct=<number>, fpu=<number> or terminal_check"
             )
             raise ConfigError(msg)
         try:
@@ -248,6 +265,7 @@ def build_agent(spec: EntrantSpec, *, device: str = "cpu") -> Agent:
             fpu_reduction=spec.fpu_reduction,
             dirichlet_eps=0.0,
             temp_moves=0,
+            terminal_check=spec.terminal_check,
         ),
         name=spec.name,
     )
@@ -302,6 +320,8 @@ def describe_entrant(spec: EntrantSpec, *, board_size: int = 8) -> dict[str, Any
         out.update({"kind": "alphazero", "simulations": spec.simulations})
         if spec.c_puct != 1.5 or spec.fpu_reduction != 0.25:
             out.update({"c_puct": spec.c_puct, "fpu_reduction": spec.fpu_reduction})
+        if spec.terminal_check:
+            out["terminal_check"] = True
     return out
 
 
