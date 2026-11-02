@@ -14,6 +14,8 @@
 - **[Step 2 failure analysis](step2-failure-analysis.md)** — the network rates one disc as a near-certain win, because self-play taught it so; which head lets the wipeout through; the same loss against any disc-hungry opponent
 - **[Step 3 design](step3-design.md)** — the pre-registered opponent-diversity experiment: groups, mixing rule, scorecard, predictions, how to launch
 - [Agenda for the late-October advisor meeting](meetings/2026-10-advisor-meeting-agenda.html) — answers to the October 22 questions, the Step 0 to 2 results, and the Step 3 decisions
+- **[Step 3c: the terminal check](step3c-terminal-check.md)** — one exact rule in the evaluation search, no training: wipeouts against Greedy 65 → 12 on the same weights, the same on every checkpoint, nothing else moves; the weakness is a search-depth artefact
+- [Agenda for the November 2 advisor meeting](meetings/2026-11-02-advisor-meeting-agenda.md) — the Step 3, 3b, 3c chain in one table, the revised explanation, what changes in the report, Phase 2
 
 ## Research framing
 
