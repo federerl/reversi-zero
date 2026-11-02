@@ -149,7 +149,16 @@ class SelfPlayConfig(_Base):
         ge=0,
         description="Games per generation against the fixed opponents, on top of "
         "games_per_generation. Each yields about half the training examples of a "
-        "self-play game, since only the network's moves are recorded.",
+        "self-play game when only the network's moves are recorded, and about as "
+        "many as a self-play game with record_opponent_positions on.",
+    )
+    record_opponent_positions: bool = Field(
+        default=False,
+        description="In games against fixed opponents, also record the positions "
+        "where the opponent is to move, labelled with the result from the opponent's "
+        "side and with no policy target, so they train the value head only. Off "
+        "records only the network's own decisions (the Step 3 rule). See "
+        "selfplay/opponents.py for why the difference matters to the search.",
     )
 
     @field_validator("opponents")
@@ -182,6 +191,7 @@ class SelfPlayConfig(_Base):
             selfplay_games=self.games_per_generation,
             opponent_games=self.opponent_games,
             opponents=self.opponents,
+            record_opponent_positions=self.record_opponent_positions,
         )
 
 

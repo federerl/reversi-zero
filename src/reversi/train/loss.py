@@ -89,6 +89,7 @@ def policy_value_loss(
     own_target: Tensor | None = None,
     own_valid: Tensor | None = None,
     ownership_weight: float = 0.0,
+    pi_valid: Tensor | None = None,
 ) -> LossParts:
     """Score one batch.
 
@@ -96,6 +97,13 @@ def policy_value_loss(
     ``ownership_weight`` is positive. ``own_valid`` marks the rows whose target is
     real; the others are excluded from the mean rather than counted as "all
     empty", and a batch with no valid row contributes zero.
+
+    ``pi_valid`` does the same for the policy term: a row recorded with a fixed
+    opponent to move has a result but no search behind it, so it has nothing to
+    teach the policy head and is left out of that mean. Its ``pi_target`` is all
+    zeros, so the term would be zero anyway; the mask keeps the *denominator*
+    honest, so that such rows do not water the policy loss down. ``None`` means
+    every row is real.
 
     ``policy_logits`` is ``(batch, actions)`` raw and unmasked -- the network has
     no idea which moves are legal, and does not need to. The target is zero on
@@ -127,7 +135,16 @@ def policy_value_loss(
     # says "62% of the search went here, 31% there", and we want the network to
     # reproduce those proportions rather than just pick the argmax.
     log_probabilities = F.log_softmax(policy_logits, dim=1)
-    policy_loss = -(pi_target * log_probabilities).sum(dim=1).mean()
+    per_row = -(pi_target * log_probabilities).sum(dim=1)
+    if pi_valid is not None:
+        if pi_valid.shape != per_row.shape:
+            msg = f"pi_valid has shape {tuple(pi_valid.shape)}, expected {tuple(per_row.shape)}"
+            raise ValueError(msg)
+        mask = pi_valid.to(per_row.dtype)
+        valid = mask.sum()
+        policy_loss = (per_row * mask).sum() / valid if valid > 0 else per_row.sum() * 0.0
+    else:
+        policy_loss = per_row.mean()
 
     value_loss = F.mse_loss(value, target)
 

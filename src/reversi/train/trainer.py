@@ -81,6 +81,9 @@ class Trainer:
         planes = torch.from_numpy(np.ascontiguousarray(batch.planes)).to(self.device)
         pi_target = torch.from_numpy(np.ascontiguousarray(batch.pi)).to(self.device)
         z_target = torch.from_numpy(np.ascontiguousarray(batch.z)).to(self.device)
+        pi_valid = None
+        if batch.pi_valid is not None:
+            pi_valid = torch.from_numpy(np.ascontiguousarray(batch.pi_valid)).to(self.device)
         own_target = own_valid = None
         if batch.own is not None and batch.own_valid is not None:
             own_target = torch.from_numpy(np.ascontiguousarray(batch.own)).to(self.device)
@@ -115,6 +118,7 @@ class Trainer:
             own_target=own_target,
             own_valid=own_valid,
             ownership_weight=self.config.ownership_loss_weight,
+            pi_valid=pi_valid,
         )
 
         self.optimizer.zero_grad(set_to_none=True)

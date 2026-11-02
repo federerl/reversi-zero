@@ -356,3 +356,40 @@ def test_the_trainer_measures_value_error_against_the_blended_target() -> None:
 
     assert math.isfinite(blended_metrics["value_loss"])
     assert blended_metrics["value_mae"] != pytest.approx(plain_metrics["value_mae"])
+
+
+def test_rows_without_a_policy_target_do_not_water_the_policy_loss_down() -> None:
+    """A value-only row (fixed opponent to move) has an all-zero target, so its
+    own term is zero; the mask keeps it out of the denominator as well, so the
+    policy loss is the mean over the rows that have something to teach."""
+    logits = torch.randn(4, WIDTH, generator=torch.Generator().manual_seed(1))
+    target = torch.zeros(4, WIDTH)
+    target[0, 3] = 1.0
+    target[1, [2, 5]] = 0.5
+    # rows 2 and 3: no policy target
+    pi_valid = torch.tensor([True, True, False, False])
+    z = torch.tensor([1.0, -1.0, 1.0, -1.0])
+    value = torch.zeros(4, 1)
+
+    masked = policy_value_loss(logits, value, target, z, pi_valid=pi_valid)
+    only_real = policy_value_loss(logits[:2], value[:2], target[:2], z[:2])
+    unmasked = policy_value_loss(logits, value, target, z)
+
+    assert float(masked.policy) == pytest.approx(float(only_real.policy), abs=1e-6)
+    assert float(unmasked.policy) == pytest.approx(float(only_real.policy) / 2, abs=1e-6)
+    assert float(masked.value) == pytest.approx(float(unmasked.value)), (
+        "the value term sees every row"
+    )
+
+
+def test_a_batch_with_no_policy_target_at_all_has_zero_policy_loss() -> None:
+    logits = torch.randn(3, WIDTH)
+    parts = policy_value_loss(
+        logits,
+        torch.zeros(3, 1),
+        torch.zeros(3, WIDTH),
+        torch.ones(3),
+        pi_valid=torch.zeros(3, dtype=torch.bool),
+    )
+    assert float(parts.policy) == 0.0
+    assert float(parts.value) == pytest.approx(1.0)

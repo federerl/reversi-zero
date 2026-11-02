@@ -300,8 +300,8 @@ selfplay:
 With `opponent_games` above zero, each generation also plays that many games
 with the network on one side and one of the named opponents on the other. The
 network searches, records its policy targets and learns from the result exactly
-as in self-play; the opponent's moves only move the game along and are never
-training data. The opponents take turns and the network's colour alternates, so
+as in self-play; the opponent's moves only move the game along and, by default,
+are not training data. The opponents take turns and the network's colour alternates, so
 each opponent is met equally often as black and as white. Which games of the
 generation are external is fixed by the game's index, so a re-run or a resume
 plays the same mix.
@@ -314,6 +314,33 @@ external game yields training examples only from the network's moves, about
 half as many as a self-play game. 480 self-play games plus 240 external games
 produce about as many examples as 600 self-play games, which is what makes a
 run with opponents comparable to one without.
+
+### `record_opponent_positions: false`
+
+```yaml
+selfplay:
+  games_per_generation: 480
+  opponents: [greedy, minimax-d4]
+  opponent_games: 120         # half as many: each now yields twice the examples
+  record_opponent_positions: true
+```
+
+Off, an external game records only the positions the network moved from. On,
+it also records the positions the *opponent* moved from, labelled with the
+game's result from the opponent's side and with no policy target, so they
+train the value head and nothing else.
+
+The difference matters because of how the search judges a move: it looks at
+the position after the move, with the other side to move, and asks the value
+head about it. In an external game that is the position the opponent is about
+to play from. With the rule off, the value head never sees those positions as
+training examples, and the Step 3 results (`research/step3-results.md`,
+section 5) show it learning nothing there. The policy head is left out on
+purpose: no search ran at the opponent's position, so there is no visit
+distribution to learn, and imitating the opponent's move would teach the
+network to play like its opponent. With the rule on, an external game yields
+about as many examples as a self-play game, so `opponent_games` is halved to
+keep the data matched (`configs/full8x8_step3_both.yaml`).
 
 ---
 

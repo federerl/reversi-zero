@@ -60,6 +60,10 @@ class Batch:
     """``(batch,)`` -- whether ``own`` is a real target for that row. Rows read
     from shards written before the target existed are ``False`` and must not
     contribute to an ownership loss."""
+    pi_valid: NDArray[np.bool_] | None = None
+    """``(batch,)`` -- whether ``pi`` is a real target for that row. ``False`` for
+    a position recorded with a fixed opponent to move (``schema.Sample.pi_valid``);
+    such a row trains the value head only. ``None`` means every row is real."""
 
     def __len__(self) -> int:
         return len(self.z)
@@ -147,6 +151,11 @@ class ReplayBuffer:
         else:
             block["own"] = np.zeros((count, self.board_size * self.board_size), dtype=np.int8)
             block["own_valid"] = np.zeros(count, dtype=np.bool_)
+        # Same idea for the policy target: absent on disk means every row is real.
+        if "pi_valid" in arrays:
+            block["pi_valid"] = np.asarray(arrays["pi_valid"], dtype=np.bool_)
+        else:
+            block["pi_valid"] = np.ones(count, dtype=np.bool_)
 
         if not self._columns:
             self._columns = {field: column.copy() for field, column in block.items()}
@@ -265,6 +274,7 @@ class ReplayBuffer:
         z = np.empty(len(indices), dtype=np.float32)
         own = np.empty((len(indices), size * size), dtype=np.float32)
         own_valid = np.asarray(self._columns["own_valid"][indices], dtype=np.bool_)
+        pi_valid = np.asarray(self._columns["pi_valid"][indices], dtype=np.bool_)
 
         which_turn = (
             rng.integers(0, len(turns), size=len(indices))
@@ -293,7 +303,7 @@ class ReplayBuffer:
             z[row] = self._columns["z"][index]
             own[row] = owners
 
-        return Batch(planes=planes, pi=pi, z=z, own=own, own_valid=own_valid)
+        return Batch(planes=planes, pi=pi, z=z, own=own, own_valid=own_valid, pi_valid=pi_valid)
 
     # -----------------------------------------------------------------
 
