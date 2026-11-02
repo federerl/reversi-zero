@@ -11,7 +11,12 @@ Each position self-play keeps produces one training example with three parts:
   opponent, 0 empty. Sixty-four small answers to "who is winning where", against
   ``z``'s one. A network with an ownership head is trained to predict it; a
   network without one ignores it. Shards written before this field existed have
-  no ``own`` column and are still valid.
+  no ``own`` column and are still valid;
+* **``pi_valid``**, optionally, whether ``pi`` is a real target. A position from
+  a game against a fixed opponent, with the opponent to move, has a result to
+  learn from but no search behind it: nothing chose that move but the opponent.
+  Such a row carries an all-zero ``pi`` and ``pi_valid`` false, and trains only
+  the value head. Shards without the column have every ``pi`` real.
 
 **We store the position, not the encoded planes.** Re-deriving the three input
 planes at sampling time costs microseconds. Storing them instead would mean that
@@ -66,7 +71,7 @@ FIELDS: tuple[str, ...] = ("black", "white", "to_move", "pi", "z", "move_no", "g
 # Columns a shard may carry. A reader fills in what is missing; a writer includes
 # what it has. This is how a training target can be added without invalidating
 # every game collected before it existed.
-OPTIONAL_FIELDS: tuple[str, ...] = ("own",)
+OPTIONAL_FIELDS: tuple[str, ...] = ("own", "pi_valid")
 
 
 @dataclass(frozen=True, slots=True)
@@ -97,6 +102,15 @@ class Sample:
     ``row * size + col`` order (contract C1). ``None`` until ``finish``, and
     ``None`` for positions read from a shard written before this field existed.
     """
+    pi_valid: bool = True
+    """Whether ``pi`` came from a search and should train the policy head.
+
+    False for a position recorded with a fixed opponent to move: the game's
+    result still labels it (``z``), but the move played there was the
+    opponent's choice, not the search's, so there is no distribution to
+    imitate and ``pi`` is all zeros. The loss skips the policy term on such a
+    row. See ``selfplay/opponents.py`` for why these positions are recorded.
+    """
 
     def state(self, board_size: int) -> State:
         return State(black=self.black, white=self.white, to_move=self.to_move, size=board_size)
@@ -125,7 +139,9 @@ class GameRecord:
     had probability 1" teaches the network nothing it can use."""
     opponent: str | None = None
     """The fixed opponent's name when this was not a self-play game, else ``None``.
-    See ``selfplay/opponents.py``. Only the network's moves are in ``samples``."""
+    See ``selfplay/opponents.py``. The network's moves are always in ``samples``;
+    the opponent's positions are too when the schedule records them, as
+    value-only rows (``pi_valid`` false)."""
     network: Player | None = None
     """The colour the network played in a game against a fixed opponent."""
     black_discs: int = 0
@@ -155,6 +171,7 @@ class GameRecord:
                 move_no=sample.move_no,
                 z=float(result_for(terminal, sample.to_move)),
                 own=ownership[sample.to_move],
+                pi_valid=sample.pi_valid,
             )
             for sample in self.samples
         ]
@@ -233,6 +250,11 @@ def samples_to_arrays(
         )
         raise ReplayError(msg)
 
+    # Written only when some row needs it, so shards from pure self-play are
+    # byte-for-byte what they were before the column existed.
+    if any(not s.pi_valid for s in samples):
+        arrays["pi_valid"] = np.fromiter((s.pi_valid for s in samples), dtype=np.bool_, count=count)
+
     validate_arrays(arrays, board_size=board_size)
     return arrays
 
@@ -253,6 +275,7 @@ def arrays_to_samples(
             move_no=int(arrays["move_no"][row]),
             z=float(arrays["z"][row]),
             own=np.asarray(arrays["own"][row], dtype=np.int8) if "own" in arrays else None,
+            pi_valid=bool(arrays["pi_valid"][row]) if "pi_valid" in arrays else True,
         )
         for row in range(len(arrays["black"]))
     ]
@@ -297,13 +320,27 @@ def validate_arrays(arrays: Arrays, *, board_size: int) -> None:
         msg = "to_move must be 0 (black) or 1 (white)"
         raise ReplayError(msg)
 
+    # A row whose policy target is not real must be exactly empty, and every
+    # other row must be a distribution. Reading a shard with value-only rows
+    # through code that does not know the column fails here, on the sum, rather
+    # than quietly training the policy head on nothing.
+    expected = np.ones(count, dtype=np.float32)
+    if "pi_valid" in arrays:
+        pi_valid = arrays["pi_valid"]
+        if pi_valid.shape != (count,):
+            msg = f"pi_valid has shape {pi_valid.shape}, expected ({count},)"
+            raise ReplayError(msg)
+        if not np.isin(pi_valid, (0, 1)).all():
+            msg = "pi_valid must be 0 or 1"
+            raise ReplayError(msg)
+        expected = pi_valid.astype(np.float32)
     sums = arrays["pi"].sum(axis=1)
-    if not np.allclose(sums, 1.0, atol=1e-5):
-        worst = int(np.argmax(np.abs(sums - 1.0)))
+    if not np.allclose(sums, expected, atol=1e-5):
+        worst = int(np.argmax(np.abs(sums - expected)))
         msg = (
-            f"policy target at row {worst} sums to {sums[worst]:.6f}, not 1. "
-            "A target that is not a distribution still trains, which is why this "
-            "is checked rather than assumed."
+            f"policy target at row {worst} sums to {sums[worst]:.6f}, not "
+            f"{expected[worst]:.0f}. A target that is not a distribution still "
+            "trains, which is why this is checked rather than assumed."
         )
         raise ReplayError(msg)
     if np.any(arrays["pi"] < 0.0):

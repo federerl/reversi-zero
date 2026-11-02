@@ -47,7 +47,7 @@ from reversi.search.mcts import MCTS, select_move
 from reversi.seeding import game_seed
 from reversi.seeding import rng as make_rng
 from reversi.selfplay.opponents import OpponentSchedule
-from reversi.types import Player, pass_action
+from reversi.types import Player, pass_action, policy_size
 
 __all__ = ["SelfPlaySummary", "play_game", "play_games"]
 
@@ -146,12 +146,18 @@ def play_game(
     opponent: Agent | None = None,
     opponent_name: str | None = None,
     network: Player = Player.BLACK,
+    record_opponent: bool = False,
 ) -> tuple[GameRecord, list[int]]:
     """Play one game against yourself, or against ``opponent`` as colour ``network``.
 
     Returns the record and the branching seen. ``rng`` drives the exploration
     noise inside the search, the sampling of which move to play and the
     opponent's tie-breaks, so one seed reproduces the whole game.
+
+    With ``record_opponent``, the positions the opponent moves from are kept as
+    value-only samples (no search ran there, so no policy target); see
+    ``opponents.py``. Positions where the opponent has a single legal move are
+    skipped, as the network's forced moves are.
     """
     mcts = MCTS(evaluator, search_config)
     record = GameRecord(
@@ -180,7 +186,21 @@ def play_game(
             raise WorkerError(msg)
 
         if opponent is not None and state.to_move is not network:
-            # The opponent's move: no search, no sample, just the next position.
+            # The opponent's move: no search, so no policy target. The position
+            # itself is kept as a value-only sample when asked to, because it is
+            # the position the network's search reads when it judges the move
+            # that led here.
+            if record_opponent and len(rules.legal_actions(state)) > 1:
+                record.samples.append(
+                    Sample(
+                        black=state.black,
+                        white=state.white,
+                        to_move=state.to_move,
+                        pi=np.zeros(policy_size(board_size), dtype=np.float32),
+                        move_no=ply,
+                        pi_valid=False,
+                    )
+                )
             action = opponent.select(state, rng)
             if action == passing:
                 record.passes += 1
@@ -246,7 +266,7 @@ def play_games(
     for index in range(n_games):
         seed = game_seed(root_seed, generation, worker_id, index)
         assignment = schedule.assignment(first_game + index) if schedule is not None else None
-        if assignment is not None:
+        if schedule is not None and assignment is not None:
             if opponents is None or assignment.opponent not in opponents:
                 msg = f"the schedule names opponent {assignment.opponent!r} but none was built"
                 raise WorkerError(msg)
@@ -260,6 +280,7 @@ def play_games(
                 opponent=opponents[assignment.opponent],
                 opponent_name=assignment.opponent,
                 network=assignment.network,
+                record_opponent=schedule.record_opponent_positions,
             )
             continue
         yield play_game(

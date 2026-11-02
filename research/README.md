@@ -15,6 +15,8 @@
 - **[Step 3 design](step3-design.md)** — the pre-registered opponent-diversity experiment: groups, mixing rule, scorecard, predictions, how to launch
 - **[Step 3 results](step3-results.md)** — playing Greedy in training did not transfer and barely took, because the external games never trained the value head where the search reads it; a random-playout search finds the same hole; the material target cuts it, seen and unseen, at a steep cost in strength
 - [Agenda for the late-October advisor meeting](meetings/2026-10-advisor-meeting-agenda.html) — answers to the October 22 questions, the Step 0 to 2 results, and the Step 3 decisions
+- [Step 3b design](step3b-design.md) — the follow-up: record the opponent's positions from external games as value-only examples, with the predictions written before the runs
+- **[Step 3b results](step3b-results.md)** — the value head was trained where the search reads it and did not move; the training rows show why: the wipeout is a one-move tactic in a state that is usually favourable, outnumbered fifty to one in the data
 
 ## Research framing
 

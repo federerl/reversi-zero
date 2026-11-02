@@ -494,3 +494,67 @@ def test_buffer_stats_describe_staleness_and_variety() -> None:
 
 def test_stats_on_an_empty_buffer_do_not_explode() -> None:
     assert ReplayBuffer(board_size=BOARD, window=10).stats(0) == {"buffer_size": 0}
+
+
+# ===========================================================================
+# Value-only rows (positions recorded with a fixed opponent to move)
+# ===========================================================================
+
+
+def with_value_only_rows(count: int, rows: tuple[int, ...]) -> list[Sample]:
+    samples = make_samples(count, seed=3)
+    for row in rows:
+        s = samples[row]
+        samples[row] = Sample(
+            black=s.black,
+            white=s.white,
+            to_move=s.to_move,
+            pi=np.zeros(WIDTH, dtype=np.float32),
+            move_no=s.move_no,
+            z=s.z,
+            pi_valid=False,
+        )
+    return samples
+
+
+def test_value_only_rows_survive_a_round_trip() -> None:
+    arrays = samples_to_arrays(with_value_only_rows(12, (2, 7)), generation=1, board_size=BOARD)
+    assert "pi_valid" in arrays
+    restored = arrays_to_samples(arrays, board_size=BOARD)
+    assert [s.pi_valid for s in restored] == [row not in (2, 7) for row in range(12)]
+    assert not restored[2].pi.any() and restored[3].pi.any()
+
+
+def test_a_shard_without_value_only_rows_has_no_extra_column() -> None:
+    """Pure self-play shards stay exactly what they were before the column existed."""
+    arrays = arrays_for(10)
+    assert "pi_valid" not in arrays
+    assert all(s.pi_valid for s in arrays_to_samples(arrays, board_size=BOARD))
+
+
+def test_a_value_only_row_with_a_policy_in_it_is_refused() -> None:
+    arrays = samples_to_arrays(with_value_only_rows(10, (4,)), generation=1, board_size=BOARD)
+    arrays["pi"][4, 0] = 1.0  # claims a distribution on a row that says it has none
+    with pytest.raises(ReplayError, match=r"sums to 1.000000, not 0"):
+        validate_arrays(arrays, board_size=BOARD)
+
+
+def test_an_empty_policy_on_a_real_row_is_still_refused() -> None:
+    arrays = arrays_for(10)
+    arrays["pi"][3] = 0.0
+    with pytest.raises(ReplayError, match=r"sums to 0.000000, not 1"):
+        validate_arrays(arrays, board_size=BOARD)
+
+
+def test_the_buffer_tells_the_trainer_which_rows_have_a_policy_target() -> None:
+    buffer = ReplayBuffer(board_size=BOARD, window=100, symmetry_aug=False)
+    buffer.add(arrays_for(8, generation=1))  # no column: every row real
+    buffer.add(
+        samples_to_arrays(with_value_only_rows(8, (0, 1, 2)), generation=2, board_size=BOARD)
+    )
+    batch = buffer.sample(16, rng=np.random.default_rng(0))
+    assert batch.pi_valid is not None
+    assert batch.pi_valid.shape == (16,)
+    # Every masked-out row carries an empty target; every real row a distribution.
+    sums = batch.pi.sum(axis=1)
+    np.testing.assert_allclose(sums, batch.pi_valid.astype(np.float32), atol=1e-5)
