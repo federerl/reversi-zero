@@ -27,27 +27,29 @@ Four things, in the order of how much weight they can carry.
 
 **The method.** A frozen evaluation protocol audited before any experiment; a held-out roster with a written admission rule and a measured similarity check; a held-out opponent with no learned or hand-written knowledge that reproduces the weakness independently; three experiments with predictions written before the runs, two of which failed and are reported as such. For a one-term undergraduate study this is the standard a reader will notice first.
 
-## 4. Tactical and strategic weaknesses
+## 4. Tactical and strategic weaknesses, and the horizon between them
 
 The words come from chess, where they are used the way they are used here.
 
 A **tactical** weakness is a loss that turns on a short, concrete sequence of moves whose outcome can be calculated exactly: here, one reply that takes every disc and ends the game. The position before it is not misjudged in general; it is misjudged in one specific line. Calculation finds the line, and finds it faster than any amount of learned judgement, because the line's outcome is a fact about the rules.
 
-A **strategic** weakness is a misjudgement of what a position is worth that no short calculation corrects: overvaluing material, undervaluing mobility or corners, failing to see that a large group is dead. The loss arrives over many moves, there is no single refuting line to find, and a deeper search helps only in proportion to how much of the long game it can see. Improving judgement means improving the evaluator, which means learning.
+A **strategic** weakness is a misjudgement of what a position is worth that no calculation of affordable length corrects: overvaluing material, undervaluing mobility or corners, trading the wrong thing for the wrong thing over forty moves. The loss arrives slowly, there is no single refuting line to find, and a deeper search helps only in proportion to how much of the long game it can see. Improving judgement means improving the evaluator, which means learning.
 
-The test that separates them is the one Step 2 and 3c applied: does an exact search of small depth, with the learned evaluator left alone, remove the loss? If yes, the weakness is tactical. If a deeper search reduces it only gradually and never to zero at any affordable depth, it is strategic. The Step 2 budget series (50, 256, 800 simulations: wipeouts fall by a third to a half per step, never to zero) looked strategic on its own; the one-ply check at 50 simulations, which removes 82 to 88% of the wipeouts and more than 256 simulations do, says the search was not short of depth in general but of one specific ply.
+The two are not a binary. What separates them is the **horizon**: how many moves an exact calculation has to read before it can confirm the outcome without asking the evaluator. The wipeout here has a horizon of one move. A capturing race in Go has a horizon of the whole race, often tens of moves, but it is still a calculation: counting liberties and reading out the fill is something a beginner can do exactly, and classical Go programs did it with dedicated life-and-death and capturing-race readers rather than with their general evaluation. A positional misjudgement has no horizon at which calculation settles it.
 
-The split matters because the remedies differ.
+Where a weakness sits on that axis decides what fixes it, and the fix differs from one end to the other.
 
-| | tactical | strategic |
-|---|---|---|
-| what is wrong | one calculable line is never looked at | the estimate of a kind of position is off |
-| what fixes it | exact search where the line can be resolved | a better evaluator: more or different training data, a different target |
-| what opponent diversity does | reaches the state, cannot teach the line (Step 3, 3b) | teaches the kind, if the new opponents produce it |
-| what the value target can carry | not the exception, when its look-alikes outnumber it (Step 3b, section 5) | the shift in the average, which is the point |
-| cost of the fix | microseconds a position, no network calls (Step 3c) | GPU hours, and a calibration or strength cost elsewhere (Step 3 group D) |
+| | horizon of one move (here) | horizon of a long forced line | no finite horizon |
+|---|---|---|---|
+| what is wrong | one calculable reply is never looked at | one calculable line is never read to the end, and the evaluator misjudges every position along it | the estimate of a kind of position is off |
+| what fixes it | exact resolution at the node (Step 3c) | a dedicated exact reader for that kind of line, or a search budget that reaches the end despite the evaluator | a better evaluator: more or different data, a different target |
+| what opponent diversity does | reaches the state, cannot teach the reply (Steps 3, 3b) | teaches the evaluator about such lines, if enough of them with enough variety are seen; the adversary then finds the next one | teaches the kind, if the new opponents produce it |
+| what the value target can carry | not the exception, when its look-alikes outnumber it (Step 3b, section 5) | the average over such positions, which is right most of the time and wrong in the race | the shift in the average, which is the point |
+| cost of the fix | microseconds a position, no network calls | a solver per tactic, or search that scales with the line's length | GPU hours, and a calibration or strength cost elsewhere (Step 3 group D) |
 
-The adversarial-policy results in Go sit on the strategic side as far as the published evidence goes: the exploited misjudgement about a group's status survives a substantial increase in search, and the remedies tried were training-side. The result here sits on the tactical side, and it is the first in this line of work to be placed there by an experiment that excludes the other side.
+The test that places a weakness on the axis is the one Step 2 and Step 3c applied: leave the learned evaluator alone, add exact calculation of a chosen depth, and ask whether the loss goes. The Step 2 budget series (50, 256, 800 simulations: wipeouts fall by a third to a half per step and never to zero) looked, on its own, like a long horizon or none. The one-ply check at 50 simulations, which removes 82 to 88% of the wipeouts and more than 256 simulations do, says the search was not short of depth in general but of one specific ply that the prior kept it from spending.
+
+The cyclic attack on KataGo (Wang et al. 2023) reads as the middle column. The decisive error is one move, failing to start filling liberties in a race the network has misjudged, and the correct move is exactly calculable, so the weakness is tactical in kind. But the horizon is the length of the race, the value network misjudges every position along it, and the policy network does not propose the fill, so search receives no help from either head: the adversary still wins 72% of games against KataGo at ten million visits. The weakness here is the same kind at the shortest possible horizon, which is why one cheap rule removes it and why the result can be placed by experiment. The general statement both support: a learned evaluator with a generic search inherits the tactical blind spots that classical programs covered with dedicated exact readers, and the cost of recovering each one by search alone grows with its horizon. The terminal check is the smallest such reader.
 
 ## 5. What would make the claim stronger
 
