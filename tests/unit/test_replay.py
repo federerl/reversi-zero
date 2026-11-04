@@ -525,6 +525,22 @@ def test_value_only_rows_survive_a_round_trip() -> None:
     assert not restored[2].pi.any() and restored[3].pi.any()
 
 
+def test_opponent_to_move_rows_survive_a_round_trip() -> None:
+    from dataclasses import replace
+
+    samples = [
+        replace(s, opponent_to_move=row in (1, 5))
+        for row, s in enumerate(arrays_to_samples(arrays_for(8), board_size=BOARD))
+    ]
+    arrays = samples_to_arrays(samples, generation=1, board_size=BOARD)
+    assert "opponent_to_move" in arrays
+    restored = arrays_to_samples(arrays, board_size=BOARD)
+    assert [s.opponent_to_move for s in restored] == [row in (1, 5) for row in range(8)]
+    # The flag says where a row came from, not how it trains.
+    assert all(s.pi_valid for s in restored)
+    assert "opponent_to_move" not in arrays_for(8)
+
+
 def test_a_shard_without_value_only_rows_has_no_extra_column() -> None:
     """Pure self-play shards stay exactly what they were before the column existed."""
     arrays = arrays_for(10)

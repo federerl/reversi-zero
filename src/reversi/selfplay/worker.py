@@ -25,8 +25,10 @@ legal move had probability 1" teaches the network a fact about the rules that th
 rules already enforce, while using up a slot in the training batch.
 
 **A game may have a fixed opponent on one side.** Then the network searches and
-records only on its own turns, and the opponent's moves are applied like forced
-ones: nothing searched, nothing stored. See ``opponents.py`` for why and when.
+records on its own turns; the opponent's moves are applied like forced ones,
+with nothing stored, unless the positions are recorded as value-only rows or,
+with ``search_opponent_positions``, searched for a policy target before the
+opponent's move is applied. See ``opponents.py`` for why and when.
 """
 
 from __future__ import annotations
@@ -156,6 +158,7 @@ def play_game(
     opponent_name: str | None = None,
     network: Player = Player.BLACK,
     record_opponent: bool = False,
+    search_opponent: bool = False,
 ) -> tuple[GameRecord, list[int]]:
     """Play one game against yourself, or against ``opponent`` as colour ``network``.
 
@@ -166,7 +169,10 @@ def play_game(
     With ``record_opponent``, the positions the opponent moves from are kept as
     value-only samples (no search ran there, so no policy target); see
     ``opponents.py``. Positions where the opponent has a single legal move are
-    skipped, as the network's forced moves are.
+    skipped, as the network's forced moves are. With ``search_opponent`` as well,
+    the network searches each such position before the opponent moves, and the
+    row carries that search's policy target; the move played is still the
+    opponent's, so the game is unchanged.
     """
     mcts = MCTS(evaluator, search_config)
     record = GameRecord(
@@ -200,14 +206,19 @@ def play_game(
             # the position the network's search reads when it judges the move
             # that led here.
             if record_opponent and len(rules.legal_actions(state)) > 1:
+                if search_opponent:
+                    pi = mcts.run(state, rng=rng).policy_target()
+                else:
+                    pi = np.zeros(policy_size(board_size), dtype=np.float32)
                 record.samples.append(
                     Sample(
                         black=state.black,
                         white=state.white,
                         to_move=state.to_move,
-                        pi=np.zeros(policy_size(board_size), dtype=np.float32),
+                        pi=pi,
                         move_no=ply,
-                        pi_valid=False,
+                        pi_valid=search_opponent,
+                        opponent_to_move=True,
                     )
                 )
             action = opponent.select(state, rng)
@@ -290,6 +301,7 @@ def play_games(
                 opponent_name=assignment.opponent,
                 network=assignment.network,
                 record_opponent=schedule.record_opponent_positions,
+                search_opponent=schedule.search_opponent_positions,
             )
             continue
         yield play_game(

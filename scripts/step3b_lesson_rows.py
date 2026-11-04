@@ -67,6 +67,14 @@ def count_run(
         if not keep.any():
             continue
         pi_valid = arrays["pi_valid"] if "pi_valid" in arrays.files else np.ones(len(keep), bool)
+        # Which rows are the opponent's. Shards from Step 5 on say so directly
+        # (``opponent_to_move``); before that the value-only rows were exactly
+        # the opponent's, so ``pi_valid`` false identifies them.
+        theirs = (
+            arrays["opponent_to_move"].astype(bool)
+            if "opponent_to_move" in arrays.files
+            else ~pi_valid
+        )
         to_move = arrays["to_move"]
         z = arrays["z"]
         ply = arrays["move_no"]
@@ -81,13 +89,13 @@ def count_run(
 
         # Opponent to move: the network is the side not to move, and z is the
         # opponent's result, so z > 0 is the fatal case.
-        sel = keep & ~pi_valid & late & (other <= max_discs)
+        sel = keep & theirs & late & (other <= max_discs)
         opp["rows"] += int(sel.sum())
         opp["opponent_won"] += int((z[sel] > 0).sum())
         opp["network_won"] += int((z[sel] < 0).sum())
 
         # Network to move: z is the network's result.
-        sel = keep & pi_valid & late & (mover <= max_discs)
+        sel = keep & ~theirs & late & (mover <= max_discs)
         net["rows"] += int(sel.sum())
         net["network_lost"] += int((z[sel] < 0).sum())
         net["network_won"] += int((z[sel] > 0).sum())
