@@ -78,6 +78,7 @@ def batched(config: SearchConfig, games: int = 8, in_flight: int = 5) -> Batched
             "with both",
             SearchConfig(n_simulations=12, temp_moves=3, dirichlet_eps=0.25, dirichlet_alpha=2.0),
         ),
+        ("with the terminal check", SearchConfig(n_simulations=12, terminal_check=True)),
     ],
 )
 def test_batching_produces_exactly_the_same_games(name: str, config: SearchConfig) -> None:

@@ -17,6 +17,8 @@
 - [Agenda for the late-October advisor meeting](meetings/2026-10-advisor-meeting-agenda.html) — answers to the October 22 questions, the Step 0 to 2 results, and the Step 3 decisions
 - [Step 3b design](step3b-design.md) — the follow-up: record the opponent's positions from external games as value-only examples, with the predictions written before the runs
 - **[Step 3b results](step3b-results.md)** — the value head was trained where the search reads it and did not move; the training rows show why: the wipeout is a one-move tactic in a state that is usually favourable, outnumbered fifty to one in the data
+- **[Step 3c: the terminal check](step3c-terminal-check.md)** — one exact rule in the evaluation search, no training: wipeouts against Greedy 65 → 12 on the same weights, the same on every checkpoint, nothing else moves; the weakness is a search-depth artefact
+- [Agenda for the November 2 advisor meeting](meetings/2026-11-02-advisor-meeting-agenda.md) — the Step 3, 3b, 3c chain in one table, the revised explanation, what changes in the report, Phase 2
 
 ## Research framing
 

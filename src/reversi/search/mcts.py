@@ -241,7 +241,11 @@ class MCTS:
         node = root
         path: list[tuple[Node, int]] = []
 
-        while node.expanded:
+        # A proven node (see ``terminal_value``) is treated like a finished
+        # position: the walk stops there and its exact value is backed up. The
+        # root is the exception, because the point of the search is to choose
+        # among the root's moves, and that needs them visited.
+        while node.expanded and (node is root or node.proven_value is None):
             index = self._select(node)
             path.append((node, index))
             child = node.children[index]
@@ -258,12 +262,18 @@ class MCTS:
         A batched scheduler calls this first so that finished positions never
         take up a slot in the network batch -- we know their answer exactly, and
         a guess could only be worse *and* slower.
+
+        A position the terminal check has proven (its mover can win on the next
+        move) counts as finished too, at +1 for the mover. Without that, the
+        exact answer would enter the move's average once, when the node was
+        opened, and every later simulation through the node would dilute it
+        with the network's opinion of the other replies.
         """
-        if not rules.is_terminal(node.state):
-            return None
-        if node.terminal_value is None:
-            node.terminal_value = float(scoring.result(node.state))
-        return node.terminal_value
+        if rules.is_terminal(node.state):
+            if node.terminal_value is None:
+                node.terminal_value = float(scoring.result(node.state))
+            return node.terminal_value
+        return node.proven_value
 
     def open_node(
         self,
@@ -275,6 +285,13 @@ class MCTS:
 
         Split out from ``_expand`` so a batched scheduler can hand back one row
         of a batch it already ran.
+
+        Returns the value to back up for this position. That is the network's
+        ``value`` unless ``terminal_check`` is on and a move from here ends the
+        game, in which case it is no lower than that move's exact result; a
+        winning one proves the node (``terminal_value``). The node keeps the
+        network's own number in ``net_value`` either way, so the root's
+        reported value stays the network's raw opinion.
         """
         actions = rules.legal_actions(node.state)
         node.open_with(actions, priors_from_logits(logits, actions), value)
@@ -283,7 +300,36 @@ class MCTS:
             # Contract C5, layer 2: an edge for every legal move and no others,
             # so the search cannot reach an illegal move even in principle.
             assert set(node.actions) == set(actions), "expanded node has illegal edges"
+
+        if self.config.terminal_check:
+            best = self._best_ending_move(node)
+            if best >= 1.0:
+                node.proven_value = 1.0
+                return 1.0
+            return max(value, best)
         return value
+
+    def _best_ending_move(self, node: Node) -> float:
+        """The best exact result among the moves from ``node`` that end the game.
+
+        From the node's mover's point of view, so +1 means "can win right now".
+        -1 when no move ends the game, which leaves the network's value alone
+        under ``max``. A game-ending draw gives a floor of 0 that later
+        simulations may average away; only a win proves the node. The children
+        it creates are kept, with their exact result filled in, so a later
+        descent reuses them instead of rebuilding them.
+        """
+        best = -1.0
+        for index, action in enumerate(node.actions):
+            child = node.children[index]
+            if child is None:
+                child = Node(rules.apply(node.state, action))
+                node.children[index] = child
+            exact = self.terminal_value(child)
+            if exact is not None:
+                # One ply down: the child's result is from the other side's view.
+                best = max(best, -exact)
+        return best
 
     def backup(self, path: Sequence[tuple[Node, int]], leaf_value: float) -> None:
         """Public name for the sign-flipping walk back up -- see ``_backup``."""
@@ -326,13 +372,14 @@ class MCTS:
         if exact is not None:
             return exact
 
-        self._expand(node)
-        return node.net_value
+        return self._expand(node)
 
-    def _expand(self, node: Node) -> None:
-        """Attach the legal moves and ask the network what it thinks. Batch of one."""
+    def _expand(self, node: Node) -> float:
+        """Attach the legal moves and ask the network what it thinks. Batch of one.
+
+        Returns the value to back up, which is ``open_node``'s answer."""
         logits, values = self.evaluator.evaluate([node.state])
-        self.open_node(node, logits[0], float(values[0]))
+        return self.open_node(node, logits[0], float(values[0]))
 
     @staticmethod
     def _backup(path: Sequence[tuple[Node, int]], leaf_value: float) -> None:
