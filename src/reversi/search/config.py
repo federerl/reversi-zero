@@ -92,10 +92,12 @@ class SearchConfig:
     game is over. The check reads the exact answer one ply down at the cost of a
     few board operations per opened node, no network calls.
 
-    Off by default, and off in every self-play and evaluation config built from
-    a run's YAML, so that every published number is of the plain search. Turn
-    it on from the arena with ``;terminal_check`` on an entrant to measure what
-    the search misses."""
+    Off by default. A run's YAML can turn it on for self-play with
+    ``mcts.terminal_check`` (the Step 4 experiment, ``research/step4-design.md``),
+    so that the games that make the training data are played by a search that
+    does not fall for the wipeout. ``for_evaluation`` leaves it off whatever the
+    YAML says, so every published strength number is of the plain search unless
+    an arena entrant asks for it with ``;terminal_check``."""
 
     def __post_init__(self) -> None:
         if self.n_simulations < 1:
@@ -135,6 +137,7 @@ class SearchConfig:
             dirichlet_eps=mcts.dirichlet_eps,
             temp_moves=mcts.temp_moves,
             temp_init=mcts.temp_init,
+            terminal_check=mcts.terminal_check,
         )
 
     @classmethod
@@ -153,6 +156,10 @@ class SearchConfig:
             dirichlet_eps=0.0,
             temp_moves=0,
             temp_init=0.0,
+            # Not inherited either: a strength measurement is of the plain
+            # search, so that a run trained with the check (Step 4) is scored
+            # on what its network learned, not on what the check adds.
+            terminal_check=False,
         )
 
     def with_simulations(self, n_simulations: int) -> SearchConfig:

@@ -223,6 +223,28 @@ badly through the middlegame and learns from garbage.
 > the most common bugs in AlphaZero reimplementations — and it doesn't crash, it
 > just quietly trains on the wrong thing.
 
+### `terminal_check: false`
+
+Before the search trusts the network's value for a position, it can try every
+legal move from there and see whether one of them **ends the game**. If a move
+wins on the spot, the position is scored as a certain win for the side to move,
+whatever the network thinks. That costs a handful of board operations per
+position and no network calls.
+
+This is off in every shipped config, and it only ever applies to self-play.
+Strength measurements (the arena, the web app) always run the plain search,
+so a run trained with the check on is scored on what its network learned, not
+on what the check adds at play time.
+
+It exists because of a specific failure, written up in
+`research/step2-failure-analysis.md`: the network rates a position where it
+holds one disc as a near-certain win, and gives the opponent's capturing reply
+a prior of a few percent, so a short search never looks at that reply and
+never finds out the game is over. Switching the check on in self-play is the
+Step 4 experiment (`research/step4-design.md`): the games that make the
+training data are then played by a search that does not fall for the wipeout,
+and the question is whether the network learns the tactic from them.
+
 ---
 
 ## `selfplay` — generating the games
