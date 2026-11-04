@@ -20,6 +20,7 @@
 - **[Step 3c: the terminal check](step3c-terminal-check.md)** — one exact rule in the evaluation search, no training: wipeouts against Greedy 65 → 12 on the same weights, the same on every checkpoint, nothing else moves; the weakness is a search-depth artefact
 - [Agenda for the November 2 advisor meeting](meetings/2026-11-02-advisor-meeting-agenda.md) — the Step 3, 3b, 3c chain in one table, the revised explanation, what changes in the report, Phase 2
 - [Step 4 design](step4-design.md) — the terminal check switched on in self-play, on top of the opponent mix that makes the low-disc positions: the strongest form of the data-side route, with the predictions written before the runs and what each outcome would mean for the claim
+- [Step 5 design](step5-design.md) — the network's search run at the opponent's positions too, so the policy head is trained where the search reads: the first training signal on the prior that gates the wipeout, with the predictions written before the runs
 - **[What this study contributes](contribution.md)** — the claim in one sentence, what is known and what is new, tactical versus strategic weaknesses as a horizon of exact calculation, with the Go cyclic attack placed on it, and why the remedies differ, what would strengthen it
 
 ## Research framing

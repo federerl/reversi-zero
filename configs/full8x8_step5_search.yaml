@@ -1,0 +1,53 @@
+# Step 5, group B-both-sp: the Step 3b recipe with the network's search also run
+# at the opponent's positions in external games (research/step5-design.md).
+#
+# One key differs from configs/full8x8_step3_both.yaml,
+# `selfplay.search_opponent_positions`. Step 3b recorded the positions where
+# Greedy or Minimax is to move as value-only rows, and the value head did not
+# move there. What the search needs at those positions turned out to be the
+# policy head's prior on the opponent's game-ending reply, and no run has ever
+# trained the policy head there, because nothing searched there. With this key
+# the network runs its own search at each such position, exactly as at its own,
+# and the visit distribution becomes the row's policy target. The opponent still
+# plays its own move, so the games are the same kind of games as Step 3b's.
+#
+# Everything else -- the opponents and the mix, the search budget, noise,
+# temperature, trainer and replay window -- is the Step 3b recipe, continued
+# from the same checkpoint; the two files are kept side by side so the diff is
+# the experiment.
+
+name: full8x8-step5-search
+
+net:
+  n_blocks: 6
+  channels: 64
+
+mcts:
+  n_simulations: 200
+  temp_moves: 15
+
+selfplay:
+  games_per_generation: 480   # self-play games; 600 in the control
+  opponents: [greedy, minimax-d4]
+  opponent_games: 120         # on top of the 480; 240 in group B
+  record_opponent_positions: true
+  search_opponent_positions: true   # the one change; see the header
+  n_workers: 6
+  games_in_flight: 24
+  max_generations: 400
+
+replay:
+  window: 400000
+  retain_shards: 30
+
+train:
+  steps_per_generation: 800
+  batch_size: 1024
+  optimizer: sgd
+  lr: 0.02
+  momentum: 0.9
+  weight_decay: 0.0001
+
+arena:
+  every_n_generations: 5
+  games: 400
