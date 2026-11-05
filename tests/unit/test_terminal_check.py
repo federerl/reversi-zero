@@ -204,12 +204,19 @@ def midgame(plies: int = 12, seed: int = 3) -> State:
     return state
 
 
-def test_the_check_is_off_by_default_and_in_every_derived_config() -> None:
+def test_the_check_is_off_by_default_and_never_reaches_evaluation() -> None:
     from reversi.config import MCTSConfig
 
     assert SearchConfig().terminal_check is False
     assert SearchConfig.for_selfplay(MCTSConfig()).terminal_check is False
     assert SearchConfig.for_evaluation(MCTSConfig(), n_simulations=50).terminal_check is False
+
+    # The Step 4 switch: a run's YAML turns the check on for the games that
+    # make the training data, and the strength measurements still run the
+    # plain search, so they score what the network learned.
+    checked = MCTSConfig(terminal_check=True)
+    assert SearchConfig.for_selfplay(checked).terminal_check is True
+    assert SearchConfig.for_evaluation(checked, n_simulations=50).terminal_check is False
 
 
 def test_without_a_game_ending_move_in_reach_the_search_is_identical() -> None:

@@ -1,0 +1,59 @@
+# Step 4, group B-both-tc: the Step 3b recipe with the terminal check switched
+# on in self-play (research/step4-design.md).
+#
+# One key differs from configs/full8x8_step3_both.yaml, `mcts.terminal_check`.
+# Before the search trusts the network's value for a position it tries every
+# legal move from there and, if one ends the game, scores the position by that
+# exact result. The games that make the training data are then played by a
+# search that does not fall for the one-move wipeout
+# (research/step3c-terminal-check.md), and the experiment asks whether the
+# network learns the tactic from them.
+#
+# The check sits on top of the opponent mix rather than on pure self-play
+# because the mix is what makes the positions that carry the lesson: against
+# Greedy the network spends long stretches with few discs, ninety times as
+# often as in self-play. Without that, the network would have nothing to learn
+# from and a null result would say nothing.
+#
+# The check applies to self-play only. Evaluation always runs the plain search,
+# so the scorecard measures what the network learned and not what the check
+# adds at play time. Everything else -- the opponents and the mix, the search
+# budget, noise, temperature, trainer and replay window -- is the Step 3b
+# recipe, continued from the same checkpoint; the two files are kept side by
+# side so the diff is the experiment.
+
+name: full8x8-step4-check
+
+net:
+  n_blocks: 6
+  channels: 64
+
+mcts:
+  n_simulations: 200
+  temp_moves: 15
+  terminal_check: true        # the one change; see the header
+
+selfplay:
+  games_per_generation: 480   # self-play games; 600 in the control
+  opponents: [greedy, minimax-d4]
+  opponent_games: 120         # on top of the 480; 240 in group B
+  record_opponent_positions: true
+  n_workers: 6
+  games_in_flight: 24
+  max_generations: 400
+
+replay:
+  window: 400000
+  retain_shards: 30
+
+train:
+  steps_per_generation: 800
+  batch_size: 1024
+  optimizer: sgd
+  lr: 0.02
+  momentum: 0.9
+  weight_decay: 0.0001
+
+arena:
+  every_n_generations: 5
+  games: 400

@@ -73,6 +73,10 @@ class SelfPlaySummary:
     opponent_draws: int = 0
     network_wipeouts: int = 0
     """External games the network ended with no discs at all."""
+    wipeouts: int = 0
+    """Games of either kind that ended with one side holding no discs. In pure
+    self-play this is the rate at which the network wipes itself out, the
+    training-side reading the Step 4 experiment is checked against."""
 
     def observe(self, record: GameRecord, branching: list[int]) -> None:
         self.games += 1
@@ -88,6 +92,7 @@ class SelfPlaySummary:
             self.white_wins += 1
         else:
             self.draws += 1
+        self.wipeouts += record.black_discs == 0 or record.white_discs == 0
         if record.opponent is not None and record.network is not None:
             self.opponent_games += 1
             network_black = record.network is Player.BLACK
@@ -120,6 +125,10 @@ class SelfPlaySummary:
             # the agent having found a strategy.
             "first_player_win_rate": self.black_wins / decisive,
             "draw_rate": self.draws / max(1, self.games),
+            # Share of all games that ended with one side at zero discs. About
+            # one in a hundred in plain self-play (Step 2); the terminal check in
+            # self-play (Step 4) is expected to lower it from the first generation.
+            "wipeout_rate": self.wipeouts / max(1, self.games),
             # Zero in pure self-play. The score is points per game for the
             # network against its fixed opponents; the wipeout rate is the share
             # of those games it ended with no discs, the failure Step 2 found.

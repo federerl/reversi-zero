@@ -157,6 +157,8 @@ def test_the_summary_counts_external_games_from_the_networks_side() -> None:
         wipeouts += discs == 0
     assert summary.opponent_games == 6
     assert summary.network_wipeouts == wipeouts
+    # Every wipeout of the network is a wipeout; the other side's count too.
+    assert summary.wipeouts >= summary.network_wipeouts
     assert summary.opponent_wins + summary.opponent_losses + summary.opponent_draws == 6
     metrics = summary.as_metrics()
     assert metrics["opponent_games"] == 6

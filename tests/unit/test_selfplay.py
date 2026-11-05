@@ -288,6 +288,7 @@ def test_summary_reports_sane_statistics() -> None:
     assert 0.0 <= metrics["pass_rate"] <= 1.0
     assert 0.0 <= metrics["draw_rate"] <= 1.0
     assert 0.0 <= metrics["first_player_win_rate"] <= 1.0
+    assert 0.0 <= metrics["wipeout_rate"] <= 1.0
     assert metrics["mean_branching"] >= 2.0
 
 

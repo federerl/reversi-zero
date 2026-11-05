@@ -109,6 +109,13 @@ class MCTSConfig(_Base):
         "the raw visit distribution at tau=1 (contract C4).",
     )
     temp_init: float = Field(default=1.0, ge=0.0)
+    terminal_check: bool = Field(
+        default=False,
+        description="In self-play, look one move ahead for a game-ending reply "
+        "before trusting the network's value for a position (search/config.py). "
+        "Self-play only: evaluation always runs the plain search, so the strength "
+        "numbers measure what the network learned. The Step 4 experiment.",
+    )
 
 
 class SelfPlayConfig(_Base):
