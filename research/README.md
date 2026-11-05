@@ -21,6 +21,7 @@
 - [Agenda for the November 2 advisor meeting](meetings/2026-11-02-advisor-meeting-agenda.md) — the Step 3, 3b, 3c chain in one table, the revised explanation, what changes in the report, Phase 2
 - [Step 4 design](step4-design.md) — the terminal check switched on in self-play, on top of the opponent mix that makes the low-disc positions: the strongest form of the data-side route, with the predictions written before the runs and what each outcome would mean for the claim
 - [Step 5 design](step5-design.md) — the network's search run at the opponent's positions too, so the policy head is trained where the search reads: the first training signal on the prior that gates the wipeout, with the predictions written before the runs
+- **[Step 4 results](step4-results.md)** — the check in self-play stopped the wipeouts during training and taught the heads nothing the plain search could use: the value head did not move, the prior did not move, and the row counts show the check removed the lesson rows rather than adding them
 - **[What this study contributes](contribution.md)** — the claim in one sentence, what is known and what is new, tactical versus strategic weaknesses as a horizon of exact calculation, with the Go cyclic attack placed on it, and why the remedies differ, what would strengthen it
 
 ## Research framing
