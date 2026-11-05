@@ -16,7 +16,14 @@ Each position self-play keeps produces one training example with three parts:
   a game against a fixed opponent, with the opponent to move, has a result to
   learn from but no search behind it: nothing chose that move but the opponent.
   Such a row carries an all-zero ``pi`` and ``pi_valid`` false, and trains only
-  the value head. Shards without the column have every ``pi`` real.
+  the value head. Shards without the column have every ``pi`` real;
+* **``opponent_to_move``**, optionally, whether the position was recorded with
+  a fixed opponent to move. It says where a row came from, not how it trains:
+  such a row may be value-only (``pi_valid`` false) or carry a policy target
+  from a search the network ran at the opponent's position
+  (``selfplay.search_opponent_positions``). Analysis scripts use it to find the
+  opponent's positions once ``pi_valid`` no longer marks them. Shards without
+  the column have no such rows.
 
 **We store the position, not the encoded planes.** Re-deriving the three input
 planes at sampling time costs microseconds. Storing them instead would mean that
@@ -71,7 +78,7 @@ FIELDS: tuple[str, ...] = ("black", "white", "to_move", "pi", "z", "move_no", "g
 # Columns a shard may carry. A reader fills in what is missing; a writer includes
 # what it has. This is how a training target can be added without invalidating
 # every game collected before it existed.
-OPTIONAL_FIELDS: tuple[str, ...] = ("own", "pi_valid")
+OPTIONAL_FIELDS: tuple[str, ...] = ("own", "pi_valid", "opponent_to_move")
 
 
 @dataclass(frozen=True, slots=True)
@@ -111,6 +118,12 @@ class Sample:
     imitate and ``pi`` is all zeros. The loss skips the policy term on such a
     row. See ``selfplay/opponents.py`` for why these positions are recorded.
     """
+    opponent_to_move: bool = False
+    """Whether a fixed opponent was to move here (an external game, the
+    opponent's turn). Independent of ``pi_valid``: with
+    ``selfplay.search_opponent_positions`` the network searches these positions
+    too and they carry a real policy target. Kept so analysis can tell the
+    opponent's positions apart from the network's own."""
 
     def state(self, board_size: int) -> State:
         return State(black=self.black, white=self.white, to_move=self.to_move, size=board_size)
@@ -172,6 +185,7 @@ class GameRecord:
                 z=float(result_for(terminal, sample.to_move)),
                 own=ownership[sample.to_move],
                 pi_valid=sample.pi_valid,
+                opponent_to_move=sample.opponent_to_move,
             )
             for sample in self.samples
         ]
@@ -254,6 +268,10 @@ def samples_to_arrays(
     # byte-for-byte what they were before the column existed.
     if any(not s.pi_valid for s in samples):
         arrays["pi_valid"] = np.fromiter((s.pi_valid for s in samples), dtype=np.bool_, count=count)
+    if any(s.opponent_to_move for s in samples):
+        arrays["opponent_to_move"] = np.fromiter(
+            (s.opponent_to_move for s in samples), dtype=np.bool_, count=count
+        )
 
     validate_arrays(arrays, board_size=board_size)
     return arrays
@@ -276,6 +294,9 @@ def arrays_to_samples(
             z=float(arrays["z"][row]),
             own=np.asarray(arrays["own"][row], dtype=np.int8) if "own" in arrays else None,
             pi_valid=bool(arrays["pi_valid"][row]) if "pi_valid" in arrays else True,
+            opponent_to_move=(
+                bool(arrays["opponent_to_move"][row]) if "opponent_to_move" in arrays else False
+            ),
         )
         for row in range(len(arrays["black"]))
     ]
@@ -324,6 +345,15 @@ def validate_arrays(arrays: Arrays, *, board_size: int) -> None:
     # other row must be a distribution. Reading a shard with value-only rows
     # through code that does not know the column fails here, on the sum, rather
     # than quietly training the policy head on nothing.
+    if "opponent_to_move" in arrays:
+        flags = arrays["opponent_to_move"]
+        if flags.shape != (count,):
+            msg = f"opponent_to_move has shape {flags.shape}, expected ({count},)"
+            raise ReplayError(msg)
+        if not np.isin(flags, (0, 1)).all():
+            msg = "opponent_to_move must be 0 or 1"
+            raise ReplayError(msg)
+
     expected = np.ones(count, dtype=np.float32)
     if "pi_valid" in arrays:
         pi_valid = arrays["pi_valid"]

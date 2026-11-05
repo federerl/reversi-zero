@@ -33,6 +33,18 @@ opponent's positions closes that gap with one change; the policy head is left
 alone because nothing searched there, and imitating the opponent's move would
 teach the network to play like its opponent.
 
+**Searching the opponent's positions too.** The Step 3b runs trained the value
+head at the opponent's positions and it did not move (``research/step3b-results.md``);
+what the search needs one ply down turned out to be the *prior* on the
+opponent's game-ending reply, and nothing ever trained the policy head there.
+With ``search_opponent_positions`` the network runs its own search at each
+recorded opponent position, exactly as at its own, and the visit distribution
+is stored as the policy target; the move actually played is still the
+opponent's. The search's choice is never played, so the game is the one the
+opponent and the network would have played anyway, and the row teaches the
+policy head what the network itself would do from the opponent's seat, which
+is the quantity the search reads (``research/step5-design.md``).
+
 **What it does not do.** Nothing here touches the value target: a position
 from an external game is labelled with that game's result, as a self-play
 position is. Whether that is the right choice is an experimental question and
@@ -75,8 +87,18 @@ class OpponentSchedule:
     """Also record the positions where the opponent is to move, as value-only
     training examples. See the module docstring for why; off reproduces the
     Step 3 runs exactly."""
+    search_opponent_positions: bool = False
+    """Run the network's search at each recorded opponent position and store
+    its visit distribution as the policy target there; the opponent still plays
+    its own move. Needs ``record_opponent_positions``."""
 
     def __post_init__(self) -> None:
+        if self.search_opponent_positions and not self.record_opponent_positions:
+            msg = (
+                "search_opponent_positions searches the opponent's positions so they can "
+                "be recorded with a policy target; it needs record_opponent_positions"
+            )
+            raise ConfigError(msg)
         if self.selfplay_games < 0 or self.opponent_games < 0:
             msg = (
                 f"game counts cannot be negative: selfplay_games={self.selfplay_games}, "

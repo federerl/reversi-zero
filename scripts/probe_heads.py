@@ -225,14 +225,33 @@ def main() -> int:
     parser.add_argument("--protocol", type=Path, default=PROTOCOL)
     parser.add_argument("--networks", nargs="*", default=None)
     parser.add_argument("--limit", type=int, default=None, help="wipeouts per network (smoke)")
+    parser.add_argument(
+        "--positions-from",
+        default=None,
+        metavar="NAME",
+        help="Probe every network on NAME's wipeout positions instead of its own. A network "
+        "is normally probed where it was wiped out, which selects the positions it has not "
+        "learned; one fixed set makes the heads of different networks comparable.",
+    )
     args = parser.parse_args()
 
     checkpoints = json.loads(args.protocol.read_text(encoding="utf-8"))["checkpoints"]
-    results: dict[str, Any] = {}
+    games_by_net = {}
     for path in games_files(args.games_dir):
         net, traces = load(path)
-        if net not in checkpoints or (args.networks and net not in args.networks):
-            continue  # a fixed opponent's games, or a network not asked for
+        if net in checkpoints:
+            games_by_net[net] = traces
+    if args.positions_from is not None and args.positions_from not in games_by_net:
+        msg = f"no Greedy games found for {args.positions_from!r} under {args.games_dir}"
+        raise SystemExit(msg)
+    results: dict[str, Any] = {}
+    for net in checkpoints:
+        if args.networks and net not in args.networks:
+            continue
+        source = args.positions_from if args.positions_from is not None else net
+        if source not in games_by_net:
+            continue  # no games for this network in this directory
+        traces = games_by_net[source]
         evaluator = load_evaluator(Path(checkpoints[net]["file"]))
         wiped = [t for t in traces if t.wipeout and not t.net_won][: args.limit]
         rows: list[dict[str, Any]] = []
@@ -250,6 +269,7 @@ def main() -> int:
                 rows.append(probe_position(evaluator, trace, move, k))
         results[net] = {
             "checkpoint": checkpoints[net]["file"],
+            "positions_from": source,
             "wipeouts": len(wiped),
             "summary": {k: summarise([r for r in rows if r["k"] == k]) for k in PROBED_MOVES},
             "positions": rows,

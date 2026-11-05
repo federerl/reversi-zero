@@ -364,6 +364,29 @@ network to play like its opponent. With the rule on, an external game yields
 about as many examples as a self-play game, so `opponent_games` is halved to
 keep the data matched (`configs/full8x8_step3_both.yaml`).
 
+### `search_opponent_positions: false`
+
+Goes one step past `record_opponent_positions`. The opponent's positions are
+not only kept, the network **runs its own search at each of them** — the same
+search it runs at its own positions, same number of simulations, same
+exploration noise — and the visit distribution it produces is stored as that
+row's policy target. The opponent still plays its own move; the search's
+choice is never played, so the game is unchanged.
+
+Why: the search judges a move by looking at the position after it, with the
+other side to move. In a game against Greedy that position is Greedy's to play
+from, and nothing ever searched there, so the policy head never got a training
+signal at exactly the positions the search reads. `record_opponent_positions`
+trained the value head there and it did not move (`research/step3b-results.md`);
+this trains the policy head there, which is where the Step 2 analysis locates
+the missing information (the prior on the opponent's game-ending reply). The
+Step 5 experiment, `research/step5-design.md`.
+
+Costs one extra search per recorded opponent position, so an external game
+takes about twice the network calls. Needs `record_opponent_positions`. Shards
+written with it on carry an `opponent_to_move` column so analysis can still
+tell the opponent's rows from the network's.
+
 ---
 
 ## `replay` — the training data pool

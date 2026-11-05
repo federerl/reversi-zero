@@ -167,6 +167,24 @@ class SelfPlayConfig(_Base):
         "records only the network's own decisions (the Step 3 rule). See "
         "selfplay/opponents.py for why the difference matters to the search.",
     )
+    search_opponent_positions: bool = Field(
+        default=False,
+        description="In games against fixed opponents, run the network's own search "
+        "at each recorded opponent position and store its visit distribution as "
+        "the policy target there; the opponent still plays its own move. Gives "
+        "the policy head training signal one ply down, where the search reads "
+        "(research/step5-design.md). Needs record_opponent_positions.",
+    )
+
+    @model_validator(mode="after")
+    def _searching_needs_recording(self) -> SelfPlayConfig:
+        if self.search_opponent_positions and not self.record_opponent_positions:
+            msg = (
+                "selfplay.search_opponent_positions needs selfplay.record_opponent_positions: "
+                "the searched positions are recorded as training examples"
+            )
+            raise ValueError(msg)
+        return self
 
     @field_validator("opponents")
     @classmethod
@@ -199,6 +217,7 @@ class SelfPlayConfig(_Base):
             opponent_games=self.opponent_games,
             opponents=self.opponents,
             record_opponent_positions=self.record_opponent_positions,
+            search_opponent_positions=self.search_opponent_positions,
         )
 
 
