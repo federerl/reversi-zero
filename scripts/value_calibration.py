@@ -165,11 +165,18 @@ def main() -> int:
         default=20000,
         help="Positions sampled from the last generation for the self-play row.",
     )
+    parser.add_argument(
+        "--checkpoints",
+        nargs="+",
+        default=list(CHECKPOINTS),
+        metavar="NAME",
+        help="Networks to calibrate, by evaluation name. Default: the Step 3 groups.",
+    )
     args = parser.parse_args()
     self_play = dict(item.split("=", 1) for item in args.self_play)
 
     results: dict[str, dict[str, dict]] = {}
-    for network in CHECKPOINTS:
+    for network in args.checkpoints:
         results[network] = {}
         for row, opponents in ROWS:
             est_parts, out_parts = [], []
