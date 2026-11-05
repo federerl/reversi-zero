@@ -1,0 +1,65 @@
+{
+ "pairings": {
+  "Bsp-s1": {
+   "corner": null,
+   "edax-l3": null,
+   "edax-l5": null,
+   "edax-l7": null,
+   "gen60": null,
+   "greedy": {
+    "ci_high": 0.976147456998507,
+    "ci_low": 0.9167032959981803,
+    "commit": "18df169",
+    "games": 200,
+    "record": "191W 9L 0D",
+    "report": "Bsp-s1-vs-greedy.json",
+    "score": 0.955,
+    "wipeouts": 9,
+    "wipeouts_inflicted": 1
+   },
+   "greedy-corner": null,
+   "greedy-d2": null,
+   "minimax-d4": null,
+   "mobility": null,
+   "noisy-greedy": null,
+   "random": null,
+   "rollout-r3000": {
+    "ci_high": 0.961623645350847,
+    "ci_low": 0.8919809207009312,
+    "commit": "18df169",
+    "games": 200,
+    "record": "187W 13L 0D",
+    "report": "Bsp-s1-vs-rollout-r3000.json",
+    "score": 0.935,
+    "wipeouts": 11,
+    "wipeouts_inflicted": 1
+   }
+  }
+ },
+ "protocol": "research/eval-protocol-frozen.json: 200 games per pairing, 50 simulations, 4-ply openings played with both colours, seed 20261025",
+ "rows": {
+  "held out": [
+   "edax-l7",
+   "edax-l3",
+   "edax-l5",
+   "rollout-r3000"
+  ],
+  "retention": [
+   "gen60"
+  ],
+  "sanity": [
+   "random"
+  ],
+  "seen": [
+   "greedy",
+   "minimax-d4"
+  ],
+  "seen family": [
+   "greedy-corner",
+   "greedy-d2",
+   "noisy-greedy",
+   "corner",
+   "mobility"
+  ]
+ }
+}
