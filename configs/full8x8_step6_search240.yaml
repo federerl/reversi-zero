@@ -1,0 +1,48 @@
+# Step 6, group B-both-sp-240: the Step 5 recipe at a higher dose of searched
+# opponent positions, 240 external games per generation (research/step6-design.md).
+#
+# Two keys differ from configs/full8x8_step5_search.yaml, and they move together:
+# `opponent_games` is the dose, and `games_per_generation` comes down by the
+# same amount so that every group trains on about 600 games' worth of rows, as
+# the Step 3 matching rule asks. An external game with both sides recorded and
+# searched yields about as many rows as a self-play game.
+#
+# Everything else -- the opponents, the recording and searching rules, the
+# search budget, noise, temperature, trainer and replay window -- is Step 5's,
+# continued from the same checkpoint.
+
+name: full8x8-step6-search240
+
+net:
+  n_blocks: 6
+  channels: 64
+
+mcts:
+  n_simulations: 200
+  temp_moves: 15
+
+selfplay:
+  games_per_generation: 360   # self-play games; 480 in Step 5, 600 in the control
+  opponents: [greedy, minimax-d4]
+  opponent_games: 240         # the dose; 120 in Step 5
+  record_opponent_positions: true
+  search_opponent_positions: true   # the one change; see the header
+  n_workers: 6
+  games_in_flight: 24
+  max_generations: 400
+
+replay:
+  window: 400000
+  retain_shards: 30
+
+train:
+  steps_per_generation: 800
+  batch_size: 1024
+  optimizer: sgd
+  lr: 0.02
+  momentum: 0.9
+  weight_decay: 0.0001
+
+arena:
+  every_n_generations: 5
+  games: 400
