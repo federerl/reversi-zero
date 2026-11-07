@@ -23,7 +23,7 @@
 - [Step 5 design](step5-design.md) — the network's search run at the opponent's positions too, so the policy head is trained where the search reads: the first training signal on the prior that gates the wipeout, with the predictions written before the runs
 - **[Step 4 results](step4-results.md)** — the check in self-play stopped the wipeouts during training and taught the heads nothing the plain search could use: the value head did not move, the prior did not move, and the row counts show the check removed the lesson rows rather than adding them
 - **[Step 5 results](step5-results.md)** — the first training route that moved the wipeouts: a third fewer against every disc-hungry opponent on both seeds, at no cost, with the prior on the wiping reply doubled; the held-out random-playout row did not move, so the policy head learned the positions, not the rule
-- **[What this study contributes](contribution.md)** — the claim in one sentence, what is known and what is new, tactical versus strategic weaknesses as a horizon of exact calculation, with the Go cyclic attack placed on it, and why the remedies differ, what would strengthen it
+- **[What this study contributes](contribution.md)** — the claim in one sentence after Step 5: the value head cannot carry a one-move tactic by any of three routes, the policy head can carry the positions it was shown when given a target where the search reads, and an exact check carries the rule; tactical versus strategic weaknesses as a horizon of exact calculation, with the Go cyclic attack placed on it, and what would strengthen the claim
 
 ## Research framing
 
