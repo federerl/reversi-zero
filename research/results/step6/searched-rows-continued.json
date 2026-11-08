@@ -1,0 +1,182 @@
+{
+ "purpose": "research/step5-design.md, prediction 1: the search's target at the opponent's positions where a move takes every disc of the network's",
+ "from_generation": 141,
+ "runs": [
+  {
+   "run": "step5-Bboth-sp-s1",
+   "rows": 687992,
+   "opponent_to_move_rows": 60202,
+   "with_a_wiping_move": 60,
+   "target_mostly_on_a_wiping_move": 56,
+   "mean_target_mass_on_wiping_moves": 0.8156666638950507,
+   "by_generation": {
+    "141": {
+     "with_wipe": 5,
+     "concentrated": 4
+    },
+    "142": {
+     "with_wipe": 4,
+     "concentrated": 4
+    },
+    "143": {
+     "with_wipe": 3,
+     "concentrated": 3
+    },
+    "144": {
+     "with_wipe": 4,
+     "concentrated": 3
+    },
+    "145": {
+     "with_wipe": 2,
+     "concentrated": 1
+    },
+    "146": {
+     "with_wipe": 3,
+     "concentrated": 3
+    },
+    "147": {
+     "with_wipe": 4,
+     "concentrated": 4
+    },
+    "148": {
+     "with_wipe": 2,
+     "concentrated": 2
+    },
+    "149": {
+     "with_wipe": 3,
+     "concentrated": 3
+    },
+    "150": {
+     "with_wipe": 4,
+     "concentrated": 4
+    },
+    "151": {
+     "with_wipe": 3,
+     "concentrated": 3
+    },
+    "152": {
+     "with_wipe": 3,
+     "concentrated": 3
+    },
+    "153": {
+     "with_wipe": 3,
+     "concentrated": 3
+    },
+    "154": {
+     "with_wipe": 2,
+     "concentrated": 2
+    },
+    "155": {
+     "with_wipe": 3,
+     "concentrated": 2
+    },
+    "156": {
+     "with_wipe": 4,
+     "concentrated": 4
+    },
+    "157": {
+     "with_wipe": 3,
+     "concentrated": 3
+    },
+    "158": {
+     "with_wipe": 1,
+     "concentrated": 1
+    },
+    "159": {
+     "with_wipe": 2,
+     "concentrated": 2
+    },
+    "160": {
+     "with_wipe": 2,
+     "concentrated": 2
+    }
+   }
+  },
+  {
+   "run": "step5-Bboth-sp-s2",
+   "rows": 687082,
+   "opponent_to_move_rows": 59648,
+   "with_a_wiping_move": 80,
+   "target_mostly_on_a_wiping_move": 74,
+   "mean_target_mass_on_wiping_moves": 0.8252500004367903,
+   "by_generation": {
+    "141": {
+     "with_wipe": 8,
+     "concentrated": 8
+    },
+    "142": {
+     "with_wipe": 5,
+     "concentrated": 5
+    },
+    "143": {
+     "with_wipe": 5,
+     "concentrated": 5
+    },
+    "144": {
+     "with_wipe": 5,
+     "concentrated": 5
+    },
+    "145": {
+     "with_wipe": 6,
+     "concentrated": 5
+    },
+    "147": {
+     "with_wipe": 9,
+     "concentrated": 7
+    },
+    "148": {
+     "with_wipe": 1,
+     "concentrated": 1
+    },
+    "149": {
+     "with_wipe": 5,
+     "concentrated": 4
+    },
+    "150": {
+     "with_wipe": 2,
+     "concentrated": 2
+    },
+    "151": {
+     "with_wipe": 3,
+     "concentrated": 3
+    },
+    "152": {
+     "with_wipe": 4,
+     "concentrated": 3
+    },
+    "153": {
+     "with_wipe": 3,
+     "concentrated": 3
+    },
+    "154": {
+     "with_wipe": 4,
+     "concentrated": 4
+    },
+    "155": {
+     "with_wipe": 3,
+     "concentrated": 3
+    },
+    "156": {
+     "with_wipe": 4,
+     "concentrated": 4
+    },
+    "157": {
+     "with_wipe": 4,
+     "concentrated": 4
+    },
+    "158": {
+     "with_wipe": 3,
+     "concentrated": 3
+    },
+    "159": {
+     "with_wipe": 3,
+     "concentrated": 3
+    },
+    "160": {
+     "with_wipe": 3,
+     "concentrated": 2
+    }
+   }
+  }
+ ]
+}
