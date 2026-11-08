@@ -1,0 +1,53 @@
+# Step 8, group B-both-sp-w8: the Step 5 recipe with the rows recorded at the
+# opponent's positions counted 8 times in the policy loss (research/step8-design.md).
+#
+# One key differs from configs/full8x8_step5_search.yaml,
+# `train.opponent_policy_weight`, as in the Step 7 configs but at twice the
+# larger Step 7 weight. Step 7 found that weights of 2 and 4 reproduce the
+# Step 6 dose curve with the games fixed and cost nothing, and that the second
+# doubling of the weight bought nothing more on the held-out row. This config
+# doubles it again, with the games exactly Step 5's, so that the opponent's
+# rows are about two fifths of the policy loss: it asks whether the held-out
+# row moves when the signal alone is pushed past where either route stopped,
+# and whether the policy head starts paying at its own positions for what it
+# carries at the opponent's when the share is this large.
+#
+# Everything else is the Step 5 recipe, continued from the same checkpoint;
+# the Step 7 files sit beside this one so the diff is the experiment.
+
+name: full8x8-step8-weight8
+
+net:
+  n_blocks: 6
+  channels: 64
+
+mcts:
+  n_simulations: 200
+  temp_moves: 15
+
+selfplay:
+  games_per_generation: 480   # self-play games; 600 in the control
+  opponents: [greedy, minimax-d4]
+  opponent_games: 120         # on top of the 480; 240 in group B
+  record_opponent_positions: true
+  search_opponent_positions: true
+  n_workers: 6
+  games_in_flight: 24
+  max_generations: 400
+
+replay:
+  window: 400000
+  retain_shards: 30
+
+train:
+  opponent_policy_weight: 8   # the one change; see the header
+  steps_per_generation: 800
+  batch_size: 1024
+  optimizer: sgd
+  lr: 0.02
+  momentum: 0.9
+  weight_decay: 0.0001
+
+arena:
+  every_n_generations: 5
+  games: 400
