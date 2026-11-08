@@ -38,7 +38,11 @@ term only. The weight defaults to 0, which is exactly the two-term loss above.
 **No entropy bonus, no advantage, no importance weights.** This is plain
 supervised learning against targets that happen to have been produced by search.
 If you are looking for the reinforcement learning, it is in where the data comes
-from, not in this file.
+from, not in this file. The one knob on the rows themselves is ``pi_weight``, a
+per-row multiplier on the policy term that lets a chosen kind of row (the
+positions recorded with a fixed opponent to move, see ``train.opponent_policy_weight``)
+count as if it appeared in the batch several times over; the mean is taken over
+the weights, so the term keeps its scale.
 """
 
 from __future__ import annotations
@@ -90,6 +94,7 @@ def policy_value_loss(
     own_valid: Tensor | None = None,
     ownership_weight: float = 0.0,
     pi_valid: Tensor | None = None,
+    pi_weight: Tensor | None = None,
 ) -> LossParts:
     """Score one batch.
 
@@ -104,6 +109,12 @@ def policy_value_loss(
     zeros, so the term would be zero anyway; the mask keeps the *denominator*
     honest, so that such rows do not water the policy loss down. ``None`` means
     every row is real.
+
+    ``pi_weight`` multiplies each row's policy term, and the mean is taken over
+    the weights rather than the row count, so a row with weight 2 counts exactly
+    as if it were in the batch twice and the term keeps its scale against the
+    value term. ``None`` means every row weighs one. A row masked out by
+    ``pi_valid`` contributes nothing whatever its weight.
 
     ``policy_logits`` is ``(batch, actions)`` raw and unmasked -- the network has
     no idea which moves are legal, and does not need to. The target is zero on
@@ -136,15 +147,26 @@ def policy_value_loss(
     # reproduce those proportions rather than just pick the argmax.
     log_probabilities = F.log_softmax(policy_logits, dim=1)
     per_row = -(pi_target * log_probabilities).sum(dim=1)
-    if pi_valid is not None:
-        if pi_valid.shape != per_row.shape:
-            msg = f"pi_valid has shape {tuple(pi_valid.shape)}, expected {tuple(per_row.shape)}"
-            raise ValueError(msg)
-        mask = pi_valid.to(per_row.dtype)
-        valid = mask.sum()
-        policy_loss = (per_row * mask).sum() / valid if valid > 0 else per_row.sum() * 0.0
-    else:
+    if pi_valid is None and pi_weight is None:
         policy_loss = per_row.mean()
+    else:
+        weights = torch.ones_like(per_row)
+        if pi_valid is not None:
+            if pi_valid.shape != per_row.shape:
+                msg = f"pi_valid has shape {tuple(pi_valid.shape)}, expected {tuple(per_row.shape)}"
+                raise ValueError(msg)
+            weights = weights * pi_valid.to(per_row.dtype)
+        if pi_weight is not None:
+            if pi_weight.shape != per_row.shape:
+                msg = (
+                    f"pi_weight has shape {tuple(pi_weight.shape)}, expected {tuple(per_row.shape)}"
+                )
+                raise ValueError(msg)
+            weights = weights * pi_weight.to(per_row.dtype)
+        total_weight = weights.sum()
+        policy_loss = (
+            (per_row * weights).sum() / total_weight if total_weight > 0 else per_row.sum() * 0.0
+        )
 
     value_loss = F.mse_loss(value, target)
 

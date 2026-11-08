@@ -64,6 +64,11 @@ class Batch:
     """``(batch,)`` -- whether ``pi`` is a real target for that row. ``False`` for
     a position recorded with a fixed opponent to move (``schema.Sample.pi_valid``);
     such a row trains the value head only. ``None`` means every row is real."""
+    opponent_to_move: NDArray[np.bool_] | None = None
+    """``(batch,)`` -- whether the row was recorded with a fixed opponent to move
+    (``schema.Sample.opponent_to_move``). The trainer can weight such rows in the
+    policy loss (``train.opponent_policy_weight``). ``None`` for batches built by
+    hand; the buffer always fills it, ``False`` where the shard has no column."""
 
     def __len__(self) -> int:
         return len(self.z)
@@ -156,6 +161,11 @@ class ReplayBuffer:
             block["pi_valid"] = np.asarray(arrays["pi_valid"], dtype=np.bool_)
         else:
             block["pi_valid"] = np.ones(count, dtype=np.bool_)
+        # And for who was to move: absent on disk means the network, everywhere.
+        if "opponent_to_move" in arrays:
+            block["opponent_to_move"] = np.asarray(arrays["opponent_to_move"], dtype=np.bool_)
+        else:
+            block["opponent_to_move"] = np.zeros(count, dtype=np.bool_)
 
         if not self._columns:
             self._columns = {field: column.copy() for field, column in block.items()}
@@ -275,6 +285,7 @@ class ReplayBuffer:
         own = np.empty((len(indices), size * size), dtype=np.float32)
         own_valid = np.asarray(self._columns["own_valid"][indices], dtype=np.bool_)
         pi_valid = np.asarray(self._columns["pi_valid"][indices], dtype=np.bool_)
+        opponent_to_move = np.asarray(self._columns["opponent_to_move"][indices], dtype=np.bool_)
 
         which_turn = (
             rng.integers(0, len(turns), size=len(indices))
@@ -303,7 +314,15 @@ class ReplayBuffer:
             z[row] = self._columns["z"][index]
             own[row] = owners
 
-        return Batch(planes=planes, pi=pi, z=z, own=own, own_valid=own_valid, pi_valid=pi_valid)
+        return Batch(
+            planes=planes,
+            pi=pi,
+            z=z,
+            own=own,
+            own_valid=own_valid,
+            pi_valid=pi_valid,
+            opponent_to_move=opponent_to_move,
+        )
 
     # -----------------------------------------------------------------
 

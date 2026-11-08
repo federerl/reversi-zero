@@ -504,6 +504,23 @@ poor while move predictions are fine; lower it if the value head starts
 memorising specific game outcomes. Run 2 tried 4.0 and the agent got weaker: the
 policy signal was starved (see `experiments.md`).
 
+### `opponent_policy_weight: 1.0`
+
+How many times a position recorded with a fixed opponent to move counts in the
+policy loss, compared with a position from the network's own play. The policy
+loss is a mean over the batch; with this at 2, each such row goes into that mean
+twice, and the mean is taken over the weights, so the loss keeps its scale and
+its balance against the value term. The games, the shards and the value head are
+untouched: this changes how much of the policy head's attention those rows get,
+not what the network sees.
+
+It only matters when those rows carry a policy target, which they do under
+`selfplay.search_opponent_positions`; a value-only row stays out of the policy
+loss whatever its weight. 1.0 is the plain mean. `research/step7-design.md` is
+the experiment it exists for: the Step 6 dose curve raised the share of such
+rows by playing more external games, and paid for the largest dose with the
+network's own strength; this raises their share in the policy loss alone.
+
 ### `ownership_loss_weight: 0.0`
 
 A third, optional term, only for a network built with `net.ownership: true`:
