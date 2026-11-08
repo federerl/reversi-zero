@@ -1,0 +1,37 @@
+{
+  "few_discs": "at most 3 discs, from ply 16",
+  "from_generation": 141,
+  "purpose": "research/step3b-results.md: rows that carried the wipeout lesson",
+  "runs": [
+    {
+      "network_to_move_few_discs": {
+        "network_lost": 43,
+        "network_won": 4607,
+        "rows": 4650
+      },
+      "opponent_to_move_few_discs": {
+        "network_won": 167,
+        "opponent_won": 12,
+        "rows": 179
+      },
+      "rows": 687992,
+      "run": "step5-Bboth-sp-s1",
+      "value_only_rows": 0
+    },
+    {
+      "network_to_move_few_discs": {
+        "network_lost": 56,
+        "network_won": 4491,
+        "rows": 4547
+      },
+      "opponent_to_move_few_discs": {
+        "network_won": 188,
+        "opponent_won": 12,
+        "rows": 200
+      },
+      "rows": 687082,
+      "run": "step5-Bboth-sp-s2",
+      "value_only_rows": 0
+    }
+  ]
+}
