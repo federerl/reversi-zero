@@ -84,6 +84,17 @@ class Trainer:
         pi_valid = None
         if batch.pi_valid is not None:
             pi_valid = torch.from_numpy(np.ascontiguousarray(batch.pi_valid)).to(self.device)
+        # Rows recorded with a fixed opponent to move can count more than once in
+        # the policy term (research/step7-design.md). Weight 1 is the plain mean,
+        # so nothing is built unless the config asks for something else.
+        pi_weight = None
+        if self.config.opponent_policy_weight != 1.0 and batch.opponent_to_move is not None:
+            theirs = torch.from_numpy(np.ascontiguousarray(batch.opponent_to_move)).to(self.device)
+            pi_weight = torch.where(
+                theirs,
+                torch.full_like(z_target, self.config.opponent_policy_weight),
+                torch.ones_like(z_target),
+            )
         own_target = own_valid = None
         if batch.own is not None and batch.own_valid is not None:
             own_target = torch.from_numpy(np.ascontiguousarray(batch.own)).to(self.device)
@@ -119,6 +130,7 @@ class Trainer:
             own_valid=own_valid,
             ownership_weight=self.config.ownership_loss_weight,
             pi_valid=pi_valid,
+            pi_weight=pi_weight,
         )
 
         self.optimizer.zero_grad(set_to_none=True)

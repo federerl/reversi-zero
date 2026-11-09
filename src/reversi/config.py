@@ -251,6 +251,14 @@ class TrainConfig(_Base):
     lr_floor_divisor: float = Field(default=20.0, ge=1.0, description="Cosine decays to lr/this")
     grad_clip: float = Field(default=5.0, gt=0.0, description="Global-norm clip")
     value_loss_weight: float = Field(default=1.0, ge=0.0)
+    opponent_policy_weight: float = Field(
+        default=1.0,
+        ge=0.0,
+        description="How many times a row recorded with a fixed opponent to move counts "
+        "in the policy loss, relative to a self-play row. 1 is a plain mean. Only rows "
+        "that carry a policy target count at all, so this needs "
+        "selfplay.search_opponent_positions to do anything.",
+    )
     ownership_loss_weight: float = Field(
         default=0.0,
         ge=0.0,
