@@ -1,0 +1,626 @@
+{
+ "budgets": [
+  50,
+  100,
+  256,
+  800
+ ],
+ "checkpoints": [
+  "control120",
+  "Bw2-s1",
+  "B240w2-s1",
+  "B240w2-s2"
+ ],
+ "opponents": [
+  "greedy",
+  "rollout-r3000"
+ ],
+ "pairings": {
+  "B240w2-s1": {
+   "greedy": {
+    "check": {
+     "100": {
+      "ci_high": 0.9991168312843989,
+      "ci_low": 0.9722262956021069,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s1-s100-tc-vs-greedy.json",
+      "score": 0.995,
+      "wipeouts": 1
+     },
+     "256": {
+      "ci_high": 0.9972533418664555,
+      "ci_low": 0.9642782382838231,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s1-s256-tc-vs-greedy.json",
+      "score": 0.99,
+      "wipeouts": 2
+     },
+     "50": {
+      "ci_high": 0.9921955735836505,
+      "ci_low": 0.9497129130941735,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s1-s50-tc-vs-greedy.json",
+      "score": 0.98,
+      "wipeouts": 4
+     },
+     "800": {
+      "ci_high": 1.0,
+      "ci_low": 0.9811546736227335,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s1-s800-tc-vs-greedy.json",
+      "score": 1.0,
+      "wipeouts": 0
+     }
+    },
+    "plain": {
+     "100": {
+      "ci_high": 0.961623645350847,
+      "ci_low": 0.8919809207009312,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s1-s100-vs-greedy.json",
+      "score": 0.935,
+      "wipeouts": 13
+     },
+     "256": {
+      "ci_high": 0.9921955735836505,
+      "ci_low": 0.9497129130941735,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s1-s256-vs-greedy.json",
+      "score": 0.98,
+      "wipeouts": 4
+     },
+     "50": {
+      "ci_high": 0.8583282847220932,
+      "ci_low": 0.7499876129240015,
+      "commit": "e75fa39",
+      "from": "research/results/step8/scorecard.json",
+      "games": 200,
+      "report": "B240w2-s1-vs-greedy.json",
+      "score": 0.81,
+      "wipeouts": 38
+     },
+     "800": {
+      "ci_high": 0.9972533418664555,
+      "ci_low": 0.9642782382838231,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s1-s800-vs-greedy.json",
+      "score": 0.99,
+      "wipeouts": 2
+     }
+    }
+   },
+   "rollout-r3000": {
+    "check": {
+     "100": {
+      "ci_high": 0.98457778358489,
+      "ci_low": 0.9328018362523657,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s1-s100-tc-vs-rollout-r3000.json",
+      "score": 0.9675,
+      "wipeouts": 3
+     },
+     "256": {
+      "ci_high": 0.9991168312843989,
+      "ci_low": 0.9722262956021069,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s1-s256-tc-vs-rollout-r3000.json",
+      "score": 0.995,
+      "wipeouts": 0
+     },
+     "50": {
+      "ci_high": 0.9921955735836505,
+      "ci_low": 0.9497129130941735,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s1-s50-tc-vs-rollout-r3000.json",
+      "score": 0.98,
+      "wipeouts": 2
+     },
+     "800": {
+      "ci_high": 1.0,
+      "ci_low": 0.9811546736227335,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s1-s800-tc-vs-rollout-r3000.json",
+      "score": 1.0,
+      "wipeouts": 0
+     }
+    },
+    "plain": {
+     "100": {
+      "ci_high": 0.9812825186501182,
+      "ci_low": 0.9262855544509103,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s1-s100-vs-rollout-r3000.json",
+      "score": 0.9625,
+      "wipeouts": 5
+     },
+     "256": {
+      "ci_high": 0.9892752803482386,
+      "ci_low": 0.942821659593358,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s1-s256-vs-rollout-r3000.json",
+      "score": 0.975,
+      "wipeouts": 4
+     },
+     "50": {
+      "ci_high": 0.9578478281716571,
+      "ci_low": 0.8859451911438936,
+      "commit": "e75fa39",
+      "from": "research/results/step8/scorecard.json",
+      "games": 200,
+      "report": "B240w2-s1-vs-rollout-r3000.json",
+      "score": 0.93,
+      "wipeouts": 12
+     },
+     "800": {
+      "ci_high": 1.0,
+      "ci_low": 0.9811546736227335,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s1-s800-vs-rollout-r3000.json",
+      "score": 1.0,
+      "wipeouts": 0
+     }
+    }
+   }
+  },
+  "B240w2-s2": {
+   "greedy": {
+    "check": {
+     "100": {
+      "ci_high": 0.9921955735836505,
+      "ci_low": 0.9497129130941735,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s2-s100-tc-vs-greedy.json",
+      "score": 0.98,
+      "wipeouts": 4
+     },
+     "256": {
+      "ci_high": 1.0,
+      "ci_low": 0.9811546736227335,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s2-s256-tc-vs-greedy.json",
+      "score": 1.0,
+      "wipeouts": 0
+     },
+     "50": {
+      "ci_high": 0.9948857622067417,
+      "ci_low": 0.9568342712073097,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s2-s50-tc-vs-greedy.json",
+      "score": 0.985,
+      "wipeouts": 3
+     },
+     "800": {
+      "ci_high": 1.0,
+      "ci_low": 0.9811546736227335,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s2-s800-tc-vs-greedy.json",
+      "score": 1.0,
+      "wipeouts": 0
+     }
+    },
+    "plain": {
+     "100": {
+      "ci_high": 0.9578478281716571,
+      "ci_low": 0.8859451911438936,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s2-s100-vs-greedy.json",
+      "score": 0.93,
+      "wipeouts": 14
+     },
+     "256": {
+      "ci_high": 0.9892752803482386,
+      "ci_low": 0.942821659593358,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s2-s256-vs-greedy.json",
+      "score": 0.975,
+      "wipeouts": 5
+     },
+     "50": {
+      "ci_high": 0.8583282847220932,
+      "ci_low": 0.7499876129240015,
+      "commit": "e75fa39",
+      "from": "research/results/step8/scorecard.json",
+      "games": 200,
+      "report": "B240w2-s2-vs-greedy.json",
+      "score": 0.81,
+      "wipeouts": 38
+     },
+     "800": {
+      "ci_high": 1.0,
+      "ci_low": 0.9811546736227335,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s2-s800-vs-greedy.json",
+      "score": 1.0,
+      "wipeouts": 0
+     }
+    }
+   },
+   "rollout-r3000": {
+    "check": {
+     "100": {
+      "ci_high": 0.9892752803482386,
+      "ci_low": 0.942821659593358,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s2-s100-tc-vs-rollout-r3000.json",
+      "score": 0.975,
+      "wipeouts": 4
+     },
+     "256": {
+      "ci_high": 0.9991168312843989,
+      "ci_low": 0.9722262956021069,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s2-s256-tc-vs-rollout-r3000.json",
+      "score": 0.995,
+      "wipeouts": 1
+     },
+     "50": {
+      "ci_high": 0.9708245103789765,
+      "ci_low": 0.9073089225133699,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s2-s50-tc-vs-rollout-r3000.json",
+      "score": 0.9475,
+      "wipeouts": 9
+     },
+     "800": {
+      "ci_high": 1.0,
+      "ci_low": 0.9811546736227335,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s2-s800-tc-vs-rollout-r3000.json",
+      "score": 1.0,
+      "wipeouts": 0
+     }
+    },
+    "plain": {
+     "100": {
+      "ci_high": 0.9690146582965411,
+      "ci_low": 0.9042130012276914,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s2-s100-vs-rollout-r3000.json",
+      "score": 0.945,
+      "wipeouts": 10
+     },
+     "256": {
+      "ci_high": 0.9892752803482386,
+      "ci_low": 0.942821659593358,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s2-s256-vs-rollout-r3000.json",
+      "score": 0.975,
+      "wipeouts": 5
+     },
+     "50": {
+      "ci_high": 0.9241851103937213,
+      "ci_low": 0.836209761663897,
+      "commit": "e75fa39",
+      "from": "research/results/step8/scorecard.json",
+      "games": 200,
+      "report": "B240w2-s2-vs-rollout-r3000.json",
+      "score": 0.8875,
+      "wipeouts": 22
+     },
+     "800": {
+      "ci_high": 1.0,
+      "ci_low": 0.9811546736227335,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "B240w2-s2-s800-vs-rollout-r3000.json",
+      "score": 1.0,
+      "wipeouts": 0
+     }
+    }
+   }
+  },
+  "Bw2-s1": {
+   "greedy": {
+    "check": {
+     "100": {
+      "ci_high": 0.9921955735836505,
+      "ci_low": 0.9497129130941735,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "Bw2-s1-s100-tc-vs-greedy.json",
+      "score": 0.98,
+      "wipeouts": 4
+     },
+     "256": {
+      "ci_high": 1.0,
+      "ci_low": 0.9811546736227335,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "Bw2-s1-s256-tc-vs-greedy.json",
+      "score": 1.0,
+      "wipeouts": 0
+     },
+     "50": {
+      "ci_high": 0.9795943679338476,
+      "ci_low": 0.923067931799067,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "Bw2-s1-s50-tc-vs-greedy.json",
+      "score": 0.96,
+      "wipeouts": 8
+     },
+     "800": {
+      "ci_high": 1.0,
+      "ci_low": 0.9811546736227335,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "Bw2-s1-s800-tc-vs-greedy.json",
+      "score": 1.0,
+      "wipeouts": 0
+     }
+    },
+    "plain": {
+     "100": {
+      "ci_high": 0.9055342954521209,
+      "ci_low": 0.8107086162924745,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "Bw2-s1-s100-vs-greedy.json",
+      "score": 0.865,
+      "wipeouts": 27
+     },
+     "256": {
+      "ci_high": 0.9829444579914328,
+      "ci_low": 0.9295293884777092,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "Bw2-s1-s256-vs-greedy.json",
+      "score": 0.965,
+      "wipeouts": 7
+     },
+     "50": {
+      "ci_high": 0.8003950482796865,
+      "ci_low": 0.6803707417954529,
+      "commit": "898e4dc",
+      "from": "research/results/step8/scorecard.json",
+      "games": 200,
+      "report": "Bw2-s1-vs-greedy.json",
+      "score": 0.745,
+      "wipeouts": 51
+     },
+     "800": {
+      "ci_high": 1.0,
+      "ci_low": 0.9811546736227335,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "Bw2-s1-s800-vs-greedy.json",
+      "score": 1.0,
+      "wipeouts": 0
+     }
+    }
+   },
+   "rollout-r3000": {
+    "check": {
+     "100": {
+      "ci_high": 0.9829444579914328,
+      "ci_low": 0.9295293884777092,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "Bw2-s1-s100-tc-vs-rollout-r3000.json",
+      "score": 0.965,
+      "wipeouts": 7
+     },
+     "256": {
+      "ci_high": 0.9861796856598887,
+      "ci_low": 0.9361057075454807,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "Bw2-s1-s256-tc-vs-rollout-r3000.json",
+      "score": 0.97,
+      "wipeouts": 5
+     },
+     "50": {
+      "ci_high": 0.972617354399236,
+      "ci_low": 0.9104218518612239,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "Bw2-s1-s50-tc-vs-rollout-r3000.json",
+      "score": 0.95,
+      "wipeouts": 10
+     }
+    },
+    "plain": {
+     "100": {
+      "ci_high": 0.9578478281716571,
+      "ci_low": 0.8859451911438936,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "Bw2-s1-s100-vs-rollout-r3000.json",
+      "score": 0.93,
+      "wipeouts": 14
+     },
+     "256": {
+      "ci_high": 0.9812825186501182,
+      "ci_low": 0.9262855544509103,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "Bw2-s1-s256-vs-rollout-r3000.json",
+      "score": 0.9625,
+      "wipeouts": 7
+     },
+     "50": {
+      "ci_high": 0.9138802552428735,
+      "ci_low": 0.8219857499741765,
+      "commit": "898e4dc",
+      "from": "research/results/step8/scorecard.json",
+      "games": 200,
+      "report": "Bw2-s1-vs-rollout-r3000.json",
+      "score": 0.875,
+      "wipeouts": 25
+     }
+    }
+   }
+  },
+  "control120": {
+   "greedy": {
+    "check": {
+     "100": {
+      "ci_high": 0.9795943679338476,
+      "ci_low": 0.923067931799067,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "control120-s100-tc-vs-greedy.json",
+      "score": 0.96,
+      "wipeouts": 8
+     },
+     "256": {
+      "ci_high": 0.9829444579914328,
+      "ci_low": 0.9295293884777092,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "control120-s256-tc-vs-greedy.json",
+      "score": 0.965,
+      "wipeouts": 7
+     },
+     "50": {
+      "ci_high": 0.972617354399236,
+      "ci_low": 0.9104218518612239,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "control120-s50-tc-vs-greedy.json",
+      "score": 0.95,
+      "wipeouts": 10
+     },
+     "800": {
+      "ci_high": 0.9972533418664555,
+      "ci_low": 0.9642782382838231,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "control120-s800-tc-vs-greedy.json",
+      "score": 0.99,
+      "wipeouts": 2
+     }
+    },
+    "plain": {
+     "100": {
+      "ci_high": 0.7958616993642531,
+      "ci_low": 0.6750925439746589,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "control120-s100-vs-greedy.json",
+      "score": 0.74,
+      "wipeouts": 51
+     },
+     "256": {
+      "ci_high": 0.8757209208741302,
+      "ci_low": 0.7718411637168737,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "control120-s256-vs-greedy.json",
+      "score": 0.83,
+      "wipeouts": 34
+     },
+     "50": {
+      "ci_high": 0.7360842846076572,
+      "ci_low": 0.6073198511602995,
+      "commit": "0d699f4",
+      "from": "research/results/step8/scorecard.json",
+      "games": 200,
+      "report": "control120-vs-greedy.json",
+      "score": 0.675,
+      "wipeouts": 65
+     },
+     "800": {
+      "ci_high": 0.9501594141102401,
+      "ci_low": 0.874010511732856,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "control120-s800-vs-greedy.json",
+      "score": 0.92,
+      "wipeouts": 16
+     }
+    }
+   },
+   "rollout-r3000": {
+    "check": {
+     "100": {
+      "ci_high": 0.9634925114427637,
+      "ci_low": 0.8950178279771279,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "control120-s100-tc-vs-rollout-r3000.json",
+      "score": 0.9375,
+      "wipeouts": 9
+     },
+     "256": {
+      "ci_high": 0.9795943679338476,
+      "ci_low": 0.923067931799067,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "control120-s256-tc-vs-rollout-r3000.json",
+      "score": 0.96,
+      "wipeouts": 8
+     },
+     "50": {
+      "ci_high": 0.9423125511378069,
+      "ci_low": 0.8622342812328346,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "control120-s50-tc-vs-rollout-r3000.json",
+      "score": 0.91,
+      "wipeouts": 13
+     }
+    },
+    "plain": {
+     "100": {
+      "ci_high": 0.8949875746507673,
+      "ci_low": 0.7967264702532598,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "control120-s100-vs-rollout-r3000.json",
+      "score": 0.8525,
+      "wipeouts": 27
+     },
+     "256": {
+      "ci_high": 0.9383368972826135,
+      "ci_low": 0.8563983883518006,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "control120-s256-vs-rollout-r3000.json",
+      "score": 0.905,
+      "wipeouts": 19
+     },
+     "50": {
+      "ci_high": 0.8583282847220932,
+      "ci_low": 0.7499876129240015,
+      "commit": "0d699f4",
+      "from": "research/results/step8/scorecard.json",
+      "games": 200,
+      "report": "control120-vs-rollout-r3000.json",
+      "score": 0.81,
+      "wipeouts": 34
+     }
+    }
+   }
+  }
+ },
+ "protocol": "200 games per pairing, 4-ply openings played with both colours, seed 20261025, one core per pairing; the entrant name is the frozen one so every budget draws the frozen scorecard's openings; 'plain' is the search as trained, 'check' the same search with terminal_check on",
+ "purpose": "search-budget dose curve with and without the terminal check: the control and three trained checkpoints at 50, 100, 256 and 800 simulations a move against Greedy and the random-playout search (research/step3c-terminal-check.md, section 7)"
+}
