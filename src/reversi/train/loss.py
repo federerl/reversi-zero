@@ -42,7 +42,9 @@ from, not in this file. The one knob on the rows themselves is ``pi_weight``, a
 per-row multiplier on the policy term that lets a chosen kind of row (the
 positions recorded with a fixed opponent to move, see ``train.opponent_policy_weight``)
 count as if it appeared in the batch several times over; the mean is taken over
-the weights, so the term keeps its scale.
+the weights, so the term keeps its scale, which also means the other rows' share
+of it shrinks as the weight grows (at weight 4 on a tenth of the rows, each of
+the rest carries about four fifths of the gradient it carries at weight 1).
 """
 
 from __future__ import annotations
