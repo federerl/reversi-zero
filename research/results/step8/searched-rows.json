@@ -183,6 +183,96 @@
    }
   },
   {
+   "run": "step8-Bsp240-w2-s3",
+   "rows": 678888,
+   "opponent_to_move_rows": 118680,
+   "with_a_wiping_move": 163,
+   "target_mostly_on_a_wiping_move": 148,
+   "mean_target_mass_on_wiping_moves": 0.8011963156971829,
+   "by_generation": {
+    "121": {
+     "with_wipe": 16,
+     "concentrated": 15
+    },
+    "122": {
+     "with_wipe": 18,
+     "concentrated": 12
+    },
+    "123": {
+     "with_wipe": 13,
+     "concentrated": 12
+    },
+    "124": {
+     "with_wipe": 13,
+     "concentrated": 13
+    },
+    "125": {
+     "with_wipe": 9,
+     "concentrated": 9
+    },
+    "126": {
+     "with_wipe": 9,
+     "concentrated": 8
+    },
+    "127": {
+     "with_wipe": 16,
+     "concentrated": 14
+    },
+    "128": {
+     "with_wipe": 13,
+     "concentrated": 13
+    },
+    "129": {
+     "with_wipe": 5,
+     "concentrated": 4
+    },
+    "130": {
+     "with_wipe": 3,
+     "concentrated": 3
+    },
+    "131": {
+     "with_wipe": 4,
+     "concentrated": 4
+    },
+    "132": {
+     "with_wipe": 9,
+     "concentrated": 9
+    },
+    "133": {
+     "with_wipe": 4,
+     "concentrated": 3
+    },
+    "134": {
+     "with_wipe": 4,
+     "concentrated": 3
+    },
+    "135": {
+     "with_wipe": 6,
+     "concentrated": 6
+    },
+    "136": {
+     "with_wipe": 5,
+     "concentrated": 5
+    },
+    "137": {
+     "with_wipe": 5,
+     "concentrated": 4
+    },
+    "138": {
+     "with_wipe": 5,
+     "concentrated": 5
+    },
+    "139": {
+     "with_wipe": 1,
+     "concentrated": 1
+    },
+    "140": {
+     "with_wipe": 5,
+     "concentrated": 5
+    }
+   }
+  },
+  {
    "run": "step8-Bsp-w8-s1",
    "rows": 686606,
    "opponent_to_move_rows": 59019,

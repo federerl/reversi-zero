@@ -35,6 +35,21 @@
     },
     {
       "network_to_move_few_discs": {
+        "network_lost": 242,
+        "network_won": 8927,
+        "rows": 9170
+      },
+      "opponent_to_move_few_discs": {
+        "network_won": 384,
+        "opponent_won": 57,
+        "rows": 441
+      },
+      "rows": 678888,
+      "run": "step8-Bsp240-w2-s3",
+      "value_only_rows": 0
+    },
+    {
+      "network_to_move_few_discs": {
         "network_lost": 108,
         "network_won": 4424,
         "rows": 4532
