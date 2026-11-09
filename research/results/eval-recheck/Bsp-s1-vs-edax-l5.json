@@ -1,0 +1,67 @@
+{
+  "agent_specs": {
+    "Bsp-s1": {
+      "checkpoint": "gen_00140.pt",
+      "generation": 140,
+      "kind": "alphazero",
+      "run_id": "step5-Bboth-sp-s1",
+      "simulations": 50
+    },
+    "edax-l5": {
+      "kind": "edax",
+      "level": 5
+    }
+  },
+  "board_size": 8,
+  "kind": "round_robin",
+  "matchups": [
+    {
+      "a": "Bsp-s1",
+      "b": "edax-l5",
+      "ci_high": 0.3797617200886074,
+      "ci_low": 0.25230527730286756,
+      "decisive": true,
+      "games": 200,
+      "record": "59W 134L 7D",
+      "score_a": 0.3125,
+      "score_as_black": 0.305,
+      "score_as_white": 0.32
+    }
+  ],
+  "notes": "recheck at the Step 8 code: Bsp-s1 vs edax-l5",
+  "protocol": {
+    "anchor": "Bsp-s1",
+    "games_per_pair": 200,
+    "opening_plies": 4,
+    "seconds": 860.2961191711947,
+    "seed": 20261025
+  },
+  "provenance": {
+    "git": {
+      "available": true,
+      "branch": "main",
+      "commit": "e75fa39b1cec182e1a33665c11e0ac120d809ee4",
+      "commit_short": "e75fa39",
+      "diff": null,
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dirty": true
+    }
+  },
+  "ratings": [
+    {
+      "ci_high": 190.9600254724303,
+      "ci_low": 88.7375915798452,
+      "elo": 136.9658847669455,
+      "games": 200,
+      "name": "edax-l5"
+    },
+    {
+      "ci_high": 0.0,
+      "ci_low": 0.0,
+      "elo": 0.0,
+      "games": 200,
+      "name": "Bsp-s1"
+    }
+  ],
+  "report_version": 1
+}

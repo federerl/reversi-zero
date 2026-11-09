@@ -393,3 +393,80 @@ def test_a_batch_with_no_policy_target_at_all_has_zero_policy_loss() -> None:
     )
     assert float(parts.policy) == 0.0
     assert float(parts.value) == pytest.approx(1.0)
+
+
+# ===========================================================================
+# A weight on the opponent's rows in the policy loss (research/step7-design.md)
+# ===========================================================================
+
+
+def test_a_weighted_row_counts_as_if_it_were_in_the_batch_that_many_times() -> None:
+    """Weight 2 on a row must give exactly the loss of a batch holding that row
+    twice: the mean is over the weights, not the row count."""
+    logits = torch.randn(3, WIDTH, generator=torch.Generator().manual_seed(2))
+    target = torch.zeros(3, WIDTH)
+    target[0, 1] = 1.0
+    target[1, [0, 4]] = 0.5
+    target[2, 7] = 1.0
+    z = torch.tensor([1.0, -1.0, 1.0])
+    value = torch.zeros(3, 1)
+
+    weighted = policy_value_loss(logits, value, target, z, pi_weight=torch.tensor([1.0, 2.0, 1.0]))
+    duplicated = policy_value_loss(
+        logits[[0, 1, 1, 2]], value[[0, 1, 1, 2]], target[[0, 1, 1, 2]], z[[0, 1, 1, 2]]
+    )
+    plain = policy_value_loss(logits, value, target, z)
+    ones = policy_value_loss(logits, value, target, z, pi_weight=torch.ones(3))
+
+    assert float(weighted.policy) == pytest.approx(float(duplicated.policy), abs=1e-6)
+    assert float(ones.policy) == pytest.approx(float(plain.policy), abs=1e-6)
+    assert float(weighted.value) == pytest.approx(float(plain.value)), (
+        "the weight touches the policy term only"
+    )
+
+
+def test_a_masked_row_stays_out_of_the_policy_loss_whatever_its_weight() -> None:
+    logits = torch.randn(3, WIDTH, generator=torch.Generator().manual_seed(3))
+    target = torch.zeros(3, WIDTH)
+    target[0, 2] = 1.0
+    target[1, 3] = 1.0
+    z = torch.ones(3)
+    value = torch.zeros(3, 1)
+    pi_valid = torch.tensor([True, True, False])
+
+    masked = policy_value_loss(logits, value, target, z, pi_valid=pi_valid)
+    masked_and_weighted = policy_value_loss(
+        logits, value, target, z, pi_valid=pi_valid, pi_weight=torch.tensor([1.0, 1.0, 4.0])
+    )
+    assert float(masked_and_weighted.policy) == pytest.approx(float(masked.policy), abs=1e-6)
+
+    with pytest.raises(ValueError, match="pi_weight"):
+        policy_value_loss(logits, value, target, z, pi_weight=torch.ones(2))
+
+
+def test_the_trainer_weights_the_opponents_rows_from_the_config() -> None:
+    """Two trainers from the same seed on the same batch: the one with the weight
+    reports a different policy loss, the one at weight 1 the same as a batch that
+    does not say who was to move."""
+    batch = fixed_batch()
+    theirs = np.zeros(16, dtype=np.bool_)
+    theirs[:4] = True
+    marked = Batch(planes=batch.planes, pi=batch.pi, z=batch.z, opponent_to_move=theirs)
+
+    def first_step(weight: float, on: Batch) -> dict[str, float]:
+        torch.manual_seed(0)
+        trainer, _ = small_trainer(opponent_policy_weight=weight)
+        return trainer.train_on(on)
+
+    plain = first_step(1.0, batch)
+    unweighted = first_step(1.0, marked)
+    weighted = first_step(4.0, marked)
+
+    assert unweighted["policy_loss"] == pytest.approx(plain["policy_loss"], abs=1e-6)
+    assert weighted["policy_loss"] != pytest.approx(plain["policy_loss"], abs=1e-6)
+    assert weighted["value_loss"] == pytest.approx(plain["value_loss"], abs=1e-6)
+
+
+def test_a_negative_opponent_weight_is_refused() -> None:
+    with pytest.raises(ValueError):
+        TrainConfig.model_validate({"opponent_policy_weight": -1.0})
