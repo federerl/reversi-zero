@@ -2,8 +2,8 @@
 
 **Applies to:** the measurement named first in the [Step 3b results](step3b-results.md), section 8, item 1, and to the [Step 3 results](step3-results.md), section 10
 **Code:** `SearchConfig.terminal_check`, the `;terminal_check` entrant option, and the `checked` variant of the head probe, on the `research/terminal-check` branch
-**Evaluated:** November 1 and 2, 2026, on the cluster's CPU partition: nine pairings of 200 games, one job each, the same frozen protocol as Steps 1 to 3b, with the check switched on for one entrant and nothing else changed. No training was run.
-**Reports:** [`results/step3c/scorecard.json`](results/step3c/scorecard.json) (the control at generation 120 with and without the check, every pairing's score, interval and wipeout count), [`results/step3c/head-probe.json`](results/step3c/head-probe.json) (the Step 3 probe with the fourth search variant, on the five Step 3b checkpoints). The arena reports and recorded games are under `~/reversi-runs/step3-eval/` on the cluster and are not committed.
+**Evaluated:** November 1 and 2, 2026, on the cluster's CPU partition: nine pairings of 200 games, one job each, the same frozen protocol as Steps 1 to 3b, with the check switched on for one entrant and nothing else changed. No training was run. The search-budget curve of section 7 was evaluated November 9, 2026: 56 further pairings under the same protocol, on the control and three checkpoints trained in Steps 7 and 8.
+**Reports:** [`results/step3c/scorecard.json`](results/step3c/scorecard.json) (the control at generation 120 with and without the check, every pairing's score, interval and wipeout count), [`results/step3c/head-probe.json`](results/step3c/head-probe.json) (the Step 3 probe with the fourth search variant, on the five Step 3b checkpoints), [`results/step3c/dose-curve.json`](results/step3c/dose-curve.json) (section 7: four checkpoints at four search budgets, with and without the check, against Greedy and the random-playout search). The arena reports and recorded games are under `~/reversi-runs/step3-eval/` on the cluster and are not committed.
 **Verdict: the Step 2 weakness is a property of the search budget, not of the network's knowledge, and it is the same in every checkpoint trained so far.** The control network at generation 120, with no change to its weights, loses 65 games to Greedy by wipeout at 50 simulations. With one extra rule in the search, look one move ahead for a reply that ends the game before trusting the network's estimate of a position, it loses 12, and its score against Greedy goes from 67.5% to 94.0%. The same rule takes the Greedy family from 59 to 74% to 94 to 97%, and the held-out random-playout search, which the rule was never shown, from 81.0% to 93.2% with 34 wipeouts falling to 12. Against Edax and against its own earlier generation it changes nothing: the check closes one hole and adds no strength. On the Step 2 fatal positions it finds a surviving move 95 to 98% of the time on all five checkpoints at 50 simulations, where the plain search finds one 0% of the time. Section 5 reads the twelve games that remain.
 
 ## 1. What the check is
@@ -108,9 +108,49 @@ Both residues are fixable in the search, neither was run, and neither bears on t
 - **The repair is local.** The check changes nothing against Edax or against the earlier generation. It is not a strength improvement; it is the removal of one class of loss. This separates the two things the Step 1 pilot conflated, overall strength and the Greedy anomaly: the anomaly can be removed on its own, and removing it leaves strength where it was.
 - **Together with Steps 3 and 3b, this fixes where the fault sits.** The training data does not carry the lesson (Step 3b, section 5: about 80 rows against four thousand look-alikes labelled the other way); the value head cannot carry a one-move tactic as a smooth function of the position; the policy prior hides the reply; and the search budget is too small to look past the prior. The first three are properties of learning from game results; the fourth is the one a cheap, exact rule can override. The rule matters in Othello because a game can end from the middle of the board in one move: the wipeout rule puts a terminal position within one ply of ordinary-looking positions, where a learned evaluator is least likely to be asked and most likely to be wrong.
 
-**What it does not establish.** It does not say the check should be on in self-play: training with it would change what the network learns about low-disc positions, and that is a training experiment, not a measurement. It does not test a larger search budget as an alternative (Step 2 measured 256 and 800 simulations: fewer wipeouts, never zero, at five to sixteen times the cost). It does not test the two residual repairs in section 5. And the twelve games say the 95% is a property of this rule at this budget, not a ceiling.
+**What it does not establish.** It does not say the check should be on in self-play: training with it would change what the network learns about low-disc positions, and that is a training experiment, not a measurement. Section 7, run a week later, tests a larger search budget as the alternative and finds that sixteen times the budget buys no more than the check does at 50 simulations. It does not test the two residual repairs in section 5. And the twelve games say the 95% is a property of this rule at this budget, not a ceiling.
 
-## 7. Reproduction
+## 7. The search-budget curve
+
+Section 6 left one alternative untested: that the weakness is a matter of search depth in general, so that a larger budget without the check would remove it as well. Step 2's three points (50, 256 and 800 simulations: wipeouts falling by a third to a half per step and never to zero) could not separate that from the one-ply reading, and the Step 8 results, section 8, named the curve as the next measurement once the policy route had been followed to its end. This section runs it.
+
+Four checkpoints, each playing the frozen protocol's 200 games against Greedy and against the random-playout search at 50, 100, 256 and 800 simulations a move, once with the plain search and once with the check: the untrained control at generation 120, and three checkpoints trained on the opponent's positions by the policy route, the Step 7 checkpoint with the searched rows counted twice in the policy loss and both seeds of the Step 8 combined group (240 external games, the rows counted twice). The entrant names are the frozen ones, so every budget draws the same openings as the frozen scorecard, and the 50-simulation plain cells are the scorecard's own reports, not re-run; the other 56 pairings ran November 9 on one core each. The columns of a row differ in the search budget and in nothing else. The table is `results/step3c/dose-curve.json` (`scripts/step3c_dose_curve.py`), the figure `scripts/figures/dose.py`.
+
+![Wipeouts against the search budget, with and without the check, for the control and three trained checkpoints, against Greedy and the random-playout search](figures/dose-curve.png)
+
+Wipeouts in 200 games against Greedy:
+
+| checkpoint | plain 50 | plain 100 | plain 256 | plain 800 | check 50 | check 100 | check 256 | check 800 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| control120 (untrained) | 65 | 51 | 34 | 16 | 10 | 8 | 7 | 2 |
+| Bw2-s1 (Step 7, rows counted twice) | 51 | 27 | 7 | 0 | 8 | 4 | 0 | 0 |
+| B240w2-s1 (Step 8, 240 games, rows counted twice) | 38 | 13 | 4 | 2 | 4 | 1 | 2 | 0 |
+| B240w2-s2 (the same, second seed) | 38 | 14 | 5 | 0 | 3 | 4 | 0 | 0 |
+
+Against the random-playout search, the held-out opponent:
+
+| checkpoint | plain 50 | plain 100 | plain 256 | plain 800 | check 50 | check 100 | check 256 | check 800 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| control120 (untrained) | 34 | 27 | 19 | 12 | 13 | 9 | 8 | 2 |
+| Bw2-s1 (Step 7, rows counted twice) | 25 | 14 | 7 | 3 | 10 | 7 | 5 | 0 |
+| B240w2-s1 (Step 8, 240 games, rows counted twice) | 12 | 5 | 4 | 0 | 2 | 3 | 0 | 0 |
+| B240w2-s2 (the same, second seed) | 22 | 10 | 5 | 0 | 9 | 4 | 1 | 0 |
+
+The scores move with the wipeouts throughout and are in the JSON; against Greedy the control reads 67.5% at 50 simulations, 92.0% at 800 and 95.0% at 50 with the check. Four readings.
+
+**Sixteen times the budget buys no more than one ply of exact reading.** On the untrained control the plain search at 800 simulations leaves 16 wipeouts against Greedy, where the check at 50 leaves 10; against the random-playout search it leaves 12 at 800, where the check at 50 leaves 13 and at 800 leaves 2. The budget catches the one-ply rule's 50-simulation reading on one row at sixteen times the cost and does not catch it on the other. The curve on the control is slow because of what section 1 and the Step 2 analysis found: the prior on the wiping reply is 3.6% at the median of these positions, and a search that gives a child that share of its visits needs some hundreds of simulations at the position above before the child is opened even once. Each step of the budget removes about a quarter to a half of the remaining wipeouts, 65, 51, 34, 16, and the one-ply rule removes five sixths of them at the smallest budget. The Step 2 reading stands as a curve: the search was short of one specific ply, not of depth.
+
+**What the check leaves is not a budget problem until 800.** The checked curve on the control is nearly flat, 10, 8, 7, 2 against Greedy and 13, 9, 8, 2 against the random-playout search. Section 5 read the residue as the first-play-urgency rule meeting a proven loss: every move the search tried was known to lose and the one that did not was never tried. More simulations do eventually try it, which is why 2 remain at 800 and not 7, but 256 do not; the residue is a property of how the search orders untried moves, which section 5 names two cheap fixes for, and the budget is the expensive way to buy the same thing.
+
+**The trained prior does not remove the hole at 50 simulations; it lowers the budget at which the plain search finds the reply itself.** From 50 to 100 simulations the control's wipeouts fall by a fifth, 65 to 51 against Greedy and 34 to 27 against the random-playout search; the trained checkpoints' fall by half or more, 51 to 27, 38 to 13 and 38 to 14 against Greedy, 25 to 14, 12 to 5 and 22 to 10 against the random-playout search. At 256 simulations the plain search on the trained checkpoints reads 4 to 7 against Greedy and 4 to 7 against the random-playout search, which is where the check sits at 50 simulations on the same checkpoints (3 to 8, and 2 to 10) and where the control's plain search has not arrived at 800. The mechanism is the one the Step 5 results named: the policy route raised the prior on the wiping reply from 4% to 8 to 12%, and a child carrying 12% of the prior is opened at a budget where one carrying 4% is not. The training signal and the search budget multiply. What twenty generations of the policy route bought, read on this axis, is a move of the budget that finds the reply from past 800 simulations to about 256.
+
+**The held-out row reads as the Greedy row does at every budget, so the reading every trained group stops at under the frozen protocol is a reading of the budget.** The Step 6 to 8 groups all read 17 to 27 wipeouts against the random-playout search at 50 simulations, whichever way the policy signal was bought, and the Step 8 design asked whether that was where the signal stopped or where the distinct positions ran out. At 256 simulations the two combined-group checkpoints read 4 and 5 on that row with the plain search, and at 800 both read 0, with or without the check. The row stops where a 50-simulation search stops on these priors, not where the networks stop. With the check on, every trained checkpoint reads 0 to 2 against Greedy and 0 to 5 against the random-playout search from 256 simulations on, and 0 on both rows at 800.
+
+**What it costs.** The check costs nothing in wall time at any budget (section 1). The budget is paid for in proportion: on one core the Greedy pairings took 15 to 22 minutes at 50 simulations and two and a half to three hours at 800, and the random-playout pairings, whose opponent spends 3,000 playouts a move, six hours at 50 and nine and a half to ten at 800. A search at 800 simulations in play is sixteen times the compute of one at 50, for a reading the one-ply rule gives at 50.
+
+**What it does not establish.** One seed of the weight-2 recipe and two of the combined one, 200 games a cell, so neighbouring cells that differ by a few wipeouts are not individually resolved and the curve is read as a whole; no budget between 256 and 800; the random-playout opponent at one strength, 3,000 playouts a move; and nothing about what a budget above 50 would do inside training, which is a training experiment and not a measurement.
+
+## 8. Reproduction
 
 On the cluster, from the `research/terminal-check` branch, with the Step 3 checkpoints and recorded games under `~/reversi-runs/`:
 
@@ -136,6 +176,33 @@ python scripts/probe_heads.py ~/reversi-runs/step3-eval --protocol ~/reversi-run
 # the residual wipeouts
 python scripts/analyze_wipeouts.py ~/reversi-runs/step3-eval/control120-tc-vs-greedy-games --opponent greedy
 python scripts/analyze_wipeouts.py ~/reversi-runs/step3-eval/control120-tc-vs-rollout-r3000-games --opponent rollout-r3000 --replies any
+```
+
+The search-budget curve (section 7), with the Step 7 and 8 checkpoints under `~/reversi-runs/`: one job per pairing, the frozen entrant name so the openings are the scorecard's, the budget and the check on the entrant, the plain 50-simulation cell taken from the scorecard.
+
+```bash
+declare -A ckpt=(
+    [control120]=~/reversi-runs/control/checkpoints/gen_00120.pt
+    [Bw2-s1]=~/reversi-runs/step7-Bsp-w2-s1/checkpoints/gen_00140.pt
+    [B240w2-s1]=~/reversi-runs/step8-Bsp240-w2-s1/checkpoints/gen_00140.pt
+    [B240w2-s2]=~/reversi-runs/step8-Bsp240-w2-s2/checkpoints/gen_00140.pt
+)
+for c in "${!ckpt[@]}"; do for o in greedy rollout-r3000; do for s in 50 100 256 800; do
+  for mode in plain tc; do
+    [ "$mode" = plain ] && [ "$s" = 50 ] && continue
+    spec="$c=${ckpt[$c]}@$s"; tag="s$s"
+    [ "$mode" = tc ] && { spec="$spec;terminal_check"; tag="$tag-tc"; }
+    sbatch --job-name="rz-dose-$c-$tag-$o" --cpus-per-task=1 --mem=6G slurm/cpu.sbatch \
+      uv run reversi arena --suite custom -e "$spec" -e "$o" \
+        --games 200 --simulations 50 --workers 1 --seed 20261025 --record-games \
+        --out ~/reversi-runs/dose-eval/$c-$tag-vs-$o.json
+  done
+done; done; done
+
+python scripts/step3c_dose_curve.py ~/reversi-runs/dose-eval \
+    --plain-50-from research/results/step8/scorecard.json \
+    --out research/results/step3c/dose-curve.json --markdown
+python scripts/figures/dose.py --out research/figures/dose-curve.png
 ```
 
 The unit tests for the check are in `tests/unit/test_terminal_check.py`: the exact value where a game-ending move exists, the proven node staying proven, identical results where no move ends the game, the default being off everywhere, and the entrant option. `tests/unit/test_game_batch.py` checks that the batched self-play scheduler applies it the same way as the one-at-a-time search.
