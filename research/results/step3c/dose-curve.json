@@ -444,6 +444,15 @@
       "report": "Bw2-s1-s50-tc-vs-rollout-r3000.json",
       "score": 0.95,
       "wipeouts": 10
+     },
+     "800": {
+      "ci_high": 1.0,
+      "ci_low": 0.9811546736227335,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "Bw2-s1-s800-tc-vs-rollout-r3000.json",
+      "score": 1.0,
+      "wipeouts": 0
      }
     },
     "plain": {
@@ -474,6 +483,15 @@
       "report": "Bw2-s1-vs-rollout-r3000.json",
       "score": 0.875,
       "wipeouts": 25
+     },
+     "800": {
+      "ci_high": 0.9948857622067417,
+      "ci_low": 0.9568342712073097,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "Bw2-s1-s800-vs-rollout-r3000.json",
+      "score": 0.985,
+      "wipeouts": 3
      }
     }
    }
@@ -586,6 +604,15 @@
       "report": "control120-s50-tc-vs-rollout-r3000.json",
       "score": 0.91,
       "wipeouts": 13
+     },
+     "800": {
+      "ci_high": 0.9972533418664555,
+      "ci_low": 0.9642782382838231,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "control120-s800-tc-vs-rollout-r3000.json",
+      "score": 0.99,
+      "wipeouts": 2
      }
     },
     "plain": {
@@ -616,6 +643,15 @@
       "report": "control120-vs-rollout-r3000.json",
       "score": 0.81,
       "wipeouts": 34
+     },
+     "800": {
+      "ci_high": 0.9653478057456681,
+      "ci_low": 0.8980683070423372,
+      "commit": "e75fa39",
+      "games": 200,
+      "report": "control120-s800-vs-rollout-r3000.json",
+      "score": 0.94,
+      "wipeouts": 12
      }
     }
    }

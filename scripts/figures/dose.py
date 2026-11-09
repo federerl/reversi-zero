@@ -199,7 +199,7 @@ def main() -> None:
         ax.set_xlim(21, 1000)
 
     fig.suptitle(
-        "Sixteen times the search budget buys less than one ply of exact reading",
+        "Sixteen times the search budget buys no more than one ply of exact reading",
         x=0.07,
         ha="left",
         fontsize=12.5,

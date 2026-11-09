@@ -167,7 +167,7 @@ def main() -> int:
             "opponents": list(OPPONENTS),
             "pairings": table,
         }
-        args.out.write_text(json.dumps(payload, indent=1, sort_keys=True) + "\n")
+        args.out.write_text(json.dumps(payload, indent=1, sort_keys=True) + "\n", newline="\n")
         print(f"wrote {args.out}", file=sys.stderr)
     if args.markdown or args.out is None:
         print("wipeouts in 200 games\n")
