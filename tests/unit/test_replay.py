@@ -17,6 +17,7 @@ from reversi.data.schema import Sample, arrays_to_samples, samples_to_arrays, va
 from reversi.data.shards import Manifest, read_shard, shard_filename, write_shard
 from reversi.errors import ReplayError
 from reversi.game import rules, symmetry
+from reversi.game.state import State
 from reversi.nn import features
 from reversi.types import Player, policy_size
 
@@ -574,3 +575,31 @@ def test_the_buffer_tells_the_trainer_which_rows_have_a_policy_target() -> None:
     # Every masked-out row carries an empty target; every real row a distribution.
     sums = batch.pi.sum(axis=1)
     np.testing.assert_allclose(sums, batch.pi_valid.astype(np.float32), atol=1e-5)
+
+
+def test_the_buffer_tells_the_trainer_which_rows_were_the_opponents() -> None:
+    """The ``opponent_to_move`` column reaches the batch, and a shard without
+    the column reads as the network to move everywhere."""
+    from dataclasses import replace
+
+    buffer = ReplayBuffer(board_size=BOARD, window=100, symmetry_aug=False)
+    buffer.add(arrays_for(8, generation=1))  # no column
+    theirs = [replace(s, opponent_to_move=row < 3) for row, s in enumerate(make_samples(8, seed=5))]
+    buffer.add(samples_to_arrays(theirs, generation=2, board_size=BOARD))
+
+    batch = buffer.sample(32, rng=np.random.default_rng(0))
+    assert batch.opponent_to_move is not None
+    assert batch.opponent_to_move.shape == (32,)
+    assert batch.opponent_to_move.dtype == np.bool_
+    # Without augmentation a row's planes are the encoding of its stored position,
+    # so each row can be traced back: the flag is set exactly on the three marked
+    # samples and on nothing from the shard without the column.
+    marked = {
+        features.encode(
+            State(black=s.black, white=s.white, to_move=s.to_move, size=BOARD)
+        ).tobytes()
+        for s in theirs[:3]
+    }
+    flags = [planes.tobytes() in marked for planes in batch.planes]
+    assert flags == batch.opponent_to_move.tolist()
+    assert 0 < sum(flags) < 32
