@@ -182,7 +182,7 @@ Unchanged in both groups. The gap against the held-out opponents is 0.07 to 0.10
 The two measurements the first reading of this step named have been run.
 
 1. **The third seed of the combined recipe** read 24 on the random-playout row (section 2): the 12 was the seed, not the recipe, and the distinct positions are not what the row at 50 simulations needs.
-2. **The search-budget curve with and without the check**, on the control and the weight-2 and combined checkpoints at 50, 100, 256 and 800 simulations against Greedy and the random-playout search, is in the [Step 3c results](step3c-terminal-check.md), section 7. On the control the plain search at 800 simulations leaves more wipeouts than the check at 50; on the trained checkpoints the plain search reaches the check's reading at about 256, and both reach zero at 800. The row that every group stops at under the frozen protocol is where a 50-simulation search stops on these priors, not where the networks stop.
+2. **The search-budget curve with and without the check**, on the control and the weight-2 and combined checkpoints at 50, 100, 256 and 800 simulations against Greedy and the random-playout search, is in the [Step 3c results](step3c-terminal-check.md), section 7. On the control the plain search at 800 simulations leaves no fewer wipeouts than the check at 50; on the trained checkpoints the plain search reaches the check's reading at about 256, and both reach zero at 800. The row that every group stops at under the frozen protocol is where a 50-simulation search stops on these priors, not where the networks stop.
 
 What remains, in order of cost:
 
