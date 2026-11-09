@@ -61,12 +61,16 @@ The series has one figure so far, `research/figures/wipeout-values.png` (the val
 | F1 | the recording rule | how an opponent position becomes a training row, and which head gets a target at it, in Steps 3b, 5 and 7 | diagram, no data | to draw |
 | F2 | wipeout move-number histogram | the wipeouts against Greedy end on moves 20 to 35, so this is a one-move trap in the midgame, not an endgame loss | `results/step2/`, `results/step3/` game records | to draw |
 | F3 | scorecard dot plot | every checkpoint's reading on each row, with the 95% interval, one panel per row; makes "nothing else moved" visible | `results/step*/scorecard.json` | to draw |
-| F4 | the chain | the Greedy-family sum and the held-out row against the weighted count of fatal rows, Steps 5 to 8, both seeds per group; the family keeps falling, the held-out row stops at 200 | `results/step{5,6,7,8}/searched-rows.json`, `scorecard.json` | to draw, first |
+| F4 | the chain | the Greedy-family sum and the held-out row against the weighted count of fatal rows, Steps 5 to 8, both seeds per group; the family keeps falling, the held-out row stops at 200 | `results/step{5,6,7,8}/searched-rows.json`, `scorecard.json` | **drawn**, below; `scripts/figures/chain.py` |
 | F5 | the prior's tail | the share of the control's 63 fatal positions where the prior on the wiping reply is under 5%, by group; the tail closes from 65% to 8% | `results/step*/head-probe-fixed.json` | to draw |
 | F6 | search-budget curves | wipeouts against Greedy and the random-playout search at 50, 100, 256 and 800 simulations, plain and checked, on the control and two trained checkpoints | the dose-curve runs submitted November 9 (section 5) | after the runs |
 | F7 | reliability curves | the value head's estimate against the outcome, by row group; the 8 to 9 points of overrating on the held-out opponents | `results/step*/value-calibration.json` | to draw |
 
-F4 is the figure the report's argument rests on and the one to draw before the partial draft; F3 replaces four scorecard tables for a reader outside RL. The outline in PR #63 listed F1, F2, F3 and F7; F4, F5 and F6 are new with Steps 5 to 8. One figure script per figure under `scripts/figures/`, matplotlib, each regenerable from the committed JSON.
+F4 is the figure the report's argument rests on, and it is drawn:
+
+![The Greedy-family and held-out wipeouts of every checkpoint from Steps 5 to 8, against the fatal searched rows it was trained on times the weight on them](../figures/chain-weighted-count.png)
+
+The grey band is the nine checkpoints trained without searched rows; the dashed line is the exact check on the untrained control. Read left to right: the family falls at every step along the axis, through weight 8; the held-out row reaches the band's floor by a weighted count of 200 and stays there, from either route, except the combined group's one seed at 12, on the check's line. F3 replaces four scorecard tables for a reader outside RL. The outline in PR #63 listed F1, F2, F3 and F7; F4, F5 and F6 are new with Steps 5 to 8. One figure script per figure under `scripts/figures/`, matplotlib, each regenerable from the committed JSON.
 
 **To discuss:** whether F4 and F3 are enough for the partial draft, and whether the probe tables (section 4 of each results page) appear in the report at all or only as F5.
 
@@ -89,5 +93,5 @@ Phase 2, December to January, toward a workshop paper, in order of what most cha
 1. Is the section 2 claim the right one for the report and for the paper's positioning? In particular, is "partly, by one route, and for nothing up to a weight of 8" the right strength?
 2. The combined group's 12: third seed now, or report it as one seed and move on?
 3. Report: results sections first as a partial draft around November 16? Markdown to PDF?
-4. Figures: F4 and F3 before the partial draft, the rest with the full draft?
+4. Figures: F4 is drawn; F3 before the partial draft, the rest with the full draft?
 5. The open pull requests: #77 (Step 8 design) and #78 (Step 8 results, stacked on it), and #79 (this agenda). Steps 6 and 7 and the held-out-row correction are merged.
