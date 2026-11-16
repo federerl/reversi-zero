@@ -1,5 +1,5 @@
 {
- "purpose": "per-generation self-play metrics from metrics/selfplay.jsonl for the Step 7 groups (research/step7-design.md, prediction 1) and the Step 5 and 6 runs they are read against",
+ "purpose": "per-generation self-play metrics from metrics/selfplay.jsonl for the Step 8 groups, the third seed of the combined group included (research/step8-design.md, prediction 1), and the Step 5, 6 and 7 runs they are read against",
  "series": {
   "Bsp-s1": {
    "run": "step5-Bboth-sp-s1",
@@ -3662,6 +3662,235 @@
      "opponent_score": 0.9833333333333333,
      "opponent_wipeout_rate": 0.016666666666666666,
      "wipeout_rate": 0.0033333333333333335
+    }
+   ]
+  },
+  "B240w2-s3": {
+   "run": "step8-Bsp240-w2-s3",
+   "generations": [
+    121,
+    140
+   ],
+   "rows": [
+    {
+     "generation": 121,
+     "games": 600,
+     "positions": 33628,
+     "seconds": 215.6643152423203,
+     "plies_mean": 60.35166666666667,
+     "opponent_games": 240,
+     "opponent_score": 0.9333333333333333,
+     "opponent_wipeout_rate": 0.06666666666666667,
+     "wipeout_rate": 0.028333333333333332
+    },
+    {
+     "generation": 122,
+     "games": 600,
+     "positions": 33645,
+     "seconds": 217.91852847952396,
+     "plies_mean": 60.196666666666665,
+     "opponent_games": 240,
+     "opponent_score": 0.925,
+     "opponent_wipeout_rate": 0.075,
+     "wipeout_rate": 0.03
+    },
+    {
+     "generation": 123,
+     "games": 600,
+     "positions": 33752,
+     "seconds": 217.30822994746268,
+     "plies_mean": 60.535,
+     "opponent_games": 240,
+     "opponent_score": 0.9416666666666667,
+     "opponent_wipeout_rate": 0.05416666666666667,
+     "wipeout_rate": 0.021666666666666667
+    },
+    {
+     "generation": 124,
+     "games": 600,
+     "positions": 33761,
+     "seconds": 220.04570767097175,
+     "plies_mean": 60.46333333333333,
+     "opponent_games": 240,
+     "opponent_score": 0.9416666666666667,
+     "opponent_wipeout_rate": 0.05416666666666667,
+     "wipeout_rate": 0.021666666666666667
+    },
+    {
+     "generation": 125,
+     "games": 600,
+     "positions": 33919,
+     "seconds": 216.50265008304268,
+     "plies_mean": 60.74,
+     "opponent_games": 240,
+     "opponent_score": 0.9625,
+     "opponent_wipeout_rate": 0.0375,
+     "wipeout_rate": 0.015
+    },
+    {
+     "generation": 126,
+     "games": 600,
+     "positions": 33815,
+     "seconds": 219.06730411201715,
+     "plies_mean": 60.861666666666665,
+     "opponent_games": 240,
+     "opponent_score": 0.95,
+     "opponent_wipeout_rate": 0.0375,
+     "wipeout_rate": 0.02
+    },
+    {
+     "generation": 127,
+     "games": 600,
+     "positions": 33618,
+     "seconds": 218.56284955516458,
+     "plies_mean": 60.28333333333333,
+     "opponent_games": 240,
+     "opponent_score": 0.9333333333333333,
+     "opponent_wipeout_rate": 0.06666666666666667,
+     "wipeout_rate": 0.028333333333333332
+    },
+    {
+     "generation": 128,
+     "games": 600,
+     "positions": 33777,
+     "seconds": 219.9452413180843,
+     "plies_mean": 60.46,
+     "opponent_games": 240,
+     "opponent_score": 0.9458333333333333,
+     "opponent_wipeout_rate": 0.05416666666666667,
+     "wipeout_rate": 0.023333333333333334
+    },
+    {
+     "generation": 129,
+     "games": 600,
+     "positions": 34154,
+     "seconds": 219.93904493097216,
+     "plies_mean": 61.111666666666665,
+     "opponent_games": 240,
+     "opponent_score": 0.9791666666666666,
+     "opponent_wipeout_rate": 0.020833333333333332,
+     "wipeout_rate": 0.008333333333333333
+    },
+    {
+     "generation": 130,
+     "games": 600,
+     "positions": 34182,
+     "seconds": 219.4007304618135,
+     "plies_mean": 61.32833333333333,
+     "opponent_games": 240,
+     "opponent_score": 0.9875,
+     "opponent_wipeout_rate": 0.0125,
+     "wipeout_rate": 0.011666666666666667
+    },
+    {
+     "generation": 131,
+     "games": 600,
+     "positions": 34050,
+     "seconds": 217.89239380974323,
+     "plies_mean": 61.10166666666667,
+     "opponent_games": 240,
+     "opponent_score": 0.975,
+     "opponent_wipeout_rate": 0.016666666666666666,
+     "wipeout_rate": 0.006666666666666667
+    },
+    {
+     "generation": 132,
+     "games": 600,
+     "positions": 33934,
+     "seconds": 217.8318155966699,
+     "plies_mean": 60.805,
+     "opponent_games": 240,
+     "opponent_score": 0.9625,
+     "opponent_wipeout_rate": 0.0375,
+     "wipeout_rate": 0.015
+    },
+    {
+     "generation": 133,
+     "games": 600,
+     "positions": 34107,
+     "seconds": 218.7284167446196,
+     "plies_mean": 61.248333333333335,
+     "opponent_games": 240,
+     "opponent_score": 0.975,
+     "opponent_wipeout_rate": 0.016666666666666666,
+     "wipeout_rate": 0.006666666666666667
+    },
+    {
+     "generation": 134,
+     "games": 600,
+     "positions": 34060,
+     "seconds": 216.34338306169957,
+     "plies_mean": 61.193333333333335,
+     "opponent_games": 240,
+     "opponent_score": 0.975,
+     "opponent_wipeout_rate": 0.016666666666666666,
+     "wipeout_rate": 0.01
+    },
+    {
+     "generation": 135,
+     "games": 600,
+     "positions": 34016,
+     "seconds": 218.73652224708349,
+     "plies_mean": 61.05833333333333,
+     "opponent_games": 240,
+     "opponent_score": 0.9625,
+     "opponent_wipeout_rate": 0.025,
+     "wipeout_rate": 0.013333333333333334
+    },
+    {
+     "generation": 136,
+     "games": 600,
+     "positions": 34070,
+     "seconds": 218.0375409098342,
+     "plies_mean": 61.11,
+     "opponent_games": 240,
+     "opponent_score": 0.9791666666666666,
+     "opponent_wipeout_rate": 0.020833333333333332,
+     "wipeout_rate": 0.01
+    },
+    {
+     "generation": 137,
+     "games": 600,
+     "positions": 34077,
+     "seconds": 219.61210826411843,
+     "plies_mean": 60.955,
+     "opponent_games": 240,
+     "opponent_score": 0.9666666666666667,
+     "opponent_wipeout_rate": 0.020833333333333332,
+     "wipeout_rate": 0.011666666666666667
+    },
+    {
+     "generation": 138,
+     "games": 600,
+     "positions": 34027,
+     "seconds": 217.68015528284013,
+     "plies_mean": 61.155,
+     "opponent_games": 240,
+     "opponent_score": 0.975,
+     "opponent_wipeout_rate": 0.020833333333333332,
+     "wipeout_rate": 0.011666666666666667
+    },
+    {
+     "generation": 139,
+     "games": 600,
+     "positions": 34182,
+     "seconds": 216.541320852004,
+     "plies_mean": 61.208333333333336,
+     "opponent_games": 240,
+     "opponent_score": 0.9916666666666667,
+     "opponent_wipeout_rate": 0.004166666666666667,
+     "wipeout_rate": 0.0016666666666666668
+    },
+    {
+     "generation": 140,
+     "games": 600,
+     "positions": 34114,
+     "seconds": 218.52714781928807,
+     "plies_mean": 60.97666666666667,
+     "opponent_games": 240,
+     "opponent_score": 0.975,
+     "opponent_wipeout_rate": 0.020833333333333332,
+     "wipeout_rate": 0.008333333333333333
     }
    ]
   }

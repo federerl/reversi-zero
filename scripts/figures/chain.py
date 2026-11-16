@@ -124,8 +124,11 @@ GROUPS: list[dict[str, Any]] = [
     {
         "label": "240 games \u00d72",
         "scorecard": "step8",
-        "names": ["B240w2-s1", "B240w2-s2"],
-        "rows": ("step8/searched-rows.json", ["step8-Bsp240-w2-s1", "step8-Bsp240-w2-s2"]),
+        "names": ["B240w2-s1", "B240w2-s2", "B240w2-s3"],
+        "rows": (
+            "step8/searched-rows.json",
+            ["step8-Bsp240-w2-s1", "step8-Bsp240-w2-s2", "step8-Bsp240-w2-s3"],
+        ),
         "weight": 2,
         "route": "both",
     },
@@ -261,15 +264,20 @@ def draw_panel(
     groups: dict[str, list[dict[str, Any]]] = {}
     for p in points:
         groups.setdefault(p["group"], []).append(p)
+    # The seeds of a group are joined through the group's mean: for two seeds that is
+    # the segment between them, for three it is a star rather than a zigzag.
     for ps in groups.values():
-        ax.plot(
-            [p["x"] for p in ps],
-            [p[key] for p in ps],
-            color=ROUTE_COLOUR[ps[0]["route"]],
-            linewidth=1.2,
-            alpha=0.55,
-            zorder=2,
-        )
+        cx = sum(p["x"] for p in ps) / len(ps)
+        cy = sum(p[key] for p in ps) / len(ps)
+        for p in ps:
+            ax.plot(
+                [cx, p["x"]],
+                [cy, p[key]],
+                color=ROUTE_COLOUR[p["route"]],
+                linewidth=1.2,
+                alpha=0.55,
+                zorder=2,
+            )
     for p in points:
         c = ROUTE_COLOUR[p["route"]]
         ax.plot(
@@ -380,7 +388,7 @@ def main() -> None:
     fig.text(
         0.07,
         0.895,
-        "Each point is one checkpoint, two seeds per group joined by a line, read under the "
+        "Each point is one checkpoint, the seeds of a group joined by a line, read under the "
         "frozen protocol (200 games a pairing, 50 simulations a move).\n"
         "The x-axis is the number of opponent positions with a game-ending reply that the "
         "training search was run at, times the weight those rows carry in the policy loss.",
