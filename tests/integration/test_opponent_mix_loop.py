@@ -57,3 +57,36 @@ def test_pure_self_play_still_reports_no_external_games(
         run_training(smoke_config, paths, metrics=hub, generations=1)
     (row,) = read_jsonl(paths.metrics / "selfplay.jsonl")
     assert row["opponent_games"] == 0
+
+
+@pytest.mark.parametrize("workers", [1, 2])
+def test_searched_opponent_positions_reach_the_shards(
+    smoke_config: Config, tmp_path: Path, workers: int
+) -> None:
+    """With the opponent's positions searched, every row has a real policy
+    target and the shard says which rows were the opponent's."""
+    import numpy as np
+
+    config = mixed(
+        smoke_config,
+        n_workers=workers,
+        games_per_generation=4,
+        record_opponent_positions=True,
+        search_opponent_positions=True,
+    )
+    paths = RunPaths(run_id="searched", root=tmp_path / "run")
+    paths.ensure()
+    with MetricsHub(paths.metrics, run_id=paths.run_id) as hub:
+        run_training(config, paths, metrics=hub, generations=1)
+
+    shards = sorted(paths.replay.glob("gen_*_w*.npz"))
+    assert shards
+    theirs = 0
+    for shard in shards:
+        with np.load(shard) as arrays:
+            assert "pi_valid" not in arrays.files, "every searched row carries a real target"
+            if "opponent_to_move" in arrays.files:
+                flags = arrays["opponent_to_move"].astype(bool)
+                theirs += int(flags.sum())
+                assert np.allclose(arrays["pi"][flags].sum(axis=1), 1.0)
+    assert theirs > 0, "the opponent's positions were recorded"

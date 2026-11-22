@@ -1,0 +1,67 @@
+{
+  "agent_specs": {
+    "control120": {
+      "checkpoint": "gen_00120.pt",
+      "generation": 120,
+      "kind": "alphazero",
+      "run_id": "control",
+      "simulations": 50
+    },
+    "edax-l5": {
+      "kind": "edax",
+      "level": 5
+    }
+  },
+  "board_size": 8,
+  "kind": "round_robin",
+  "matchups": [
+    {
+      "a": "control120",
+      "b": "edax-l5",
+      "ci_high": 0.3641900097821255,
+      "ci_low": 0.23844234740066744,
+      "decisive": true,
+      "games": 200,
+      "record": "56W 137L 7D",
+      "score_a": 0.2975,
+      "score_as_black": 0.295,
+      "score_as_white": 0.3
+    }
+  ],
+  "notes": "recheck at the Step 8 code: control120 vs edax-l5",
+  "protocol": {
+    "anchor": "control120",
+    "games_per_pair": 200,
+    "opening_plies": 4,
+    "seconds": 854.2704386487603,
+    "seed": 20261025
+  },
+  "provenance": {
+    "git": {
+      "available": true,
+      "branch": "main",
+      "commit": "e75fa39b1cec182e1a33665c11e0ac120d809ee4",
+      "commit_short": "e75fa39",
+      "diff": null,
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dirty": true
+    }
+  },
+  "ratings": [
+    {
+      "ci_high": 209.8992341853467,
+      "ci_low": 96.19025851356825,
+      "elo": 149.2601724923989,
+      "games": 200,
+      "name": "edax-l5"
+    },
+    {
+      "ci_high": 0.0,
+      "ci_low": 0.0,
+      "elo": 0.0,
+      "games": 200,
+      "name": "control120"
+    }
+  ],
+  "report_version": 1
+}

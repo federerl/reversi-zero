@@ -17,6 +17,7 @@ from reversi.data.schema import Sample, arrays_to_samples, samples_to_arrays, va
 from reversi.data.shards import Manifest, read_shard, shard_filename, write_shard
 from reversi.errors import ReplayError
 from reversi.game import rules, symmetry
+from reversi.game.state import State
 from reversi.nn import features
 from reversi.types import Player, policy_size
 
@@ -494,3 +495,111 @@ def test_buffer_stats_describe_staleness_and_variety() -> None:
 
 def test_stats_on_an_empty_buffer_do_not_explode() -> None:
     assert ReplayBuffer(board_size=BOARD, window=10).stats(0) == {"buffer_size": 0}
+
+
+# ===========================================================================
+# Value-only rows (positions recorded with a fixed opponent to move)
+# ===========================================================================
+
+
+def with_value_only_rows(count: int, rows: tuple[int, ...]) -> list[Sample]:
+    samples = make_samples(count, seed=3)
+    for row in rows:
+        s = samples[row]
+        samples[row] = Sample(
+            black=s.black,
+            white=s.white,
+            to_move=s.to_move,
+            pi=np.zeros(WIDTH, dtype=np.float32),
+            move_no=s.move_no,
+            z=s.z,
+            pi_valid=False,
+        )
+    return samples
+
+
+def test_value_only_rows_survive_a_round_trip() -> None:
+    arrays = samples_to_arrays(with_value_only_rows(12, (2, 7)), generation=1, board_size=BOARD)
+    assert "pi_valid" in arrays
+    restored = arrays_to_samples(arrays, board_size=BOARD)
+    assert [s.pi_valid for s in restored] == [row not in (2, 7) for row in range(12)]
+    assert not restored[2].pi.any() and restored[3].pi.any()
+
+
+def test_opponent_to_move_rows_survive_a_round_trip() -> None:
+    from dataclasses import replace
+
+    samples = [
+        replace(s, opponent_to_move=row in (1, 5))
+        for row, s in enumerate(arrays_to_samples(arrays_for(8), board_size=BOARD))
+    ]
+    arrays = samples_to_arrays(samples, generation=1, board_size=BOARD)
+    assert "opponent_to_move" in arrays
+    restored = arrays_to_samples(arrays, board_size=BOARD)
+    assert [s.opponent_to_move for s in restored] == [row in (1, 5) for row in range(8)]
+    # The flag says where a row came from, not how it trains.
+    assert all(s.pi_valid for s in restored)
+    assert "opponent_to_move" not in arrays_for(8)
+
+
+def test_a_shard_without_value_only_rows_has_no_extra_column() -> None:
+    """Pure self-play shards stay exactly what they were before the column existed."""
+    arrays = arrays_for(10)
+    assert "pi_valid" not in arrays
+    assert all(s.pi_valid for s in arrays_to_samples(arrays, board_size=BOARD))
+
+
+def test_a_value_only_row_with_a_policy_in_it_is_refused() -> None:
+    arrays = samples_to_arrays(with_value_only_rows(10, (4,)), generation=1, board_size=BOARD)
+    arrays["pi"][4, 0] = 1.0  # claims a distribution on a row that says it has none
+    with pytest.raises(ReplayError, match=r"sums to 1.000000, not 0"):
+        validate_arrays(arrays, board_size=BOARD)
+
+
+def test_an_empty_policy_on_a_real_row_is_still_refused() -> None:
+    arrays = arrays_for(10)
+    arrays["pi"][3] = 0.0
+    with pytest.raises(ReplayError, match=r"sums to 0.000000, not 1"):
+        validate_arrays(arrays, board_size=BOARD)
+
+
+def test_the_buffer_tells_the_trainer_which_rows_have_a_policy_target() -> None:
+    buffer = ReplayBuffer(board_size=BOARD, window=100, symmetry_aug=False)
+    buffer.add(arrays_for(8, generation=1))  # no column: every row real
+    buffer.add(
+        samples_to_arrays(with_value_only_rows(8, (0, 1, 2)), generation=2, board_size=BOARD)
+    )
+    batch = buffer.sample(16, rng=np.random.default_rng(0))
+    assert batch.pi_valid is not None
+    assert batch.pi_valid.shape == (16,)
+    # Every masked-out row carries an empty target; every real row a distribution.
+    sums = batch.pi.sum(axis=1)
+    np.testing.assert_allclose(sums, batch.pi_valid.astype(np.float32), atol=1e-5)
+
+
+def test_the_buffer_tells_the_trainer_which_rows_were_the_opponents() -> None:
+    """The ``opponent_to_move`` column reaches the batch, and a shard without
+    the column reads as the network to move everywhere."""
+    from dataclasses import replace
+
+    buffer = ReplayBuffer(board_size=BOARD, window=100, symmetry_aug=False)
+    buffer.add(arrays_for(8, generation=1))  # no column
+    theirs = [replace(s, opponent_to_move=row < 3) for row, s in enumerate(make_samples(8, seed=5))]
+    buffer.add(samples_to_arrays(theirs, generation=2, board_size=BOARD))
+
+    batch = buffer.sample(32, rng=np.random.default_rng(0))
+    assert batch.opponent_to_move is not None
+    assert batch.opponent_to_move.shape == (32,)
+    assert batch.opponent_to_move.dtype == np.bool_
+    # Without augmentation a row's planes are the encoding of its stored position,
+    # so each row can be traced back: the flag is set exactly on the three marked
+    # samples and on nothing from the shard without the column.
+    marked = {
+        features.encode(
+            State(black=s.black, white=s.white, to_move=s.to_move, size=BOARD)
+        ).tobytes()
+        for s in theirs[:3]
+    }
+    flags = [planes.tobytes() in marked for planes in batch.planes]
+    assert flags == batch.opponent_to_move.tolist()
+    assert 0 < sum(flags) < 32

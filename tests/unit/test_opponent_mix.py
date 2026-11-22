@@ -2,11 +2,12 @@
 
 Three things have to hold for the opponent-diversity experiment to mean what
 it says. The share of external games must be exactly what the config states
-and the same on every re-run, so the groups differ in one thing. Only the
-network's own decisions may become training examples, so an external game
-teaches the network about *its* moves and nothing about the opponent's. And
-the batched scheduler must play exactly the games the one-at-a-time path
-plays, as it already must for self-play.
+and the same on every re-run, so the groups differ in one thing. Which
+positions of an external game become training examples must be exactly what
+the schedule says: the network's own decisions always, the opponent's
+positions only when asked for and then as value-only rows, so the policy head
+never learns the opponent's moves. And the batched scheduler must play exactly
+the games the one-at-a-time path plays, as it already must for self-play.
 """
 
 from __future__ import annotations
@@ -156,6 +157,8 @@ def test_the_summary_counts_external_games_from_the_networks_side() -> None:
         wipeouts += discs == 0
     assert summary.opponent_games == 6
     assert summary.network_wipeouts == wipeouts
+    # Every wipeout of the network is a wipeout; the other side's count too.
+    assert summary.wipeouts >= summary.network_wipeouts
     assert summary.opponent_wins + summary.opponent_losses + summary.opponent_draws == 6
     metrics = summary.as_metrics()
     assert metrics["opponent_games"] == 6
@@ -187,7 +190,7 @@ def fingerprint(records) -> dict:
             record.result_for_black,
             tuple(branching),
             tuple(
-                (s.black, s.white, int(s.to_move), s.move_no, s.z, tuple(s.pi))
+                (s.black, s.white, int(s.to_move), s.move_no, s.z, tuple(s.pi), s.pi_valid)
                 for s in record.samples
             ),
         )
@@ -347,3 +350,243 @@ def test_opponent_games_need_an_opponent() -> None:
 def test_duplicate_opponents_are_refused() -> None:
     with pytest.raises(ValueError, match="twice"):
         Config.model_validate(smoke(opponents=["greedy", "greedy"], opponent_games=2))
+
+
+# ---------------------------------------------------------------------------
+# Recording the opponent's positions as value-only examples
+# ---------------------------------------------------------------------------
+
+
+def play_recording(seed: int, network: Player = Player.WHITE):
+    return play_game(
+        StubEvaluator(),
+        SEARCH,
+        board_size=BOARD,
+        rng=make_rng(seed),
+        opponent=GreedyAgent(),
+        opponent_name="greedy",
+        network=network,
+        record_opponent=True,
+    )
+
+
+@pytest.mark.parametrize("network", [Player.BLACK, Player.WHITE])
+def test_recording_keeps_the_opponents_positions_without_a_policy_target(network: Player) -> None:
+    record, branching = play_recording(3, network)
+    theirs = [s for s in record.samples if s.to_move is not network]
+    mine = [s for s in record.samples if s.to_move is network]
+    assert theirs, "the opponent had choices too"
+    assert all(not s.pi_valid for s in theirs)
+    assert all(not s.pi.any() for s in theirs), "nothing searched there, so nothing to imitate"
+    assert all(s.pi_valid for s in mine)
+    assert len(branching) == len(mine), "the search ran only on the network's moves"
+
+
+def test_the_opponents_positions_carry_the_result_from_the_opponents_side() -> None:
+    record, _ = play_recording(5, Player.WHITE)
+    for sample in record.samples:
+        expected = (
+            record.result_for_black if sample.to_move is Player.BLACK else -record.result_for_black
+        )
+        assert sample.z == expected
+        assert sample.own is not None
+
+
+def test_recording_adds_positions_and_changes_nothing_else() -> None:
+    """The same seed plays the same game; the record only gains rows."""
+    plain, _ = play_game(
+        StubEvaluator(),
+        SEARCH,
+        board_size=BOARD,
+        rng=make_rng(3),
+        opponent=GreedyAgent(),
+        opponent_name="greedy",
+        network=Player.WHITE,
+    )
+    recorded, _ = play_recording(3, Player.WHITE)
+    assert (plain.plies, plain.result_for_black) == (recorded.plies, recorded.result_for_black)
+    assert [tuple(s.pi) for s in plain.samples] == [
+        tuple(s.pi) for s in recorded.samples if s.pi_valid
+    ]
+    assert len(recorded.samples) > len(plain.samples)
+
+
+def test_a_forced_opponent_move_is_not_recorded_either() -> None:
+    """Same rule as for the network: one legal move is no decision."""
+    record, _ = play_recording(11, Player.BLACK)
+    for sample in record.samples:
+        if not sample.pi_valid:
+            assert len(rules.legal_actions(sample.state(BOARD))) > 1
+
+
+def test_batching_records_exactly_the_same_opponent_positions() -> None:
+    schedule = OpponentSchedule(6, 4, ("greedy", "random"), record_opponent_positions=True)
+    solo = play_games(
+        StubEvaluator(),
+        SEARCH,
+        board_size=BOARD,
+        n_games=schedule.total,
+        root_seed=7,
+        generation=1,
+        schedule=schedule,
+        opponents=build_opponents(schedule.opponents),
+    )
+    batched = BatchedSelfPlay(
+        StubEvaluator(),
+        SEARCH,
+        board_size=BOARD,
+        games_in_flight=4,
+        root_seed=7,
+        generation=1,
+        schedule=schedule,
+        opponents=build_opponents(schedule.opponents),
+    )
+    a, b = fingerprint(solo), fingerprint(batched.play(schedule.total))
+    assert a == b
+    external = [game for game in a.values() if game[0] is not None]
+    assert len(external) == 4
+    for game in external:
+        samples = game[6]
+        assert any(not valid for *_, valid in samples), "an opponent position was kept"
+
+
+# ---------------------------------------------------------------------------
+# Searching the opponent's positions (Step 5)
+# ---------------------------------------------------------------------------
+
+
+def play_searching(seed: int, network: Player = Player.WHITE):
+    return play_game(
+        StubEvaluator(),
+        SEARCH,
+        board_size=BOARD,
+        rng=make_rng(seed),
+        opponent=GreedyAgent(),
+        opponent_name="greedy",
+        network=network,
+        record_opponent=True,
+        search_opponent=True,
+    )
+
+
+@pytest.mark.parametrize("network", [Player.BLACK, Player.WHITE])
+def test_searching_gives_the_opponents_positions_a_policy_target(network: Player) -> None:
+    record, branching = play_searching(3, network)
+    theirs = [s for s in record.samples if s.opponent_to_move]
+    mine = [s for s in record.samples if not s.opponent_to_move]
+    assert theirs, "the opponent had choices too"
+    assert all(s.to_move is not network for s in theirs)
+    assert all(s.pi_valid for s in theirs), "a search ran there, so the target is real"
+    for sample in theirs:
+        assert sample.pi.sum() == pytest.approx(1.0)
+        legal = set(rules.legal_actions(sample.state(BOARD)))
+        assert all(sample.pi[a] == 0 for a in range(len(sample.pi)) if a not in legal)
+    assert all(s.to_move is network for s in mine)
+    assert len(branching) == len(mine), "branching still counts the network's own decisions"
+
+
+def test_the_opponent_still_plays_its_own_move_when_its_position_is_searched() -> None:
+    """Without exploration noise the search draws nothing from the rng, so a
+    searched game and a record-only game from the same seed must be the same
+    game: the extra searches changed what was stored, not what was played."""
+    quiet = SearchConfig(n_simulations=12)
+    common = {
+        "board_size": BOARD,
+        "opponent": GreedyAgent(),
+        "opponent_name": "greedy",
+        "network": Player.BLACK,
+        "record_opponent": True,
+    }
+    plain, _ = play_game(StubEvaluator(), quiet, rng=make_rng(5), **common)
+    searched, _ = play_game(StubEvaluator(), quiet, rng=make_rng(5), search_opponent=True, **common)
+    assert (plain.plies, plain.result_for_black) == (searched.plies, searched.result_for_black)
+    assert [(s.black, s.white, s.to_move) for s in plain.samples] == [
+        (s.black, s.white, s.to_move) for s in searched.samples
+    ]
+    assert [s.opponent_to_move for s in plain.samples] == [
+        s.opponent_to_move for s in searched.samples
+    ]
+    assert any(s.opponent_to_move for s in searched.samples)
+    assert all(s.pi_valid for s in searched.samples)
+    assert not all(s.pi_valid for s in plain.samples)
+
+
+def test_value_only_rows_are_marked_as_the_opponents() -> None:
+    record, _ = play_recording(3, Player.WHITE)
+    assert all(s.opponent_to_move == (not s.pi_valid) for s in record.samples)
+
+
+def test_batching_searches_exactly_the_same_opponent_positions() -> None:
+    schedule = OpponentSchedule(
+        6, 4, ("greedy", "random"), record_opponent_positions=True, search_opponent_positions=True
+    )
+    solo = list(
+        play_games(
+            StubEvaluator(),
+            SEARCH,
+            board_size=BOARD,
+            n_games=schedule.total,
+            root_seed=7,
+            generation=1,
+            schedule=schedule,
+            opponents=build_opponents(schedule.opponents),
+        )
+    )
+    batched = list(
+        BatchedSelfPlay(
+            StubEvaluator(),
+            SEARCH,
+            board_size=BOARD,
+            games_in_flight=4,
+            root_seed=7,
+            generation=1,
+            schedule=schedule,
+            opponents=build_opponents(schedule.opponents),
+        ).play(schedule.total)
+    )
+    assert fingerprint(solo) == fingerprint(batched)
+    flags = {r.game_index: [s.opponent_to_move for s in r.samples] for r, _ in solo}
+    assert flags == {r.game_index: [s.opponent_to_move for s in r.samples] for r, _ in batched}
+    external = [r for r, _ in solo if r.opponent is not None]
+    assert len(external) == 4
+    for record in external:
+        assert any(s.opponent_to_move for s in record.samples)
+        assert all(s.pi_valid for s in record.samples)
+
+
+def test_searching_needs_recording() -> None:
+    with pytest.raises(ConfigError, match="record_opponent_positions"):
+        OpponentSchedule(6, 2, ("greedy",), search_opponent_positions=True)
+    with pytest.raises(ValueError, match="record_opponent_positions"):
+        Config.model_validate(
+            smoke(opponents=["greedy"], opponent_games=2, search_opponent_positions=True)
+        )
+
+
+def test_the_config_passes_the_search_rule_to_the_schedule() -> None:
+    on = Config.model_validate(
+        smoke(
+            opponents=["greedy"],
+            opponent_games=2,
+            record_opponent_positions=True,
+            search_opponent_positions=True,
+        )
+    )
+    schedule = on.selfplay.schedule()
+    assert schedule is not None and schedule.search_opponent_positions
+    off = Config.model_validate(
+        smoke(opponents=["greedy"], opponent_games=2, record_opponent_positions=True)
+    )
+    schedule = off.selfplay.schedule()
+    assert schedule is not None and not schedule.search_opponent_positions
+
+
+def test_the_config_passes_the_recording_rule_to_the_schedule() -> None:
+    off = Config.model_validate(smoke(opponents=["greedy"], opponent_games=2))
+    on = Config.model_validate(
+        smoke(opponents=["greedy"], opponent_games=2, record_opponent_positions=True)
+    )
+    assert not off.selfplay.record_opponent_positions
+    schedule_off, schedule_on = off.selfplay.schedule(), on.selfplay.schedule()
+    assert schedule_off is not None and not schedule_off.record_opponent_positions
+    assert schedule_on is not None and schedule_on.record_opponent_positions

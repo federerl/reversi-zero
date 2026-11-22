@@ -1,0 +1,280 @@
+{
+ "pairings": {
+  "control120": {
+   "corner": {
+    "ci_high": 0.9921955735836505,
+    "ci_low": 0.9497129130941735,
+    "commit": "0d699f4",
+    "games": 200,
+    "record": "196W 4L 0D",
+    "report": "control120-vs-corner.json",
+    "score": 0.98,
+    "wipeouts": 4,
+    "wipeouts_inflicted": 1
+   },
+   "edax-l3": {
+    "ci_high": 0.7776311022605097,
+    "ci_low": 0.6540769541334929,
+    "commit": "0d699f4",
+    "games": 200,
+    "record": "141W 53L 6D",
+    "report": "control120-vs-edax-l3.json",
+    "score": 0.72,
+    "wipeouts": 0,
+    "wipeouts_inflicted": 0
+   },
+   "edax-l5": {
+    "ci_high": 0.3641900097821255,
+    "ci_low": 0.23844234740066744,
+    "commit": "0d699f4",
+    "games": 200,
+    "record": "56W 137L 7D",
+    "report": "control120-vs-edax-l5.json",
+    "score": 0.2975,
+    "wipeouts": 0,
+    "wipeouts_inflicted": 0
+   },
+   "edax-l7": {
+    "ci_high": 0.1494058124327174,
+    "ci_low": 0.06567044866909588,
+    "commit": "0d699f4",
+    "games": 200,
+    "record": "17W 177L 6D",
+    "report": "control120-vs-edax-l7.json",
+    "score": 0.1,
+    "wipeouts": 9,
+    "wipeouts_inflicted": 0
+   },
+   "gen60": {
+    "ci_high": 0.6891456314159018,
+    "ci_low": 0.5561430369897816,
+    "commit": "0d699f4",
+    "games": 200,
+    "record": "120W 70L 10D",
+    "report": "control120-vs-gen60.json",
+    "score": 0.625,
+    "wipeouts": 0,
+    "wipeouts_inflicted": 0
+   },
+   "greedy": {
+    "ci_high": 0.7360842846076572,
+    "ci_low": 0.6073198511602995,
+    "commit": "0d699f4",
+    "games": 200,
+    "record": "135W 65L 0D",
+    "report": "control120-vs-greedy.json",
+    "score": 0.675,
+    "wipeouts": 65,
+    "wipeouts_inflicted": 2
+   },
+   "greedy-corner": {
+    "ci_high": 0.698594735350732,
+    "ci_low": 0.566317026527406,
+    "commit": "0d699f4",
+    "games": 200,
+    "record": "127W 73L 0D",
+    "report": "control120-vs-greedy-corner.json",
+    "score": 0.635,
+    "wipeouts": 72,
+    "wipeouts_inflicted": 2
+   },
+   "greedy-d2": {
+    "ci_high": 0.6558432509151711,
+    "ci_low": 0.5207645903369208,
+    "commit": "0d699f4",
+    "games": 200,
+    "record": "118W 82L 0D",
+    "report": "control120-vs-greedy-d2.json",
+    "score": 0.59,
+    "wipeouts": 82,
+    "wipeouts_inflicted": 2
+   },
+   "minimax-d4": {
+    "ci_high": 0.9972533418664555,
+    "ci_low": 0.9642782382838231,
+    "commit": "0d699f4",
+    "games": 200,
+    "record": "198W 2L 0D",
+    "report": "control120-vs-minimax-d4.json",
+    "score": 0.99,
+    "wipeouts": 0,
+    "wipeouts_inflicted": 0
+   },
+   "mobility": {
+    "ci_high": 0.9462542498225244,
+    "ci_low": 0.8681041292843443,
+    "commit": "0d699f4",
+    "games": 200,
+    "record": "183W 17L 0D",
+    "report": "control120-vs-mobility.json",
+    "score": 0.915,
+    "wipeouts": 17,
+    "wipeouts_inflicted": 2
+   },
+   "noisy-greedy": {
+    "ci_high": 0.7913184585289088,
+    "ci_low": 0.6698242380737758,
+    "commit": "0d699f4",
+    "games": 200,
+    "record": "147W 53L 0D",
+    "report": "control120-vs-noisy-greedy.json",
+    "score": 0.735,
+    "wipeouts": 52,
+    "wipeouts_inflicted": 2
+   },
+   "random": {
+    "ci_high": 1.0,
+    "ci_low": 0.9811546736227335,
+    "commit": "0d699f4",
+    "games": 200,
+    "record": "200W 0L 0D",
+    "report": "control120-vs-random.json",
+    "score": 1.0,
+    "wipeouts": 0,
+    "wipeouts_inflicted": 4
+   },
+   "rollout-r3000": {
+    "ci_high": 0.8583282847220932,
+    "ci_low": 0.7499876129240015,
+    "commit": "0d699f4",
+    "games": 200,
+    "record": "162W 38L 0D",
+    "report": "control120-vs-rollout-r3000.json",
+    "score": 0.81,
+    "wipeouts": 34,
+    "wipeouts_inflicted": 1
+   }
+  },
+  "control120-tc": {
+   "corner": null,
+   "edax-l3": null,
+   "edax-l5": {
+    "ci_high": 0.32754283425040653,
+    "ci_low": 0.2064086957787952,
+    "commit": "8509fbf",
+    "games": 200,
+    "record": "50W 145L 5D",
+    "report": "control120-tc-vs-edax-l5.json",
+    "score": 0.2625,
+    "wipeouts": 1,
+    "wipeouts_inflicted": 0
+   },
+   "edax-l7": {
+    "ci_high": 0.18084162355728,
+    "ci_low": 0.08819814459378356,
+    "commit": "8509fbf",
+    "games": 200,
+    "record": "23W 172L 5D",
+    "report": "control120-tc-vs-edax-l7.json",
+    "score": 0.1275,
+    "wipeouts": 3,
+    "wipeouts_inflicted": 0
+   },
+   "gen60": {
+    "ci_high": 0.6534510794545565,
+    "ci_low": 0.518250988429422,
+    "commit": "8509fbf",
+    "games": 200,
+    "record": "113W 78L 9D",
+    "report": "control120-tc-vs-gen60.json",
+    "score": 0.5875,
+    "wipeouts": 0,
+    "wipeouts_inflicted": 0
+   },
+   "greedy": {
+    "ci_high": 0.9653478057456681,
+    "ci_low": 0.8980683070423372,
+    "commit": "8509fbf",
+    "games": 200,
+    "record": "188W 12L 0D",
+    "report": "control120-tc-vs-greedy.json",
+    "score": 0.94,
+    "wipeouts": 12,
+    "wipeouts_inflicted": 3
+   },
+   "greedy-corner": {
+    "ci_high": 0.9653478057456681,
+    "ci_low": 0.8980683070423372,
+    "commit": "8509fbf",
+    "games": 200,
+    "record": "188W 12L 0D",
+    "report": "control120-tc-vs-greedy-corner.json",
+    "score": 0.94,
+    "wipeouts": 11,
+    "wipeouts_inflicted": 1
+   },
+   "greedy-d2": {
+    "ci_high": 0.9690146582965411,
+    "ci_low": 0.9042130012276914,
+    "commit": "8509fbf",
+    "games": 200,
+    "record": "189W 11L 0D",
+    "report": "control120-tc-vs-greedy-d2.json",
+    "score": 0.945,
+    "wipeouts": 10,
+    "wipeouts_inflicted": 0
+   },
+   "minimax-d4": null,
+   "mobility": {
+    "ci_high": 0.9972533418664555,
+    "ci_low": 0.9642782382838231,
+    "commit": "8509fbf",
+    "games": 200,
+    "record": "198W 2L 0D",
+    "report": "control120-tc-vs-mobility.json",
+    "score": 0.99,
+    "wipeouts": 2,
+    "wipeouts_inflicted": 1
+   },
+   "noisy-greedy": {
+    "ci_high": 0.9829444579914328,
+    "ci_low": 0.9295293884777092,
+    "commit": "8509fbf",
+    "games": 200,
+    "record": "193W 7L 0D",
+    "report": "control120-tc-vs-noisy-greedy.json",
+    "score": 0.965,
+    "wipeouts": 7,
+    "wipeouts_inflicted": 4
+   },
+   "random": null,
+   "rollout-r3000": {
+    "ci_high": 0.9597418793311848,
+    "ci_low": 0.8889569133524796,
+    "commit": "8509fbf",
+    "games": 200,
+    "record": "186W 13L 1D",
+    "report": "control120-tc-vs-rollout-r3000.json",
+    "score": 0.9325,
+    "wipeouts": 12,
+    "wipeouts_inflicted": 0
+   }
+  }
+ },
+ "protocol": "research/eval-protocol-frozen.json: 200 games per pairing, 50 simulations, 4-ply openings played with both colours, seed 20261025",
+ "rows": {
+  "held out": [
+   "edax-l7",
+   "edax-l3",
+   "edax-l5",
+   "rollout-r3000"
+  ],
+  "retention": [
+   "gen60"
+  ],
+  "sanity": [
+   "random"
+  ],
+  "seen": [
+   "greedy",
+   "minimax-d4"
+  ],
+  "seen family": [
+   "greedy-corner",
+   "greedy-d2",
+   "noisy-greedy",
+   "corner",
+   "mobility"
+  ]
+ }
+}

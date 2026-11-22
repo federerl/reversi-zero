@@ -20,11 +20,14 @@ counterfactual:
 2. One ply later, from Greedy's side: the raw value (the exact answer is +1,
    Greedy wins on the spot), and the prior the network puts on the reply that
    wipes it out.
-3. The same search run three ways on the same position: as recorded (real
+3. The same search run four ways on the same position: as recorded (real
    prior and real value), with the prior flattened to uniform (so only the
-   value head is speaking), and with the value zeroed (so only the prior is
-   speaking; finished positions still score exactly). Whichever way stops
-   choosing the fatal move points at the head that let it through.
+   value head is speaking), with the value zeroed (so only the prior is
+   speaking; finished positions still score exactly), and as recorded but
+   with the one-move look-ahead for game-ending replies switched on
+   (``SearchConfig.terminal_check``, the search-side repair the Step 3b
+   results propose). Whichever way stops choosing the fatal move points at
+   the part of the agent that let it through.
 
 Usage::
 
@@ -163,12 +166,13 @@ def probe_position(evaluator: Evaluator, trace: Trace, move: NetMove, k: int) ->
     }
     for sims in BUDGETS:
         config = SearchConfig(n_simulations=sims)
-        for label, eval_ in (
-            ("real", evaluator),
-            ("value_only", OnlyValue(evaluator)),
-            ("policy_only", OnlyPolicy(evaluator)),
+        for label, eval_, cfg in (
+            ("real", evaluator, config),
+            ("value_only", OnlyValue(evaluator), config),
+            ("policy_only", OnlyPolicy(evaluator), config),
+            ("checked", evaluator, SearchConfig(n_simulations=sims, terminal_check=True)),
         ):
-            chosen = MCTS(eval_, config).run(state).best_action()
+            chosen = MCTS(eval_, cfg).run(state).best_action()
             row["searches"][f"{label}@{sims}"] = {"chosen": chosen, "safe": chosen in safe}
     return row
 
@@ -221,14 +225,33 @@ def main() -> int:
     parser.add_argument("--protocol", type=Path, default=PROTOCOL)
     parser.add_argument("--networks", nargs="*", default=None)
     parser.add_argument("--limit", type=int, default=None, help="wipeouts per network (smoke)")
+    parser.add_argument(
+        "--positions-from",
+        default=None,
+        metavar="NAME",
+        help="Probe every network on NAME's wipeout positions instead of its own. A network "
+        "is normally probed where it was wiped out, which selects the positions it has not "
+        "learned; one fixed set makes the heads of different networks comparable.",
+    )
     args = parser.parse_args()
 
     checkpoints = json.loads(args.protocol.read_text(encoding="utf-8"))["checkpoints"]
-    results: dict[str, Any] = {}
+    games_by_net = {}
     for path in games_files(args.games_dir):
         net, traces = load(path)
-        if net not in checkpoints or (args.networks and net not in args.networks):
-            continue  # a fixed opponent's games, or a network not asked for
+        if net in checkpoints:
+            games_by_net[net] = traces
+    if args.positions_from is not None and args.positions_from not in games_by_net:
+        msg = f"no Greedy games found for {args.positions_from!r} under {args.games_dir}"
+        raise SystemExit(msg)
+    results: dict[str, Any] = {}
+    for net in checkpoints:
+        if args.networks and net not in args.networks:
+            continue
+        source = args.positions_from if args.positions_from is not None else net
+        if source not in games_by_net:
+            continue  # no games for this network in this directory
+        traces = games_by_net[source]
         evaluator = load_evaluator(Path(checkpoints[net]["file"]))
         wiped = [t for t in traces if t.wipeout and not t.net_won][: args.limit]
         rows: list[dict[str, Any]] = []
@@ -246,6 +269,7 @@ def main() -> int:
                 rows.append(probe_position(evaluator, trace, move, k))
         results[net] = {
             "checkpoint": checkpoints[net]["file"],
+            "positions_from": source,
             "wipeouts": len(wiped),
             "summary": {k: summarise([r for r in rows if r["k"] == k]) for k in PROBED_MOVES},
             "positions": rows,
@@ -289,11 +313,11 @@ def main() -> int:
                 f"| {s['child_wiping_has_top_prior']:.0%} |"
             )
     print()
-    print("## The same search with one head switched off")
+    print("## The same search with one head switched off, or with the terminal check on")
     print()
     print("Share of positions where the search chooses a move that survives.")
     print()
-    labels = ("real", "value_only", "policy_only")
+    labels = ("real", "value_only", "policy_only", "checked")
     keys = [f"{label}@{sims}" for sims in BUDGETS for label in labels]
     print("| network | move | positions | " + " | ".join(keys) + " | real@50 replayed the record |")
     print("|---|---|---:|" + "---:|" * (len(keys) + 1))

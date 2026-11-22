@@ -1,0 +1,82 @@
+{
+  "few_discs": "at most 3 discs, from ply 16",
+  "from_generation": 121,
+  "purpose": "research/step3b-results.md: rows that carried the wipeout lesson",
+  "runs": [
+    {
+      "network_to_move_few_discs": {
+        "network_lost": 307,
+        "network_won": 4266,
+        "rows": 4573
+      },
+      "opponent_to_move_few_discs": {
+        "network_won": 153,
+        "opponent_won": 77,
+        "rows": 230
+      },
+      "rows": 684605,
+      "run": "step3-Bboth-s1",
+      "value_only_rows": 58461
+    },
+    {
+      "network_to_move_few_discs": {
+        "network_lost": 311,
+        "network_won": 3858,
+        "rows": 4171
+      },
+      "opponent_to_move_few_discs": {
+        "network_won": 152,
+        "opponent_won": 83,
+        "rows": 235
+      },
+      "rows": 684173,
+      "run": "step3-Bboth-s2",
+      "value_only_rows": 58201
+    },
+    {
+      "network_to_move_few_discs": {
+        "network_lost": 767,
+        "network_won": 8219,
+        "rows": 8987
+      },
+      "opponent_to_move_few_discs": {
+        "network_won": 0,
+        "opponent_won": 0,
+        "rows": 0
+      },
+      "rows": 694800,
+      "run": "step3-B-s1",
+      "value_only_rows": 0
+    },
+    {
+      "network_to_move_few_discs": {
+        "network_lost": 575,
+        "network_won": 8011,
+        "rows": 8586
+      },
+      "opponent_to_move_few_discs": {
+        "network_won": 0,
+        "opponent_won": 0,
+        "rows": 0
+      },
+      "rows": 695793,
+      "run": "step3-B-s2",
+      "value_only_rows": 0
+    },
+    {
+      "network_to_move_few_discs": {
+        "network_lost": 5,
+        "network_won": 45,
+        "rows": 51
+      },
+      "opponent_to_move_few_discs": {
+        "network_won": 0,
+        "opponent_won": 0,
+        "rows": 0
+      },
+      "rows": 694569,
+      "run": "step3-A-s1",
+      "value_only_rows": 0
+    }
+  ]
+}

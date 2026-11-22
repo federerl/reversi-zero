@@ -53,7 +53,7 @@ from reversi.search.node import Node
 from reversi.seeding import game_seed
 from reversi.seeding import rng as make_rng
 from reversi.selfplay.opponents import OpponentSchedule
-from reversi.types import Action, Player, pass_action
+from reversi.types import Action, Player, pass_action, policy_size
 
 __all__ = ["BatchedSelfPlay"]
 
@@ -77,11 +77,14 @@ class _Slot:
         "mcts",
         "network",
         "opponent",
+        "opponent_turn",
         "pending",
         "ply",
         "record",
+        "record_opponent",
         "rng",
         "root",
+        "search_opponent",
         "sims_done",
         "simulations",
         "state",
@@ -103,6 +106,11 @@ class _Slot:
         # A fixed opponent on the other side, for the games that have one.
         self.opponent: Agent | None = None
         self.network = Player.BLACK
+        self.record_opponent = False
+        self.search_opponent = False
+        # True while the root is one of the opponent's positions: the search
+        # runs for a policy target only, and the opponent's move is played.
+        self.opponent_turn = False
 
     # -- lifecycle ----------------------------------------------------
 
@@ -115,6 +123,8 @@ class _Slot:
         opponent: Agent | None = None,
         opponent_name: str | None = None,
         network: Player = Player.BLACK,
+        record_opponent: bool = False,
+        search_opponent: bool = False,
     ) -> None:
         self.game_index = game_index
         self.state = rules.initial_state(board_size)
@@ -133,6 +143,9 @@ class _Slot:
         self.branching = []
         self.opponent = opponent
         self.network = network
+        self.record_opponent = record_opponent
+        self.search_opponent = search_opponent
+        self.opponent_turn = False
         self.finished = False
 
     def prepare(self, ceiling: int) -> State | None:
@@ -177,8 +190,9 @@ class _Slot:
 
         node, path = self.pending
         self.pending = None
-        self.mcts.open_node(node, logits, value)
-        self.mcts.backup(path, value)
+        # open_node's answer, not the raw network value: with the terminal
+        # check on they differ, and the plain search backs up the same thing.
+        self.mcts.backup(path, self.mcts.open_node(node, logits, value))
         self.sims_done += 1
 
     # -- the parts that need no network -------------------------------
@@ -190,8 +204,27 @@ class _Slot:
                 self._finish()
                 return
             if self.opponent is not None and self.state.to_move is not self.network:
-                # The opponent's turn: its move needs no network call and is not
-                # recorded, so it is handled here with the forced moves.
+                # The opponent's turn: its move needs no network call, so it is
+                # handled here with the forced moves. The position is kept as a
+                # value-only sample when asked to (see worker.play_game).
+                if self.record_opponent and len(rules.legal_actions(self.state)) > 1:
+                    if self.search_opponent:
+                        # Search here too, for a policy target. The root is set
+                        # up by the caller; _play_the_move records the target
+                        # and plays the opponent's move, not the search's.
+                        self.opponent_turn = True
+                        return
+                    self.record.samples.append(
+                        Sample(
+                            black=self.state.black,
+                            white=self.state.white,
+                            to_move=self.state.to_move,
+                            pi=np.zeros(policy_size(self.state.size), dtype=np.float32),
+                            move_no=self.ply,
+                            pi_valid=False,
+                            opponent_to_move=True,
+                        )
+                    )
                 self._apply(self.opponent.select(self.state, self.rng), ceiling)
                 continue
             actions = rules.legal_actions(self.state)
@@ -214,6 +247,26 @@ class _Slot:
             root_value=root.net_value,
             board_size=self.state.size,
         )
+        if self.opponent_turn:
+            # The opponent's position, searched for its policy target only.
+            # Same order of random draws as worker.play_game: the search's
+            # noise, then the opponent's tie-break.
+            self.record.samples.append(
+                Sample(
+                    black=self.state.black,
+                    white=self.state.white,
+                    to_move=self.state.to_move,
+                    pi=result.policy_target(),
+                    move_no=self.ply,
+                    opponent_to_move=True,
+                )
+            )
+            assert self.opponent is not None  # opponent_turn is only set with one
+            self.opponent_turn = False
+            self.root = None
+            self.sims_done = 0
+            self._apply(self.opponent.select(self.state, self.rng), ceiling)
+            return
         self.branching.append(root.n_actions)
         self.record.samples.append(
             Sample(
@@ -363,7 +416,7 @@ class BatchedSelfPlay:
             if self.schedule is not None
             else None
         )
-        if assignment is None:
+        if self.schedule is None or assignment is None:
             slot.start(game_index, self._seed(game_index), self.board_size)
             return
         if self.opponents is None or assignment.opponent not in self.opponents:
@@ -376,6 +429,8 @@ class BatchedSelfPlay:
             opponent=self.opponents[assignment.opponent],
             opponent_name=assignment.opponent,
             network=assignment.network,
+            record_opponent=self.schedule.record_opponent_positions,
+            search_opponent=self.schedule.search_opponent_positions,
         )
 
     def _seed(self, game_index: int) -> int:

@@ -20,6 +20,11 @@ Usage::
     python scripts/step3_scorecard.py ~/reversi-runs/step3-eval \
         --out research/results/step3/scorecard.json [--markdown]
 
+``--checkpoints`` chooses the columns; the default is the Step 3 groups. Later
+steps evaluate into the same directory and pick their own columns, for example
+``--checkpoints control120 Bboth-s1 Bboth-s2 Btc-s1 Btc-s2`` for Step 4, so one
+script reads every step's table instead of one edited copy per step.
+
 The scorecard rows follow the roster document: held out, retention, seen, seen
 family, sanity. An opponent whose report is missing shows as a blank cell, so a
 half-finished evaluation can still be read.
@@ -33,7 +38,8 @@ import sys
 from pathlib import Path
 
 CHECKPOINTS = ("control120", "A-s1", "A-s2", "B-s1", "B-s2", "D-s1")
-"""Column order: the starting checkpoint, then the groups in the design's order."""
+"""Default column order: the starting checkpoint, then the Step 3 groups in the
+design's order. Override with ``--checkpoints``."""
 
 ROWS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("held out", ("edax-l7", "edax-l3", "edax-l5", "rollout-r3000")),
@@ -92,14 +98,14 @@ def cell(entry: dict | None) -> str:
     return text
 
 
-def markdown(table: dict[str, dict[str, dict | None]]) -> str:
+def markdown(table: dict[str, dict[str, dict | None]], checkpoints: tuple[str, ...]) -> str:
     lines = [
-        "| row | opponent | " + " | ".join(CHECKPOINTS) + " |",
-        "|---|---|" + "---|" * len(CHECKPOINTS),
+        "| row | opponent | " + " | ".join(checkpoints) + " |",
+        "|---|---|" + "---|" * len(checkpoints),
     ]
     for row, opponents in ROWS:
         for opponent in opponents:
-            cells = " | ".join(cell(table[checkpoint][opponent]) for checkpoint in CHECKPOINTS)
+            cells = " | ".join(cell(table[checkpoint][opponent]) for checkpoint in checkpoints)
             lines.append(f"| {row} | {opponent} | {cells} |")
     return "\n".join(lines)
 
@@ -111,7 +117,15 @@ def main() -> int:
     parser.add_argument("eval_dir", type=Path)
     parser.add_argument("--out", type=Path, default=None, help="Write the table as JSON here.")
     parser.add_argument("--markdown", action="store_true", help="Print the table as Markdown.")
+    parser.add_argument(
+        "--checkpoints",
+        nargs="+",
+        default=list(CHECKPOINTS),
+        metavar="NAME",
+        help="Columns, by evaluation name, in order. Default: the Step 3 groups.",
+    )
     args = parser.parse_args()
+    checkpoints = tuple(args.checkpoints)
 
     table = {
         checkpoint: {
@@ -119,10 +133,10 @@ def main() -> int:
             for _, opponents in ROWS
             for opponent in opponents
         }
-        for checkpoint in CHECKPOINTS
+        for checkpoint in checkpoints
     }
     done = sum(entry is not None for cells in table.values() for entry in cells.values())
-    total = len(CHECKPOINTS) * sum(len(opponents) for _, opponents in ROWS)
+    total = len(checkpoints) * sum(len(opponents) for _, opponents in ROWS)
     print(f"{done} of {total} pairings reported", file=sys.stderr)
 
     if args.out is not None:
@@ -136,7 +150,7 @@ def main() -> int:
         args.out.write_text(json.dumps(payload, indent=1, sort_keys=True) + "\n")
         print(f"wrote {args.out}", file=sys.stderr)
     if args.markdown or args.out is None:
-        print(markdown(table))
+        print(markdown(table, checkpoints))
     return 0
 
 

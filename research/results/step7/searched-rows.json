@@ -1,0 +1,346 @@
+{
+ "purpose": "research/step5-design.md, prediction 1: the search's target at the opponent's positions where a move takes every disc of the network's",
+ "from_generation": 121,
+ "runs": [
+  {
+   "run": "step7-Bsp-w2-s1",
+   "rows": 685379,
+   "opponent_to_move_rows": 58760,
+   "with_a_wiping_move": 110,
+   "target_mostly_on_a_wiping_move": 99,
+   "mean_target_mass_on_wiping_moves": 0.7868636331944303,
+   "by_generation": {
+    "121": {
+     "with_wipe": 9,
+     "concentrated": 9
+    },
+    "122": {
+     "with_wipe": 6,
+     "concentrated": 5
+    },
+    "123": {
+     "with_wipe": 8,
+     "concentrated": 6
+    },
+    "124": {
+     "with_wipe": 11,
+     "concentrated": 10
+    },
+    "125": {
+     "with_wipe": 6,
+     "concentrated": 5
+    },
+    "126": {
+     "with_wipe": 9,
+     "concentrated": 7
+    },
+    "127": {
+     "with_wipe": 5,
+     "concentrated": 5
+    },
+    "128": {
+     "with_wipe": 6,
+     "concentrated": 5
+    },
+    "129": {
+     "with_wipe": 7,
+     "concentrated": 6
+    },
+    "130": {
+     "with_wipe": 9,
+     "concentrated": 8
+    },
+    "131": {
+     "with_wipe": 4,
+     "concentrated": 4
+    },
+    "132": {
+     "with_wipe": 4,
+     "concentrated": 3
+    },
+    "133": {
+     "with_wipe": 5,
+     "concentrated": 5
+    },
+    "134": {
+     "with_wipe": 5,
+     "concentrated": 5
+    },
+    "135": {
+     "with_wipe": 4,
+     "concentrated": 4
+    },
+    "136": {
+     "with_wipe": 2,
+     "concentrated": 2
+    },
+    "137": {
+     "with_wipe": 4,
+     "concentrated": 4
+    },
+    "138": {
+     "with_wipe": 2,
+     "concentrated": 2
+    },
+    "139": {
+     "with_wipe": 1,
+     "concentrated": 1
+    },
+    "140": {
+     "with_wipe": 3,
+     "concentrated": 3
+    }
+   }
+  },
+  {
+   "run": "step7-Bsp-w2-s2",
+   "rows": 685446,
+   "opponent_to_move_rows": 58691,
+   "with_a_wiping_move": 116,
+   "target_mostly_on_a_wiping_move": 97,
+   "mean_target_mass_on_wiping_moves": 0.7251724135451789,
+   "by_generation": {
+    "121": {
+     "with_wipe": 9,
+     "concentrated": 6
+    },
+    "122": {
+     "with_wipe": 6,
+     "concentrated": 6
+    },
+    "123": {
+     "with_wipe": 9,
+     "concentrated": 7
+    },
+    "124": {
+     "with_wipe": 7,
+     "concentrated": 5
+    },
+    "125": {
+     "with_wipe": 9,
+     "concentrated": 8
+    },
+    "126": {
+     "with_wipe": 6,
+     "concentrated": 3
+    },
+    "127": {
+     "with_wipe": 9,
+     "concentrated": 9
+    },
+    "128": {
+     "with_wipe": 8,
+     "concentrated": 7
+    },
+    "129": {
+     "with_wipe": 8,
+     "concentrated": 6
+    },
+    "130": {
+     "with_wipe": 4,
+     "concentrated": 4
+    },
+    "131": {
+     "with_wipe": 6,
+     "concentrated": 6
+    },
+    "132": {
+     "with_wipe": 7,
+     "concentrated": 6
+    },
+    "133": {
+     "with_wipe": 5,
+     "concentrated": 4
+    },
+    "134": {
+     "with_wipe": 4,
+     "concentrated": 3
+    },
+    "135": {
+     "with_wipe": 4,
+     "concentrated": 3
+    },
+    "136": {
+     "with_wipe": 1,
+     "concentrated": 1
+    },
+    "137": {
+     "with_wipe": 3,
+     "concentrated": 2
+    },
+    "138": {
+     "with_wipe": 5,
+     "concentrated": 5
+    },
+    "139": {
+     "with_wipe": 4,
+     "concentrated": 4
+    },
+    "140": {
+     "with_wipe": 2,
+     "concentrated": 2
+    }
+   }
+  },
+  {
+   "run": "step7-Bsp-w4-s1",
+   "rows": 686329,
+   "opponent_to_move_rows": 59096,
+   "with_a_wiping_move": 86,
+   "target_mostly_on_a_wiping_move": 79,
+   "mean_target_mass_on_wiping_moves": 0.8221511609072603,
+   "by_generation": {
+    "121": {
+     "with_wipe": 9,
+     "concentrated": 9
+    },
+    "122": {
+     "with_wipe": 9,
+     "concentrated": 8
+    },
+    "123": {
+     "with_wipe": 6,
+     "concentrated": 4
+    },
+    "124": {
+     "with_wipe": 14,
+     "concentrated": 14
+    },
+    "125": {
+     "with_wipe": 4,
+     "concentrated": 4
+    },
+    "126": {
+     "with_wipe": 3,
+     "concentrated": 2
+    },
+    "127": {
+     "with_wipe": 6,
+     "concentrated": 6
+    },
+    "128": {
+     "with_wipe": 2,
+     "concentrated": 1
+    },
+    "129": {
+     "with_wipe": 5,
+     "concentrated": 4
+    },
+    "130": {
+     "with_wipe": 7,
+     "concentrated": 7
+    },
+    "132": {
+     "with_wipe": 3,
+     "concentrated": 2
+    },
+    "133": {
+     "with_wipe": 3,
+     "concentrated": 3
+    },
+    "134": {
+     "with_wipe": 5,
+     "concentrated": 5
+    },
+    "135": {
+     "with_wipe": 2,
+     "concentrated": 2
+    },
+    "136": {
+     "with_wipe": 4,
+     "concentrated": 4
+    },
+    "137": {
+     "with_wipe": 1,
+     "concentrated": 1
+    },
+    "139": {
+     "with_wipe": 3,
+     "concentrated": 3
+    }
+   }
+  },
+  {
+   "run": "step7-Bsp-w4-s2",
+   "rows": 686638,
+   "opponent_to_move_rows": 58875,
+   "with_a_wiping_move": 84,
+   "target_mostly_on_a_wiping_move": 71,
+   "mean_target_mass_on_wiping_moves": 0.7585714262954536,
+   "by_generation": {
+    "121": {
+     "with_wipe": 9,
+     "concentrated": 6
+    },
+    "122": {
+     "with_wipe": 6,
+     "concentrated": 5
+    },
+    "123": {
+     "with_wipe": 8,
+     "concentrated": 7
+    },
+    "124": {
+     "with_wipe": 10,
+     "concentrated": 7
+    },
+    "125": {
+     "with_wipe": 8,
+     "concentrated": 8
+    },
+    "126": {
+     "with_wipe": 3,
+     "concentrated": 1
+    },
+    "127": {
+     "with_wipe": 3,
+     "concentrated": 2
+    },
+    "128": {
+     "with_wipe": 5,
+     "concentrated": 5
+    },
+    "129": {
+     "with_wipe": 7,
+     "concentrated": 6
+    },
+    "130": {
+     "with_wipe": 1,
+     "concentrated": 1
+    },
+    "131": {
+     "with_wipe": 2,
+     "concentrated": 2
+    },
+    "132": {
+     "with_wipe": 4,
+     "concentrated": 4
+    },
+    "133": {
+     "with_wipe": 3,
+     "concentrated": 3
+    },
+    "134": {
+     "with_wipe": 4,
+     "concentrated": 4
+    },
+    "135": {
+     "with_wipe": 4,
+     "concentrated": 3
+    },
+    "136": {
+     "with_wipe": 2,
+     "concentrated": 2
+    },
+    "137": {
+     "with_wipe": 4,
+     "concentrated": 4
+    },
+    "138": {
+     "with_wipe": 1,
+     "concentrated": 1
+    }
+   }
+  }
+ ]
+}

@@ -109,6 +109,13 @@ class MCTSConfig(_Base):
         "the raw visit distribution at tau=1 (contract C4).",
     )
     temp_init: float = Field(default=1.0, ge=0.0)
+    terminal_check: bool = Field(
+        default=False,
+        description="In self-play, look one move ahead for a game-ending reply "
+        "before trusting the network's value for a position (search/config.py). "
+        "Self-play only: evaluation always runs the plain search, so the strength "
+        "numbers measure what the network learned. The Step 4 experiment.",
+    )
 
 
 class SelfPlayConfig(_Base):
@@ -149,8 +156,35 @@ class SelfPlayConfig(_Base):
         ge=0,
         description="Games per generation against the fixed opponents, on top of "
         "games_per_generation. Each yields about half the training examples of a "
-        "self-play game, since only the network's moves are recorded.",
+        "self-play game when only the network's moves are recorded, and about as "
+        "many as a self-play game with record_opponent_positions on.",
     )
+    record_opponent_positions: bool = Field(
+        default=False,
+        description="In games against fixed opponents, also record the positions "
+        "where the opponent is to move, labelled with the result from the opponent's "
+        "side and with no policy target, so they train the value head only. Off "
+        "records only the network's own decisions (the Step 3 rule). See "
+        "selfplay/opponents.py for why the difference matters to the search.",
+    )
+    search_opponent_positions: bool = Field(
+        default=False,
+        description="In games against fixed opponents, run the network's own search "
+        "at each recorded opponent position and store its visit distribution as "
+        "the policy target there; the opponent still plays its own move. Gives "
+        "the policy head training signal one ply down, where the search reads "
+        "(research/step5-design.md). Needs record_opponent_positions.",
+    )
+
+    @model_validator(mode="after")
+    def _searching_needs_recording(self) -> SelfPlayConfig:
+        if self.search_opponent_positions and not self.record_opponent_positions:
+            msg = (
+                "selfplay.search_opponent_positions needs selfplay.record_opponent_positions: "
+                "the searched positions are recorded as training examples"
+            )
+            raise ValueError(msg)
+        return self
 
     @field_validator("opponents")
     @classmethod
@@ -182,6 +216,8 @@ class SelfPlayConfig(_Base):
             selfplay_games=self.games_per_generation,
             opponent_games=self.opponent_games,
             opponents=self.opponents,
+            record_opponent_positions=self.record_opponent_positions,
+            search_opponent_positions=self.search_opponent_positions,
         )
 
 
@@ -215,6 +251,14 @@ class TrainConfig(_Base):
     lr_floor_divisor: float = Field(default=20.0, ge=1.0, description="Cosine decays to lr/this")
     grad_clip: float = Field(default=5.0, gt=0.0, description="Global-norm clip")
     value_loss_weight: float = Field(default=1.0, ge=0.0)
+    opponent_policy_weight: float = Field(
+        default=1.0,
+        ge=0.0,
+        description="How many times a row recorded with a fixed opponent to move counts "
+        "in the policy loss, relative to a self-play row. 1 is a plain mean. Only rows "
+        "that carry a policy target count at all, so this needs "
+        "selfplay.search_opponent_positions to do anything.",
+    )
     ownership_loss_weight: float = Field(
         default=0.0,
         ge=0.0,

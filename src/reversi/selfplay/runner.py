@@ -276,6 +276,7 @@ def merge_summaries(results: list[WorkerResult]) -> SelfPlaySummary:
         merged.opponent_losses += counters.get("opponent_losses", 0)
         merged.opponent_draws += counters.get("opponent_draws", 0)
         merged.network_wipeouts += counters.get("network_wipeouts", 0)
+        merged.wipeouts += counters.get("wipeouts", 0)
     return merged
 
 

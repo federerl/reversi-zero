@@ -1,0 +1,66 @@
+{
+  "agent_specs": {
+    "control120": {
+      "checkpoint": "gen_00120.pt",
+      "generation": 120,
+      "kind": "alphazero",
+      "run_id": "control",
+      "simulations": 50
+    },
+    "greedy": {
+      "kind": "greedy"
+    }
+  },
+  "board_size": 8,
+  "kind": "round_robin",
+  "matchups": [
+    {
+      "a": "control120",
+      "b": "greedy",
+      "ci_high": 0.7360842846076572,
+      "ci_low": 0.6073198511602995,
+      "decisive": true,
+      "games": 200,
+      "record": "135W 65L 0D",
+      "score_a": 0.675,
+      "score_as_black": 0.66,
+      "score_as_white": 0.69
+    }
+  ],
+  "notes": "recheck at the Step 8 code: control120 vs greedy",
+  "protocol": {
+    "anchor": "control120",
+    "games_per_pair": 200,
+    "opening_plies": 4,
+    "seconds": 805.175579521805,
+    "seed": 20261025
+  },
+  "provenance": {
+    "git": {
+      "available": true,
+      "branch": "main",
+      "commit": "e75fa39b1cec182e1a33665c11e0ac120d809ee4",
+      "commit_short": "e75fa39",
+      "diff": null,
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dirty": true
+    }
+  },
+  "ratings": [
+    {
+      "ci_high": 0.0,
+      "ci_low": 0.0,
+      "elo": 0.0,
+      "games": 200,
+      "name": "control120"
+    },
+    {
+      "ci_high": -77.70444007898284,
+      "ci_low": -181.6986615816098,
+      "elo": -126.96527095113439,
+      "games": 200,
+      "name": "greedy"
+    }
+  ],
+  "report_version": 1
+}

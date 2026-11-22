@@ -1,0 +1,6197 @@
+{
+  "budgets": [
+    50,
+    256
+  ],
+  "games": "/home/liul4/reversi-runs/step3-eval",
+  "networks": {
+    "Bboth-s1": {
+      "checkpoint": "/home/liul4/reversi-runs/step3-Bboth-s1/checkpoints/gen_00140.pt",
+      "positions": [
+        {
+          "child_prior_greedy_total": 0.039245849260072255,
+          "child_prior_wiping_total": 0.039245849260072255,
+          "child_value_for_greedy": -0.9873647093772888,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            40
+          ],
+          "k": 1,
+          "played": 41,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.39396490960721164,
+          "prior_safe_max": 0.23173678213956206,
+          "prior_safe_total": 0.6060350903927884,
+          "safe_moves": [
+            9,
+            13,
+            31,
+            47
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 47,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 41,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 47,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 41,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 13,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 13,
+              "safe": true
+            }
+          },
+          "value": 0.9348110556602478
+        },
+        {
+          "child_prior_greedy_total": 0.05940092636209053,
+          "child_prior_wiping_total": 0.05940092636209053,
+          "child_value_for_greedy": -0.9569135904312134,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            53
+          ],
+          "k": 1,
+          "played": 29,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.2467968481924056,
+          "prior_safe_max": 0.1354320139519472,
+          "prior_safe_total": 0.7532031518075942,
+          "safe_moves": [
+            14,
+            17,
+            18,
+            19,
+            20,
+            30,
+            33,
+            38,
+            41,
+            49,
+            58,
+            59,
+            60
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 60,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 29,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 33,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 29,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 30,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 18,
+              "safe": true
+            }
+          },
+          "value": 0.8652824759483337
+        },
+        {
+          "child_prior_greedy_total": 0.07331703141995247,
+          "child_prior_wiping_total": 0.07331703141995247,
+          "child_value_for_greedy": -0.9835085272789001,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            8
+          ],
+          "k": 1,
+          "played": 17,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.10899815208619858,
+          "prior_safe_max": 0.07903171471820815,
+          "prior_safe_total": 0.07903171471820815,
+          "safe_moves": [
+            3
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 3,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 17,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 3,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 17,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 3,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 3,
+              "safe": true
+            }
+          },
+          "value": 0.9461605548858643
+        },
+        {
+          "child_prior_greedy_total": 0.037694438066753766,
+          "child_prior_wiping_total": 0.037694438066753766,
+          "child_value_for_greedy": -0.8811925053596497,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            12
+          ],
+          "k": 1,
+          "played": 20,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.2397033796543431,
+          "prior_safe_max": 0.26876988209484687,
+          "prior_safe_total": 0.5495829537780836,
+          "safe_moves": [
+            26,
+            40,
+            58,
+            60
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 26,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 26,
+              "safe": true
+            },
+            "real@256": {
+              "chosen": 26,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 20,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 58,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 26,
+              "safe": true
+            }
+          },
+          "value": 0.8430469036102295
+        },
+        {
+          "child_prior_greedy_total": 0.07283192247568507,
+          "child_prior_wiping_total": 0.07283192247568507,
+          "child_value_for_greedy": -0.9878504276275635,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            30
+          ],
+          "k": 1,
+          "played": 25,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.47269805064303416,
+          "prior_safe_max": 0.2264106573205144,
+          "prior_safe_total": 0.527301949356966,
+          "safe_moves": [
+            2,
+            47,
+            53,
+            57
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 53,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 25,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 53,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 25,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 53,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 47,
+              "safe": true
+            }
+          },
+          "value": 0.9479689598083496
+        },
+        {
+          "child_prior_greedy_total": 0.006452156906245123,
+          "child_prior_wiping_total": 0.006452156906245123,
+          "child_value_for_greedy": -0.9674485325813293,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            61
+          ],
+          "k": 1,
+          "played": 52,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.3577982155445802,
+          "prior_safe_max": 0.21419251970663977,
+          "prior_safe_total": 0.6422017844554198,
+          "safe_moves": [
+            10,
+            13,
+            16,
+            38
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 52,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 52,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 52,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 52,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 10,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 10,
+              "safe": true
+            }
+          },
+          "value": 0.8390988707542419
+        },
+        {
+          "child_prior_greedy_total": 0.03463852033524357,
+          "child_prior_wiping_total": 0.03463852033524357,
+          "child_value_for_greedy": -0.9997665286064148,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            41
+          ],
+          "k": 1,
+          "played": 42,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.270016731196512,
+          "prior_safe_max": 0.21193067811480742,
+          "prior_safe_total": 0.729983268803488,
+          "safe_moves": [
+            0,
+            5,
+            12,
+            26,
+            47,
+            59,
+            60
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 42,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 42,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 42,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 42,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 26,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 0,
+              "safe": true
+            }
+          },
+          "value": 0.9975895285606384
+        },
+        {
+          "child_prior_greedy_total": 0.04181444876706761,
+          "child_prior_wiping_total": 0.04181444876706761,
+          "child_value_for_greedy": -0.9831032156944275,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            47
+          ],
+          "k": 1,
+          "played": 46,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.26334986140601413,
+          "prior_safe_max": 0.20078182415940712,
+          "prior_safe_total": 0.3986333657515592,
+          "safe_moves": [
+            11,
+            15,
+            61
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 11,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 46,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 11,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 46,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 61,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 61,
+              "safe": true
+            }
+          },
+          "value": 0.8350270390510559
+        },
+        {
+          "child_prior_greedy_total": 0.06595308280207146,
+          "child_prior_wiping_total": 0.06595308280207146,
+          "child_value_for_greedy": -0.9841676354408264,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            4
+          ],
+          "k": 1,
+          "played": 12,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.48246281901292015,
+          "prior_safe_max": 0.1553251380437779,
+          "prior_safe_total": 0.21825447306326798,
+          "safe_moves": [
+            31,
+            49,
+            55
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 31,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 12,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 31,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 12,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 31,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 31,
+              "safe": true
+            }
+          },
+          "value": 0.8544276356697083
+        },
+        {
+          "child_prior_greedy_total": 0.0548135066912414,
+          "child_prior_wiping_total": 0.0548135066912414,
+          "child_value_for_greedy": -0.9956019520759583,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            59
+          ],
+          "k": 1,
+          "played": 51,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.34088648790201725,
+          "prior_safe_max": 0.20789758256021468,
+          "prior_safe_total": 0.35158055136565836,
+          "safe_moves": [
+            3,
+            6,
+            24
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 3,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 51,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 3,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 51,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 24,
+              "safe": true
+            }
+          },
+          "value": 0.9684287905693054
+        },
+        {
+          "child_prior_greedy_total": 0.0287882700478973,
+          "child_prior_wiping_total": 0.0287882700478973,
+          "child_value_for_greedy": -0.9676325917243958,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            14
+          ],
+          "k": 1,
+          "played": 21,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.34943295237388916,
+          "prior_safe_max": 0.24158621146459483,
+          "prior_safe_total": 0.44542137576588725,
+          "safe_moves": [
+            3,
+            38,
+            53
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 21,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 21,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 38,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 21,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 38,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 38,
+              "safe": true
+            }
+          },
+          "value": 0.877392053604126
+        },
+        {
+          "child_prior_greedy_total": 0.04688608754499004,
+          "child_prior_wiping_total": 0.04688608754499004,
+          "child_value_for_greedy": -0.9787542223930359,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            3,
+            9
+          ],
+          "k": 1,
+          "played": 12,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.3698390620388757,
+          "prior_safe_max": 0.259082163394564,
+          "prior_safe_total": 0.6301609379611244,
+          "safe_moves": [
+            24,
+            42,
+            46
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 12,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 12,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 12,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 12,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 42,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 42,
+              "safe": true
+            }
+          },
+          "value": 0.9003832340240479
+        },
+        {
+          "child_prior_greedy_total": 0.024947451316392366,
+          "child_prior_wiping_total": 0.024947451316392366,
+          "child_value_for_greedy": -0.9937454462051392,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            6
+          ],
+          "k": 1,
+          "played": 13,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.22185821512753628,
+          "prior_safe_max": 0.10855161255800921,
+          "prior_safe_total": 0.2931148562140054,
+          "safe_moves": [
+            3,
+            24,
+            59
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 13,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 13,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 13,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 13,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 3,
+              "safe": true
+            }
+          },
+          "value": 0.9743741750717163
+        },
+        {
+          "child_prior_greedy_total": 0.027890496952628005,
+          "child_prior_wiping_total": 0.027890496952628005,
+          "child_value_for_greedy": -0.9998287558555603,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            58
+          ],
+          "k": 1,
+          "played": 50,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.2355378183027691,
+          "prior_safe_max": 0.16524415757347657,
+          "prior_safe_total": 0.3960707450161802,
+          "safe_moves": [
+            13,
+            16,
+            38
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 50,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 50,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 50,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 50,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 38,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 13,
+              "safe": true
+            }
+          },
+          "value": 0.9940937161445618
+        },
+        {
+          "child_prior_greedy_total": 0.10806038443488865,
+          "child_prior_wiping_total": 0.10806038443488865,
+          "child_value_for_greedy": -0.9946238994598389,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            22
+          ],
+          "k": 1,
+          "played": 21,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.32301663129223346,
+          "prior_safe_max": 0.20909590822494448,
+          "prior_safe_total": 0.3655275144882869,
+          "safe_moves": [
+            5,
+            16,
+            51
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 51,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 21,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 51,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 21,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 51,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 5,
+              "safe": true
+            }
+          },
+          "value": 0.9358540773391724
+        },
+        {
+          "child_prior_greedy_total": 0.06083421411758121,
+          "child_prior_wiping_total": 0.06083421411758121,
+          "child_value_for_greedy": -0.9832800626754761,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            33
+          ],
+          "k": 1,
+          "played": 26,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.6765247302709426,
+          "prior_safe_max": 0.16066710202315335,
+          "prior_safe_total": 0.32347526972905744,
+          "safe_moves": [
+            14,
+            46,
+            60
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 60,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 26,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 60,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 26,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 60,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 60,
+              "safe": true
+            }
+          },
+          "value": 0.8855130672454834
+        },
+        {
+          "child_prior_greedy_total": 0.01311160321104378,
+          "child_prior_wiping_total": 0.01311160321104378,
+          "child_value_for_greedy": -0.9752272963523865,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            4
+          ],
+          "k": 1,
+          "played": 25,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.4073348880866108,
+          "prior_safe_max": 0.31541246567708453,
+          "prior_safe_total": 0.5926651119133893,
+          "safe_moves": [
+            38,
+            59
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 25,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 25,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 25,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 25,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 38,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 38,
+              "safe": true
+            }
+          },
+          "value": 0.900233268737793
+        },
+        {
+          "child_prior_greedy_total": 0.06766089497804031,
+          "child_prior_wiping_total": 0.06766089497804031,
+          "child_value_for_greedy": -0.9994295239448547,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            61
+          ],
+          "k": 1,
+          "played": 53,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.1940465144410617,
+          "prior_safe_max": 0.1726290373380052,
+          "prior_safe_total": 0.5744139118162812,
+          "safe_moves": [
+            2,
+            15,
+            24,
+            31,
+            47,
+            57
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 53,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 53,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 24,
+              "safe": true
+            }
+          },
+          "value": 0.9966121315956116
+        },
+        {
+          "child_prior_greedy_total": 0.08648237123679642,
+          "child_prior_wiping_total": 0.08648237123679642,
+          "child_value_for_greedy": -0.9254609942436218,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            30
+          ],
+          "k": 1,
+          "played": 29,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.27525339500449314,
+          "prior_safe_max": 0.23466514023481125,
+          "prior_safe_total": 0.5073064094985344,
+          "safe_moves": [
+            24,
+            40,
+            44,
+            58
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 44,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 29,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 44,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 29,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 44,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 44,
+              "safe": true
+            }
+          },
+          "value": 0.7632797956466675
+        },
+        {
+          "child_prior_greedy_total": 0.044705321484126335,
+          "child_prior_wiping_total": 0.044705321484126335,
+          "child_value_for_greedy": -0.9902223944664001,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            54
+          ],
+          "k": 1,
+          "played": 45,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.23319716751436978,
+          "prior_safe_max": 0.01051124003469102,
+          "prior_safe_total": 0.01051124003469102,
+          "safe_moves": [
+            48
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 45,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 45,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 45,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 45,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 48,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 48,
+              "safe": true
+            }
+          },
+          "value": 0.8733859658241272
+        },
+        {
+          "child_prior_greedy_total": 0.032478419653298514,
+          "child_prior_wiping_total": 0.032478419653298514,
+          "child_value_for_greedy": -0.9998100996017456,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            49
+          ],
+          "k": 1,
+          "played": 41,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.45642699275448145,
+          "prior_safe_max": 0.3504490026341811,
+          "prior_safe_total": 0.5435730072455186,
+          "safe_moves": [
+            1,
+            23,
+            62
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 23,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 41,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 23,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 41,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 23,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 23,
+              "safe": true
+            }
+          },
+          "value": 0.9760740995407104
+        },
+        {
+          "child_prior_greedy_total": 0.014940330692802607,
+          "child_prior_wiping_total": 0.014940330692802607,
+          "child_value_for_greedy": -0.9435802698135376,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            10
+          ],
+          "k": 1,
+          "played": 37,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.31349853236375447,
+          "prior_safe_max": 0.3065732652335364,
+          "prior_safe_total": 0.6865014676362455,
+          "safe_moves": [
+            5,
+            13,
+            21,
+            33,
+            38,
+            59
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 37,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 21,
+              "safe": true
+            },
+            "real@256": {
+              "chosen": 37,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 37,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 38,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 21,
+              "safe": true
+            }
+          },
+          "value": 0.8796237707138062
+        },
+        {
+          "child_prior_greedy_total": 0.013784666204384571,
+          "child_prior_wiping_total": 0.013784666204384571,
+          "child_value_for_greedy": -0.7688242197036743,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            38
+          ],
+          "k": 1,
+          "played": 37,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.24888054980244403,
+          "prior_safe_max": 0.4439700257788016,
+          "prior_safe_total": 0.751119450197556,
+          "safe_moves": [
+            9,
+            11,
+            17,
+            21,
+            33,
+            43,
+            53,
+            59
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 43,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 43,
+              "safe": true
+            },
+            "real@256": {
+              "chosen": 37,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 37,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 11,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 17,
+              "safe": true
+            }
+          },
+          "value": 0.5734754800796509
+        },
+        {
+          "child_prior_greedy_total": 0.052268824617598776,
+          "child_prior_wiping_total": 0.052268824617598776,
+          "child_value_for_greedy": -0.9999167323112488,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            2
+          ],
+          "k": 1,
+          "played": 34,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.6606974690884775,
+          "prior_safe_max": 0.26224322692147317,
+          "prior_safe_total": 0.33930253091152235,
+          "safe_moves": [
+            24,
+            55
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 34,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 34,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 24,
+              "safe": true
+            }
+          },
+          "value": 0.9826146364212036
+        },
+        {
+          "child_prior_greedy_total": 0.08648237123679642,
+          "child_prior_wiping_total": 0.08648237123679642,
+          "child_value_for_greedy": -0.9254609942436218,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            30
+          ],
+          "k": 1,
+          "played": 29,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.27525339500449314,
+          "prior_safe_max": 0.23466514023481125,
+          "prior_safe_total": 0.5073064094985344,
+          "safe_moves": [
+            24,
+            40,
+            44,
+            58
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 44,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 29,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 44,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 29,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 44,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 44,
+              "safe": true
+            }
+          },
+          "value": 0.7632797956466675
+        },
+        {
+          "child_prior_greedy_total": 0.07874126214216895,
+          "child_prior_wiping_total": 0.07874126214216895,
+          "child_value_for_greedy": -0.9998908638954163,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            10
+          ],
+          "k": 1,
+          "played": 18,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.2942837674462147,
+          "prior_safe_max": 0.18425548678347523,
+          "prior_safe_total": 0.4668411762451574,
+          "safe_moves": [
+            13,
+            38,
+            61
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 50,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 18,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 50,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 18,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 38,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 13,
+              "safe": true
+            }
+          },
+          "value": 0.9929385185241699
+        },
+        {
+          "child_prior_greedy_total": 0.1368014532715413,
+          "child_prior_wiping_total": 0.1368014532715413,
+          "child_value_for_greedy": -0.9979706406593323,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            49
+          ],
+          "k": 1,
+          "played": 42,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.24806881846571263,
+          "prior_safe_max": 0.13320198736712865,
+          "prior_safe_total": 0.19360980688721707,
+          "safe_moves": [
+            7,
+            31
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 31,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 42,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 31,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 42,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 7,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 7,
+              "safe": true
+            }
+          },
+          "value": 0.9875345826148987
+        },
+        {
+          "child_prior_greedy_total": 0.01027043773703524,
+          "child_prior_wiping_total": 0.01027043773703524,
+          "child_value_for_greedy": -0.9907070398330688,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            17
+          ],
+          "k": 1,
+          "played": 18,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.2989415559513069,
+          "prior_safe_max": 0.2422131064884424,
+          "prior_safe_total": 0.7010584440486931,
+          "safe_moves": [
+            12,
+            22,
+            29,
+            40,
+            41,
+            42,
+            52,
+            53
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 18,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 18,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 18,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 18,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 29,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 12,
+              "safe": true
+            }
+          },
+          "value": 0.9843581914901733
+        },
+        {
+          "child_prior_greedy_total": 0.023859505636210462,
+          "child_prior_wiping_total": 0.023859505636210462,
+          "child_value_for_greedy": -0.9859734773635864,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            61
+          ],
+          "k": 1,
+          "played": 21,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.35942573376906367,
+          "prior_safe_max": 0.22478531513218553,
+          "prior_safe_total": 0.6405742662309364,
+          "safe_moves": [
+            17,
+            39,
+            50
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 21,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 21,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 21,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 21,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 17,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 17,
+              "safe": true
+            }
+          },
+          "value": 0.9287081360816956
+        },
+        {
+          "child_prior_greedy_total": 0.07538000528508876,
+          "child_prior_wiping_total": 0.07538000528508876,
+          "child_value_for_greedy": -0.9768445491790771,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            25
+          ],
+          "k": 1,
+          "played": 26,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.2365066903623165,
+          "prior_safe_max": 0.1825987978440571,
+          "prior_safe_total": 0.406664491159059,
+          "safe_moves": [
+            31,
+            47,
+            50
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 50,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 26,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 50,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 26,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 47,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 31,
+              "safe": true
+            }
+          },
+          "value": 0.9337099194526672
+        },
+        {
+          "child_prior_greedy_total": 0.06693185621527259,
+          "child_prior_wiping_total": 0.06693185621527259,
+          "child_value_for_greedy": -0.9653295278549194,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            24
+          ],
+          "k": 1,
+          "played": 25,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.19580053051369234,
+          "prior_safe_max": 0.11029494214948714,
+          "prior_safe_total": 0.1212538781167418,
+          "safe_moves": [
+            4,
+            55
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 42,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 30,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 42,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 25,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 4,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 4,
+              "safe": true
+            }
+          },
+          "value": 0.8987169861793518
+        },
+        {
+          "child_prior_greedy_total": 0.037694438066753766,
+          "child_prior_wiping_total": 0.037694438066753766,
+          "child_value_for_greedy": -0.8811925053596497,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            12
+          ],
+          "k": 1,
+          "played": 20,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.2397033796543431,
+          "prior_safe_max": 0.26876988209484687,
+          "prior_safe_total": 0.5495829537780836,
+          "safe_moves": [
+            26,
+            40,
+            58,
+            60
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 26,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 26,
+              "safe": true
+            },
+            "real@256": {
+              "chosen": 26,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 20,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 58,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 26,
+              "safe": true
+            }
+          },
+          "value": 0.8430469036102295
+        },
+        {
+          "child_prior_greedy_total": 0.08294254765159954,
+          "child_prior_wiping_total": 0.08294254765159954,
+          "child_value_for_greedy": -0.8285372853279114,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            53
+          ],
+          "k": 1,
+          "played": 46,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.5251245167332882,
+          "prior_safe_max": 0.2191919138580221,
+          "prior_safe_total": 0.4748754832667118,
+          "safe_moves": [
+            12,
+            17,
+            30
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 12,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 46,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 12,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 46,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 30,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 30,
+              "safe": true
+            }
+          },
+          "value": 0.8041286468505859
+        },
+        {
+          "child_prior_greedy_total": 0.011126777813085085,
+          "child_prior_wiping_total": 0.011126777813085085,
+          "child_value_for_greedy": -0.9015787243843079,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            50
+          ],
+          "k": 1,
+          "played": 42,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.26634693249485186,
+          "prior_safe_max": 0.22528557931322804,
+          "prior_safe_total": 0.7336530675051481,
+          "safe_moves": [
+            2,
+            22,
+            32,
+            45
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 42,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 42,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 45,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 42,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 45,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 45,
+              "safe": true
+            }
+          },
+          "value": 0.9012106657028198
+        },
+        {
+          "child_prior_greedy_total": 0.011392729534400809,
+          "child_prior_wiping_total": 0.011392729534400809,
+          "child_value_for_greedy": -0.9803251028060913,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            1
+          ],
+          "k": 1,
+          "played": 10,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.2889755174371932,
+          "prior_safe_max": 0.17917453782064433,
+          "prior_safe_total": 0.40656286235472083,
+          "safe_moves": [
+            4,
+            24,
+            60
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 10,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 10,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 10,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 10,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 4,
+              "safe": true
+            }
+          },
+          "value": 0.9637788534164429
+        },
+        {
+          "child_prior_greedy_total": 0.052395370716761584,
+          "child_prior_wiping_total": 0.052395370716761584,
+          "child_value_for_greedy": -0.994170606136322,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            32
+          ],
+          "k": 1,
+          "played": 33,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.2110935994791472,
+          "prior_safe_max": 0.17417855420947143,
+          "prior_safe_total": 0.33435589549947253,
+          "safe_moves": [
+            39,
+            60
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 22,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 22,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 50,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 33,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 39,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 39,
+              "safe": true
+            }
+          },
+          "value": 0.9652067422866821
+        },
+        {
+          "child_prior_greedy_total": 0.017679563463467097,
+          "child_prior_wiping_total": 0.017679563463467097,
+          "child_value_for_greedy": -0.9968722462654114,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            5
+          ],
+          "k": 1,
+          "played": 13,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.319333888770281,
+          "prior_safe_max": 0.1972356096819449,
+          "prior_safe_total": 0.4601913131059202,
+          "safe_moves": [
+            11,
+            25,
+            50
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 13,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 13,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 13,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 13,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 11,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 11,
+              "safe": true
+            }
+          },
+          "value": 0.9662377834320068
+        },
+        {
+          "child_prior_greedy_total": 0.08294254765159954,
+          "child_prior_wiping_total": 0.08294254765159954,
+          "child_value_for_greedy": -0.8285372853279114,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            53
+          ],
+          "k": 1,
+          "played": 46,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.5251245167332882,
+          "prior_safe_max": 0.2191919138580221,
+          "prior_safe_total": 0.4748754832667118,
+          "safe_moves": [
+            12,
+            17,
+            30
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 12,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 46,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 12,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 46,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 30,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 30,
+              "safe": true
+            }
+          },
+          "value": 0.8041286468505859
+        },
+        {
+          "child_prior_greedy_total": 0.08041823997270976,
+          "child_prior_wiping_total": 0.08041823997270976,
+          "child_value_for_greedy": -0.9258121848106384,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            11
+          ],
+          "k": 1,
+          "played": 19,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.28110590833257804,
+          "prior_safe_max": 0.10183263270479948,
+          "prior_safe_total": 0.10183263270479948,
+          "safe_moves": [
+            53
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 53,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 19,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 21,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 19,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 53,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 53,
+              "safe": true
+            }
+          },
+          "value": 0.7020995616912842
+        },
+        {
+          "child_prior_greedy_total": 0.04190237691277435,
+          "child_prior_wiping_total": 0.04190237691277435,
+          "child_value_for_greedy": -0.9980165362358093,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            33
+          ],
+          "k": 1,
+          "played": 42,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.42878362607389603,
+          "prior_safe_max": 0.19170063303286905,
+          "prior_safe_total": 0.571216373926104,
+          "safe_moves": [
+            9,
+            10,
+            11,
+            12,
+            21,
+            22,
+            31,
+            33,
+            50,
+            52,
+            53,
+            59,
+            63
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 21,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 42,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 21,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 42,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 21,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 10,
+              "safe": true
+            }
+          },
+          "value": 0.9926812052726746
+        },
+        {
+          "child_prior_greedy_total": 0.021512989999915057,
+          "child_prior_wiping_total": 0.021512989999915057,
+          "child_value_for_greedy": -0.9954227209091187,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            8
+          ],
+          "k": 1,
+          "played": 17,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.18870749241791365,
+          "prior_safe_max": 0.13395697368056464,
+          "prior_safe_total": 0.32865349288669654,
+          "safe_moves": [
+            3,
+            39,
+            59
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 17,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 17,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 17,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 17,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 59,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 39,
+              "safe": true
+            }
+          },
+          "value": 0.9757183194160461
+        },
+        {
+          "child_prior_greedy_total": 0.010339301316707768,
+          "child_prior_wiping_total": 0.010339301316707768,
+          "child_value_for_greedy": -0.9506186842918396,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            23
+          ],
+          "k": 1,
+          "played": 44,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.4193124171178703,
+          "prior_safe_max": 0.24130740831789246,
+          "prior_safe_total": 0.5806875828821296,
+          "safe_moves": [
+            12,
+            24,
+            46
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 44,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 44,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 44,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 44,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 12,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 46,
+              "safe": true
+            }
+          },
+          "value": 0.9258567094802856
+        },
+        {
+          "child_prior_greedy_total": 0.014982310964440608,
+          "child_prior_wiping_total": 0.014982310964440608,
+          "child_value_for_greedy": -0.9265380501747131,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            31
+          ],
+          "k": 1,
+          "played": 38,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.40551673594807264,
+          "prior_safe_max": 0.3262494954452116,
+          "prior_safe_total": 0.5944832640519273,
+          "safe_moves": [
+            4,
+            18,
+            43
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 38,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 38,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 18,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 38,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 18,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 18,
+              "safe": true
+            }
+          },
+          "value": 0.9320241212844849
+        },
+        {
+          "child_prior_greedy_total": 0.05598553666588811,
+          "child_prior_wiping_total": 0.05598553666588811,
+          "child_value_for_greedy": -0.6643067598342896,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            10
+          ],
+          "k": 1,
+          "played": 34,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.7388588230737244,
+          "prior_safe_max": 0.13650749015687205,
+          "prior_safe_total": 0.26114117692627564,
+          "safe_moves": [
+            32,
+            45
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 45,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 34,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 45,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 34,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 45,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 45,
+              "safe": true
+            }
+          },
+          "value": 0.5469898581504822
+        },
+        {
+          "child_prior_greedy_total": 0.032412977030188944,
+          "child_prior_wiping_total": 0.032412977030188944,
+          "child_value_for_greedy": -0.9826744198799133,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            47
+          ],
+          "k": 1,
+          "played": 46,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.22851133598605083,
+          "prior_safe_max": 0.13915625668449932,
+          "prior_safe_total": 0.3454635471400544,
+          "safe_moves": [
+            8,
+            23,
+            60,
+            62
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 46,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 46,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 46,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 46,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 23,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 60,
+              "safe": true
+            }
+          },
+          "value": 0.9555279016494751
+        },
+        {
+          "child_prior_greedy_total": 0.07797457614469852,
+          "child_prior_wiping_total": 0.07797457614469852,
+          "child_value_for_greedy": -0.9582868814468384,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            46,
+            52
+          ],
+          "k": 1,
+          "played": 45,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.3360802989942777,
+          "prior_safe_max": 0.22576213840325343,
+          "prior_safe_total": 0.542141196109182,
+          "safe_moves": [
+            19,
+            25,
+            29
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 29,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 45,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 19,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 45,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 19,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 29,
+              "safe": true
+            }
+          },
+          "value": 0.8274639248847961
+        },
+        {
+          "child_prior_greedy_total": 0.03227883330591229,
+          "child_prior_wiping_total": 0.03227883330591229,
+          "child_value_for_greedy": -0.9778028130531311,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            51
+          ],
+          "k": 1,
+          "played": 42,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.5630849833840279,
+          "prior_safe_max": 0.2685899047614316,
+          "prior_safe_total": 0.4369150166159721,
+          "safe_moves": [
+            12,
+            17,
+            23
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 12,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 42,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 12,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 42,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 12,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 12,
+              "safe": true
+            }
+          },
+          "value": 0.9470579624176025
+        },
+        {
+          "child_prior_greedy_total": 0.08500830939167711,
+          "child_prior_wiping_total": 0.08500830939167711,
+          "child_value_for_greedy": -0.9990485310554504,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            17
+          ],
+          "k": 1,
+          "played": 18,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.3001565850063258,
+          "prior_safe_max": 0.2236020330821499,
+          "prior_safe_total": 0.4602140009439537,
+          "safe_moves": [
+            2,
+            48,
+            60
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 2,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 18,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 60,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 18,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 60,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 2,
+              "safe": true
+            }
+          },
+          "value": 0.9935203790664673
+        },
+        {
+          "child_prior_greedy_total": 0.027263365486454277,
+          "child_prior_wiping_total": 0.027263365486454277,
+          "child_value_for_greedy": -0.998685359954834,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            15
+          ],
+          "k": 1,
+          "played": 22,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.19281249590208407,
+          "prior_safe_max": 0.12104698033022908,
+          "prior_safe_total": 0.3331579319862309,
+          "safe_moves": [
+            47,
+            57,
+            59,
+            61
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 22,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 22,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 22,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 22,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 59,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 59,
+              "safe": true
+            }
+          },
+          "value": 0.9929556250572205
+        },
+        {
+          "child_prior_greedy_total": 0.08294254765159954,
+          "child_prior_wiping_total": 0.08294254765159954,
+          "child_value_for_greedy": -0.8285372853279114,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            53
+          ],
+          "k": 1,
+          "played": 46,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.5251245167332882,
+          "prior_safe_max": 0.2191919138580221,
+          "prior_safe_total": 0.4748754832667118,
+          "safe_moves": [
+            12,
+            17,
+            30
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 12,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 46,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 12,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 46,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 30,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 30,
+              "safe": true
+            }
+          },
+          "value": 0.8041286468505859
+        },
+        {
+          "child_prior_greedy_total": 0.08309409048297123,
+          "child_prior_wiping_total": 0.08309409048297123,
+          "child_value_for_greedy": -0.9942804574966431,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            52
+          ],
+          "k": 1,
+          "played": 44,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.2615909262258947,
+          "prior_safe_max": 0.21441495547433537,
+          "prior_safe_total": 0.7384090737741053,
+          "safe_moves": [
+            10,
+            11,
+            12,
+            14,
+            22,
+            25,
+            30,
+            42,
+            46
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 42,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 44,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 42,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 44,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 30,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 11,
+              "safe": true
+            }
+          },
+          "value": 0.9899095296859741
+        },
+        {
+          "child_prior_greedy_total": 0.07600407213893823,
+          "child_prior_wiping_total": 0.07600407213893823,
+          "child_value_for_greedy": -0.9990037679672241,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            55
+          ],
+          "k": 1,
+          "played": 46,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.21129720171426014,
+          "prior_safe_max": 0.1158921151669591,
+          "prior_safe_total": 0.28840813546642097,
+          "safe_moves": [
+            1,
+            3,
+            33
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 33,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 46,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 33,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 46,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 33,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 1,
+              "safe": true
+            }
+          },
+          "value": 0.9972726106643677
+        },
+        {
+          "child_prior_greedy_total": 0.038997952978639054,
+          "child_prior_wiping_total": 0.038997952978639054,
+          "child_value_for_greedy": -0.9992785453796387,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            61
+          ],
+          "k": 1,
+          "played": 29,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.4826628326147671,
+          "prior_safe_max": 0.23319936213123071,
+          "prior_safe_total": 0.5173371673852328,
+          "safe_moves": [
+            0,
+            8,
+            39,
+            40
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 0,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 29,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 0,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 29,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 0,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 0,
+              "safe": true
+            }
+          },
+          "value": 0.9901893734931946
+        },
+        {
+          "child_prior_greedy_total": 0.11565732011318258,
+          "child_prior_wiping_total": 0.11565732011318258,
+          "child_value_for_greedy": -0.9993506073951721,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            24
+          ],
+          "k": 1,
+          "played": 25,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.20111742298078883,
+          "prior_safe_max": 0.15412606659684094,
+          "prior_safe_total": 0.33418383473452506,
+          "safe_moves": [
+            4,
+            31,
+            56
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 4,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 25,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 4,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 25,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 31,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 4,
+              "safe": true
+            }
+          },
+          "value": 0.9983147978782654
+        },
+        {
+          "child_prior_greedy_total": 0.03365239976505571,
+          "child_prior_wiping_total": 0.03365239976505571,
+          "child_value_for_greedy": -0.7515136003494263,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            52
+          ],
+          "k": 1,
+          "played": 44,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.24152718283820584,
+          "prior_safe_max": 0.10491317169799544,
+          "prior_safe_total": 0.10491317169799544,
+          "safe_moves": [
+            10
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 25,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 25,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 25,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 44,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 10,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 10,
+              "safe": true
+            }
+          },
+          "value": 0.751086950302124
+        },
+        {
+          "child_prior_greedy_total": 0.0477575398328234,
+          "child_prior_wiping_total": 0.0477575398328234,
+          "child_value_for_greedy": -0.9814971089363098,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            14
+          ],
+          "k": 1,
+          "played": 21,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.1721773424312649,
+          "prior_safe_max": 0.12356324814424265,
+          "prior_safe_total": 0.12356324814424265,
+          "safe_moves": [
+            17
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 17,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 33,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 17,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 21,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 17,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 17,
+              "safe": true
+            }
+          },
+          "value": 0.8025721311569214
+        },
+        {
+          "child_prior_greedy_total": 0.03358635660128027,
+          "child_prior_wiping_total": 0.03358635660128027,
+          "child_value_for_greedy": -0.9966539740562439,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            59
+          ],
+          "k": 1,
+          "played": 50,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.25044909281529154,
+          "prior_safe_max": 0.24389965312583423,
+          "prior_safe_total": 0.7495509071847083,
+          "safe_moves": [
+            11,
+            15,
+            20,
+            25,
+            31,
+            40,
+            47,
+            59
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 50,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 50,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 59,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 50,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 20,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 20,
+              "safe": true
+            }
+          },
+          "value": 0.9783310890197754
+        },
+        {
+          "child_prior_greedy_total": 0.06249685110727954,
+          "child_prior_wiping_total": 0.06249685110727954,
+          "child_value_for_greedy": -0.9777185320854187,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            30
+          ],
+          "k": 1,
+          "played": 29,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.4134260558599695,
+          "prior_safe_max": 0.3080680473709305,
+          "prior_safe_total": 0.3881961549782309,
+          "safe_moves": [
+            13,
+            43
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 43,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 29,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 43,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 29,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 13,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 13,
+              "safe": true
+            }
+          },
+          "value": 0.816559910774231
+        },
+        {
+          "child_prior_greedy_total": 0.038004455088725665,
+          "child_prior_wiping_total": 0.038004455088725665,
+          "child_value_for_greedy": -0.9856770038604736,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            24
+          ],
+          "k": 1,
+          "played": 25,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.3650242072373568,
+          "prior_safe_max": 0.1443691126702934,
+          "prior_safe_total": 0.1443691126702934,
+          "safe_moves": [
+            10
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 10,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 25,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 10,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 25,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 10,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 10,
+              "safe": true
+            }
+          },
+          "value": 0.9290030002593994
+        },
+        {
+          "child_prior_greedy_total": 0.0535569103779897,
+          "child_prior_wiping_total": 0.0535569103779897,
+          "child_value_for_greedy": -0.9904034733772278,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            24
+          ],
+          "k": 1,
+          "played": 25,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.16255898738462,
+          "prior_safe_max": 0.03362555329662663,
+          "prior_safe_total": 0.03362555329662663,
+          "safe_moves": [
+            7
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 42,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 25,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 42,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 25,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 7,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 7,
+              "safe": true
+            }
+          },
+          "value": 0.9882863759994507
+        }
+      ],
+      "summary": {
+        "1": {
+          "child_prior_wiping_below_5pct": 0.5333333333333333,
+          "child_prior_wiping_median": 0.04579570451455819,
+          "child_value_for_greedy_median": -0.9833942949771881,
+          "child_wiping_has_top_prior": 0.0,
+          "played_has_top_prior": 0.8333333333333334,
+          "positions": 60,
+          "prior_played_median": 0.291629642441704,
+          "prior_safe_total_median": 0.46020265702493696,
+          "real_search_replayed_the_record": 1.0,
+          "searches": {
+            "policy_only@256": {
+              "safe_count": 35,
+              "safe_share": 0.5833333333333334
+            },
+            "policy_only@50": {
+              "safe_count": 4,
+              "safe_share": 0.06666666666666667
+            },
+            "real@256": {
+              "safe_count": 37,
+              "safe_share": 0.6166666666666667
+            },
+            "real@50": {
+              "safe_count": 0,
+              "safe_share": 0.0
+            },
+            "value_only@256": {
+              "safe_count": 60,
+              "safe_share": 1.0
+            },
+            "value_only@50": {
+              "safe_count": 60,
+              "safe_share": 1.0
+            }
+          },
+          "value_median": 0.932867020368576
+        }
+      },
+      "wipeouts": 61
+    },
+    "Bboth-s2": {
+      "checkpoint": "/home/liul4/reversi-runs/step3-Bboth-s2/checkpoints/gen_00140.pt",
+      "positions": [
+        {
+          "child_prior_greedy_total": 0.06543173066826197,
+          "child_prior_wiping_total": 0.06543173066826197,
+          "child_value_for_greedy": -0.9992774724960327,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            57
+          ],
+          "k": 1,
+          "played": 50,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.09282584133344512,
+          "prior_safe_max": 0.08112633242434834,
+          "prior_safe_total": 0.11849004359731387,
+          "safe_moves": [
+            0,
+            63
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 0,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 50,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 0,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 50,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 0,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 0,
+              "safe": true
+            }
+          },
+          "value": 0.9988420605659485
+        },
+        {
+          "child_prior_greedy_total": 0.13348631077642242,
+          "child_prior_wiping_total": 0.13348631077642242,
+          "child_value_for_greedy": -0.9973305463790894,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            50
+          ],
+          "k": 1,
+          "played": 42,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.3704335967470803,
+          "prior_safe_max": 0.16276873282780546,
+          "prior_safe_total": 0.3527792206868825,
+          "safe_moves": [
+            2,
+            8,
+            24
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 42,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 53,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 42,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 24,
+              "safe": true
+            }
+          },
+          "value": 0.9607178568840027
+        },
+        {
+          "child_prior_greedy_total": 0.0626464892434738,
+          "child_prior_wiping_total": 0.0626464892434738,
+          "child_value_for_greedy": -0.9925380349159241,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            54
+          ],
+          "k": 1,
+          "played": 45,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.1379487878853818,
+          "prior_safe_max": 0.12461546960772008,
+          "prior_safe_total": 0.23121670538732406,
+          "safe_moves": [
+            24,
+            48,
+            59
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 59,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 45,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 59,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 45,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 24,
+              "safe": true
+            }
+          },
+          "value": 0.9720807671546936
+        },
+        {
+          "child_prior_greedy_total": 0.027018932642245183,
+          "child_prior_wiping_total": 0.027018932642245183,
+          "child_value_for_greedy": -0.9950420260429382,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            50
+          ],
+          "k": 1,
+          "played": 43,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.20576166410000069,
+          "prior_safe_max": 0.15263030233939473,
+          "prior_safe_total": 0.39143491954819476,
+          "safe_moves": [
+            2,
+            5,
+            15,
+            31
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 43,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 43,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 43,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 43,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 2,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 2,
+              "safe": true
+            }
+          },
+          "value": 0.9924012422561646
+        },
+        {
+          "child_prior_greedy_total": 0.009452112087794135,
+          "child_prior_wiping_total": 0.009452112087794135,
+          "child_value_for_greedy": -0.9781648516654968,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            39
+          ],
+          "k": 1,
+          "played": 38,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.200827089146982,
+          "prior_safe_max": 0.22272928130550362,
+          "prior_safe_total": 0.799172910853018,
+          "safe_moves": [
+            6,
+            10,
+            16,
+            32,
+            61
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 10,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 10,
+              "safe": true
+            },
+            "real@256": {
+              "chosen": 38,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 38,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 10,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 10,
+              "safe": true
+            }
+          },
+          "value": 0.9490321278572083
+        },
+        {
+          "child_prior_greedy_total": 0.08714903137061594,
+          "child_prior_wiping_total": 0.08714903137061594,
+          "child_value_for_greedy": -0.9970911145210266,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            31
+          ],
+          "k": 1,
+          "played": 30,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.19042855411823267,
+          "prior_safe_max": 0.14198566645536032,
+          "prior_safe_total": 0.403114812889548,
+          "safe_moves": [
+            8,
+            24,
+            40,
+            58
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 58,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 30,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 58,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 30,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 58,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 40,
+              "safe": true
+            }
+          },
+          "value": 0.9952405691146851
+        },
+        {
+          "child_prior_greedy_total": 0.01355915033137675,
+          "child_prior_wiping_total": 0.01355915033137675,
+          "child_value_for_greedy": -0.9538671970367432,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            61
+          ],
+          "k": 1,
+          "played": 52,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.3548693541043032,
+          "prior_safe_max": 0.19362094315194953,
+          "prior_safe_total": 0.6451306458956967,
+          "safe_moves": [
+            10,
+            13,
+            16,
+            38
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 52,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 52,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 52,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 52,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 10,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 10,
+              "safe": true
+            }
+          },
+          "value": 0.8575326800346375
+        },
+        {
+          "child_prior_greedy_total": 0.018282530418582098,
+          "child_prior_wiping_total": 0.018282530418582098,
+          "child_value_for_greedy": -0.8796470761299133,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            47
+          ],
+          "k": 1,
+          "played": 38,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.27524153442611154,
+          "prior_safe_max": 0.33688421058760926,
+          "prior_safe_total": 0.7247584655738885,
+          "safe_moves": [
+            2,
+            41,
+            44
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 41,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 41,
+              "safe": true
+            },
+            "real@256": {
+              "chosen": 44,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 38,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 44,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 2,
+              "safe": true
+            }
+          },
+          "value": 0.8980882167816162
+        },
+        {
+          "child_prior_greedy_total": 0.06655418650644053,
+          "child_prior_wiping_total": 0.06655418650644053,
+          "child_value_for_greedy": -0.9990236163139343,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            14
+          ],
+          "k": 1,
+          "played": 21,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.27991833157283275,
+          "prior_safe_max": 0.12064192946166293,
+          "prior_safe_total": 0.3597098031212229,
+          "safe_moves": [
+            3,
+            8,
+            32,
+            59
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 59,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 21,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 59,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 21,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 32,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 3,
+              "safe": true
+            }
+          },
+          "value": 0.9905259609222412
+        },
+        {
+          "child_prior_greedy_total": 0.07203659711061992,
+          "child_prior_wiping_total": 0.07203659711061992,
+          "child_value_for_greedy": -0.9933350086212158,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            51
+          ],
+          "k": 1,
+          "played": 43,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.149518243970558,
+          "prior_safe_max": 0.12298624748202597,
+          "prior_safe_total": 0.2942427294179035,
+          "safe_moves": [
+            0,
+            3,
+            24
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 43,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 43,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 0,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 3,
+              "safe": true
+            }
+          },
+          "value": 0.9822510480880737
+        },
+        {
+          "child_prior_greedy_total": 0.09409763054618864,
+          "child_prior_wiping_total": 0.09409763054618864,
+          "child_value_for_greedy": -0.9750327467918396,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            32
+          ],
+          "k": 1,
+          "played": 33,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.17902171891989677,
+          "prior_safe_max": 0.12336481609885463,
+          "prior_safe_total": 0.12336481609885463,
+          "safe_moves": [
+            60
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 50,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 33,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 50,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 33,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 60,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 60,
+              "safe": true
+            }
+          },
+          "value": 0.7785542011260986
+        },
+        {
+          "child_prior_greedy_total": 0.031486389894151846,
+          "child_prior_wiping_total": 0.031486389894151846,
+          "child_value_for_greedy": -0.9996065497398376,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            9
+          ],
+          "k": 1,
+          "played": 18,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.26332487670311916,
+          "prior_safe_max": 0.1814884232900495,
+          "prior_safe_total": 0.37701576825291744,
+          "safe_moves": [
+            34,
+            50,
+            63
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 18,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 18,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 34,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 18,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 63,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 34,
+              "safe": true
+            }
+          },
+          "value": 0.9678896069526672
+        },
+        {
+          "child_prior_greedy_total": 0.046579065742361,
+          "child_prior_wiping_total": 0.046579065742361,
+          "child_value_for_greedy": -0.9897690415382385,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            58
+          ],
+          "k": 1,
+          "played": 50,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.4129636183629026,
+          "prior_safe_max": 0.23110546251432923,
+          "prior_safe_total": 0.5870363816370974,
+          "safe_moves": [
+            2,
+            13,
+            38
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 38,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 50,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 13,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 50,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 13,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 13,
+              "safe": true
+            }
+          },
+          "value": 0.9907148480415344
+        },
+        {
+          "child_prior_greedy_total": 0.07541597440382876,
+          "child_prior_wiping_total": 0.07541597440382876,
+          "child_value_for_greedy": -0.9922491312026978,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            12
+          ],
+          "k": 1,
+          "played": 19,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.3607150996351241,
+          "prior_safe_max": 0.20998970778127626,
+          "prior_safe_total": 0.44931828860637935,
+          "safe_moves": [
+            5,
+            39,
+            49
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 39,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 19,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 39,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 19,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 39,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 39,
+              "safe": true
+            }
+          },
+          "value": 0.944329559803009
+        },
+        {
+          "child_prior_greedy_total": 0.04338906793720945,
+          "child_prior_wiping_total": 0.04338906793720945,
+          "child_value_for_greedy": -0.9834517240524292,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            48
+          ],
+          "k": 1,
+          "played": 41,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.1765039232064781,
+          "prior_safe_max": 0.11397123599808469,
+          "prior_safe_total": 0.11397123599808469,
+          "safe_moves": [
+            6
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 6,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 41,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 6,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 41,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 6,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 6,
+              "safe": true
+            }
+          },
+          "value": 0.9504942297935486
+        },
+        {
+          "child_prior_greedy_total": 0.06194722041885907,
+          "child_prior_wiping_total": 0.06194722041885907,
+          "child_value_for_greedy": -0.9954339265823364,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            39
+          ],
+          "k": 1,
+          "played": 38,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.4333928397661815,
+          "prior_safe_max": 0.21941015569374828,
+          "prior_safe_total": 0.5666071602338184,
+          "safe_moves": [
+            2,
+            6,
+            16,
+            61
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 61,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 38,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 61,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 38,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 2,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 2,
+              "safe": true
+            }
+          },
+          "value": 0.9955316185951233
+        },
+        {
+          "child_prior_greedy_total": 0.08427594711645692,
+          "child_prior_wiping_total": 0.08427594711645692,
+          "child_value_for_greedy": -0.9806972146034241,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            11
+          ],
+          "k": 1,
+          "played": 19,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.31647500066930206,
+          "prior_safe_max": 0.006939897433123155,
+          "prior_safe_total": 0.006939897433123155,
+          "safe_moves": [
+            8
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 53,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 19,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 53,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 19,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 8,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 8,
+              "safe": true
+            }
+          },
+          "value": 0.747103214263916
+        },
+        {
+          "child_prior_greedy_total": 0.0314985942367014,
+          "child_prior_wiping_total": 0.0314985942367014,
+          "child_value_for_greedy": -0.9744956493377686,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            47
+          ],
+          "k": 1,
+          "played": 46,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.20423252500989966,
+          "prior_safe_max": 0.19716819512738482,
+          "prior_safe_total": 0.46753035853003105,
+          "safe_moves": [
+            17,
+            30,
+            60
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 46,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 41,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 46,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 46,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 17,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 17,
+              "safe": true
+            }
+          },
+          "value": 0.8438548445701599
+        },
+        {
+          "child_prior_greedy_total": 0.1267656435467554,
+          "child_prior_wiping_total": 0.1267656435467554,
+          "child_value_for_greedy": -0.9992898106575012,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            54
+          ],
+          "k": 1,
+          "played": 45,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.24092494572128872,
+          "prior_safe_max": 0.11529257985906705,
+          "prior_safe_total": 0.13142883531739244,
+          "safe_moves": [
+            48,
+            59
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 59,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 45,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 59,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 45,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 59,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 59,
+              "safe": true
+            }
+          },
+          "value": 0.9903973340988159
+        },
+        {
+          "child_prior_greedy_total": 0.013715115189455706,
+          "child_prior_wiping_total": 0.013715115189455706,
+          "child_value_for_greedy": -0.989528238773346,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            62
+          ],
+          "k": 1,
+          "played": 53,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.49912218301939526,
+          "prior_safe_max": 0.16561530381595993,
+          "prior_safe_total": 0.27151436921005906,
+          "safe_moves": [
+            3,
+            49
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 53,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 53,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 53,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 53,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 3,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 3,
+              "safe": true
+            }
+          },
+          "value": 0.9658821225166321
+        },
+        {
+          "child_prior_greedy_total": 0.06868216119261451,
+          "child_prior_wiping_total": 0.06868216119261451,
+          "child_value_for_greedy": -0.9989938139915466,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            46
+          ],
+          "k": 1,
+          "played": 45,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.3079035865044302,
+          "prior_safe_max": 0.2596882642229048,
+          "prior_safe_total": 0.6920964134955697,
+          "safe_moves": [
+            2,
+            14,
+            24,
+            40
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 45,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 45,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 2,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 2,
+              "safe": true
+            }
+          },
+          "value": 0.9869880080223083
+        },
+        {
+          "child_prior_greedy_total": 0.10307553075465778,
+          "child_prior_wiping_total": 0.10307553075465778,
+          "child_value_for_greedy": -0.9949741363525391,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            6
+          ],
+          "k": 1,
+          "played": 13,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.2567860135189755,
+          "prior_safe_max": 0.20277309512791414,
+          "prior_safe_total": 0.41985860124407015,
+          "safe_moves": [
+            3,
+            24,
+            59
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 3,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 13,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 3,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 13,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 3,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 3,
+              "safe": true
+            }
+          },
+          "value": 0.9638825058937073
+        },
+        {
+          "child_prior_greedy_total": 0.024487070946075752,
+          "child_prior_wiping_total": 0.024487070946075752,
+          "child_value_for_greedy": -0.8470565676689148,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            52
+          ],
+          "k": 1,
+          "played": 44,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.37879123688414373,
+          "prior_safe_max": 0.37162703601906866,
+          "prior_safe_total": 0.6212087631158563,
+          "safe_moves": [
+            9,
+            10,
+            12,
+            25,
+            29,
+            31,
+            42,
+            46
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 44,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 29,
+              "safe": true
+            },
+            "real@256": {
+              "chosen": 44,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 44,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 12,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 10,
+              "safe": true
+            }
+          },
+          "value": 0.717871367931366
+        },
+        {
+          "child_prior_greedy_total": 0.009085932846744632,
+          "child_prior_wiping_total": 0.009085932846744632,
+          "child_value_for_greedy": -0.9645416736602783,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            9
+          ],
+          "k": 1,
+          "played": 18,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.3787801653891228,
+          "prior_safe_max": 0.1497837423533718,
+          "prior_safe_total": 0.23559059885237887,
+          "safe_moves": [
+            4,
+            33
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 18,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 18,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 18,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 18,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 33,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 33,
+              "safe": true
+            }
+          },
+          "value": 0.895254909992218
+        },
+        {
+          "child_prior_greedy_total": 0.05492656931111155,
+          "child_prior_wiping_total": 0.05492656931111155,
+          "child_value_for_greedy": -0.9993436932563782,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            55
+          ],
+          "k": 1,
+          "played": 46,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.1782157162301157,
+          "prior_safe_max": 0.11874551184637658,
+          "prior_safe_total": 0.3426337657492756,
+          "safe_moves": [
+            4,
+            24,
+            56
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 46,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 46,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 56,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 4,
+              "safe": true
+            }
+          },
+          "value": 0.996746301651001
+        },
+        {
+          "child_prior_greedy_total": 0.029384719830506913,
+          "child_prior_wiping_total": 0.029384719830506913,
+          "child_value_for_greedy": -0.9785535335540771,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            40
+          ],
+          "k": 1,
+          "played": 33,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.18795255138409375,
+          "prior_safe_max": 0.1570148515797469,
+          "prior_safe_total": 0.32099487609438826,
+          "safe_moves": [
+            1,
+            5,
+            59
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 33,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 33,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 33,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 33,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 5,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 5,
+              "safe": true
+            }
+          },
+          "value": 0.9459310173988342
+        },
+        {
+          "child_prior_greedy_total": 0.06214278800955049,
+          "child_prior_wiping_total": 0.06214278800955049,
+          "child_value_for_greedy": -0.9033387899398804,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            30
+          ],
+          "k": 1,
+          "played": 29,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.2151274516902417,
+          "prior_safe_max": 0.30247265662690387,
+          "prior_safe_total": 0.565825882715416,
+          "safe_moves": [
+            24,
+            40,
+            44,
+            58
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 44,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 44,
+              "safe": true
+            },
+            "real@256": {
+              "chosen": 44,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 29,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 44,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 24,
+              "safe": true
+            }
+          },
+          "value": 0.7688918709754944
+        },
+        {
+          "child_prior_greedy_total": 0.021128959669888363,
+          "child_prior_wiping_total": 0.021128959669888363,
+          "child_value_for_greedy": -0.9896560311317444,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            32
+          ],
+          "k": 1,
+          "played": 41,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.3535155038259606,
+          "prior_safe_max": 0.13028179341410415,
+          "prior_safe_total": 0.6464844961740395,
+          "safe_moves": [
+            2,
+            13,
+            31,
+            32,
+            39,
+            52,
+            58
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 41,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 41,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 41,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 41,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 2,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 13,
+              "safe": true
+            }
+          },
+          "value": 0.9782695770263672
+        },
+        {
+          "child_prior_greedy_total": 0.0261259278745611,
+          "child_prior_wiping_total": 0.0261259278745611,
+          "child_value_for_greedy": -0.9980722069740295,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            12
+          ],
+          "k": 1,
+          "played": 20,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.3870037125152988,
+          "prior_safe_max": 0.18802955344161484,
+          "prior_safe_total": 0.3553976641710319,
+          "safe_moves": [
+            9,
+            57,
+            60
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 20,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 20,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 20,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 20,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 9,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 9,
+              "safe": true
+            }
+          },
+          "value": 0.9351698756217957
+        },
+        {
+          "child_prior_greedy_total": 0.00970755837529734,
+          "child_prior_wiping_total": 0.00970755837529734,
+          "child_value_for_greedy": -0.937288224697113,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            46
+          ],
+          "k": 1,
+          "played": 19,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.5692453965310744,
+          "prior_safe_max": 0.2645419850900806,
+          "prior_safe_total": 0.4307546034689256,
+          "safe_moves": [
+            33,
+            51
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 19,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 19,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 51,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 19,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 51,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 51,
+              "safe": true
+            }
+          },
+          "value": 0.8543694019317627
+        },
+        {
+          "child_prior_greedy_total": 0.08219084148540576,
+          "child_prior_wiping_total": 0.08219084148540576,
+          "child_value_for_greedy": -0.9650671482086182,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            46,
+            52
+          ],
+          "k": 1,
+          "played": 45,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.3946100559446571,
+          "prior_safe_max": 0.2730322745074227,
+          "prior_safe_total": 0.48734131352930576,
+          "safe_moves": [
+            19,
+            22,
+            25
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 19,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 45,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 19,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 45,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 19,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 19,
+              "safe": true
+            }
+          },
+          "value": 0.9161257147789001
+        },
+        {
+          "child_prior_greedy_total": 0.0549941834487516,
+          "child_prior_wiping_total": 0.0549941834487516,
+          "child_value_for_greedy": -0.926133930683136,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            33
+          ],
+          "k": 1,
+          "played": 34,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.29211805451015743,
+          "prior_safe_max": 0.2413125985064486,
+          "prior_safe_total": 0.2413125985064486,
+          "safe_moves": [
+            12
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 12,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 34,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 12,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 34,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 12,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 12,
+              "safe": true
+            }
+          },
+          "value": 0.8640177845954895
+        },
+        {
+          "child_prior_greedy_total": 0.03163274659079983,
+          "child_prior_wiping_total": 0.03163274659079983,
+          "child_value_for_greedy": -0.9937635064125061,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            24
+          ],
+          "k": 1,
+          "played": 25,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.33827210343454645,
+          "prior_safe_max": 0.24303837562535735,
+          "prior_safe_total": 0.32269851405687716,
+          "safe_moves": [
+            10,
+            49,
+            60
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 25,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 25,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 25,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 25,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 60,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 60,
+              "safe": true
+            }
+          },
+          "value": 0.9631468653678894
+        },
+        {
+          "child_prior_greedy_total": 0.03240797467531272,
+          "child_prior_wiping_total": 0.03240797467531272,
+          "child_value_for_greedy": -0.847748875617981,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            52
+          ],
+          "k": 1,
+          "played": 44,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.21916836696293993,
+          "prior_safe_max": 0.13120682503289124,
+          "prior_safe_total": 0.13120682503289124,
+          "safe_moves": [
+            10
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 44,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 44,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 25,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 44,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 10,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 10,
+              "safe": true
+            }
+          },
+          "value": 0.6777021884918213
+        },
+        {
+          "child_prior_greedy_total": 0.03873597134555696,
+          "child_prior_wiping_total": 0.03873597134555696,
+          "child_value_for_greedy": -0.9974533319473267,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            40
+          ],
+          "k": 1,
+          "played": 44,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.6514817706011473,
+          "prior_safe_max": 0.1909948220476523,
+          "prior_safe_total": 0.3485182293988526,
+          "safe_moves": [
+            13,
+            59
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 59,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 44,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 59,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 44,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 13,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 59,
+              "safe": true
+            }
+          },
+          "value": 0.9613945484161377
+        },
+        {
+          "child_prior_greedy_total": 0.030011227321490235,
+          "child_prior_wiping_total": 0.030011227321490235,
+          "child_value_for_greedy": -0.9741313457489014,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            11
+          ],
+          "k": 1,
+          "played": 18,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.39576369948369855,
+          "prior_safe_max": 0.22958888680084638,
+          "prior_safe_total": 0.6042363005163014,
+          "safe_moves": [
+            34,
+            38,
+            52
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 18,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 18,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 18,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 18,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 34,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 34,
+              "safe": true
+            }
+          },
+          "value": 0.90062415599823
+        },
+        {
+          "child_prior_greedy_total": 0.06950648147514624,
+          "child_prior_wiping_total": 0.06950648147514624,
+          "child_value_for_greedy": -0.9796264171600342,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            8
+          ],
+          "k": 1,
+          "played": 17,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.1831838478495609,
+          "prior_safe_max": 0.1088937894779731,
+          "prior_safe_total": 0.1088937894779731,
+          "safe_moves": [
+            40
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 40,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 17,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 40,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 17,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 40,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 40,
+              "safe": true
+            }
+          },
+          "value": 0.9672707319259644
+        },
+        {
+          "child_prior_greedy_total": 0.029420250518642575,
+          "child_prior_wiping_total": 0.029420250518642575,
+          "child_value_for_greedy": -0.9990763068199158,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            54
+          ],
+          "k": 1,
+          "played": 45,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.23523724347988978,
+          "prior_safe_max": 0.08236934125357057,
+          "prior_safe_total": 0.16010127313689831,
+          "safe_moves": [
+            24,
+            59
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 45,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 45,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 45,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 45,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 24,
+              "safe": true
+            }
+          },
+          "value": 0.9920579195022583
+        },
+        {
+          "child_prior_greedy_total": 0.021988376479268452,
+          "child_prior_wiping_total": 0.021988376479268452,
+          "child_value_for_greedy": -0.9989427924156189,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            62
+          ],
+          "k": 1,
+          "played": 53,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.16574164286473458,
+          "prior_safe_max": 0.1281012948716316,
+          "prior_safe_total": 0.2964650622221469,
+          "safe_moves": [
+            8,
+            24,
+            40
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 53,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 53,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 53,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 53,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 40,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 40,
+              "safe": true
+            }
+          },
+          "value": 0.9861541986465454
+        },
+        {
+          "child_prior_greedy_total": 0.009037912328646314,
+          "child_prior_wiping_total": 0.009037912328646314,
+          "child_value_for_greedy": -0.9914245009422302,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            39
+          ],
+          "k": 1,
+          "played": 30,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.3204837172475637,
+          "prior_safe_max": 0.24859168559522657,
+          "prior_safe_total": 0.6795162827524363,
+          "safe_moves": [
+            10,
+            41,
+            60
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 30,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 30,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 30,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 30,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 41,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 41,
+              "safe": true
+            }
+          },
+          "value": 0.9654126763343811
+        },
+        {
+          "child_prior_greedy_total": 0.11197485381627088,
+          "child_prior_wiping_total": 0.11197485381627088,
+          "child_value_for_greedy": -0.9955028295516968,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            61
+          ],
+          "k": 1,
+          "played": 52,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.15571221800289958,
+          "prior_safe_max": 0.13712917771892372,
+          "prior_safe_total": 0.3084733175111542,
+          "safe_moves": [
+            6,
+            16,
+            32,
+            48
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 32,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 52,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 32,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 52,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 32,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 16,
+              "safe": true
+            }
+          },
+          "value": 0.9836587905883789
+        },
+        {
+          "child_prior_greedy_total": 0.043571304108049845,
+          "child_prior_wiping_total": 0.043571304108049845,
+          "child_value_for_greedy": -0.9972094893455505,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            40
+          ],
+          "k": 1,
+          "played": 41,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.3805243736845276,
+          "prior_safe_max": 0.1481927329146165,
+          "prior_safe_total": 0.21981736604177926,
+          "safe_moves": [
+            22,
+            61
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 22,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 41,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 22,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 41,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 22,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 22,
+              "safe": true
+            }
+          },
+          "value": 0.9592388272285461
+        },
+        {
+          "child_prior_greedy_total": 0.06214278800955049,
+          "child_prior_wiping_total": 0.06214278800955049,
+          "child_value_for_greedy": -0.9033387899398804,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            30
+          ],
+          "k": 1,
+          "played": 29,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.2151274516902417,
+          "prior_safe_max": 0.30247265662690387,
+          "prior_safe_total": 0.565825882715416,
+          "safe_moves": [
+            24,
+            40,
+            44,
+            58
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 44,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 44,
+              "safe": true
+            },
+            "real@256": {
+              "chosen": 44,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 29,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 44,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 24,
+              "safe": true
+            }
+          },
+          "value": 0.7688918709754944
+        },
+        {
+          "child_prior_greedy_total": 0.007886009204206443,
+          "child_prior_wiping_total": 0.007886009204206443,
+          "child_value_for_greedy": -0.7756087779998779,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            3
+          ],
+          "k": 1,
+          "played": 11,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.20433463536051727,
+          "prior_safe_max": 0.1235556921149441,
+          "prior_safe_total": 0.1235556921149441,
+          "safe_moves": [
+            17
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 11,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 51,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 11,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 11,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 17,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 17,
+              "safe": true
+            }
+          },
+          "value": 0.5897436738014221
+        },
+        {
+          "child_prior_greedy_total": 0.005381238619759969,
+          "child_prior_wiping_total": 0.005381238619759969,
+          "child_value_for_greedy": -0.9314039349555969,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            13
+          ],
+          "k": 1,
+          "played": 21,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.25429163231901797,
+          "prior_safe_max": 0.3177915005804639,
+          "prior_safe_total": 0.745708367680982,
+          "safe_moves": [
+            18,
+            31,
+            41,
+            61
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 61,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 61,
+              "safe": true
+            },
+            "real@256": {
+              "chosen": 21,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 21,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 18,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 18,
+              "safe": true
+            }
+          },
+          "value": 0.9245482087135315
+        },
+        {
+          "child_prior_greedy_total": 0.14150597003779464,
+          "child_prior_wiping_total": 0.14150597003779464,
+          "child_value_for_greedy": -0.9950132369995117,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            16
+          ],
+          "k": 1,
+          "played": 17,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.22557577229754608,
+          "prior_safe_max": 0.09858435634725697,
+          "prior_safe_total": 0.26426877452504893,
+          "safe_moves": [
+            2,
+            4,
+            6
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 41,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 17,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 41,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 17,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 4,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 4,
+              "safe": true
+            }
+          },
+          "value": 0.9941999316215515
+        },
+        {
+          "child_prior_greedy_total": 0.13484824869922546,
+          "child_prior_wiping_total": 0.13484824869922546,
+          "child_value_for_greedy": -0.9971247911453247,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            42,
+            52
+          ],
+          "k": 1,
+          "played": 43,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.2578545122484785,
+          "prior_safe_max": 0.26239289808316596,
+          "prior_safe_total": 0.4786977263647441,
+          "safe_moves": [
+            9,
+            31,
+            47
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 31,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 43,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 31,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 43,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 31,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 31,
+              "safe": true
+            }
+          },
+          "value": 0.9860237240791321
+        },
+        {
+          "child_prior_greedy_total": 0.04232819390511218,
+          "child_prior_wiping_total": 0.04232819390511218,
+          "child_value_for_greedy": -0.9956478476524353,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            8
+          ],
+          "k": 1,
+          "played": 17,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.2713491387733869,
+          "prior_safe_max": 0.1436458445108505,
+          "prior_safe_total": 0.4257339708044906,
+          "safe_moves": [
+            3,
+            32,
+            39,
+            59
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 59,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 17,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 59,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 17,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 59,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 39,
+              "safe": true
+            }
+          },
+          "value": 0.9671797752380371
+        },
+        {
+          "child_prior_greedy_total": 0.01921106997845862,
+          "child_prior_wiping_total": 0.01921106997845862,
+          "child_value_for_greedy": -0.9973019957542419,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            39
+          ],
+          "k": 1,
+          "played": 30,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.42143834521848333,
+          "prior_safe_max": 0.30757669057916587,
+          "prior_safe_total": 0.5495524745777872,
+          "safe_moves": [
+            8,
+            33,
+            52
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 30,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 30,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 30,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 30,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 33,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 52,
+              "safe": true
+            }
+          },
+          "value": 0.9848653078079224
+        },
+        {
+          "child_prior_greedy_total": 0.04985164876669565,
+          "child_prior_wiping_total": 0.04985164876669565,
+          "child_value_for_greedy": -0.9883222579956055,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            49
+          ],
+          "k": 1,
+          "played": 42,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.22372555450010062,
+          "prior_safe_max": 0.09970771969737,
+          "prior_safe_total": 0.14507589657683795,
+          "safe_moves": [
+            24,
+            60
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 60,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 42,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 60,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 42,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 24,
+              "safe": true
+            }
+          },
+          "value": 0.9211913347244263
+        },
+        {
+          "child_prior_greedy_total": 0.0334212953880069,
+          "child_prior_wiping_total": 0.0334212953880069,
+          "child_value_for_greedy": -0.9348292946815491,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            59
+          ],
+          "k": 1,
+          "played": 51,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.39924187337502126,
+          "prior_safe_max": 0.07404138791482706,
+          "prior_safe_total": 0.12579169461201134,
+          "safe_moves": [
+            24,
+            48
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 51,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 51,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 51,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 24,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 24,
+              "safe": true
+            }
+          },
+          "value": 0.9345225095748901
+        },
+        {
+          "child_prior_greedy_total": 0.04517017560381752,
+          "child_prior_wiping_total": 0.04517017560381752,
+          "child_value_for_greedy": -0.9983397722244263,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            10
+          ],
+          "k": 1,
+          "played": 42,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.2635631960088372,
+          "prior_safe_max": 0.22349809331095294,
+          "prior_safe_total": 0.7364368039911627,
+          "safe_moves": [
+            24,
+            30,
+            32,
+            40,
+            44,
+            54
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 32,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 42,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 32,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 42,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 44,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 44,
+              "safe": true
+            }
+          },
+          "value": 0.9869599342346191
+        },
+        {
+          "child_prior_greedy_total": 0.01974583750058404,
+          "child_prior_wiping_total": 0.01974583750058404,
+          "child_value_for_greedy": -0.9398571848869324,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            30
+          ],
+          "k": 1,
+          "played": 29,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.26759092656206346,
+          "prior_safe_max": 0.18340478918107564,
+          "prior_safe_total": 0.21420214154553177,
+          "safe_moves": [
+            48,
+            59
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 29,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 29,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 29,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 29,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 59,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 59,
+              "safe": true
+            }
+          },
+          "value": 0.9231139421463013
+        },
+        {
+          "child_prior_greedy_total": 0.029177760546817796,
+          "child_prior_wiping_total": 0.029177760546817796,
+          "child_value_for_greedy": -0.9995540380477905,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            5
+          ],
+          "k": 1,
+          "played": 37,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.43914509726261564,
+          "prior_safe_max": 0.3337620157837963,
+          "prior_safe_total": 0.5608549027373844,
+          "safe_moves": [
+            7,
+            15,
+            39,
+            42
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 7,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 37,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 7,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 37,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 7,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 7,
+              "safe": true
+            }
+          },
+          "value": 0.9957268834114075
+        },
+        {
+          "child_prior_greedy_total": 0.026795307401812334,
+          "child_prior_wiping_total": 0.026795307401812334,
+          "child_value_for_greedy": -0.8336994647979736,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            12
+          ],
+          "k": 1,
+          "played": 20,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.27389319693718833,
+          "prior_safe_max": 0.1737262565969791,
+          "prior_safe_total": 0.4939087476938291,
+          "safe_moves": [
+            26,
+            40,
+            58,
+            60
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 20,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 20,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 20,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 20,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 58,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 26,
+              "safe": true
+            }
+          },
+          "value": 0.898047924041748
+        },
+        {
+          "child_prior_greedy_total": 0.07088126644104867,
+          "child_prior_wiping_total": 0.07088126644104867,
+          "child_value_for_greedy": -0.9993647933006287,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            41
+          ],
+          "k": 1,
+          "played": 34,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.4561340422910021,
+          "prior_safe_max": 0.28156650120218246,
+          "prior_safe_total": 0.28156650120218246,
+          "safe_moves": [
+            48
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 48,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 34,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 54,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 34,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 48,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 48,
+              "safe": true
+            }
+          },
+          "value": 0.9832749366760254
+        },
+        {
+          "child_prior_greedy_total": 0.07127730258351783,
+          "child_prior_wiping_total": 0.07127730258351783,
+          "child_value_for_greedy": -0.9952067136764526,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            26
+          ],
+          "k": 1,
+          "played": 50,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.3185550950869184,
+          "prior_safe_max": 0.2630141925885373,
+          "prior_safe_total": 0.6814449049130817,
+          "safe_moves": [
+            3,
+            7,
+            13,
+            39,
+            49,
+            53
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 53,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 50,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 53,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 50,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 53,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 7,
+              "safe": true
+            }
+          },
+          "value": 0.994505763053894
+        },
+        {
+          "child_prior_greedy_total": 0.08771514589923841,
+          "child_prior_wiping_total": 0.08771514589923841,
+          "child_value_for_greedy": -0.9884809851646423,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            53
+          ],
+          "k": 1,
+          "played": 21,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.5642417824897717,
+          "prior_safe_max": 0.24906616144052884,
+          "prior_safe_total": 0.43575821751022836,
+          "safe_moves": [
+            9,
+            31,
+            41
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 41,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 21,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 41,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 21,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 41,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 31,
+              "safe": true
+            }
+          },
+          "value": 0.9848952293395996
+        },
+        {
+          "child_prior_greedy_total": 0.06180710261492586,
+          "child_prior_wiping_total": 0.06180710261492586,
+          "child_value_for_greedy": -0.9260731339454651,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            12
+          ],
+          "k": 1,
+          "played": 20,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.3703893696517833,
+          "prior_safe_max": 0.27462230201423854,
+          "prior_safe_total": 0.38432165816859937,
+          "safe_moves": [
+            18,
+            39,
+            57
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 18,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 20,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 18,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 20,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 39,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 18,
+              "safe": true
+            }
+          },
+          "value": 0.7914755940437317
+        },
+        {
+          "child_prior_greedy_total": 0.06221018812597293,
+          "child_prior_wiping_total": 0.06221018812597293,
+          "child_value_for_greedy": -0.9969229698181152,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            1
+          ],
+          "k": 1,
+          "played": 10,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.28397584645431495,
+          "prior_safe_max": 0.14305863394532653,
+          "prior_safe_total": 0.3469568976405525,
+          "safe_moves": [
+            4,
+            55,
+            56,
+            60
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 4,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 10,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 4,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 10,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 56,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 4,
+              "safe": true
+            }
+          },
+          "value": 0.9951744675636292
+        },
+        {
+          "child_prior_greedy_total": 0.14185240895512893,
+          "child_prior_wiping_total": 0.14185240895512893,
+          "child_value_for_greedy": -0.9925453662872314,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            13,
+            30
+          ],
+          "k": 1,
+          "played": 21,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.49918523884843397,
+          "prior_safe_max": 0.18969588810376092,
+          "prior_safe_total": 0.3519788177828544,
+          "safe_moves": [
+            19,
+            33,
+            51
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 19,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 21,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 19,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 21,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 51,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 33,
+              "safe": true
+            }
+          },
+          "value": 0.9336192011833191
+        },
+        {
+          "child_prior_greedy_total": 0.018591823942676788,
+          "child_prior_wiping_total": 0.018591823942676788,
+          "child_value_for_greedy": -0.8824985027313232,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            12
+          ],
+          "k": 1,
+          "played": 20,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.4067797648323222,
+          "prior_safe_max": 0.23022236717946964,
+          "prior_safe_total": 0.234380881073558,
+          "safe_moves": [
+            15,
+            33
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 20,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 20,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 33,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 20,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 33,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 33,
+              "safe": true
+            }
+          },
+          "value": 0.8736956715583801
+        },
+        {
+          "child_prior_greedy_total": 0.01503507279809311,
+          "child_prior_wiping_total": 0.01503507279809311,
+          "child_value_for_greedy": -0.9976638555526733,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            48
+          ],
+          "k": 1,
+          "played": 41,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.38139959779817184,
+          "prior_safe_max": 0.08168552685683439,
+          "prior_safe_total": 0.1174703094941684,
+          "safe_moves": [
+            2,
+            6
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 41,
+              "safe": false
+            },
+            "policy_only@50": {
+              "chosen": 41,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 41,
+              "safe": false
+            },
+            "real@50": {
+              "chosen": 41,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 2,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 2,
+              "safe": true
+            }
+          },
+          "value": 0.9754393100738525
+        },
+        {
+          "child_prior_greedy_total": 0.02737424142694458,
+          "child_prior_wiping_total": 0.02737424142694458,
+          "child_value_for_greedy": -0.9004108309745789,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            53
+          ],
+          "k": 1,
+          "played": 26,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.46350330137328066,
+          "prior_safe_max": 0.33977926853413704,
+          "prior_safe_total": 0.5364966986267194,
+          "safe_moves": [
+            12,
+            30
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 30,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 26,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 30,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 26,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 30,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 30,
+              "safe": true
+            }
+          },
+          "value": 0.9268268942832947
+        },
+        {
+          "child_prior_greedy_total": 0.06574738427241168,
+          "child_prior_wiping_total": 0.06574738427241168,
+          "child_value_for_greedy": -0.9999728798866272,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            14
+          ],
+          "k": 1,
+          "played": 21,
+          "played_has_top_prior": false,
+          "played_was_safe": false,
+          "prior_played": 0.21950793834216084,
+          "prior_safe_max": 0.13727197126954713,
+          "prior_safe_total": 0.2599760709649156,
+          "safe_moves": [
+            8,
+            32,
+            39
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 32,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 21,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 32,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 21,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 39,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 32,
+              "safe": true
+            }
+          },
+          "value": 0.9925886988639832
+        },
+        {
+          "child_prior_greedy_total": 0.05948151252898447,
+          "child_prior_wiping_total": 0.05948151252898447,
+          "child_value_for_greedy": -0.9735958576202393,
+          "child_wiping_has_top_prior": false,
+          "child_wiping_replies": [
+            32
+          ],
+          "k": 1,
+          "played": 33,
+          "played_has_top_prior": true,
+          "played_was_safe": false,
+          "prior_played": 0.2917291885654636,
+          "prior_safe_max": 0.18443470704440085,
+          "prior_safe_total": 0.2314808066734702,
+          "safe_moves": [
+            57,
+            60
+          ],
+          "searches": {
+            "policy_only@256": {
+              "chosen": 60,
+              "safe": true
+            },
+            "policy_only@50": {
+              "chosen": 33,
+              "safe": false
+            },
+            "real@256": {
+              "chosen": 60,
+              "safe": true
+            },
+            "real@50": {
+              "chosen": 33,
+              "safe": false
+            },
+            "value_only@256": {
+              "chosen": 60,
+              "safe": true
+            },
+            "value_only@50": {
+              "chosen": 60,
+              "safe": true
+            }
+          },
+          "value": 0.9278265833854675
+        }
+      ],
+      "summary": {
+        "1": {
+          "child_prior_wiping_below_5pct": 0.5454545454545454,
+          "child_prior_wiping_median": 0.04437073985593368,
+          "child_value_for_greedy_median": -0.991836816072464,
+          "child_wiping_has_top_prior": 0.0,
+          "played_has_top_prior": 0.7121212121212122,
+          "positions": 66,
+          "prior_played_median": 0.28194708901357385,
+          "prior_safe_total_median": 0.3540884424289572,
+          "real_search_replayed_the_record": 1.0,
+          "searches": {
+            "policy_only@256": {
+              "safe_count": 39,
+              "safe_share": 0.5909090909090909
+            },
+            "policy_only@50": {
+              "safe_count": 6,
+              "safe_share": 0.09090909090909091
+            },
+            "real@256": {
+              "safe_count": 39,
+              "safe_share": 0.5909090909090909
+            },
+            "real@50": {
+              "safe_count": 0,
+              "safe_share": 0.0
+            },
+            "value_only@256": {
+              "safe_count": 66,
+              "safe_share": 1.0
+            },
+            "value_only@50": {
+              "safe_count": 66,
+              "safe_share": 1.0
+            }
+          },
+          "value_median": 0.9622707068920135
+        }
+      },
+      "wipeouts": 69
+    }
+  },
+  "note": "k=1 is the network's last move before the wipeout; only positions where a surviving move existed are probed",
+  "purpose": "research/step2-failure-analysis.md: which head lets the wipeout through"
+}

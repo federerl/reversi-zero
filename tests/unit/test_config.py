@@ -48,6 +48,36 @@ def test_full_profile_uses_sgd_and_larger_net() -> None:
     assert full.selfplay.n_workers == 6, "sized for the >=8 core cluster allocation"
 
 
+STEP3_MIX_PROFILES = ["full8x8_step3_mix.yaml", "full8x8_step3_both.yaml"]
+
+
+@pytest.mark.parametrize("profile", STEP3_MIX_PROFILES)
+def test_step3_mix_profiles_change_only_the_selfplay_block(profile: str) -> None:
+    """The opponent-mix groups are the control recipe with a different `selfplay` block.
+
+    Profiles do not inherit from one another, only from base.yaml, so a block
+    left out of a profile silently takes the base values: a 100,000-position
+    replay window and AdamW where the control has 400,000 and SGD. A run resumed
+    from the control checkpoint under such a profile fails to load the SGD
+    momentum into AdamW, and a profile that did load would still not be the
+    matched comparison the design promises.
+    """
+    control = load_config(CONFIG_DIR / "full8x8.yaml").model_dump()
+    group = load_config(CONFIG_DIR / profile).model_dump()
+    differences = {key for key in control if control[key] != group[key]}
+    assert differences == {"name", "selfplay"}
+
+
+def test_recording_both_sides_is_the_only_change_from_the_step3_mix() -> None:
+    mix = load_config(CONFIG_DIR / "full8x8_step3_mix.yaml").model_dump()["selfplay"]
+    both = load_config(CONFIG_DIR / "full8x8_step3_both.yaml").model_dump()["selfplay"]
+    changed = {key for key in mix if mix[key] != both[key]}
+    assert changed == {"opponent_games", "record_opponent_positions"}
+    assert both["record_opponent_positions"] is True
+    # Half the external games, since each now yields both sides' positions.
+    assert both["opponent_games"] * 2 == mix["opponent_games"]
+
+
 # ---------------------------------------------------------------------------
 # Derived quantities
 # ---------------------------------------------------------------------------

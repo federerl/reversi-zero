@@ -223,6 +223,28 @@ badly through the middlegame and learns from garbage.
 > the most common bugs in AlphaZero reimplementations — and it doesn't crash, it
 > just quietly trains on the wrong thing.
 
+### `terminal_check: false`
+
+Before the search trusts the network's value for a position, it can try every
+legal move from there and see whether one of them **ends the game**. If a move
+wins on the spot, the position is scored as a certain win for the side to move,
+whatever the network thinks. That costs a handful of board operations per
+position and no network calls.
+
+This is off in every shipped config, and it only ever applies to self-play.
+Strength measurements (the arena, the web app) always run the plain search,
+so a run trained with the check on is scored on what its network learned, not
+on what the check adds at play time.
+
+It exists because of a specific failure, written up in
+`research/step2-failure-analysis.md`: the network rates a position where it
+holds one disc as a near-certain win, and gives the opponent's capturing reply
+a prior of a few percent, so a short search never looks at that reply and
+never finds out the game is over. Switching the check on in self-play is the
+Step 4 experiment (`research/step4-design.md`): the games that make the
+training data are then played by a search that does not fall for the wipeout,
+and the question is whether the network learns the tactic from them.
+
 ---
 
 ## `selfplay` — generating the games
@@ -300,8 +322,8 @@ selfplay:
 With `opponent_games` above zero, each generation also plays that many games
 with the network on one side and one of the named opponents on the other. The
 network searches, records its policy targets and learns from the result exactly
-as in self-play; the opponent's moves only move the game along and are never
-training data. The opponents take turns and the network's colour alternates, so
+as in self-play; the opponent's moves only move the game along and, by default,
+are not training data. The opponents take turns and the network's colour alternates, so
 each opponent is met equally often as black and as white. Which games of the
 generation are external is fixed by the game's index, so a re-run or a resume
 plays the same mix.
@@ -314,6 +336,56 @@ external game yields training examples only from the network's moves, about
 half as many as a self-play game. 480 self-play games plus 240 external games
 produce about as many examples as 600 self-play games, which is what makes a
 run with opponents comparable to one without.
+
+### `record_opponent_positions: false`
+
+```yaml
+selfplay:
+  games_per_generation: 480
+  opponents: [greedy, minimax-d4]
+  opponent_games: 120         # half as many: each now yields twice the examples
+  record_opponent_positions: true
+```
+
+Off, an external game records only the positions the network moved from. On,
+it also records the positions the *opponent* moved from, labelled with the
+game's result from the opponent's side and with no policy target, so they
+train the value head and nothing else.
+
+The difference matters because of how the search judges a move: it looks at
+the position after the move, with the other side to move, and asks the value
+head about it. In an external game that is the position the opponent is about
+to play from. With the rule off, the value head never sees those positions as
+training examples, and the Step 3 results (`research/step3-results.md`,
+section 5) show it learning nothing there. The policy head is left out on
+purpose: no search ran at the opponent's position, so there is no visit
+distribution to learn, and imitating the opponent's move would teach the
+network to play like its opponent. With the rule on, an external game yields
+about as many examples as a self-play game, so `opponent_games` is halved to
+keep the data matched (`configs/full8x8_step3_both.yaml`).
+
+### `search_opponent_positions: false`
+
+Goes one step past `record_opponent_positions`. The opponent's positions are
+not only kept, the network **runs its own search at each of them** — the same
+search it runs at its own positions, same number of simulations, same
+exploration noise — and the visit distribution it produces is stored as that
+row's policy target. The opponent still plays its own move; the search's
+choice is never played, so the game is unchanged.
+
+Why: the search judges a move by looking at the position after it, with the
+other side to move. In a game against Greedy that position is Greedy's to play
+from, and nothing ever searched there, so the policy head never got a training
+signal at exactly the positions the search reads. `record_opponent_positions`
+trained the value head there and it did not move (`research/step3b-results.md`);
+this trains the policy head there, which is where the Step 2 analysis locates
+the missing information (the prior on the opponent's game-ending reply). The
+Step 5 experiment, `research/step5-design.md`.
+
+Costs one extra search per recorded opponent position, so an external game
+takes about twice the network calls. Needs `record_opponent_positions`. Shards
+written with it on carry an `opponent_to_move` column so analysis can still
+tell the opponent's rows from the network's.
 
 ---
 
@@ -431,6 +503,23 @@ loss = policy_loss  +  1.0 × value_loss
 poor while move predictions are fine; lower it if the value head starts
 memorising specific game outcomes. Run 2 tried 4.0 and the agent got weaker: the
 policy signal was starved (see `experiments.md`).
+
+### `opponent_policy_weight: 1.0`
+
+How many times a position recorded with a fixed opponent to move counts in the
+policy loss, compared with a position from the network's own play. The policy
+loss is a mean over the batch; with this at 2, each such row goes into that mean
+twice, and the mean is taken over the weights, so the loss keeps its scale and
+its balance against the value term. The games, the shards and the value head are
+untouched: this changes how much of the policy head's attention those rows get,
+not what the network sees.
+
+It only matters when those rows carry a policy target, which they do under
+`selfplay.search_opponent_positions`; a value-only row stays out of the policy
+loss whatever its weight. 1.0 is the plain mean. `research/step7-design.md` is
+the experiment it exists for: the Step 6 dose curve raised the share of such
+rows by playing more external games, and paid for the largest dose with the
+network's own strength; this raises their share in the policy loss alone.
 
 ### `ownership_loss_weight: 0.0`
 

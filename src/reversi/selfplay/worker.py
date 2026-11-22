@@ -25,8 +25,10 @@ legal move had probability 1" teaches the network a fact about the rules that th
 rules already enforce, while using up a slot in the training batch.
 
 **A game may have a fixed opponent on one side.** Then the network searches and
-records only on its own turns, and the opponent's moves are applied like forced
-ones: nothing searched, nothing stored. See ``opponents.py`` for why and when.
+records on its own turns; the opponent's moves are applied like forced ones,
+with nothing stored, unless the positions are recorded as value-only rows or,
+with ``search_opponent_positions``, searched for a policy target before the
+opponent's move is applied. See ``opponents.py`` for why and when.
 """
 
 from __future__ import annotations
@@ -47,7 +49,7 @@ from reversi.search.mcts import MCTS, select_move
 from reversi.seeding import game_seed
 from reversi.seeding import rng as make_rng
 from reversi.selfplay.opponents import OpponentSchedule
-from reversi.types import Player, pass_action
+from reversi.types import Player, pass_action, policy_size
 
 __all__ = ["SelfPlaySummary", "play_game", "play_games"]
 
@@ -73,6 +75,10 @@ class SelfPlaySummary:
     opponent_draws: int = 0
     network_wipeouts: int = 0
     """External games the network ended with no discs at all."""
+    wipeouts: int = 0
+    """Games of either kind that ended with one side holding no discs. In pure
+    self-play this is the rate at which the network wipes itself out, the
+    training-side reading the Step 4 experiment is checked against."""
 
     def observe(self, record: GameRecord, branching: list[int]) -> None:
         self.games += 1
@@ -88,6 +94,7 @@ class SelfPlaySummary:
             self.white_wins += 1
         else:
             self.draws += 1
+        self.wipeouts += record.black_discs == 0 or record.white_discs == 0
         if record.opponent is not None and record.network is not None:
             self.opponent_games += 1
             network_black = record.network is Player.BLACK
@@ -120,6 +127,10 @@ class SelfPlaySummary:
             # the agent having found a strategy.
             "first_player_win_rate": self.black_wins / decisive,
             "draw_rate": self.draws / max(1, self.games),
+            # Share of all games that ended with one side at zero discs. About
+            # one in a hundred in plain self-play (Step 2); the terminal check in
+            # self-play (Step 4) is expected to lower it from the first generation.
+            "wipeout_rate": self.wipeouts / max(1, self.games),
             # Zero in pure self-play. The score is points per game for the
             # network against its fixed opponents; the wipeout rate is the share
             # of those games it ended with no discs, the failure Step 2 found.
@@ -146,12 +157,22 @@ def play_game(
     opponent: Agent | None = None,
     opponent_name: str | None = None,
     network: Player = Player.BLACK,
+    record_opponent: bool = False,
+    search_opponent: bool = False,
 ) -> tuple[GameRecord, list[int]]:
     """Play one game against yourself, or against ``opponent`` as colour ``network``.
 
     Returns the record and the branching seen. ``rng`` drives the exploration
     noise inside the search, the sampling of which move to play and the
     opponent's tie-breaks, so one seed reproduces the whole game.
+
+    With ``record_opponent``, the positions the opponent moves from are kept as
+    value-only samples (no search ran there, so no policy target); see
+    ``opponents.py``. Positions where the opponent has a single legal move are
+    skipped, as the network's forced moves are. With ``search_opponent`` as well,
+    the network searches each such position before the opponent moves, and the
+    row carries that search's policy target; the move played is still the
+    opponent's, so the game is unchanged.
     """
     mcts = MCTS(evaluator, search_config)
     record = GameRecord(
@@ -180,7 +201,26 @@ def play_game(
             raise WorkerError(msg)
 
         if opponent is not None and state.to_move is not network:
-            # The opponent's move: no search, no sample, just the next position.
+            # The opponent's move: no search, so no policy target. The position
+            # itself is kept as a value-only sample when asked to, because it is
+            # the position the network's search reads when it judges the move
+            # that led here.
+            if record_opponent and len(rules.legal_actions(state)) > 1:
+                if search_opponent:
+                    pi = mcts.run(state, rng=rng).policy_target()
+                else:
+                    pi = np.zeros(policy_size(board_size), dtype=np.float32)
+                record.samples.append(
+                    Sample(
+                        black=state.black,
+                        white=state.white,
+                        to_move=state.to_move,
+                        pi=pi,
+                        move_no=ply,
+                        pi_valid=search_opponent,
+                        opponent_to_move=True,
+                    )
+                )
             action = opponent.select(state, rng)
             if action == passing:
                 record.passes += 1
@@ -246,7 +286,7 @@ def play_games(
     for index in range(n_games):
         seed = game_seed(root_seed, generation, worker_id, index)
         assignment = schedule.assignment(first_game + index) if schedule is not None else None
-        if assignment is not None:
+        if schedule is not None and assignment is not None:
             if opponents is None or assignment.opponent not in opponents:
                 msg = f"the schedule names opponent {assignment.opponent!r} but none was built"
                 raise WorkerError(msg)
@@ -260,6 +300,8 @@ def play_games(
                 opponent=opponents[assignment.opponent],
                 opponent_name=assignment.opponent,
                 network=assignment.network,
+                record_opponent=schedule.record_opponent_positions,
+                search_opponent=schedule.search_opponent_positions,
             )
             continue
         yield play_game(
