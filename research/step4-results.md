@@ -104,6 +104,10 @@ As in Step 3b: the network's win-probability estimate against the outcome, by ro
 
 Unchanged: calibrated to within two points on its own positions, the same 8 to 9 points of overrating against the held-out opponents that every self-play network shows. The value target did not change and neither did the value head's calibration.
 
+![Reliability curves by row group for the control, the Step 3, 3b and 4 checkpoints and group D](figures/reliability.png)
+
+The curves of this step beside those of Steps 3 and 3b (`scripts/figures/reliability.py`): the three routes into the value head leave every curve where the control has it, and the material target of Step 3's group D is the one line off the diagonal.
+
 ## 7. What this establishes
 
 - **Exact resolution inside the training search does not teach the heads the tactic.** The strongest data-side route, every training game played by a search that already knows the one-move answer, left the value head where it was, the prior on the wiping reply where it was, the prior on the fatal move where it was, and the plain search losing the same games. The data-side routes have now been tried in three forms, opponent exposure (Step 3), the value target at the position the search reads (Step 3b), and the exact answer inside the search that writes the targets (Step 4), and none transferred.

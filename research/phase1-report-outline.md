@@ -157,7 +157,7 @@ In order of cost, from Step 8 §8 and `contribution.md` §5:
 
 ## Figures and tables, collected
 
-Figures follow the numbering of the [November 9 agenda](meetings/2026-11-09-advisor-meeting-agenda.md) §4. Every figure is drawn by a script under `scripts/figures/` from committed JSON, with the `dataviz` palette already used by F4 and F6.
+Figures follow the numbering of the [November 9 agenda](meetings/2026-11-09-advisor-meeting-agenda.md) §4. Every figure is drawn by a script under `scripts/figures/` from committed JSON, with one palette; six exist, F1 and F2 are to draw.
 
 | # | What | Section | Exists? |
 |---|---|---|---|
@@ -165,10 +165,10 @@ Figures follow the numbering of the [November 9 agenda](meetings/2026-11-09-advi
 | F2 | Wipeout move-number histogram | 5 | to draw from the Step 1 / Step 2 game records |
 | F3 | Raw and search value by move during wipeouts | 6.1 | `figures/wipeout-values.png` |
 | F4 | The chain: family sum and held-out row against the weighted count, every seed | 9 | `figures/chain-weighted-count.png` |
-| F5 | The prior's tail (under-5% share) by group | 9.3 | to draw from `head-probe-fixed.json` |
+| F5 | The prior's tail (under-5% share) and median by group, against the weighted count | 9.3 | `figures/prior-tail.png` |
 | F6 | Search-budget curves, plain and checked | 8.3 | `figures/dose-curve.png` |
-| F7 | Reliability curves by row group | 7.5 | to draw from `value-calibration.json` |
-| F8 | Scorecard dot plot: every checkpoint on each row with its interval, one panel per row group | 7.1, 9 | to draw from `results/step8/scorecard.json`; makes "nothing else moved" visible |
+| F7 | Reliability curves by row group, Steps 3, 3b, 4 and group D | 7.5 | `figures/reliability.png` |
+| F8 | Scorecard dot plot: 26 checkpoints on each of the thirteen rows, against the control's interval | 7.1, 9 | `figures/scorecard-dots.png`; makes "nothing else moved" visible |
 
 | # | What | Section | Exists? |
 |---|---|---|---|
