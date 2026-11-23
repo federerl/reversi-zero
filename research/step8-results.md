@@ -85,6 +85,10 @@ Scores are the checkpoint's wins plus half its draws over 200 games, with 95% Wi
 
 **Nothing was paid at weight 8, and the combined group paid what the weight-4 group paid, which is at the edge of the noise.** At weight 8 the generation-60 row reads 59.5% and 70.2% against Step 5's 64.5% and 67.8% and the weight-4 group's 59.2% and 58.0%; Edax L5 37.2% and 35.2% against 31.2% and 35.2%, Edax L3 70.0% and 69.2% against 71.8% and 70.5%, Edax L7 9.2% and 15.5% against 11.2% and 8.5%, Minimax-d4 97.0% and 96.5%. Every line is within seed noise of Step 5's, and the second seed's 70.2% on the retention row is the highest in the series. The design named the retention row below 55% on both seeds as the sign that the policy head pays at its own positions when the opponent's rows are two fifths of its loss; it is 4 and 15 points above that. In the combined group the generation-60 row reads 59.0%, 56.2% and 59.8% against the 240 group's 63.2% and 61.8%, 2 to 7 points under, in the same direction on all three seeds and inside the ±6 to 7 points a row resolves on each; Edax L5 31.0%, 36.8% and 35.0% against 28.5% and 23.8%, Edax L3 67.0%, 66.8% and 67.8% against 65.5% and 69.5%, Edax L7 8.8%, 8.2% and 11.0% against 5.2% and 13.0%, Minimax-d4 95.5%, 97.8% and 96.2%. The retention reading is the weight-4 group's, 59.2% and 58.0%, which the Step 7 results flagged as the one reading to watch, and it has now been seen on five seeds across two groups whose policy-loss share from the opponent's rows is 27% and 29% and which share nothing else; section 6 finds the value head calibrated on those games in both groups.
 
+![Every checkpoint of Steps 3 to 8 on every row of the scorecard, against the control's 95% interval](figures/scorecard-dots.png)
+
+The same scorecard as a picture, with the Step 3, 3b and 4 checkpoints beside the policy-route ones (`scripts/figures/scorecard.py`): the Greedy family is where the trained checkpoints leave the control's band, the Edax and retention rows are where none of them does except group D, and the held-out random-playout row is where the policy route sits at the band's upper edge.
+
 ## 3. The predictions, one by one
 
 1. **The rows arrive, and fewer of them: both groups learn the avoidance faster than any earlier group, the external wipeout rate ends below 2%, the fatal rows number 140 to 190 in the combined group and 55 to 80 at weight 8, the weighted count near 350 and 450 to 650.** Held in substance for the combined group: 167, 181 and 163 rows, 334, 362 and 326 weighted, the target on the wiping reply in 95%, 85% and 91% of them; its external games ended at 2.1 to 2.2% on the three seeds, not below 2%. Half held at weight 8: 76 rows and 608 weighted on one seed, 89 and 712 on the other, above the written range; the games ended at 1.5% and 2.0%. Neither group learned the avoidance faster than the weight-4 group, which ended at 1.3% and 1.2%: the weight limits the rows it is applied to, as Steps 6 and 7 found, and a weight of 8 limits them no faster than a weight of 4.
@@ -122,6 +126,10 @@ The tail stopped closing at a weighted count near 300, and the median kept risin
 The value head does not move: +0.97 to +0.99 at P and −0.98 to −0.99 at C on every network, where the exact value at C is +1 for Greedy. A weight of 8 on the policy term, with the opponent's rows two fifths of that term, left the value head's readings at the fatal positions where Step 5 left them, as its loss in training is.
 
 At 256 simulations the plain search escapes 97 to 98% of the positions on every new network, as on every Step 6 and 7 network; the checked search at 50 escapes 97%, as it does on the control.
+
+![The under-5% share and the median of the prior on the wiping reply, every checkpoint of Steps 5 to 8, against the weighted count of fatal searched rows](figures/prior-tail.png)
+
+The two prior columns of the table against the weighted count (`scripts/figures/prior_tail.py`): the tail closes from 65% to about 10% by a weighted count of 320 and stops, the median keeps rising a little past it, and the combined group's twice-as-many distinct positions sit on both curves where the weight-4 group sits.
 
 ## 5. The training rows
 
