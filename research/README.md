@@ -8,6 +8,7 @@
 - [Held-out opponent roster for the opponent-diversity experiment](held-out-opponents.md) — which opponents count as unseen, the similarity check as run, and the frozen roster
 - [Research plan and reading list](research-plan.md)
 - [Literature reviews](lit-reviews/README.md)
+- [References for the report](references.md) — the bibliography, every entry checked against its publisher's record, with the report section each one supports
 - [Existing experimental evidence and hypotheses](../docs/experiments.md)
 - [Step 0 audit](step0-audit.md) and the [frozen evaluation protocol](eval-protocol-frozen.json) — what the historical numbers rest on, and exactly what Step 1 runs
 - [Step 1 pilot results](step1-pilot-results.md) — the pattern reproduces on 3,000 games, and every loss to Greedy is an early wipeout
@@ -31,6 +32,7 @@
 - **[Step 8 results](step8-results.md)** — the weight pushed to 8 took the Greedy family to the lowest of any group at no cost and left the held-out row where the weight-4 group had it, so the signal is not what stops that row; the two axes combined read 12 on one seed, the lowest in the series, and 22 on the other, neither of the design's outcomes, which leaves distinct positions as the open variable and a third seed as the next run
 - [Evaluation recheck](results/eval-recheck/README.md) — five Step 3 and Step 5 pairings re-run at the Step 8 code reproduce game for game; the evaluation reports carry different code commits, and the plain search did not change between them
 - **[What this study contributes](contribution.md)** — the claim in one sentence after Step 8: the value head cannot carry a one-move tactic by any of three routes, the policy head carries what it is shown when given a target where the search reads, the family first and the knowledge-free opponent once the signal is doubled, by more positions or by a weight on the same ones, at a cost only when the signal is bought with games, up to a weight of 8 at which the family keeps falling and the knowledge-free row does not, and an exact check carries the rule for nothing; tactical versus strategic weaknesses as a horizon of exact calculation, with the Go cyclic attack placed on it, and what would strengthen the claim
+- **[Phase 1 report outline](phase1-report-outline.md)** — the sections, tables and figures of the report after Step 8: five results sections (reproduction, mechanism, the three routes into the value head, the exact check and its budget curve, the policy route), where each number comes from, and the writing order
 
 ## Research framing
 
